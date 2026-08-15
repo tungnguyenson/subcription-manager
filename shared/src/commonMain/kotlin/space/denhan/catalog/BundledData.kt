@@ -3,11 +3,10 @@ package space.denhan.catalog
 import kotlinx.serialization.json.Json
 
 /**
- * Parsing for the two bundled JSON files.
+ * Parsing for the bundled service catalog.
  *
- * Both ship inside the binary so the app works with no network, and both are
- * shaped so a newer copy can override them at runtime: carrier syntax and
- * package prices go stale faster than an App Store review cycle.
+ * Ships inside the binary so the app works with no network, and is shaped so a
+ * newer copy can override it at runtime without an App Store release.
  */
 object BundledData {
 
@@ -22,6 +21,4 @@ object BundledData {
     }
 
     fun parseCatalog(raw: String): CatalogBundle = json.decodeFromString(raw)
-
-    fun parseCarriers(raw: String): CarrierConfigBundle = json.decodeFromString(raw)
 }

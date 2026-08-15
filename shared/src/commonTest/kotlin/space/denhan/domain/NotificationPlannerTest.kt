@@ -55,7 +55,7 @@ class NotificationPlannerTest {
         val plan = NotificationPlanner.plan(
             listOf(
                 item(
-                    "sim", Kind.PREPAID_SIM, expiresOn = "2026-09-14",
+                    "sim", Kind.PREPAID, expiresOn = "2026-09-14",
                     actByOffsetDays = 7, leadDays = listOf(0), nag = NagPolicy.NONE,
                 ),
             ),
@@ -86,7 +86,7 @@ class NotificationPlannerTest {
     @Test
     fun `archived items are skipped`() {
         val plan = NotificationPlanner.plan(
-            listOf(item("gone", Kind.PREPAID_SIM, expiresOn = "2026-08-20", state = ItemState.ARCHIVED)),
+            listOf(item("gone", Kind.PREPAID, expiresOn = "2026-08-20", state = ItemState.ARCHIVED)),
             today,
         )
         assertTrue(plan.alerts.isEmpty())
@@ -124,7 +124,7 @@ class NotificationPlannerTest {
         val plan = NotificationPlanner.plan(
             listOf(
                 item(
-                    "sim", Kind.PREPAID_SIM, expiresOn = "2027-01-01",
+                    "sim", Kind.PREPAID, expiresOn = "2027-01-01",
                     leadDays = emptyList(), nag = NagPolicy.NONE,
                     verifyEveryDays = 60, lastVerifiedAt = "2026-07-01",
                 ),
@@ -140,7 +140,7 @@ class NotificationPlannerTest {
         val plan = NotificationPlanner.plan(
             listOf(
                 item(
-                    "sim", Kind.PREPAID_SIM, expiresOn = "2027-01-01",
+                    "sim", Kind.PREPAID, expiresOn = "2027-01-01",
                     leadDays = emptyList(), nag = NagPolicy.NONE,
                     verifyEveryDays = 60, lastVerifiedAt = "2026-01-01",
                 ),
@@ -155,7 +155,7 @@ class NotificationPlannerTest {
     @Test
     fun `stake outranks date when the budget is tight`() {
         val sim = item(
-            "sim", Kind.PREPAID_SIM, expiresOn = "2026-09-10",
+            "sim", Kind.PREPAID, expiresOn = "2026-09-10",
             leadDays = listOf(20, 15, 10), nag = NagPolicy.NONE,
         )
         val netflix = item(
@@ -171,8 +171,8 @@ class NotificationPlannerTest {
 
     @Test
     fun `within one stake the soonest wins`() {
-        val a = item("a", Kind.PREPAID_SIM, expiresOn = "2026-09-01", leadDays = listOf(0), nag = NagPolicy.NONE)
-        val b = item("b", Kind.PREPAID_SIM, expiresOn = "2026-08-20", leadDays = listOf(0), nag = NagPolicy.NONE)
+        val a = item("a", Kind.PREPAID, expiresOn = "2026-09-01", leadDays = listOf(0), nag = NagPolicy.NONE)
+        val b = item("b", Kind.PREPAID, expiresOn = "2026-08-20", leadDays = listOf(0), nag = NagPolicy.NONE)
 
         val plan = NotificationPlanner.plan(listOf(a, b), today, budget = 1)
         assertEquals(listOf("b"), plan.alerts.map { it.itemId })
@@ -181,7 +181,7 @@ class NotificationPlannerTest {
     @Test
     fun `the budget is never exceeded`() {
         val many = (1..40).map {
-            item("i$it", Kind.PREPAID_SIM, expiresOn = "2026-09-01", nag = NagPolicy.DAILY)
+            item("i$it", Kind.PREPAID, expiresOn = "2026-09-01", nag = NagPolicy.DAILY)
         }
         val plan = NotificationPlanner.plan(many, today)
         assertTrue(plan.alerts.size <= NotificationPlanner.BUDGET)
@@ -192,7 +192,7 @@ class NotificationPlannerTest {
     @Test
     fun `truncation is reported rather than hidden`() {
         val many = (1..40).map {
-            item("i$it", Kind.PREPAID_SIM, expiresOn = "2026-09-01", nag = NagPolicy.DAILY)
+            item("i$it", Kind.PREPAID, expiresOn = "2026-09-01", nag = NagPolicy.DAILY)
         }
         val plan = NotificationPlanner.plan(many, today)
         assertTrue(plan.isTruncated)
@@ -212,7 +212,7 @@ class NotificationPlannerTest {
     fun `interruption level follows stake`() {
         val plan = NotificationPlanner.plan(
             listOf(
-                item("sim", Kind.PREPAID_SIM, expiresOn = "2026-08-20", nag = NagPolicy.NONE),
+                item("sim", Kind.PREPAID, expiresOn = "2026-08-20", nag = NagPolicy.NONE),
                 item("nf", Kind.RECURRING, expiresOn = "2026-08-20", nag = NagPolicy.NONE),
             ),
             today,
@@ -224,7 +224,7 @@ class NotificationPlannerTest {
     @Test
     fun `identifiers are unique and stable across runs`() {
         val items = listOf(
-            item("sim", Kind.PREPAID_SIM, expiresOn = "2026-09-01", verifyEveryDays = 60),
+            item("sim", Kind.PREPAID, expiresOn = "2026-09-01", verifyEveryDays = 60),
             item("bill", Kind.BILL, expiresOn = "2026-08-25"),
         )
         val first = NotificationPlanner.plan(items, today)
@@ -240,13 +240,11 @@ class NotificationPlannerTest {
 
     @Test
     fun `stake is inferred so the form never has to ask`() {
-        assertEquals(Stake.ASSET, Stakes.inferFrom(Kind.PREPAID_SIM))
+        assertEquals(Stake.ASSET, Stakes.inferFrom(Kind.PREPAID))
         assertEquals(Stake.ASSET, Stakes.inferFrom(Kind.DOCUMENT))
-        assertEquals(Stake.ASSET, Stakes.inferFrom(Kind.KEEP_ALIVE))
         assertEquals(Stake.MONEY, Stakes.inferFrom(Kind.TRIAL))
         assertEquals(Stake.MONEY, Stakes.inferFrom(Kind.BILL))
         assertEquals(Stake.INFO, Stakes.inferFrom(Kind.RECURRING))
-        assertEquals(Stake.INFO, Stakes.inferFrom(Kind.SIM_PLAN))
     }
 
     @Test

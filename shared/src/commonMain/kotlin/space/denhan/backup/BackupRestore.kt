@@ -3,7 +3,6 @@ package space.denhan.backup
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import space.denhan.data.ItemRepository
-import space.denhan.domain.Carrier
 import space.denhan.domain.Cycle
 import space.denhan.domain.DateSource
 import space.denhan.domain.GroupKind
@@ -12,10 +11,8 @@ import space.denhan.domain.ItemGroup
 import space.denhan.domain.ItemState
 import space.denhan.domain.Kind
 import space.denhan.domain.NagPolicy
-import space.denhan.domain.SimProfile
 import space.denhan.domain.Stake
 import space.denhan.domain.TrackedItem
-import space.denhan.domain.TriState
 
 /**
  * Writes a decoded backup back into storage.
@@ -30,7 +27,6 @@ class BackupRestore(private val repo: ItemRepository) {
     fun restore(file: BackupFile, nowEpochSeconds: Long): RestoreReport {
         var items = 0
         var groups = 0
-        var sims = 0
         var events = 0
         val skipped = mutableListOf<String>()
 
@@ -48,11 +44,6 @@ class BackupRestore(private val repo: ItemRepository) {
                     .onFailure { skipped += "mục ${row.id}: ${it.message}" }
             }
 
-            file.sims.forEach { row ->
-                runCatching { repo.upsertSim(row.toDomain()) }
-                    .onSuccess { sims++ }
-                    .onFailure { skipped += "SIM ${row.groupId}: ${it.message}" }
-            }
 
             file.history.forEach { row ->
                 runCatching { repo.recordHandled(row.toDomain()) }
@@ -61,7 +52,7 @@ class BackupRestore(private val repo: ItemRepository) {
             }
         }
 
-        return RestoreReport(items, groups, sims, events, skipped)
+        return RestoreReport(items, groups, events, skipped)
     }
 }
 
@@ -69,7 +60,6 @@ class BackupRestore(private val repo: ItemRepository) {
 data class RestoreReport(
     val items: Int,
     val groups: Int,
-    val sims: Int,
     val events: Int,
     val skipped: List<String>,
 ) {
@@ -108,21 +98,6 @@ private fun BackupItem.toDomain(): TrackedItem {
         state = state.toEnumOr(ItemState.ACTIVE),
     )
 }
-
-private fun BackupSim.toDomain() = SimProfile(
-    groupId = groupId,
-    carrier = carrier.toEnumOr(Carrier.OTHER),
-    msisdn = msisdn,
-    isDormant = isDormant,
-    hsdConfirmedDate = hsdConfirmedDate?.let { LocalDate.parse(it) },
-    hsdConfirmedAt = hsdConfirmedAt?.let { LocalDate.parse(it) },
-    // Never restores as YES on an unrecognised value.
-    identityVerified = identityVerified.toEnumOr(TriState.UNKNOWN),
-    identityCheckedAt = identityCheckedAt?.let { LocalDate.parse(it) },
-    lastDeviceChangeAt = lastDeviceChangeAt?.let { LocalDate.parse(it) },
-    retentionPackage = retentionPackage,
-    retentionExpiryDate = retentionExpiryDate?.let { LocalDate.parse(it) },
-)
 
 private fun BackupEvent.toDomain() = HandledEvent(
     id = id,

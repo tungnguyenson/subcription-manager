@@ -4,7 +4,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
-import space.denhan.domain.Carrier
 import space.denhan.domain.Cycle
 import space.denhan.domain.DateSource
 import space.denhan.domain.HandledEvent
@@ -12,10 +11,8 @@ import space.denhan.domain.ItemGroup
 import space.denhan.domain.ItemState
 import space.denhan.domain.GroupKind
 import space.denhan.domain.Kind
-import space.denhan.domain.SimProfile
 import space.denhan.domain.Stake
 import space.denhan.domain.TrackedItem
-import space.denhan.domain.TriState
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -125,8 +122,8 @@ class ItemRepositoryTest {
     @Test
     fun `items are grouped so one SIM collapses to a single row upstream`() = runTest {
         repo.upsertGroup(ItemGroup("sim1", "SIM Viettel 0912 345 678", GroupKind.SIM))
-        repo.upsert(sampleItem(id = "hsd", name = "Hạn số", kind = Kind.PREPAID_SIM, groupId = "sim1"), 1)
-        repo.upsert(sampleItem(id = "plan", name = "Gói ST70", kind = Kind.SIM_PLAN, groupId = "sim1"), 1)
+        repo.upsert(sampleItem(id = "hsd", name = "Hạn số", kind = Kind.PREPAID, groupId = "sim1"), 1)
+        repo.upsert(sampleItem(id = "plan", name = "Gói ST70", kind = Kind.RECURRING, groupId = "sim1"), 1)
         repo.upsert(sampleItem(id = "loose"), 1)
 
         assertEquals(setOf("hsd", "plan"), repo.observeByGroup("sim1").first().map { it.id }.toSet())
@@ -143,51 +140,9 @@ class ItemRepositoryTest {
         assertNull(loaded.groupId)
     }
 
-    // A SIM defaults to "we have not asked", never to "verified". Claiming a
-    // number is safe when its identity status is unknown is the one thing the
-    // app must not do.
-    @Test
-    fun `a new SIM starts with identity status unknown`() = runTest {
-        repo.upsertGroup(ItemGroup("sim1", "SIM", GroupKind.SIM))
-        repo.upsertSim(SimProfile(groupId = "sim1", carrier = Carrier.VIETTEL, msisdn = "0912345678"))
 
-        assertEquals(TriState.UNKNOWN, repo.observeSims().first().single().identityVerified)
-    }
 
-    @Test
-    fun `recording HSD stores both the date and when it was confirmed`() = runTest {
-        repo.upsertGroup(ItemGroup("sim1", "SIM", GroupKind.SIM))
-        repo.upsertSim(SimProfile(groupId = "sim1", carrier = Carrier.VIETTEL, msisdn = "0912345678"))
-        repo.recordHsd("sim1", hsd = d("2027-02-01"), confirmedAt = d("2026-08-15"))
 
-        val sim = repo.observeSims().first().single()
-        assertEquals(d("2027-02-01"), sim.hsdConfirmedDate)
-        assertEquals(d("2026-08-15"), sim.hsdConfirmedAt, "provenance is what makes the date auditable")
-    }
-
-    @Test
-    fun `dormant unverified SIMs are queryable for the standing warning`() = runTest {
-        repo.upsertGroup(ItemGroup("a", "A", GroupKind.SIM))
-        repo.upsertGroup(ItemGroup("b", "B", GroupKind.SIM))
-        repo.upsertGroup(ItemGroup("c", "C", GroupKind.SIM))
-
-        repo.upsertSim(SimProfile("a", Carrier.VIETTEL, "091", isDormant = true))
-        repo.upsertSim(
-            SimProfile("b", Carrier.MOBIFONE, "090", isDormant = true, identityVerified = TriState.YES),
-        )
-        repo.upsertSim(SimProfile("c", Carrier.VINAPHONE, "094", isDormant = false))
-
-        assertEquals(listOf("a"), repo.observeDormantUnverified().first().map { it.groupId })
-    }
-
-    @Test
-    fun `a device change is recorded because it starts its own reclamation clock`() = runTest {
-        repo.upsertGroup(ItemGroup("sim1", "SIM", GroupKind.SIM))
-        repo.upsertSim(SimProfile("sim1", Carrier.VIETTEL, "0912345678"))
-        repo.recordDeviceChange("sim1", d("2026-08-15"))
-
-        assertEquals(d("2026-08-15"), repo.observeSims().first().single().lastDeviceChangeAt)
-    }
 
     @Test
     fun `history stores the FX snapshot so past totals never move`() = runTest {
@@ -247,7 +202,7 @@ class ItemRepositoryTest {
 
     @Test
     fun `marking verified records the date the user last checked`() = runTest {
-        repo.upsert(sampleItem(id = "sim", kind = Kind.PREPAID_SIM), 1)
+        repo.upsert(sampleItem(id = "sim", kind = Kind.PREPAID), 1)
         repo.markVerified("sim", d("2026-08-15"))
 
         assertEquals(d("2026-08-15"), repo.observeById("sim").first()?.lastVerifiedAt)

@@ -12,9 +12,7 @@ import space.denhan.domain.DateSource
 import space.denhan.domain.HandledEvent
 import space.denhan.domain.ItemGroup
 import space.denhan.domain.ItemState
-import space.denhan.domain.SimProfile
 import space.denhan.domain.TrackedItem
-import space.denhan.domain.TriState
 
 /**
  * The single way the rest of the app reaches storage.
@@ -28,7 +26,6 @@ class ItemRepository(
 ) {
     private val items = db.itemQueries
     private val history = db.historyQueries
-    private val sims = db.simQueries
 
     // ---- items ----
 
@@ -94,45 +91,6 @@ class ItemRepository(
     fun upsertGroup(group: ItemGroup) = items.upsertGroup(group.id, group.name, group.kind.name)
 
     fun deleteGroup(id: String) = items.deleteGroup(id)
-
-    // ---- sims ----
-
-    fun observeSims(): Flow<List<SimProfile>> =
-        sims.selectAllSims().asFlow().mapToList(io).map { rows -> rows.map { it.toDomain() } }
-
-    /**
-     * Dormant numbers whose identity re-authentication is not confirmed. This is
-     * the query behind the standing warning: topping up does not defend against
-     * this clock at all. See product-spec.md section 4bis.1.
-     */
-    fun observeDormantUnverified(): Flow<List<SimProfile>> =
-        sims.selectDormantUnverified().asFlow().mapToList(io).map { rows -> rows.map { it.toDomain() } }
-
-    fun upsertSim(sim: SimProfile) {
-        sims.upsertSim(
-            groupId = sim.groupId,
-            carrier = sim.carrier.name,
-            msisdn = sim.msisdn,
-            isDormant = if (sim.isDormant) 1L else 0L,
-            hsdConfirmedDate = sim.hsdConfirmedDate?.toString(),
-            hsdConfirmedAt = sim.hsdConfirmedAt?.toString(),
-            identityVerified = sim.identityVerified.name,
-            identityCheckedAt = sim.identityCheckedAt?.toString(),
-            lastDeviceChangeAt = sim.lastDeviceChangeAt?.toString(),
-            retentionPackage = sim.retentionPackage,
-            retentionExpiryDate = sim.retentionExpiryDate?.toString(),
-        )
-    }
-
-    /** [confirmedAt] is when the user was told, which is what makes the date auditable. */
-    fun recordHsd(groupId: String, hsd: LocalDate, confirmedAt: LocalDate) =
-        sims.recordHsd(hsd.toString(), confirmedAt.toString(), groupId)
-
-    fun recordIdentity(groupId: String, state: TriState, checkedAt: LocalDate) =
-        sims.recordIdentity(state.name, checkedAt.toString(), groupId)
-
-    fun recordDeviceChange(groupId: String, on: LocalDate) =
-        sims.recordDeviceChange(on.toString(), groupId)
 
     // ---- history ----
 

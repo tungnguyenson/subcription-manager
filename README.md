@@ -52,10 +52,8 @@ Mỗi dòng dưới đây là một lỗi âm thầm, không báo gì khi xảy 
 | Khóa ngoại | SQLite mặc định không thực thi, nên xóa dữ liệu không dây chuyền | `ItemRepositoryTest` |
 | Schema của mô hình | Trường không nullable ép mô hình bịa ra ngày | `ExtractionReviewTest` |
 | Mã lỗi 429 | Gộp 5 tình huống, 3 trong đó thử lại vô ích | `OpenAiClientTest` |
-| Trạng thái xác thực SIM | Giá trị lạ mà hiểu thành đã xác thực là nguy hiểm nhất | `ItemRepositoryTest`, `BackupTest` |
 
 ## Còn thiếu
 
 Giao diện. Đang chờ bản thiết kế, xem mục H trong `docs/build-plan.md`.
 
-Và một việc không giải quyết được bằng code: **gọi bốn nhà mạng xác minh mốc thu hồi số và giá gói giữ số**. Mọi con số hiện có đều lấy từ trang đại lý, không nhà mạng nào công bố chính thức. Với một app mà sai một con số là người dùng mất số điện thoại, đây là điều kiện chặn phát hành.

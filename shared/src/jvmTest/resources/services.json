@@ -447,69 +447,71 @@
     {
       "id": "sim-viettel",
       "name": "SIM Viettel",
-      "kind": "PREPAID_SIM",
+      "kind": "PREPAID",
       "categoryId": "telecom",
       "aliases": [
         "viettel"
       ],
-      "noteVi": "Hạn sử dụng của số điện thoại. Mất là mất luôn số."
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
     },
     {
       "id": "sim-vinaphone",
       "name": "SIM VinaPhone",
-      "kind": "PREPAID_SIM",
+      "kind": "PREPAID",
       "categoryId": "telecom",
       "aliases": [
         "vinaphone",
         "vina"
       ],
-      "noteVi": "Hạn sử dụng của số điện thoại. Mất là mất luôn số."
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
     },
     {
       "id": "sim-mobifone",
       "name": "SIM MobiFone",
-      "kind": "PREPAID_SIM",
+      "kind": "PREPAID",
       "categoryId": "telecom",
       "aliases": [
         "mobifone",
         "mobi"
       ],
-      "noteVi": "Hạn sử dụng của số điện thoại. Mất là mất luôn số."
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
     },
     {
       "id": "sim-vietnamobile",
       "name": "SIM Vietnamobile",
-      "kind": "PREPAID_SIM",
+      "kind": "PREPAID",
       "categoryId": "telecom",
       "aliases": [
         "vietnamobile",
         "vnmb"
       ],
-      "noteVi": "Hạn sử dụng của số điện thoại. Mất là mất luôn số."
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
     },
     {
       "id": "sim-itel",
       "name": "SIM iTel",
-      "kind": "PREPAID_SIM",
+      "kind": "PREPAID",
       "categoryId": "telecom",
       "aliases": [
         "itel"
-      ]
+      ],
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
     },
     {
       "id": "sim-wintel",
       "name": "SIM Wintel",
-      "kind": "PREPAID_SIM",
+      "kind": "PREPAID",
       "categoryId": "telecom",
       "aliases": [
         "wintel",
         "reddi"
-      ]
+      ],
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
     },
     {
       "id": "goi-cuoc-data",
       "name": "Gói cước data",
-      "kind": "SIM_PLAN",
+      "kind": "RECURRING",
       "categoryId": "telecom",
       "aliases": [
         "goi cuoc",
@@ -518,24 +520,6 @@
         "5g"
       ],
       "defaultCycle": "MONTHLY"
-    },
-    {
-      "id": "giu-so",
-      "name": "Gói giữ số",
-      "kind": "KEEP_ALIVE",
-      "categoryId": "telecom",
-      "aliases": [
-        "giu so",
-        "vtvang",
-        "gs1",
-        "gs2",
-        "gs30",
-        "gs50"
-      ],
-      "defaultCycle": "YEARLY",
-      "typicalAmountMinor": 50000,
-      "currency": "VND",
-      "noteVi": "Cách đúng để giữ một số ít dùng. Đăng ký nhiều lần thì thời hạn cộng dồn."
     },
     {
       "id": "internet-fpt",

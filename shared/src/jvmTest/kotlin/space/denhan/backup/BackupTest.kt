@@ -7,16 +7,13 @@ import kotlinx.datetime.LocalDate
 import space.denhan.data.DriverFactory
 import space.denhan.data.ItemRepository
 import space.denhan.data.createDatabase
-import space.denhan.domain.Carrier
 import space.denhan.domain.Cycle
 import space.denhan.domain.DateSource
 import space.denhan.domain.GroupKind
 import space.denhan.domain.HandledEvent
 import space.denhan.domain.ItemGroup
 import space.denhan.domain.Kind
-import space.denhan.domain.SimProfile
 import space.denhan.domain.TrackedItem
-import space.denhan.domain.TriState
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
@@ -29,20 +26,9 @@ class BackupTest {
 
     private val group = ItemGroup("sim1", "SIM Viettel 0912 345 678", GroupKind.SIM)
 
-    private val sim = SimProfile(
-        groupId = "sim1",
-        carrier = Carrier.VIETTEL,
-        msisdn = "0912345678",
-        isDormant = true,
-        hsdConfirmedDate = d("2027-02-01"),
-        hsdConfirmedAt = d("2026-08-15"),
-        identityVerified = TriState.NO,
-        retentionPackage = "VTVANG",
-    )
-
     private val items = listOf(
         TrackedItem(
-            id = "hsd", name = "Hạn số", groupId = "sim1", kind = Kind.PREPAID_SIM,
+            id = "hsd", name = "Hạn số", groupId = "sim1", kind = Kind.PREPAID,
             expiresOn = d("2027-02-01"), actByOffsetDays = 7, anchorDate = d("2027-02-01"),
             dateSource = DateSource.USER_CONFIRMED, lastVerifiedAt = d("2026-08-15"),
         ),
@@ -71,7 +57,7 @@ class BackupTest {
         ),
     )
 
-    private fun sampleFile() = Backup.build("2026-08-15T10:00:00Z", items, listOf(group), listOf(sim), history)
+    private fun sampleFile() = Backup.build("2026-08-15T10:00:00Z", items, listOf(group), history)
 
     // A backup that cannot be restored is not a backup. This is the whole point
     // of the file.
@@ -86,7 +72,6 @@ class BackupTest {
         assertTrue(report.isClean, "skipped: ${report.skipped}")
         assertEquals(3, report.items)
         assertEquals(1, report.groups)
-        assertEquals(1, report.sims)
         assertEquals(1, report.events)
 
         assertEquals(3, target.observeAll().first().size)
@@ -132,28 +117,7 @@ class BackupTest {
         assertEquals(532_745, event.actualChargedMinor)
     }
 
-    @Test
-    fun `SIM state including the three clocks survives`() = runTest {
-        val target = repo()
-        BackupRestore(target).restore(Backup.decode(Backup.encode(sampleFile())).getOrThrow(), 1)
 
-        val restored = target.observeSims().first().single()
-        assertEquals(Carrier.VIETTEL, restored.carrier)
-        assertTrue(restored.isDormant)
-        assertEquals(d("2027-02-01"), restored.hsdConfirmedDate)
-        assertEquals(d("2026-08-15"), restored.hsdConfirmedAt)
-        assertEquals(TriState.NO, restored.identityVerified)
-        assertEquals("VTVANG", restored.retentionPackage)
-    }
-
-    @Test
-    fun `an unrecognised identity value restores as unknown, never as verified`() = runTest {
-        val file = sampleFile().let { it.copy(sims = it.sims.map { s -> s.copy(identityVerified = "MAYBE") }) }
-        val target = repo()
-        BackupRestore(target).restore(file, 1)
-
-        assertEquals(TriState.UNKNOWN, target.observeSims().first().single().identityVerified)
-    }
 
     @Test
     fun `a corrupt file fails rather than restoring garbage`() {
@@ -219,7 +183,7 @@ class BackupTest {
 
     @Test
     fun `an empty export is still valid`() {
-        val empty = Backup.build("2026-08-15T10:00:00Z", emptyList(), emptyList(), emptyList(), emptyList())
+        val empty = Backup.build("2026-08-15T10:00:00Z", emptyList(), emptyList(), emptyList())
         assertTrue(Backup.decode(Backup.encode(empty)).isSuccess)
         assertEquals(1, Backup.toCsv(emptyList()).lines().size, "header only")
     }

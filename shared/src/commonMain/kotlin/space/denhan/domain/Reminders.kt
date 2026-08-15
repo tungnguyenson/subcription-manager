@@ -18,29 +18,28 @@ object Reminders {
     const val DEFAULT_VERIFY_EVERY_DAYS = 60
 
     fun defaultLeadDays(kind: Kind): List<Int> = when (kind) {
-        // Losing a number is unrecoverable, so warn from far out.
-        Kind.PREPAID_SIM -> listOf(30, 14, 7, 3, 1, 0)
-        Kind.KEEP_ALIVE -> listOf(30, 14, 7)
+        // Running out can cost something unrecoverable, so warn from far out.
+        Kind.PREPAID -> listOf(30, 14, 7, 3, 1, 0)
         // Renewing a document needs an appointment, not just a payment.
         Kind.DOCUMENT -> listOf(60, 30, 7)
         // Early enough to still cancel before the card is charged.
         Kind.TRIAL -> listOf(3, 1, 0)
         // Early enough to gather the money.
         Kind.BILL -> listOf(7, 1)
-        Kind.RECURRING, Kind.SIM_PLAN -> listOf(3)
+        Kind.RECURRING -> listOf(3)
     }
 
     fun defaultNagPolicy(kind: Kind): NagPolicy = when (kind) {
-        Kind.PREPAID_SIM, Kind.KEEP_ALIVE, Kind.BILL -> NagPolicy.DAILY
+        Kind.PREPAID, Kind.BILL -> NagPolicy.DAILY
         Kind.DOCUMENT -> NagPolicy.WEEKLY
         // One nudge to check the card was not charged, then stop.
         Kind.TRIAL -> NagPolicy.NONE
-        Kind.RECURRING, Kind.SIM_PLAN -> NagPolicy.NONE
+        Kind.RECURRING -> NagPolicy.NONE
     }
 
     fun defaultVerifyEveryDays(kind: Kind): Int? = when (kind) {
         // Only things whose real date lives somewhere the app cannot read.
-        Kind.PREPAID_SIM, Kind.KEEP_ALIVE, Kind.DOCUMENT -> DEFAULT_VERIFY_EVERY_DAYS
+        Kind.PREPAID, Kind.DOCUMENT -> DEFAULT_VERIFY_EVERY_DAYS
         else -> null
     }
 

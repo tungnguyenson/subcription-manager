@@ -14,12 +14,19 @@ enum class Stake { ASSET, MONEY, INFO }
 
 /** What kind of thing this is. Drives defaults, not behaviour. */
 enum class Kind {
+    /** A free period that converts to a charge unless cancelled. */
     TRIAL,
+
+    /** Renews itself on a cycle until stopped. */
     RECURRING,
-    PREPAID_SIM,
-    SIM_PLAN,
-    KEEP_ALIVE,
+
+    /** Runs out unless topped up: prepaid mobile, prepaid utilities. */
+    PREPAID,
+
+    /** A one-off amount owed by a date. */
     BILL,
+
+    /** Expires and must be renewed; never counted as spend. */
     DOCUMENT,
 }
 
@@ -35,11 +42,11 @@ enum class NagPolicy { NONE, DAILY, WEEKLY }
 
 /**
  * Where the due date came from. The app only knows what the user typed; it
- * cannot read a carrier's records. Showing a date with more confidence than its
- * source deserves is how a user loses a phone number. See spec section 4bis.3.
+ * cannot read the provider's records. A date shown with more confidence than
+ * its source deserves is the failure this enum exists to prevent.
  */
 enum class DateSource {
-    /** User checked with the carrier or provider and typed what they were told. */
+    /** User checked with the provider and typed what they were told. */
     USER_CONFIRMED,
 
     /** User typed it from memory. */
@@ -53,11 +60,6 @@ enum class DateSource {
 }
 
 enum class GroupKind { SIM, VEHICLE, PERSON, OTHER }
-
-enum class Carrier { VIETTEL, VINAPHONE, MOBIFONE, VIETNAMOBILE, OTHER }
-
-/** Three-valued because "we have not asked" is not the same as "no". */
-enum class TriState { YES, NO, UNKNOWN }
 
 data class TrackedItem(
     val id: String,
@@ -111,34 +113,6 @@ data class ItemGroup(
     val kind: GroupKind,
 )
 
-/**
- * The extra state a SIM carries beyond "a name and a date", because three
- * independent clocks can each kill a number and topping up only defends
- * against the first. See spec section 4bis.1.
- */
-data class SimProfile(
-    val groupId: String,
-    val carrier: Carrier,
-    val msisdn: String,
-
-    /** Kept only to not lose the number. Changes the advice the app gives. */
-    val isDormant: Boolean = false,
-
-    // Clock 1: validity. Store what the carrier said, plus when it said it.
-    val hsdConfirmedDate: LocalDate? = null,
-    val hsdConfirmedAt: LocalDate? = null,
-
-    // Clock 2: identity re-authentication. The app cannot see this at all.
-    val identityVerified: TriState = TriState.UNKNOWN,
-    val identityCheckedAt: LocalDate? = null,
-
-    // Clock 3: handset change.
-    val lastDeviceChangeAt: LocalDate? = null,
-
-    val retentionPackage: String? = null,
-    val retentionExpiryDate: LocalDate? = null,
-)
-
 /** One completed occurrence. Append-only; never edited once written. */
 data class HandledEvent(
     val id: String,
@@ -166,8 +140,9 @@ object Stakes {
      * it and lets the user correct it later. See spec section 4.4.
      */
     fun inferFrom(kind: Kind): Stake = when (kind) {
-        Kind.PREPAID_SIM, Kind.KEEP_ALIVE, Kind.DOCUMENT -> Stake.ASSET
+        // Letting one of these lapse can cost something money cannot buy back.
+        Kind.PREPAID, Kind.DOCUMENT -> Stake.ASSET
         Kind.TRIAL, Kind.BILL -> Stake.MONEY
-        Kind.RECURRING, Kind.SIM_PLAN -> Stake.INFO
+        Kind.RECURRING -> Stake.INFO
     }
 }

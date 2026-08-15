@@ -5,8 +5,6 @@ import kotlinx.datetime.LocalTime
 import space.denhan.db.HandledEventRow
 import space.denhan.db.ItemRow
 import space.denhan.db.ItemGroupRow
-import space.denhan.db.SimProfileRow
-import space.denhan.domain.Carrier
 import space.denhan.domain.Cycle
 import space.denhan.domain.DateSource
 import space.denhan.domain.GroupKind
@@ -15,10 +13,8 @@ import space.denhan.domain.ItemGroup
 import space.denhan.domain.ItemState
 import space.denhan.domain.Kind
 import space.denhan.domain.NagPolicy
-import space.denhan.domain.SimProfile
 import space.denhan.domain.Stake
 import space.denhan.domain.TrackedItem
-import space.denhan.domain.TriState
 
 /**
  * Row-to-model conversion.
@@ -70,21 +66,6 @@ fun ItemGroupRow.toDomain() = ItemGroup(
     id = id,
     name = name,
     kind = kind.toEnumOr(GroupKind.OTHER),
-)
-
-fun SimProfileRow.toDomain() = SimProfile(
-    groupId = groupId,
-    carrier = carrier.toEnumOr(Carrier.OTHER),
-    msisdn = msisdn,
-    isDormant = isDormant != 0L,
-    hsdConfirmedDate = hsdConfirmedDate.toDateOrNull(),
-    hsdConfirmedAt = hsdConfirmedAt.toDateOrNull(),
-    // Anything unrecognised means "we have not established this", never YES.
-    identityVerified = identityVerified.toEnumOr(TriState.UNKNOWN),
-    identityCheckedAt = identityCheckedAt.toDateOrNull(),
-    lastDeviceChangeAt = lastDeviceChangeAt.toDateOrNull(),
-    retentionPackage = retentionPackage,
-    retentionExpiryDate = retentionExpiryDate.toDateOrNull(),
 )
 
 fun HandledEventRow.toDomain() = HandledEvent(

@@ -4,7 +4,6 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import space.denhan.domain.HandledEvent
 import space.denhan.domain.ItemGroup
-import space.denhan.domain.SimProfile
 import space.denhan.domain.TrackedItem
 
 /**
@@ -24,7 +23,6 @@ data class BackupFile(
     val exportedAt: String,
     val items: List<BackupItem>,
     val groups: List<BackupGroup>,
-    val sims: List<BackupSim>,
     val history: List<BackupEvent>,
 ) {
     companion object {
@@ -60,21 +58,6 @@ data class BackupItem(
 
 @Serializable
 data class BackupGroup(val id: String, val name: String, val kind: String)
-
-@Serializable
-data class BackupSim(
-    val groupId: String,
-    val carrier: String,
-    val msisdn: String,
-    val isDormant: Boolean = false,
-    val hsdConfirmedDate: String? = null,
-    val hsdConfirmedAt: String? = null,
-    val identityVerified: String = "UNKNOWN",
-    val identityCheckedAt: String? = null,
-    val lastDeviceChangeAt: String? = null,
-    val retentionPackage: String? = null,
-    val retentionExpiryDate: String? = null,
-)
 
 @Serializable
 data class BackupEvent(
@@ -116,13 +99,11 @@ object Backup {
         exportedAt: String,
         items: List<TrackedItem>,
         groups: List<ItemGroup>,
-        sims: List<SimProfile>,
         history: List<HandledEvent>,
     ) = BackupFile(
         exportedAt = exportedAt,
         items = items.map { it.toBackup() },
         groups = groups.map { BackupGroup(it.id, it.name, it.kind.name) },
-        sims = sims.map { it.toBackup() },
         history = history.map { it.toBackup() },
     )
 
@@ -187,20 +168,6 @@ private fun TrackedItem.toBackup() = BackupItem(
     lastVerifiedAt = lastVerifiedAt?.toString(),
     dateSource = dateSource.name,
     state = state.name,
-)
-
-private fun SimProfile.toBackup() = BackupSim(
-    groupId = groupId,
-    carrier = carrier.name,
-    msisdn = msisdn,
-    isDormant = isDormant,
-    hsdConfirmedDate = hsdConfirmedDate?.toString(),
-    hsdConfirmedAt = hsdConfirmedAt?.toString(),
-    identityVerified = identityVerified.name,
-    identityCheckedAt = identityCheckedAt?.toString(),
-    lastDeviceChangeAt = lastDeviceChangeAt?.toString(),
-    retentionPackage = retentionPackage,
-    retentionExpiryDate = retentionExpiryDate?.toString(),
 )
 
 private fun HandledEvent.toBackup() = BackupEvent(

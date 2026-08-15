@@ -129,9 +129,9 @@ Nên form nhập **không có ô chọn mức rủi ro**. App suy ra từ loại
 
 | Loại mục | Mức rủi ro suy ra |
 |---|---|
-| SIM, gói giữ số, giấy tờ | Mức 1, mất luôn |
+| Trả trước, giấy tờ | Mức 1, mất luôn |
 | Trial, hóa đơn, khoản vay | Mức 2, mất tiền |
-| Dịch vụ định kỳ, gói cước data | Mức 3, chỉ cần biết |
+| Dịch vụ định kỳ | Mức 3, chỉ cần biết |
 
 Sửa được trong màn hình chi tiết, và mục không đặt mức rủi ro vẫn chạy bình thường, vẫn nhắc, vẫn xếp theo ngày.
 
@@ -149,103 +149,27 @@ Tag là tính năng được yêu cầu nhiều nhất và dùng ít nhất tron
 
 ---
 
-## 4bis. SIM: phần rủi ro nhất của app
+## 4bis. SIM và các dịch vụ trả trước
 
-Người dùng giữ nhiều SIM ở nhiều nhà mạng, trong đó có những số gần như không dùng nhưng không muốn mất. Đây vừa là phần giá trị nhất, vừa là phần app dễ gây hại nhất nếu làm ẩu.
+SIM được xử lý **như mọi mục khác**: một cái tên, một ngày hết hạn, một mức quan trọng, một ô ghi chú. Không có mô hình riêng, không có cấu hình nhà mạng, không có bảng thời hạn thu hồi.
 
-### 4bis.1 Không phải một đồng hồ, mà là ba
+Lý do ghi lại ở đây vì bản trước của tài liệu này đi theo hướng ngược lại. Nghiên cứu ra rất nhiều chi tiết về quy định viễn thông Việt Nam, và tôi đã biến hết chúng thành tính năng: mô hình ba đồng hồ đếm ngược, tệp cấu hình bốn nhà mạng, cảnh báo thường trực. Đó là độ phức tạp tôi tự tạo ra, không phải thứ người dùng cần.
 
-Sai lầm dễ mắc nhất là coi "giữ SIM sống" chỉ là chuyện nạp tiền đúng hạn. Thực tế có **ba cơ chế độc lập** đều có thể dẫn tới mất số, và nạp tiền chỉ chống được một:
+**Cái người dùng cần:** chọn được mức quan trọng, và nhập được thông tin.
 
-| Cơ chế | Kích hoạt bởi | Nạp tiền có cứu được không |
-|---|---|---|
-| **Hết hạn sử dụng** | Không phát sinh giao dịch tính phí trong một khoảng thời gian | Có |
-| **Chưa xác thực danh tính** | Thông tư 08/2026/TT-BKHCN | **Không.** Phải xác thực qua VNeID hoặc sinh trắc học |
-| **Đổi thiết bị** | Lắp SIM sang một điện thoại khác | **Không.** Phải xác thực khuôn mặt trong 30 ngày |
+Cả hai đều đã có sẵn trong mô hình chung:
 
-Một app nói "nạp tiền để giữ số an toàn" là đưa lời khuyên **sai và nguy hiểm** trong bối cảnh 2026.
+| Nhu cầu | Dùng cái đã có |
+|---|---|
+| Đánh dấu số điện thoại là thứ mất là mất luôn | Mức rủi ro, đặt thành Mức 1 |
+| Ghi nhà mạng, mã tra cứu, ghi chú riêng | Trường `note` |
+| Nhắc kiểm tra lại định kỳ vì hạn hay trôi | `verifyEveryDays`, dùng chung với giấy tờ |
+| Gom nhiều mốc của cùng một cái SIM | Nhóm, dùng chung với xe cộ và giấy tờ |
+| Mở nhanh mã tra cứu của nhà mạng | `actionUrl` kèm `actionLabel` |
 
-Cơ chế thứ ba đặc biệt nguy hiểm với đúng nhóm người dùng của app này. Theo Điều 8 của thông tư (hiệu lực 15/6/2026), nhà mạng phải phát hiện việc đổi máy và **tạm dừng chiều gọi đi trong vòng 2 tiếng**. Người dùng có 30 ngày để xác thực sinh trắc học, không làm thì khóa hai chiều kèm thông báo chấm dứt hợp đồng, rồi thu hồi số sau 5 ngày nữa. Nghĩa là hành động rất tự nhiên "lấy SIM cũ trong ngăn kéo ra cắm thử xem còn sống không" chính là thứ có thể giết nó.
+Loại mục `PREPAID` áp cho mọi thứ **hết dần nếu không nạp**, không riêng gì SIM: điện trả trước, nước trả trước, tài khoản dịch vụ tính theo lượt dùng. Mặc định của nó là Mức 1 và thang nhắc dài, vì hết mà không nạp thì thường mất thứ khó lấy lại.
 
-### 4bis.2 Chất lượng dữ liệu quá kém để dự đoán ngày chết
-
-Đây là kết luận quan trọng nhất của phần nghiên cứu, và nó thay đổi thiết kế.
-
-**Không tìm được tài liệu chính thức nào của nhà mạng công bố mốc thời gian thu hồi số.** Trang điều khoản dịch vụ của MobiFone có quy định thời hạn gói cước nhưng không có mốc khóa một chiều, khóa hai chiều, thu hồi. Trang bán lẻ chính thức của Viettel chỉ nói chung chung "quá 120 ngày". Mọi con số cụ thể đều đến từ trang đại lý bán SIM và thẻ.
-
-Mức độ mâu thuẫn giữa các nguồn:
-
-- **Viettel:** khoảng thời gian sau khóa hai chiều được nêu từ 10 tới 120 ngày, tùy nguồn. Một nguồn tự mâu thuẫn trong cùng bài viết (15 ngày ở câu này, 30 ngày ở câu khác).
-- **MobiFone:** nguồn này nói 10 ngày, nguồn kia nói 30 ngày.
-- **Vietnamobile:** chỉ có một bài viết từ 2023, không nguồn nào khác xác nhận.
-- **VinaPhone:** được ghi rõ nhất, từ một trang thương mại thuộc VNPT: 10 ngày khóa một chiều, sau đó 30 ngày tự khôi phục được, ngày 30 tới 45 phải ra cửa hàng, quá 45 ngày là hủy thuê bao.
-
-Bảng "nạp bao nhiêu được thêm bao nhiêu ngày" còn kém tin cậy hơn. Con số "500.000đ được 215 ngày" xuất hiện y hệt nhau ở cả Viettel, VinaPhone và MobiFone. Ba nguồn giống hệt không phải ba lần xác nhận, mà là dấu hiệu chép lại của nhau.
-
-### 4bis.3 Hệ quả thiết kế: thúc giục thay vì dự đoán
-
-**App không được tự tính và hiển thị "số của bạn sẽ chết vào ngày X".** Dữ liệu không đủ chính xác để làm việc đó, và kiểu hỏng là kiểu tệ nhất: người dùng tin app, không hành động, rồi mất số.
-
-Bốn quy tắc thay thế:
-
-1. **Lưu ngày xác nhận, không lưu ngày dự đoán.** Trường dữ liệu chính là "lần cuối người dùng đối chiếu hạn với nhà mạng là ngày nào", kèm số ngày nhà mạng trả về lúc đó. Mọi ngày hiển thị đều đi kèm mốc thời gian và nguồn của nó.
-2. **Việc của app là làm cho người dùng đi kiểm tra, không phải thay họ kiểm tra.**
-3. **Lấy biên an toàn theo trường hợp xấu nhất.** Chỗ nào nguồn mâu thuẫn thì chọn khoảng ngắn nhất. Cụ thể: coi thời gian chỉ nhận được cuộc gọi là 10 ngày (không phải 30), và coi việc mất số vĩnh viễn có thể xảy ra sau khoảng 45 ngày kể từ ngày hết hạn. Mốc nhắc đầu tiên đặt ít nhất 30 ngày trước hạn.
-4. **Không bao giờ hiển thị con số dễ chịu lấy từ nguồn rộng rãi nhất.**
-
-### 4bis.4 Giải pháp đúng cho SIM ngủ đông là gói giữ số
-
-Với một số điện thoại gần như không dùng, lời khuyên đúng không phải là nạp tiền lặt vặt định kỳ, mà là **mua gói giữ số**. Cách này bỏ qua được toàn bộ mớ dữ liệu không đáng tin về bảng nạp tiền.
-
-| Nhà mạng | Gói | Cách đăng ký | Giá và thời hạn theo nguồn |
-|---|---|---|---|
-| Viettel | VT VÀNG | soạn `VTVANG` gửi 109 | 50.000đ / 365 ngày |
-| VinaPhone | GS1 | soạn `GS1` gửi 900 | 60.000đ / 180 ngày |
-| VinaPhone | GS2 | soạn `GS2` gửi 900 | 120.000đ / 360 ngày |
-| MobiFone | GS30 | soạn `DK GS30` gửi 999 | 30.000đ / 180 ngày |
-| MobiFone | GS50 | soạn `DK GS50` gửi 999 | 50.000đ / 360 ngày |
-| Vietnamobile | (không có) | | Chỉ còn cách nạp tiền định kỳ với biên rộng |
-
-Hai điểm cần lưu ý khi làm giao diện:
-
-- **Gói cộng dồn được.** Đăng ký nhiều lần thì thời hạn cộng lại, nên người dùng mua trước nhiều năm được. VNPT nêu ví dụ đăng ký GS2 hai lần liên tiếp được 720 ngày.
-- **Tên gói không đối xứng giữa các nhà mạng.** GS30 và GS50 của MobiFone đặt tên theo **giá tiền**, còn GS1 và GS2 của VinaPhone đặt theo **bậc**. Đừng suy diễn quy luật chung.
-
-Giá của các gói này cũng mâu thuẫn giữa các nguồn, kể cả giữa trang khu vực của chính nhà mạng và trang đại lý. Nên app **hiển thị con số kèm ghi chú "cần kiểm tra lại"**, không khẳng định như sự thật.
-
-### 4bis.5 Mã tra cứu phải cập nhật được từ xa
-
-Có nguồn nói **Viettel đã ngừng toàn bộ mã USSD (`*101#`, `*102#`, `*098#`, `*191#`) từ 13/5/2026**, chuyển sang nhắn tin: soạn `TK` gửi 191 để xem số dư và hạn sử dụng. Không xác minh được thông tin này trên trang chính thức của Viettel, và một nguồn khác vẫn liệt kê các mã đó như đang hoạt động.
-
-Chưa cần biết đúng sai, chuyện này đã đủ để rút ra một yêu cầu kỹ thuật: **bảng mã tra cứu theo nhà mạng phải nằm ở tệp cấu hình cập nhật được từ xa, không viết cứng vào binary.** Nếu mã chết mà app vẫn đưa cho người dùng, chu kỳ duyệt App Store quá chậm để sửa.
-
-Cú pháp tra cứu tốt nhất hiện biết, xếp theo độ tin cậy:
-
-| Nhà mạng | Cách an toàn nhất | Cách khác |
-|---|---|---|
-| Viettel | soạn `TK` gửi 191 | `*101#` (đang tranh cãi), tổng đài 198, app My Viettel |
-| VinaPhone | `*110#` | `*101#`, tổng đài 18001091, app My VNPT |
-| MobiFone | `*101#` | tổng đài 9090, app My MobiFone |
-| Vietnamobile | `*101#` | tổng đài 789 (nội mạng) |
-
-### 4bis.6 Việc app phải nói rõ là người dùng tự kiểm tra
-
-App không được tự nhận là nguồn tin cho bốn thứ sau. Với mỗi thứ, giao diện phải dẫn người dùng đi xác minh:
-
-- Ngày hết hạn thật của số điện thoại (lấy từ nhà mạng, không phải từ ước tính của app).
-- Giá và cú pháp hiện tại của gói giữ số, kiểm tra trước khi soạn tin.
-- Số máy hiện đang bị khóa một chiều hay chưa.
-- **Tình trạng xác thực danh tính**, thứ app hoàn toàn không nhìn thấy được.
-
-### 4bis.7 Cảnh báo hiển thị ngay khi mở app
-
-Do bối cảnh tháng 8/2026, app cần một cảnh báo đặt cao hơn mọi thứ khác trong lần chạy đầu, và một mục thường trực trong màn hình chi tiết của mỗi SIM:
-
-> **Xác thực danh tính là rủi ro riêng, nạp tiền không giải quyết được.** Từ 15/8/2026 các thuê bao chưa xác thực bắt đầu bị khóa hai chiều, thu hồi số từ 20/8/2026.
-
-> **Đổi máy cũng kích hoạt thu hồi.** Lắp SIM sang điện thoại khác sẽ bị chặn gọi đi trong 2 tiếng và phải xác thực khuôn mặt trong 30 ngày.
-
-Cảnh báo thứ hai đặc biệt quan trọng vì nó chống lại đúng hành vi mà app có thể vô tình khuyến khích: người dùng thấy nhắc, lấy SIM cũ ra cắm vào máy để kiểm tra.
+Vẫn giữ lại một điều từ phần nghiên cứu, vì nó đúng với mọi mục chứ không riêng SIM: **app chỉ biết cái người dùng gõ vào**. Ngày trong app có thể lệch với ngày thật ở nhà cung cấp, và trường `dateSource` cùng cơ chế nhắc đối chiếu tồn tại để xử lý chuyện đó.
 
 ---
 
@@ -276,7 +200,7 @@ data class TrackedItem(
   val currency: String?,         // "VND" | "USD"
 
   // Hành động
-  val actionUrl: String?,        // trang hủy, hoặc tel:// mã tra cứu nhà mạng
+  val actionUrl: String?,        // trang hủy, hoặc tel:// mã tra cứu
   val actionLabel: String?,      // "Hủy Netflix", "Kiểm tra hạn"
   val note: String?,
 
@@ -287,7 +211,7 @@ data class TrackedItem(
 
   // Đối chiếu với nguồn thật, xem mục 4bis.3 và 7.5
   val verifyEveryDays: Int?,     // null nếu không cần đối chiếu
-  val lastVerifiedAt: LocalDate?,   // lần cuối người dùng xác nhận với nhà mạng
+  val lastVerifiedAt: LocalDate?,   // lần cuối người dùng xác nhận với nguồn thật
   val dateSource: DateSource,    // ngày này ở đâu ra
 
   val state: State,
@@ -296,7 +220,7 @@ data class TrackedItem(
 
 // Ngày đến hạn đến từ đâu. Quyết định mức độ tin cậy hiển thị trên giao diện.
 enum class DateSource {
-  USER_CONFIRMED,   // người dùng vừa đối chiếu với nhà mạng hoặc nhà cung cấp
+  USER_CONFIRMED,   // người dùng vừa đối chiếu với nhà cung cấp
   USER_ESTIMATED,   // người dùng tự nhập theo trí nhớ
   COMPUTED,         // app tính ra từ chu kỳ
   EXTRACTED,        // bóc từ ảnh, chưa đối chiếu
@@ -307,11 +231,9 @@ enum class Stake { ASSET, MONEY, INFO }
 enum class Kind {
   TRIAL,          // gói dùng thử, sắp bị tính tiền
   RECURRING,      // dịch vụ tự gia hạn
-  PREPAID_SIM,    // hạn sử dụng của số điện thoại
-  SIM_PLAN,       // gói cước data của SIM
-  KEEP_ALIVE,     // nạp tiền định kỳ để giữ số
+  PREPAID,        // hết dần nếu không nạp: SIM, điện nước trả trước
   BILL,           // hóa đơn, khoản phải trả
-  DOCUMENT,       // giấy tờ có hạn
+  DOCUMENT,       // giấy tờ có hạn, không tính vào tổng chi
 }
 
 enum class State {
@@ -353,35 +275,6 @@ data class ItemGroup(
 )
 ```
 
-Riêng nhóm kiểu SIM có thêm một bảng nhỏ, vì nó mang những rủi ro mà mô hình "một tên một ngày" không diễn tả được (xem mục 4bis.1):
-
-```kotlin
-data class SimProfile(
-  val groupId: Uuid,
-  val carrier: Carrier,             // VIETTEL | VINAPHONE | MOBIFONE | VIETNAMOBILE | OTHER
-  val msisdn: String,
-  val isDormant: Boolean,           // giữ chỉ để không mất số
-
-  // Đồng hồ 1: hạn sử dụng. Ghi cái nhà mạng trả về, không ghi cái app đoán.
-  val hsdConfirmedDate: LocalDate?,     // hạn sử dụng nhà mạng báo
-  val hsdConfirmedAt: LocalDate?,       // ngày người dùng nhận được thông tin đó
-
-  // Đồng hồ 2: xác thực danh tính. App không nhìn thấy được, chỉ hỏi người dùng.
-  val identityVerified: TriState,       // YES | NO | UNKNOWN
-  val identityCheckedAt: LocalDate?,
-
-  // Đồng hồ 3: đổi máy.
-  val lastDeviceChangeAt: LocalDate?,   // người dùng tự ghi khi có đổi máy
-
-  // Gói giữ số đang có, nếu đã mua
-  val retentionPackage: String?,        // "VTVANG", "GS2", "GS50"
-  val retentionExpiryDate: LocalDate?,
-)
-
-enum class TriState { YES, NO, UNKNOWN }
-```
-
-Mặc định `identityVerified` là `UNKNOWN`, không phải `YES`. App không được suy đoán thay người dùng ở chỗ này.
 
 ### 5.1 Vì sao lịch sử tách riêng
 
@@ -572,13 +465,11 @@ Giờ nhắc mặc định **08:30 sáng**.
 
 | Loại mục | Nhắc trước | Sau khi quá hạn | Kiểu |
 |---|---|---|---|
-| Hạn số SIM | 30, 14, 7, 3, 1, 0 ngày | Mỗi ngày | Time Sensitive |
-| Gói giữ số | 30, 14, 7 ngày | Mỗi ngày | Time Sensitive |
+| Trả trước (SIM, điện, nước) | 30, 14, 7, 3, 1, 0 ngày | Mỗi ngày | Time Sensitive |
 | Giấy tờ | 60, 30, 7 ngày | Mỗi tuần | Time Sensitive |
 | Trial | 3, 1, 0 ngày | Một lần duy nhất | Thường |
 | Hóa đơn, khoản vay | 7, 1 ngày | Mỗi ngày | Time Sensitive |
 | Dịch vụ định kỳ | 3 ngày | Không, tự sang kỳ sau | Thường |
-| Gói cước SIM | 3 ngày | Không | Thường |
 
 **Time Sensitive** là mức ưu tiên của iOS cho phép thông báo vượt qua chế độ Tập trung và Không làm phiền. Bật bằng một capability trong Xcode, không cần Apple xét duyệt. Không dùng **Critical Alert**, vì mức đó kêu cả khi máy để im lặng và Apple xét duyệt riêng từng app.
 
@@ -634,19 +525,12 @@ Ngoài ra, đặt **số đếm trên biểu tượng app** bằng số mục qu
 
 Đây là cơ chế riêng, tách hẳn khỏi nhắc hạn, và nó tồn tại vì một lỗ hổng thật:
 
-**App chỉ biết cái người dùng gõ vào.** Nó không đọc được hạn thật từ nhà mạng. Người dùng nhập hạn SIM một lần, rồi mỗi lần nạp tiền hạn lại dời ra, và con số trong app từ từ sai đi. Với nhiều số điện thoại đang phụ thuộc vào app, một lần sai là mất một số.
+**App chỉ biết cái người dùng gõ vào.** Nó không đọc được ngày thật từ nhà cung cấp. Với những thứ mà ngày hết hạn dời đi theo hành vi, ví dụ hạn SIM trả trước dời ra mỗi lần nạp tiền, con số trong app từ từ sai đi mà không có gì báo.
 
-Nên mục Mức 1 có thêm `verifyEveryDays`, mặc định 60. Cứ đủ 60 ngày kể từ `lastVerifiedAt`, app hỏi: *"Hạn SIM này bạn xác nhận từ tháng 6, đã kiểm tra lại chưa?"* kèm nút mở mã tra cứu của nhà mạng.
+Nên mục Mức 1 có thêm `verifyEveryDays`, mặc định 60. Cứ đủ 60 ngày kể từ `lastVerifiedAt`, app hỏi: *"Ngày này bạn xác nhận từ tháng 6, đã kiểm tra lại chưa?"* kèm nút mở `actionUrl` nếu mục có.
 
-iOS không cho app tự động quay mã USSD. Đây là chặn có chủ đích từ 2012 sau một lỗ hổng cho phép trang web xóa máy bằng mã USSD. Nên app điền sẵn được mã, nút gọi vẫn phải người dùng bấm.
+Một giới hạn kỹ thuật cần biết nếu `actionUrl` là mã điện thoại: iOS không cho app tự động quay mã USSD, đây là chặn có chủ đích từ 2012 sau một lỗ hổng cho phép trang web xóa máy bằng mã USSD. App điền sẵn được mã, nút gọi vẫn phải người dùng bấm.
 
-Riêng với SIM, nhắc đối chiếu hỏi ba việc chứ không phải một, vì có ba đồng hồ đếm ngược (mục 4bis.1):
-
-1. Hạn sử dụng còn bao nhiêu, lấy từ nhà mạng.
-2. Đã xác thực danh tính chưa. Hỏi lại kể cả khi lần trước trả lời rồi, vì quy định còn đang đổi.
-3. Có đổi máy từ lần kiểm tra trước không.
-
-Giao diện phải nói rõ nạp tiền chỉ giải quyết được việc thứ nhất.
 
 ---
 
@@ -1056,7 +940,7 @@ Nên xuất và nhập dữ liệu thuộc Bước 1, không phải phần đán
 | Bước | Nội dung | Xong khi |
 |---|---|---|
 | **1** | Mô hình dữ liệu (App Group từ đầu), màn hình Sắp tới, thêm mục bằng tay, bộ phân bổ thông báo, đánh dấu đã xong, **xuất và nhập tệp** | Nhập được các SIM đang lo nhất, nhận được thông báo thật, và lấy dữ liệu ra được |
-| **2** | Nút hành động trên thông báo, nhắc dai, nhắc đối chiếu, ba đồng hồ của SIM, danh sách dựng sẵn, màn hình Tiền, Face ID | Dùng được hằng ngày, thay thế hẳn cách ghi chú cũ |
+| **2** | Nút hành động trên thông báo, nhắc dai, nhắc đối chiếu, danh sách dựng sẵn, màn hình Tiền, Face ID | Dùng được hằng ngày, thay thế hẳn cách ghi chú cũ |
 | **3** | Nhập bằng ảnh | Bớt được việc gõ tay |
 | **4** | Widget màn hình khóa (viết Swift) | Nhìn là thấy, không cần mở app |
 | **5** | Đồng bộ nhiều máy, chia sẻ | Chỉ làm nếu sau vài tháng dùng thật vẫn thấy thiếu |
@@ -1069,13 +953,6 @@ Ba điều chỉnh so với dự tính ban đầu, đều từ kết quả nghi�
 
 Thứ tự có chủ đích: đưa app vào tay người dùng thật sớm nhất có thể, vì dùng thật mới biết thiếu gì.
 
-### 12.1 Việc phải làm trước khi phát hành, không phải việc nghiên cứu
-
-Một hạng mục không giải quyết được bằng tìm kiếm: **gọi điện cho bốn nhà mạng để xác nhận mốc thời gian thu hồi số và cú pháp gói giữ số hiện hành.** Số cần gọi: Viettel 198, MobiFone 9090, VinaPhone 18001091, Vietnamobile 789.
-
-Lý do đây là điều kiện chặn phát hành chứ không phải việc tùy chọn: mọi con số cụ thể trong mục 4bis đều đến từ trang đại lý, không có tài liệu chính thức nào của nhà mạng xác nhận. Với một sản phẩm mà sai một con số là người dùng mất số điện thoại, đó là mức rủi ro không chấp nhận được.
-
-Còn một câu hỏi chưa trả lời, và nó có giá trị cao nhất cho phần SIM: **các app My Viettel, My VNPT, My MobiFone có cho tra hạn sử dụng theo cách app khác gọi được không?** Nếu có, tính năng SIM chuyển từ "nhắc người dùng đi kiểm tra" thành "đưa người dùng thẳng tới chỗ kiểm tra", tốt hơn hẳn.
 
 ---
 

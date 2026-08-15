@@ -37,7 +37,7 @@ Ký hiệu: `[ ]` chưa làm, `[~]` đang làm, `[x]` xong, `[-]` hoãn.
 ## D. Dữ liệu đóng gói sẵn
 
 - [x] D1. Danh sách khoảng 80 dịch vụ, gồm quốc tế và Việt Nam
-- [x] D2. Cấu hình nhà mạng: gói giữ số, cú pháp tra cứu, biên an toàn. Đọc từ tệp, ghi đè được
+- [-] D2. Cấu hình nhà mạng. Bỏ, SIM dùng mô hình chung
 
 ## E. Cầu nối nền tảng iOS
 
@@ -71,6 +71,6 @@ Ký hiệu: `[ ]` chưa làm, `[~]` đang làm, `[x]` xong, `[-]` hoãn.
 
 ## I. Việc ngoài code
 
-- [ ] I1. Gọi 4 nhà mạng xác minh mốc thu hồi số và giá gói giữ số. Chặn phát hành
+- [-] I1. Gọi 4 nhà mạng xác minh mốc thu hồi số. Bỏ, vì SIM giờ là mục thường
 - [ ] I2. Thử chất lượng đọc chữ tiếng Việt trên 20 tới 30 ảnh chụp thật
-- [ ] I3. Kiểm tra các app My Viettel, My VNPT, My MobiFone có cho tra hạn theo cách app khác gọi được không
+- [-] I3. Tra hạn tự động từ app nhà mạng. Bỏ, cùng lý do
