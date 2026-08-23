@@ -53,18 +53,29 @@ abstract final class DateCopy {
   static String lockScreenDate(LocalDate date) =>
       '${weekday(date)} ${date.day} ${month(date.month)}';
 
-  /// The shortcuts on the add form, in the order the design shows them.
+  /// The shortcuts beside the date field, in the order the design shows them.
+  ///
+  /// Shortcuts only: the calendar is its own row above them, so this rail
+  /// never has to carry the general case. That is what lets it stay a short
+  /// list of the dates people actually type — a rail whose last chip is the
+  /// picker puts the most-used control at the end of a sideways scroll.
   static const List<DateShortcut> shortcuts = [
     DateShortcut('Today', _today),
     DateShortcut('Tomorrow', _tomorrow),
     DateShortcut('In 7 days', _plus7),
     DateShortcut('In 1 month', _plusMonth),
+    DateShortcut('In 3 months', _plus3Months),
+    DateShortcut('In 6 months', _plus6Months),
+    DateShortcut('In 1 year', _plusYear),
   ];
 
   static LocalDate _today(LocalDate today) => today;
   static LocalDate _tomorrow(LocalDate today) => today.plusDays(1);
   static LocalDate _plus7(LocalDate today) => today.plusDays(7);
   static LocalDate _plusMonth(LocalDate today) => today.plusMonths(1);
+  static LocalDate _plus3Months(LocalDate today) => today.plusMonths(3);
+  static LocalDate _plus6Months(LocalDate today) => today.plusMonths(6);
+  static LocalDate _plusYear(LocalDate today) => today.plusMonths(12);
 
   /// The act-by line: what date the user must have acted by, and how much
   /// earlier that is than the expiry.

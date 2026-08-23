@@ -70,6 +70,11 @@ enum CategoryGlyph {
 
   /// A VPS or hosting plan.
   server,
+
+  /// Nothing known yet. Drawn beside an empty name field, where a blank square
+  /// would read as an image that failed to load, and offered in the gallery as
+  /// the "just something neutral" choice.
+  calendar,
 }
 
 /// One category glyph, stroked in [colour].
@@ -475,6 +480,26 @@ class CategoryGlyphPainter extends CustomPainter {
             stroke,
           );
         }
+
+      case CategoryGlyph.calendar:
+        // The same drawing as the Upcoming tab's mark. Deliberately: the tile
+        // is saying "a thing with a date", which is what that tab is called.
+        canvas.drawRRect(
+          RRect.fromLTRBR(2.6, 4.4, 17.4, 17.4, const Radius.circular(3.4)),
+          stroke,
+        );
+        canvas.drawLine(
+          const Offset(2.6, 8.6),
+          const Offset(17.4, 8.6),
+          stroke,
+        );
+        canvas.drawLine(const Offset(6.8, 2.6), const Offset(6.8, 5.6), stroke);
+        canvas.drawLine(
+          const Offset(13.2, 2.6),
+          const Offset(13.2, 5.6),
+          stroke,
+        );
+        canvas.drawCircle(const Offset(10, 13.2), 1.5, fill);
     }
   }
 

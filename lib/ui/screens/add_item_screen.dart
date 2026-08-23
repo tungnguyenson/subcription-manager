@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:subdock/catalog/service_catalog.dart';
+import 'package:subdock/domain/fx.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/money.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/domain/reminders.dart';
 import 'package:subdock/ui/date_copy.dart';
-import 'package:subdock/ui/icons.dart';
+import 'package:subdock/ui/widgets/service_mark.dart';
 import 'package:subdock/ui/item_draft.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
@@ -56,6 +57,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   final _name = TextEditingController();
   final _amount = TextEditingController();
   final _nameFocus = FocusNode();
+  final _amountFocus = FocusNode();
 
   CatalogEntry? _matched;
   LocalDate? _expiresOn;
@@ -82,6 +84,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
     _name.addListener(() => setState(() {}));
     _amount.addListener(() => setState(() {}));
     _nameFocus.addListener(() => setState(() {}));
+    // Grouping commas are settled when the field is left, not while it is
+    // being typed into: re-formatting under the cursor moves the caret away
+    // from the digit the user is working on.
+    _amountFocus.addListener(() {
+      if (!_amountFocus.hasFocus) _normalizeAmount();
+      setState(() {});
+    });
   }
 
   void _seed(DraftItem? initial) {
@@ -99,8 +108,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     final minor = initial.amountMinor;
     if (minor != null) {
-      _amount.text = minor.toString();
       _currency = initial.currency ?? _currency;
+      _amount.text = MoneyFormat.majorInput(minor, _currency);
     }
 
     // The name is already what the user meant. Offering to replace it with a
@@ -113,6 +122,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     _name.dispose();
     _amount.dispose();
     _nameFocus.dispose();
+    _amountFocus.dispose();
     super.dispose();
   }
 
@@ -121,19 +131,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   bool get _canSave => _name.text.trim().isNotEmpty && _expiresOn != null;
 
-  /// The repeats the form offers, in the hand-off's order.
+  /// The three repeats almost every item uses.
   ///
-  /// Three, not the five the domain can store. A form that lists every cycle
-  /// it supports takes longer to fill in than the item is worth. An item that
-  /// already carries one of the other two keeps it as a fourth option, because
-  /// opening the editor must never quietly rewrite a value it did not ask
-  /// about.
-  List<Cycle?> get _repeatOptions {
-    const offered = <Cycle?>[Cycle.monthly, Cycle.yearly, null];
-    final cycle = _cycle;
-    if (cycle == null || offered.contains(cycle)) return offered;
-    return [Cycle.monthly, Cycle.yearly, cycle, null];
-  }
+  /// Three, not the whole space of intervals. A form that lists every cycle it
+  /// supports takes longer to fill in than the item is worth. Everything else
+  /// — the other presets, and any interval the user types — lives behind the
+  /// fourth segment, which shows the chosen value once there is one.
+  static const List<Cycle?> _quickRepeats = [Cycle.monthly, Cycle.yearly, null];
 
   @override
   Widget build(BuildContext context) {
@@ -154,10 +158,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 const SizedBox(height: 12),
                 _gutter(_suggestionList()),
               ],
-              const SizedBox(height: SubdockSpacing.formBlock),
-              Field(label: 'Category', bleed: true, child: _categoryRail()),
+              // Date before category: it is the one field every item has to
+              // answer, and the one the user came here to type.
               const SizedBox(height: SubdockSpacing.formBlock),
               Field(label: 'Date', bleed: true, child: _dateField()),
+              const SizedBox(height: SubdockSpacing.formBlock),
+              Field(label: 'Category', bleed: true, child: _categoryRail()),
               const SizedBox(height: SubdockSpacing.formBlock),
               _gutter(Field(label: 'Repeat', child: _repeatRow())),
               if (_cycle != null) ...[
@@ -318,12 +324,29 @@ class _AddItemScreenState extends State<AddItemScreen> {
     );
   }
 
+  /// The calendar on a row of its own, the shortcuts under it.
+  ///
+  /// The picker used to be the last chip on the rail, which put the control
+  /// most items need at the end of a sideways scroll past four they do not.
+  /// The row also carries the resolved date, because a shortcut the user
+  /// cannot read back is a date they will re-check against their provider
+  /// anyway.
   Widget _dateField() {
     final expiresOn = _expiresOn;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        _gutter(
+          PickerField(
+            value: expiresOn == null
+                ? 'Pick a date'
+                : DateCopy.longDate(expiresOn),
+            placeholder: expiresOn == null,
+            onTap: _pickDate,
+          ),
+        ),
+        const SizedBox(height: 9),
         ChipRail(
           children: [
             for (final shortcut in DateCopy.shortcuts)
@@ -335,87 +358,225 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 onTap: () =>
                     setState(() => _expiresOn = shortcut.resolve(widget.today)),
               ),
-            ChoiceChipPill('Pick a date…', onTap: _pickDate),
           ],
         ),
-        if (expiresOn != null)
-          // The chip says "In 1 month"; this says which day that landed on. A
-          // relative shortcut the user cannot verify is a date they will have
-          // to re-check against their provider anyway.
-          Padding(
-            padding: const EdgeInsets.fromLTRB(SubdockSpacing.screenH, 5, 0, 0),
-            child: Text(
-              MoneyFormat.date(expiresOn),
-              style: SubdockText.monoInline,
-            ),
-          ),
       ],
     );
   }
 
   Widget _repeatRow() {
-    final options = _repeatOptions;
+    final cycle = _cycle;
+    final isCustom = cycle != null && !_quickRepeats.contains(cycle);
 
     return SegmentedRow(
-      labels: [for (final cycle in options) _repeatLabel(cycle)],
-      selected: options.indexOf(_cycle),
-      onSelect: (i) => setState(() {
-        _cycle = options[i];
-        // "Once" and "how many times" cannot both be true.
-        if (_cycle == null) _repeatCount = null;
-      }),
+      labels: [
+        for (final option in _quickRepeats) _repeatLabel(option),
+        // The fourth segment is a value and a door at once: it says what was
+        // chosen when the choice is not one of the three, and opens the full
+        // list either way.
+        isCustom ? _repeatLabel(cycle) : 'Other…',
+      ],
+      selected: isCustom ? _quickRepeats.length : _quickRepeats.indexOf(cycle),
+      onSelect: (i) {
+        if (i == _quickRepeats.length) {
+          _pickCycle();
+          return;
+        }
+        setState(() {
+          _cycle = _quickRepeats[i];
+          // "Once" and "how many times" cannot both be true.
+          if (_cycle == null) _repeatCount = null;
+        });
+      },
     );
   }
 
   /// The segment labels. Shorter than [ItemPresenter.cycleLabel] because four
   /// of these have to share the width of a phone: "Twice a year" does not fit
-  /// beside three siblings, "6 months" does.
-  static String _repeatLabel(Cycle? cycle) => switch (cycle) {
-    null => 'Once',
-    Cycle.weekly => 'Weekly',
-    Cycle.monthly => 'Monthly',
-    Cycle.quarterly => '3 months',
-    Cycle.semiannual => '6 months',
-    Cycle.yearly => 'Yearly',
-  };
+  /// beside three siblings, "6 months" does, and a typed interval shrinks all
+  /// the way to "5 mo".
+  static String _repeatLabel(Cycle? cycle) {
+    if (cycle == null) return 'Once';
+    return switch ((cycle.unit, cycle.step)) {
+      (CycleUnit.day, 7) => 'Weekly',
+      (CycleUnit.month, 1) => 'Monthly',
+      (CycleUnit.month, 3) => '3 months',
+      (CycleUnit.month, 6) => '6 months',
+      (CycleUnit.month, 12) => 'Yearly',
+      _ => ItemPresenter.cycleEveryShort(cycle),
+    };
+  }
+
+  /// The full list behind the fourth segment: every preset, one-off, and the
+  /// way out to an interval the app does not have a name for.
+  Future<void> _pickCycle() async {
+    const once = 'ONCE';
+    const custom = 'CUSTOM';
+
+    final cycle = _cycle;
+    final isCustom = cycle != null && !cycle.isPreset;
+
+    final picked = await _choose<String>(
+      title: 'Repeat',
+      options: [
+        for (final preset in Cycle.values)
+          (preset.wireName, ItemPresenter.cycleLabel(preset)),
+        (once, 'Once'),
+        (
+          custom,
+          isCustom
+              ? 'Every ${ItemPresenter.cycleEvery(cycle)}…'
+              : 'Every N days, weeks, months…',
+        ),
+      ],
+      selected: isCustom ? custom : (cycle?.wireName ?? once),
+    );
+    if (picked == null || !mounted) return;
+
+    if (picked == custom) {
+      await _pickCustomCycle();
+      return;
+    }
+
+    setState(() {
+      _cycle = picked == once ? null : CycleWire.fromWire(picked);
+      if (_cycle == null) _repeatCount = null;
+    });
+  }
+
+  /// The interval nothing on the list covers: every 5 months, every 45 days.
+  ///
+  /// A real contract renews on a schedule somebody else chose, and the answer
+  /// to "my plan runs 5 months" cannot be "then make it a one-off and re-date
+  /// it by hand five times a year".
+  Future<void> _pickCustomCycle() async {
+    final picked = await showModalBottomSheet<Cycle>(
+      context: context,
+      backgroundColor: SubdockColors.canvas,
+      showDragHandle: true,
+      // The sheet holds a keyboard-bound field, so it has to be free to give
+      // up height to the keyboard rather than sit under it.
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(SubdockRadius.placard),
+        ),
+      ),
+      builder: (sheet) => _CustomCycleSheet(initial: _cycle),
+    );
+    if (picked != null && mounted) setState(() => _cycle = picked);
+  }
 
   Widget _costField() {
-    return FieldBox(
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _amount,
-              keyboardType: const TextInputType.numberWithOptions(),
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: SubdockText.monoValue,
-              cursorColor: SubdockColors.accent,
-              decoration: InputDecoration(
-                isDense: true,
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-                hintText: '0',
-                hintStyle: SubdockText.fieldValue.copyWith(
-                  color: SubdockColors.inkMuted,
+    // VND has no minor unit, so its field has no decimal point to offer and
+    // no decimal key to put on the keyboard.
+    final exponent = Currencies.exponentOf(_currency);
+    final converted = _convertedLine;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FieldBox(
+          focused: _amountFocus.hasFocus,
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _amount,
+                  focusNode: _amountFocus,
+                  keyboardType: TextInputType.numberWithOptions(
+                    decimal: exponent > 0,
+                  ),
+                  // The amount is typed the way it is written — 20.50, not
+                  // 2050 — so the separators it is written with have to be
+                  // typeable. Everything else is filtered out here rather than
+                  // rejected on save.
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      exponent > 0 ? RegExp(r'[0-9.,]') : RegExp(r'[0-9,]'),
+                    ),
+                  ],
+                  style: SubdockText.monoValue,
+                  cursorColor: SubdockColors.accent,
+                  decoration: InputDecoration(
+                    isDense: true,
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    hintText: '0',
+                    hintStyle: SubdockText.fieldValue.copyWith(
+                      color: SubdockColors.inkMuted,
+                    ),
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(width: 10),
+              ChoiceChipPill(
+                '₫',
+                selected: _currency == 'VND',
+                onField: true,
+                onTap: () => _setCurrency('VND'),
+              ),
+              const SizedBox(width: 5),
+              ChoiceChipPill(
+                r'$',
+                selected: _currency == 'USD',
+                onField: true,
+                onTap: () => _setCurrency('USD'),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          ChoiceChipPill(
-            '₫',
-            selected: _currency == 'VND',
-            onTap: () => setState(() => _currency = 'VND'),
+        ),
+        if (converted != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Text(converted, style: SubdockText.monoInline),
           ),
-          const SizedBox(width: 5),
-          ChoiceChipPill(
-            r'$',
-            selected: _currency == 'USD',
-            onTap: () => setState(() => _currency = 'USD'),
-          ),
-        ],
-      ),
+      ],
     );
+  }
+
+  /// The same figure in the other currency.
+  ///
+  /// Two currency chips on one field means the amount can be typed under the
+  /// wrong one, and 20 read as dong is a different mistake from 260,000 read
+  /// as dollars — neither is visible in the digits themselves. Shown with the
+  /// rate that produced it, on the same terms as every other converted figure
+  /// in this app: an approximation that does not say where it came from is
+  /// worse than none.
+  String? get _convertedLine {
+    final minor = MoneyFormat.parseMajor(_amount.text, _currency);
+    if (minor == null || minor == 0) return null;
+
+    final rate = Fx.bundledUsdVnd;
+    final money = Money(minor, _currency);
+    final converted = switch (_currency) {
+      'USD' => rate.convert(money),
+      'VND' => rate.invert(money),
+      _ => null,
+    };
+    if (converted == null) return null;
+
+    return '≈ ${MoneyFormat.full(converted)} · ${MoneyFormat.rate(rate)}';
+  }
+
+  /// Re-renders the typed amount at the currency's own precision.
+  ///
+  /// The number the user typed is kept as a number; only its precision moves.
+  /// Converting it instead would answer a question they did not ask — tapping
+  /// ₫ says "this price is in dong", not "restate this price in dong".
+  void _setCurrency(String code) {
+    if (code == _currency) return;
+    setState(() {
+      _currency = code;
+      final minor = MoneyFormat.parseMajor(_amount.text, code);
+      if (minor != null) _amount.text = MoneyFormat.majorInput(minor, code);
+    });
+  }
+
+  void _normalizeAmount() {
+    final minor = MoneyFormat.parseMajor(_amount.text, _currency);
+    final text = minor == null ? '' : MoneyFormat.majorInput(minor, _currency);
+    if (text != _amount.text) _amount.text = text;
   }
 
   Widget _leadRail() {
@@ -475,8 +636,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
       if (_cycle == null) _repeatCount = null;
       final minor = entry.typicalAmountMinor;
       if (minor != null) {
-        _amount.text = minor.toString();
         _currency = entry.currency ?? _currency;
+        _amount.text = MoneyFormat.majorInput(minor, _currency);
       }
     });
     _nameFocus.unfocus();
@@ -491,6 +652,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
   }
 
   Future<void> _pickDate() async {
+    // A calendar behind the keyboard is a calendar with two rows of dates on
+    // it, so the keyboard goes first.
+    FocusScope.of(context).unfocus();
     final picked = await widget.onPickDate?.call(_expiresOn);
     if (picked != null && mounted) setState(() => _expiresOn = picked);
   }
@@ -507,7 +671,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         ),
       ),
       builder: (sheet) => IconGallery(
-        selected: _iconName ?? SubdockIcons.detect(_name.text),
+        selected: _iconName ?? SubdockMarks.detectKey(_name.text),
         onPick: (key) => Navigator.of(sheet).pop(key),
       ),
     );
@@ -620,7 +784,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   }
 
   void _save() {
-    final amount = int.tryParse(_amount.text.trim());
+    final amount = MoneyFormat.parseMajor(_amount.text, _currency);
     final initial = widget.initial;
 
     widget.onSave?.call(
@@ -640,6 +804,151 @@ class _AddItemScreenState extends State<AddItemScreen> {
       ),
     );
   }
+}
+
+/// The sheet behind "Every N days, weeks, months…".
+///
+/// Its own widget, and its own state, because the number is only a cycle once
+/// it is a whole number in range: the form outside must never hold a half-typed
+/// interval, and the sheet must be able to say why the button is off.
+class _CustomCycleSheet extends StatefulWidget {
+  /// The interval the form is holding, so the sheet opens on it rather than on
+  /// a default the user then has to undo.
+  final Cycle? initial;
+
+  const _CustomCycleSheet({this.initial});
+
+  @override
+  State<_CustomCycleSheet> createState() => _CustomCycleSheetState();
+}
+
+class _CustomCycleSheetState extends State<_CustomCycleSheet> {
+  static const List<CycleField> _fields = [
+    CycleField.day,
+    CycleField.week,
+    CycleField.month,
+    CycleField.year,
+  ];
+
+  final _count = TextEditingController();
+  late CycleField _field;
+
+  @override
+  void initState() {
+    super.initState();
+    // Two months rather than one: one month is already a segment on the form,
+    // so a user who got this far means something else.
+    final (count, field) =
+        widget.initial?.inLargestField ?? (2, CycleField.month);
+    _count.text = count.toString();
+    _field = field;
+    _count.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _count.dispose();
+    super.dispose();
+  }
+
+  /// The cycle the sheet currently describes, or null while it describes
+  /// nothing valid.
+  Cycle? get _cycle {
+    final count = int.tryParse(_count.text.trim());
+    if (count == null || count < 1) return null;
+    try {
+      return Cycle.every(count, _field);
+    } on ArgumentError {
+      return null;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cycle = _cycle;
+
+    return Padding(
+      // The sheet gives up height to the keyboard rather than letting it cover
+      // the field it belongs to.
+      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            SubdockSpacing.screenH,
+            0,
+            SubdockSpacing.screenH,
+            20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: Text('REPEAT EVERY', style: SubdockText.sectionLabel),
+              ),
+              Row(
+                children: [
+                  SizedBox(
+                    width: 84,
+                    child: FieldBox(
+                      child: TextField(
+                        controller: _count,
+                        autofocus: true,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                          LengthLimitingTextInputFormatter(3),
+                        ],
+                        textAlign: TextAlign.center,
+                        style: SubdockText.monoValue,
+                        cursorColor: SubdockColors.accent,
+                        decoration: const InputDecoration(
+                          isDense: true,
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: SegmentedRow(
+                      labels: [for (final field in _fields) _fieldLabel(field)],
+                      selected: _fields.indexOf(_field),
+                      onSelect: (i) => setState(() => _field = _fields[i]),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 14),
+              Text(
+                cycle == null
+                    ? 'A whole number of at most ${Cycle.maxStep} days or months.'
+                    : 'Repeats every ${ItemPresenter.cycleEvery(cycle)}.',
+                style: SubdockText.footnote,
+              ),
+              const SizedBox(height: 16),
+              PrimaryButton(
+                'Done',
+                onPressed: cycle == null
+                    ? null
+                    : () => Navigator.of(context).pop(cycle),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  static String _fieldLabel(CycleField field) => switch (field) {
+    CycleField.day => 'Days',
+    CycleField.week => 'Weeks',
+    CycleField.month => 'Months',
+    CycleField.year => 'Years',
+  };
 }
 
 class _SuggestionRow extends StatelessWidget {

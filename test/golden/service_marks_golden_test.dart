@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/category_glyphs.dart';
+import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/ui/widgets/service_mark.dart';
 import 'package:subdock/ui/widgets/service_marks.data.dart';
 
@@ -67,13 +68,13 @@ void main() {
             spacing: 8,
             runSpacing: 8,
             children: [
-              for (final name in names) ServiceMarkTile(name, size: 40),
+              for (final name in names) ServiceTile(name, size: 40),
               // The glyphs no catalog name reaches, so a regression in one is
               // still caught: they are only in reach of names the user types.
               for (final glyph in CategoryGlyph.values)
-                ServiceMarkTile('', iconName: glyph.name, size: 40),
+                ServiceTile('', iconName: glyph.name, size: 40),
               // And the fallback itself.
-              const ServiceMarkTile('Quán cà phê', size: 40),
+              const ServiceTile('Quán cà phê', size: 40),
             ],
           ),
         ),

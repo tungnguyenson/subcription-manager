@@ -84,24 +84,57 @@ abstract final class ItemPresenter {
     Category.other => 'Other',
   };
 
-  static String cycleLabel(Cycle? cycle) => switch (cycle) {
-    null => 'Once',
-    Cycle.weekly => 'Weekly',
-    Cycle.monthly => 'Monthly',
-    Cycle.quarterly => 'Quarterly',
-    Cycle.semiannual => 'Twice a year',
-    Cycle.yearly => 'Yearly',
-  };
+  static String cycleLabel(Cycle? cycle) {
+    if (cycle == null) return 'Once';
+    return switch ((cycle.unit, cycle.step)) {
+      (CycleUnit.day, 7) => 'Weekly',
+      (CycleUnit.month, 1) => 'Monthly',
+      (CycleUnit.month, 3) => 'Quarterly',
+      (CycleUnit.month, 6) => 'Twice a year',
+      (CycleUnit.month, 12) => 'Yearly',
+      _ => 'Every ${cycleEvery(cycle)}',
+    };
+  }
+
+  /// The interval on its own, pluralised: `5 months`, `2 weeks`, `10 days`.
+  ///
+  /// Read back in the largest unit it divides into, because a user who typed
+  /// "every 2 weeks" must not find "every 14 days" on the item afterwards.
+  static String cycleEvery(Cycle cycle) {
+    final (count, field) = cycle.inLargestField;
+    final noun = switch (field) {
+      CycleField.day => 'day',
+      CycleField.week => 'week',
+      CycleField.month => 'month',
+      CycleField.year => 'year',
+    };
+    return count == 1 ? noun : '$count ${noun}s';
+  }
+
+  /// The interval abbreviated to fit a segment or a pill: `5 mo`, `2 wk`.
+  static String cycleEveryShort(Cycle cycle) {
+    final (count, field) = cycle.inLargestField;
+    final unit = switch (field) {
+      CycleField.day => 'd',
+      CycleField.week => 'wk',
+      CycleField.month => 'mo',
+      CycleField.year => 'yr',
+    };
+    return '$count $unit';
+  }
 
   /// The suffix on a cost: `$20.00 / mo`.
-  static String? cyclePer(Cycle? cycle) => switch (cycle) {
-    null => null,
-    Cycle.weekly => '/ wk',
-    Cycle.monthly => '/ mo',
-    Cycle.quarterly => '/ qtr',
-    Cycle.semiannual => '/ 6 mo',
-    Cycle.yearly => '/ yr',
-  };
+  static String? cyclePer(Cycle? cycle) {
+    if (cycle == null) return null;
+    return switch ((cycle.unit, cycle.step)) {
+      (CycleUnit.day, 7) => '/ wk',
+      (CycleUnit.month, 1) => '/ mo',
+      (CycleUnit.month, 3) => '/ qtr',
+      (CycleUnit.month, 6) => '/ 6 mo',
+      (CycleUnit.month, 12) => '/ yr',
+      _ => '/ ${cycleEveryShort(cycle)}',
+    };
+  }
 
   /// How much the shown date can be trusted.
   ///

@@ -56,4 +56,60 @@ void main() {
     expect(MoneyFormat.date(date), '05/08/2026');
     expect(MoneyFormat.shortDate(date), '05/08');
   });
+
+  // The bug this pair exists to prevent: a field seeded with minor units shows
+  // $20.00 as "2000", and the 111 the user then types comes back as $1.11.
+  group('the cost field speaks in major units', () {
+    test('an amount is offered the way it is written', () {
+      expect(MoneyFormat.majorInput(2000, 'USD'), '20');
+      expect(MoneyFormat.majorInput(2050, 'USD'), '20.50');
+      expect(MoneyFormat.majorInput(2005, 'USD'), '20.05');
+      expect(MoneyFormat.majorInput(260000, 'VND'), '260,000');
+    });
+
+    test('a typed amount is read back as the same number', () {
+      expect(MoneyFormat.parseMajor('111', 'USD'), 11100);
+      expect(MoneyFormat.parseMajor('20.50', 'USD'), 2050);
+      expect(MoneyFormat.parseMajor('20.5', 'USD'), 2050);
+      expect(MoneyFormat.parseMajor('.29', 'USD'), 29);
+      expect(MoneyFormat.parseMajor('260,000', 'VND'), 260000);
+      expect(MoneyFormat.parseMajor(r'$20', 'USD'), 2000);
+    });
+
+    test('a round trip through the field changes nothing', () {
+      for (final (minor, currency) in const [
+        (2000, 'USD'),
+        (2050, 'USD'),
+        (1, 'USD'),
+        (260000, 'VND'),
+        (25, 'VND'),
+      ]) {
+        expect(
+          MoneyFormat.parseMajor(
+            MoneyFormat.majorInput(minor, currency),
+            currency,
+          ),
+          minor,
+          reason: '$minor $currency',
+        );
+      }
+    });
+
+    // Rounding, not truncation: 20.5 dong is 21 dong. Dropping the half
+    // silently would make every seeded USD amount lose a cent on the way to a
+    // currency that has none.
+    test('more precision than the currency has is rounded half-up', () {
+      expect(MoneyFormat.parseMajor('20.5', 'VND'), 21);
+      expect(MoneyFormat.parseMajor('20.4', 'VND'), 20);
+      expect(MoneyFormat.parseMajor('20.005', 'USD'), 2001);
+      expect(MoneyFormat.parseMajor('20.004', 'USD'), 2000);
+    });
+
+    test('text that is not an amount reads as no amount at all', () {
+      expect(MoneyFormat.parseMajor('', 'USD'), isNull);
+      expect(MoneyFormat.parseMajor('  ', 'USD'), isNull);
+      expect(MoneyFormat.parseMajor('1.2.3', 'USD'), isNull);
+      expect(MoneyFormat.parseMajor('1234567890123456', 'USD'), isNull);
+    });
+  });
 }

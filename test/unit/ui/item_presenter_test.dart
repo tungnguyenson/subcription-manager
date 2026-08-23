@@ -148,6 +148,37 @@ void main() {
       expect(ItemPresenter.cyclePer(Cycle.yearly), '/ yr');
     });
 
+    // An interval the app has no name for still has to read as one, and read
+    // back in the unit it was typed in: "every 2 weeks", never "every 14 days".
+    test('a custom interval is spelled out rather than left blank', () {
+      expect(
+        ItemPresenter.cycleLabel(Cycle.every(5, CycleField.month)),
+        'Every 5 months',
+      );
+      expect(
+        ItemPresenter.cycleLabel(Cycle.every(2, CycleField.week)),
+        'Every 2 weeks',
+      );
+      expect(
+        ItemPresenter.cycleLabel(Cycle.every(45, CycleField.day)),
+        'Every 45 days',
+      );
+      expect(
+        ItemPresenter.cyclePer(Cycle.every(5, CycleField.month)),
+        '/ 5 mo',
+      );
+      expect(
+        ItemPresenter.cycleEveryShort(Cycle.every(2, CycleField.week)),
+        '2 wk',
+      );
+    });
+
+    // A cycle of one is still "every month", not "every 1 months".
+    test('a step of one keeps the noun singular', () {
+      expect(ItemPresenter.cycleEvery(Cycle.monthly), 'month');
+      expect(ItemPresenter.cycleEvery(Cycle.weekly), 'week');
+    });
+
     // The app only knows what the user typed. A date shown with more
     // confidence than its source deserves is what this label prevents.
     test(

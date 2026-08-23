@@ -108,21 +108,40 @@ enum DateSource with WireNamed {
 
 /// Cycle is persisted too, so it needs wire names on the same terms. Kept out
 /// of `recurrence.dart` so that file stays pure calendar arithmetic.
+///
+/// The five presets keep the names they have always had. A custom interval is
+/// written as `EVERY_<n>_<unit>`, which stays legible in a sqlite3 shell and,
+/// more importantly, is not a name an older build could mistake for a preset:
+/// [fromWire] returns null for anything it does not recognise, so a build that
+/// predates custom cycles reads such a row as a one-off rather than as the
+/// wrong cycle.
 extension CycleWire on Cycle {
-  String get wireName => switch (this) {
-    Cycle.weekly => 'WEEKLY',
-    Cycle.monthly => 'MONTHLY',
-    Cycle.quarterly => 'QUARTERLY',
-    Cycle.semiannual => 'SEMIANNUAL',
-    Cycle.yearly => 'YEARLY',
+  String get wireName => switch ((unit, step)) {
+    (CycleUnit.day, 7) => 'WEEKLY',
+    (CycleUnit.month, 1) => 'MONTHLY',
+    (CycleUnit.month, 3) => 'QUARTERLY',
+    (CycleUnit.month, 6) => 'SEMIANNUAL',
+    (CycleUnit.month, 12) => 'YEARLY',
+    (CycleUnit.day, _) => 'EVERY_${step}_DAY',
+    (CycleUnit.month, _) => 'EVERY_${step}_MONTH',
   };
+
+  static final RegExp _custom = RegExp(r'^EVERY_(\d{1,3})_(DAY|MONTH)$');
 
   static Cycle? fromWire(String? wire) {
     if (wire == null) return null;
     for (final cycle in Cycle.values) {
       if (cycle.wireName == wire) return cycle;
     }
-    return null;
+
+    final match = _custom.firstMatch(wire);
+    if (match == null) return null;
+
+    final step = int.parse(match.group(1)!);
+    if (step < 1 || step > Cycle.maxStep) return null;
+    return match.group(2) == 'DAY'
+        ? Cycle.every(step, CycleField.day)
+        : Cycle.every(step, CycleField.month);
   }
 }
 

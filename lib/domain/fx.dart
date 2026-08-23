@@ -59,6 +59,29 @@ class FxRate {
     return Money(_roundHalfUp(numerator, denominator), to);
   }
 
+  /// Converts the other way, from [to] back to [from].
+  ///
+  /// Not `1 / rate` applied with [convert]: inverting a scaled integer rate
+  /// throws away precision before the multiplication rather than after it, and
+  /// on a rate of 26,046 that is visible in the dong. Dividing by the same
+  /// rate instead keeps the arithmetic exact until the single final rounding.
+  Money invert(Money amount) {
+    if (amount.currency != to) {
+      throw ArgumentError(
+        'rate converts back from $to, not ${amount.currency}',
+      );
+    }
+
+    final fromExponent = Currencies.exponentOf(from);
+    final toExponent = Currencies.exponentOf(to);
+
+    final numerator =
+        amount.minor * Currencies.pow10(scale) * Currencies.pow10(fromExponent);
+    final denominator = scaled * Currencies.pow10(toExponent);
+
+    return Money(_roundHalfUp(numerator, denominator), from);
+  }
+
   static int _roundHalfUp(int numerator, int denominator) {
     final quotient = numerator ~/ denominator;
     final remainder = numerator % denominator;

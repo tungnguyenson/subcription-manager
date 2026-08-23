@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:subdock/ui/icons.dart';
 import 'package:subdock/ui/theme.dart';
+import 'package:subdock/ui/widgets/category_glyphs.dart';
+import 'package:subdock/ui/widgets/service_mark.dart';
+import 'package:subdock/ui/widgets/service_marks.data.dart';
 
 /// The uppercase heading that sits above a card, outside it.
 class SectionLabel extends StatelessWidget {
@@ -237,7 +239,7 @@ class DetailRow extends StatelessWidget {
 class ServiceTile extends StatelessWidget {
   final String name;
 
-  /// An explicit icon key. When null the name is asked, and when the name has
+  /// An explicit mark key. When null the name is asked, and when the name has
   /// nothing to say its first letter is drawn.
   final String? iconName;
 
@@ -261,30 +263,56 @@ class ServiceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final trimmed = name.trim();
+    final chosen = iconName;
+    final detected = chosen == null
+        ? SubdockMarks.detect(trimmed)
+        : SubdockMarks.forKey(chosen);
     // With no name yet there is no letter to draw and nothing to detect from,
     // and an empty square beside an empty field reads as an image that failed
     // to load. The neutral mark says "this is the icon, and you can tap it".
-    final key = iconName ?? SubdockIcons.detect(trimmed);
-    final icon = SubdockIcons.resolve(
-      trimmed.isEmpty ? (key ?? SubdockIcons.fallback) : key,
-    );
-    final letter = trimmed.isEmpty ? '' : trimmed.substring(0, 1).toUpperCase();
+    final spec = detected ?? (trimmed.isEmpty ? _blank : null);
+
+    final (Widget child, Color tint) = switch (spec) {
+      // An explicit key that no longer names anything -- a mark retired from a
+      // later build -- falls through to the letter rather than to an empty
+      // square, which is the one outcome that would look like a bug.
+      BrandSpec(:final key) => switch (brandMarks[key]) {
+        final BrandMark mark => (
+          BrandGlyph(mark: mark, size: size * 0.56),
+          Color(mark.colour),
+        ),
+        null => (_letter(trimmed), SubdockColors.canvas),
+      },
+      GlyphSpec(:final glyph, brandColour: final int colour) => (
+        CategoryMark(glyph: glyph, colour: Color(colour), size: size * 0.62),
+        Color(colour),
+      ),
+      GlyphSpec(:final glyph) => (
+        CategoryMark(
+          glyph: glyph,
+          colour: SubdockColors.inkMuted,
+          size: size * 0.62,
+        ),
+        SubdockColors.canvas,
+      ),
+      null => (_letter(trimmed), SubdockColors.canvas),
+    };
 
     final tile = Container(
       width: size,
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: SubdockColors.canvas,
+        // A category glyph and the letter both keep the flat canvas fill the
+        // tile always had; only a brand tints. So a colour in that column
+        // means "this is that service", never "this row is a bill".
+        color: tint == SubdockColors.canvas
+            ? SubdockColors.canvas
+            : tint.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: SubdockColors.hairline),
       ),
-      child: icon != null
-          ? Icon(icon, size: size * 0.52, color: SubdockColors.inkMuted)
-          : Text(
-              letter,
-              style: SubdockText.tileLetter.copyWith(fontSize: fontSize),
-            ),
+      child: child,
     );
 
     if (onTap == null) return tile;
@@ -294,6 +322,13 @@ class ServiceTile extends StatelessWidget {
       child: tile,
     );
   }
+
+  static const MarkSpec _blank = GlyphSpec(CategoryGlyph.calendar);
+
+  Widget _letter(String trimmed) => Text(
+    trimmed.isEmpty ? '' : trimmed.substring(0, 1).toUpperCase(),
+    style: SubdockText.tileLetter.copyWith(fontSize: fontSize),
+  );
 }
 
 /// The filled action. There is one accent in this design, so a screen showing
@@ -417,11 +452,21 @@ class ChoiceChipPill extends StatelessWidget {
   final bool selected;
   final VoidCallback? onTap;
 
+  /// Set when the chip sits inside a [FieldBox] rather than on the page.
+  ///
+  /// The unselected chip is a white card lifted off a grey ground. Put that
+  /// same card on the white of a field and the only thing left of it is its
+  /// shadow: the currency chips read as one lit button beside a smudge, on the
+  /// one control where which of the two is lit changes what the number means.
+  /// On a field it inverts — the ground colour comes back as the fill.
+  final bool onField;
+
   const ChoiceChipPill(
     this.label, {
     super.key,
     this.selected = false,
     this.onTap,
+    this.onField = false,
   });
 
   @override
@@ -429,10 +474,12 @@ class ChoiceChipPill extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(SubdockRadius.chip),
-        boxShadow: selected ? const [] : SubdockShadow.soft,
+        boxShadow: selected || onField ? const [] : SubdockShadow.soft,
       ),
       child: Material(
-        color: selected ? SubdockColors.accent : SubdockColors.card,
+        color: selected
+            ? SubdockColors.accent
+            : (onField ? SubdockColors.canvas : SubdockColors.card),
         borderRadius: BorderRadius.circular(SubdockRadius.chip),
         child: InkWell(
           onTap: onTap,
@@ -529,6 +576,12 @@ class SegmentedRow extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Text(
                       labels[i],
+                      // A segment is a quarter of a phone wide at most. A
+                      // label that does not fit has to clip on one line
+                      // rather than wrap and make this row taller than the
+                      // one beside it.
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: i == selected
                           ? SubdockText.chipSelected
                           : SubdockText.chip,

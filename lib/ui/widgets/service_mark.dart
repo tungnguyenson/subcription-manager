@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/category_glyphs.dart';
 import 'package:subdock/ui/widgets/service_marks.data.dart';
 
@@ -252,6 +251,42 @@ abstract final class SubdockMarks {
     ('visa', GlyphSpec(CategoryGlyph.passport)),
   ];
 
+  /// The category shapes, in the order the gallery shows them.
+  ///
+  /// Shown above the brands, because that is what a manual pick is usually
+  /// for: a brand is nearly always found by [detect] from the name, so the
+  /// user who opens the sheet is the one whose "Phí gửi xe chung cư" needs a
+  /// shape that no rule was written for.
+  static List<String> get pickableGlyphs => [
+    for (final glyph in CategoryGlyph.values) glyph.name,
+  ];
+
+  /// The brand marks, for when the detector guessed the wrong service.
+  static List<String> get pickableBrands => brandMarks.keys.toList();
+
+  /// Both groups, for anything that only needs to know a key is offerable.
+  static List<String> get pickable => [...pickableGlyphs, ...pickableBrands];
+
+  /// The key [detect] would store for this name, for the gallery to show as
+  /// already selected. Null where the name suggests nothing.
+  static String? detectKey(String name) => switch (detect(name)) {
+    BrandSpec(:final key) => key,
+    GlyphSpec(:final glyph) => glyph.name,
+    null => null,
+  };
+
+  /// Look up an explicit key, in the one namespace both kinds of mark share.
+  ///
+  /// The two cannot collide: brand keys are slugs with hyphens, glyph names
+  /// are the enum's camelCase.
+  static MarkSpec? forKey(String key) {
+    if (brandMarks.containsKey(key)) return BrandSpec(key);
+    for (final glyph in CategoryGlyph.values) {
+      if (glyph.name == key) return GlyphSpec(glyph);
+    }
+    return null;
+  }
+
   /// The mark this name suggests, or null when nothing does.
   ///
   /// Matched against what the user typed rather than against a catalog id: the
@@ -270,116 +305,12 @@ abstract final class SubdockMarks {
   }
 }
 
-/// The square beside a row: a service's mark, a category glyph, or a letter.
-///
-/// The tile is tinted with whatever it is drawing — Netflix red at a tenth
-/// strength behind the Netflix mark — which is what keeps a column of them
-/// from reading as a column of grey chips without turning the list into a
-/// swatch chart.
-class ServiceMarkTile extends StatelessWidget {
-  final String name;
-
-  /// An explicit key: either a [brandMarks] key or a [CategoryGlyph] name.
-  /// Null asks the name. Set once the user has overridden the guess, and an
-  /// override is never re-guessed.
-  final String? iconName;
-
-  final double size;
-  final double radius;
-  final double fontSize;
-
-  /// Set on the add form, where the tile is the way into the icon gallery.
-  final VoidCallback? onTap;
-
-  const ServiceMarkTile(
-    this.name, {
-    super.key,
-    this.iconName,
-    this.size = 34,
-    this.radius = SubdockRadius.chip,
-    this.fontSize = 14,
-    this.onTap,
-  });
-
-  /// Look up an explicit key, in the one namespace both kinds of mark share.
-  static MarkSpec? specFor(String key) {
-    if (brandMarks.containsKey(key)) return BrandSpec(key);
-    for (final glyph in CategoryGlyph.values) {
-      if (glyph.name == key) return GlyphSpec(glyph);
-    }
-    return null;
-  }
-
-  Widget _letter(String trimmed) => Text(
-    trimmed.isEmpty ? '' : trimmed.substring(0, 1).toUpperCase(),
-    style: SubdockText.tileLetter.copyWith(fontSize: fontSize),
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    final trimmed = name.trim();
-    final chosen = iconName;
-    final spec = chosen == null
-        ? SubdockMarks.detect(trimmed)
-        : specFor(chosen);
-
-    final (Widget child, Color tint) = switch (spec) {
-      // An explicit key that no longer names anything -- a mark retired from a
-      // later build -- falls through to the letter rather than to an empty
-      // square, which is the one outcome that would look like a bug.
-      BrandSpec(:final key) => switch (brandMarks[key]) {
-        final BrandMark mark => (
-          _BrandGlyph(mark: mark, size: size * 0.56),
-          Color(mark.colour),
-        ),
-        null => (_letter(trimmed), SubdockColors.canvas),
-      },
-      GlyphSpec(:final glyph, brandColour: final int colour) => (
-        CategoryMark(glyph: glyph, colour: Color(colour), size: size * 0.62),
-        Color(colour),
-      ),
-      GlyphSpec(:final glyph) => (
-        CategoryMark(
-          glyph: glyph,
-          colour: SubdockColors.inkMuted,
-          size: size * 0.62,
-        ),
-        SubdockColors.canvas,
-      ),
-      null => (_letter(trimmed), SubdockColors.canvas),
-    };
-
-    final tile = Container(
-      width: size,
-      height: size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        // A household glyph and the letter both keep the flat canvas fill the
-        // tile always had; only a brand tints, so the colour in the column
-        // means "this is that service" rather than "this row is a bill".
-        color: tint == SubdockColors.canvas
-            ? SubdockColors.canvas
-            : tint.withValues(alpha: 0.10),
-        borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: SubdockColors.hairline),
-      ),
-      child: child,
-    );
-
-    if (onTap == null) return tile;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(radius),
-      child: tile,
-    );
-  }
-}
-
-class _BrandGlyph extends StatelessWidget {
+/// One brand mark at [size], drawn in the brand's own colour.
+class BrandGlyph extends StatelessWidget {
   final BrandMark mark;
   final double size;
 
-  const _BrandGlyph({required this.mark, required this.size});
+  const BrandGlyph({super.key, required this.mark, required this.size});
 
   @override
   Widget build(BuildContext context) {

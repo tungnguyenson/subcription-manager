@@ -47,6 +47,67 @@ abstract final class MoneyFormat {
     return full(money);
   }
 
+  /// The amount as the user would type it, in major units: `20`, `20.50`,
+  /// `260,000`. What goes into the cost field.
+  ///
+  /// Minor units are the storage format, not an input format. A field seeded
+  /// with `2000` for $20.00 reads as two thousand dollars, and the next digit
+  /// the user types lands two decimal places away from where they aimed it.
+  static String majorInput(int minor, String currency) {
+    final exponent = Currencies.exponentOf(currency);
+    final unit = Currencies.pow10(exponent);
+    final major = minor ~/ unit;
+    final fraction = (minor % unit).abs();
+
+    // A round amount is offered without its zeros: `20`, not `20.00`. The
+    // decimals are what the user would have to delete before typing anything
+    // else, and they carry no information here.
+    if (fraction == 0) return grouped(major);
+
+    final digits = fraction.toString().padLeft(exponent, '0');
+    return '${grouped(major)}.$digits';
+  }
+
+  /// Reads a typed major-unit amount back into minor units, or null when the
+  /// text is not a number.
+  ///
+  /// Tolerant of what a real keyboard produces: grouping commas, a stray
+  /// symbol, spaces. Strict about the one thing that matters — the arithmetic
+  /// runs on digit strings, never on a double, so `0.29` cannot arrive as 28
+  /// cents. Anything finer than the currency allows is rounded half-up, so
+  /// `20.5` under VND is 21 dong rather than a silent truncation to 20.
+  static int? parseMajor(String raw, String currency) {
+    var text = raw.replaceAll(RegExp(r'[\s,_ ₫$]'), '');
+    if (text.isEmpty) return null;
+
+    final negative = text.startsWith('-');
+    if (negative) text = text.substring(1);
+
+    final parts = text.split('.');
+    if (parts.length > 2) return null;
+
+    final wholeText = parts[0].isEmpty ? '0' : parts[0];
+    // 15 digits keeps the whole calculation inside a 64-bit int even after the
+    // exponent shift; past that the parse fails rather than wrapping.
+    if (wholeText.length > 15 || !_digits.hasMatch(wholeText)) return null;
+    final whole = int.parse(wholeText);
+
+    final fraction = parts.length == 2 ? parts[1] : '';
+    if (fraction.isNotEmpty && !_digits.hasMatch(fraction)) return null;
+
+    final exponent = Currencies.exponentOf(currency);
+    // One digit past the currency's precision, which is the one that decides
+    // the rounding.
+    final padded = fraction.padRight(exponent + 1, '0');
+    final kept = exponent == 0 ? 0 : int.parse(padded.substring(0, exponent));
+    final roundUp = int.parse(padded[exponent]) >= 5;
+
+    final minor = whole * Currencies.pow10(exponent) + kept + (roundUp ? 1 : 0);
+    return negative ? -minor : minor;
+  }
+
+  static final RegExp _digits = RegExp(r'^\d+$');
+
   /// Thousands separated with a comma.
   ///
   /// Vietnamese usage also allows a dot, but this app puts dong and dollars on

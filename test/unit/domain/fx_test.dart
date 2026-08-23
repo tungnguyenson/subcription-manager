@@ -135,4 +135,28 @@ void main() {
       throwsA(isA<ArgumentError>()),
     );
   });
+
+  // The cost field shows the amount in the other currency so a figure typed
+  // under the wrong chip is visible before it is saved.
+  group('converting back', () {
+    test('undoes a conversion to within a rounding step', () {
+      final rate = Fx.bundledUsdVnd;
+      final back = rate.invert(rate.convert(Money.usd(20)));
+
+      expect(back, Money.usd(20));
+    });
+
+    test('reads a dong amount as dollars', () {
+      // 26,046 dong to the dollar.
+      expect(Fx.bundledUsdVnd.invert(Money.vnd(260460)), Money.usd(10));
+      expect(Fx.bundledUsdVnd.invert(Money.vnd(26046)), Money.usd(1));
+    });
+
+    test('refuses an amount that is not in the currency it converts back', () {
+      expect(
+        () => Fx.bundledUsdVnd.invert(Money.usd(20)),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+  });
 }

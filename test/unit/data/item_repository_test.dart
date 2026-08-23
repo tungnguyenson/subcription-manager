@@ -24,6 +24,7 @@ void main() {
     String name = 'Netflix Premium',
     Category category = Category.subscription,
     String? iconName,
+    Cycle? cycle = Cycle.monthly,
     ItemState state = ItemState.active,
   }) {
     return TrackedItem(
@@ -33,7 +34,7 @@ void main() {
       iconName: iconName,
       expiresOn: d('2026-09-01'),
       anchorDate: d('2026-01-01'),
-      cycle: Cycle.monthly,
+      cycle: cycle,
       amountMinor: 260000,
       currency: 'VND',
       actionUrl: 'https://netflix.com/cancelplan',
@@ -235,5 +236,25 @@ void main() {
       (await repo.findById('netflix'))?.dateSource,
       DateSource.userEstimated,
     );
+  });
+
+  // A custom interval is stored in the same TEXT column the presets use, so
+  // "every 5 months" has to survive the round trip without a schema change.
+  test('a custom cycle survives storage', () async {
+    final every5 = Cycle.every(5, CycleField.month);
+    await repo.upsert(sampleItem(cycle: every5), 1);
+
+    expect((await repo.findById('netflix'))?.cycle, every5);
+  });
+
+  // An older build reading a row a newer one wrote must land on "once", which
+  // is visibly wrong, rather than on some other cycle, which is not.
+  test('a cycle name that cannot be read becomes no cycle at all', () async {
+    await repo.upsert(sampleItem(cycle: Cycle.monthly), 1);
+    await db.customStatement(
+      "UPDATE itemRow SET cycle = 'EVERY_OTHER_TUESDAY' WHERE id = 'netflix'",
+    );
+
+    expect((await repo.findById('netflix'))?.cycle, isNull);
   });
 }

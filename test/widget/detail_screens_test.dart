@@ -504,7 +504,9 @@ void main() {
 
       // The chip the catalog picked is now the selected one.
       expect(find.text('Subscription'), findsOneWidget);
-      expect(find.text('260000'), findsOneWidget);
+      // In major units, grouped, the way the catalog row itself showed it —
+      // not the 260000 that minor units would put in a dong field.
+      expect(find.text('260,000'), findsOneWidget);
     });
 
     // A relative shortcut the user cannot verify is a date they will have to
@@ -516,7 +518,113 @@ void main() {
 
       await tester.tap(find.text('In 7 days'));
       await tester.pumpAndSettle();
-      expect(find.text('22/08/2026'), findsOneWidget);
+      expect(find.text('Saturday, 22/08/2026'), findsOneWidget);
+    });
+
+    // The picker used to be the last chip on a rail the user had to scroll
+    // sideways through, and it is the control most items need.
+    testWidgets('the calendar is a row of its own, not the last chip', (
+      tester,
+    ) async {
+      DraftItem? saved;
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          today: today,
+          onSave: (draft) => saved = draft,
+          onPickDate: (from) async => d('2027-03-09'),
+        ),
+      );
+
+      expect(find.text('Pick a date'), findsOneWidget);
+      await tester.tap(find.text('Pick a date'));
+      await tester.pumpAndSettle();
+
+      // The row now carries the date it was used to pick, rather than sending
+      // the reader to a separate line to find out what was chosen.
+      expect(find.text('Pick a date'), findsNothing);
+      expect(find.text('Tuesday, 09/03/2027'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField).first, 'Passport');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.expiresOn, d('2027-03-09'));
+    });
+
+    // "My plan runs 5 months" cannot be answered with "then make it a one-off
+    // and re-date it by hand five times a year".
+    testWidgets('an interval the app has no name for can still be typed', (
+      tester,
+    ) async {
+      DraftItem? saved;
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          today: today,
+          onSave: (draft) => saved = draft,
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField).first, 'Language course');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Other…'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Every N days, weeks, months…'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).last, '5');
+      await tester.pumpAndSettle();
+      expect(find.text('Repeats every 5 months.'), findsOneWidget);
+
+      await tester.tap(find.text('Done'));
+      await tester.pumpAndSettle();
+
+      // The segment that opened the sheet now says what came back out of it.
+      expect(find.text('5 mo'), findsOneWidget);
+
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.cycle, Cycle.every(5, CycleField.month));
+    });
+
+    // Two currency chips on one field means the amount can be typed under the
+    // wrong one, and the digits alone do not show it.
+    testWidgets('the cost is echoed in the other currency', (tester) async {
+      DraftItem? saved;
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          today: today,
+          onSave: (draft) => saved = draft,
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField).first, 'Claude');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).at(1), '111');
+      await tester.tap(find.text(r'$'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('≈ 2,891,106 ₫'), findsOneWidget);
+
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      // $111, not the $1.11 that reading the field as cents would have saved.
+      expect(saved?.amountMinor, 11100);
+      expect(saved?.currency, 'USD');
     });
 
     // "Once" and "how many times" cannot both be true.
@@ -606,8 +714,9 @@ void main() {
 
       expect(find.text('Edit item'), findsOneWidget);
       expect(find.text('Claude Pro'), findsOneWidget);
-      expect(find.text('2000'), findsOneWidget);
-      expect(find.text('17/08/2026'), findsOneWidget);
+      // \$20.00, offered as `20` rather than as its 2000 cents.
+      expect(find.text('20'), findsOneWidget);
+      expect(find.text('Monday, 17/08/2026'), findsOneWidget);
     });
 
     // The complaint this screen was added for: there was no way to correct a
@@ -617,11 +726,12 @@ void main() {
         tester,
         claude,
         change: (tester) async {
-          await tester.enterText(find.byType(TextField).at(1), '2500');
+          await tester.enterText(find.byType(TextField).at(1), '25');
           await tester.pumpAndSettle();
         },
       );
 
+      // 25 dollars, not 25 cents: the field is in major units both ways.
       expect(saved?.amountMinor, 2500);
       expect(saved?.currency, 'USD');
     });
@@ -637,7 +747,7 @@ void main() {
     });
 
     // Opening the editor must never quietly rewrite a value it did not ask
-    // about, and the three-segment row cannot say "quarterly".
+    // about, and the three quick segments cannot say "quarterly".
     testWidgets('a cycle the form does not offer keeps its own segment', (
       tester,
     ) async {

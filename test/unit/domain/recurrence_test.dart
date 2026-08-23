@@ -185,4 +185,71 @@ void main() {
       throwsA(isA<ArgumentError>()),
     );
   });
+
+  group('a custom interval', () {
+    test('is canonicalised, so two ways of saying it are one value', () {
+      expect(Cycle.every(1, CycleField.week), Cycle.weekly);
+      expect(Cycle.every(12, CycleField.month), Cycle.yearly);
+      expect(Cycle.every(1, CycleField.year), Cycle.yearly);
+      expect(Cycle.every(14, CycleField.day), Cycle.every(2, CycleField.week));
+    });
+
+    test('reads back in the unit it was typed in', () {
+      expect(Cycle.every(2, CycleField.week).inLargestField, (
+        2,
+        CycleField.week,
+      ));
+      expect(Cycle.every(5, CycleField.month).inLargestField, (
+        5,
+        CycleField.month,
+      ));
+      expect(Cycle.every(10, CycleField.day).inLargestField, (
+        10,
+        CycleField.day,
+      ));
+      expect(Cycle.every(2, CycleField.year).inLargestField, (
+        2,
+        CycleField.year,
+      ));
+    });
+
+    test('steps the calendar like any other cycle', () {
+      final anchor = LocalDate.parse('2026-08-31');
+      final every5 = Cycle.every(5, CycleField.month);
+
+      // Anchored, so the 31st survives February the same way a preset does.
+      expect(
+        Recurrence.occurrenceAfter(anchor, every5, 1),
+        LocalDate.parse('2027-01-31'),
+      );
+      expect(
+        Recurrence.occurrenceAfter(anchor, every5, 2),
+        LocalDate.parse('2027-06-30'),
+      );
+      expect(
+        Recurrence.occurrenceAfter(anchor, every5, 3),
+        LocalDate.parse('2027-11-30'),
+      );
+    });
+
+    test('refuses a step that is not a schedule', () {
+      expect(
+        () => Cycle.every(0, CycleField.month),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        () => Cycle.every(-1, CycleField.day),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(
+        () => Cycle.every(Cycle.maxStep + 1, CycleField.day),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+
+    test('is not mistaken for a preset', () {
+      expect(Cycle.every(5, CycleField.month).isPreset, isFalse);
+      expect(Cycle.every(3, CycleField.month).isPreset, isTrue);
+    });
+  });
 }
