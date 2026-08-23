@@ -195,6 +195,46 @@ void main() {
         expect(find.text('Mark as paid'), findsOneWidget);
       });
     });
+
+    // Reaching the form should not mean hunting for a pencil: the row that
+    // states the fact the user came to fix is the row that opens the editor.
+    testWidgets('the link and the rows the form owns all reach the editor', (
+      tester,
+    ) async {
+      var opened = 0;
+      await show(
+        tester,
+        ItemDetailScreen(item: claude, today: today, onEdit: () => opened++),
+      );
+
+      await tester.tap(find.text('Edit'));
+      await tester.tap(find.text(r'$20.00 / mo'));
+      await tester.tap(find.text('Subscription'));
+      await tester.pumpAndSettle();
+
+      expect(opened, 3);
+    });
+
+    // A dash on a row that leads somewhere reads as "nothing to see here".
+    testWidgets('an item with no cost is invited to have one', (tester) async {
+      await show(
+        tester,
+        ItemDetailScreen(
+          item: claude.copyWith(amountMinor: () => null),
+          today: today,
+          onEdit: () {},
+        ),
+      );
+
+      expect(find.text('Add a cost'), findsOneWidget);
+    });
+
+    testWidgets('with no editor wired there is no Edit link', (tester) async {
+      await show(tester, ItemDetailScreen(item: claude, today: today));
+
+      expect(find.text('Edit'), findsNothing);
+      expect(find.text('Add a cost'), findsNothing);
+    });
   });
 
   group('Reminders for one item', () {
@@ -517,6 +557,130 @@ void main() {
 
       expect(saved?.repeatCount, 6);
       expect(saved?.cycle, Cycle.monthly);
+    });
+  });
+
+  group('Edit item', () {
+    final catalog = ServiceCatalog([
+      const CatalogEntry(
+        id: 'netflix',
+        name: 'Netflix Premium',
+        aliases: ['netflix'],
+        category: Category.subscription,
+        defaultCycle: Cycle.monthly,
+      ),
+    ]);
+
+    Future<DraftItem?> edit(
+      WidgetTester tester,
+      TrackedItem item, {
+      Future<void> Function(WidgetTester tester)? change,
+    }) async {
+      DraftItem? saved;
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          today: today,
+          initial: DraftItem.of(item),
+          onSave: (draft) => saved = draft,
+        ),
+      );
+      await change?.call(tester);
+      await tester.tap(find.text('Save changes'));
+      await tester.pumpAndSettle();
+      return saved;
+    }
+
+    testWidgets('opens on the item rather than on a blank form', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          today: today,
+          initial: DraftItem.of(claude),
+        ),
+      );
+
+      expect(find.text('Edit item'), findsOneWidget);
+      expect(find.text('Claude Pro'), findsOneWidget);
+      expect(find.text('2000'), findsOneWidget);
+      expect(find.text('17/08/2026'), findsOneWidget);
+    });
+
+    // The complaint this screen was added for: there was no way to correct a
+    // price once the item existed.
+    testWidgets('the cost can be changed', (tester) async {
+      final saved = await edit(
+        tester,
+        claude,
+        change: (tester) async {
+          await tester.enterText(find.byType(TextField).at(1), '2500');
+          await tester.pumpAndSettle();
+        },
+      );
+
+      expect(saved?.amountMinor, 2500);
+      expect(saved?.currency, 'USD');
+    });
+
+    // An item can hold several leads and the rail holds one, so the form does
+    // not show it. What it does not show, it must not flatten.
+    testWidgets('the reminder ladder survives an edit', (tester) async {
+      expect(find.text('REMIND ME'), findsNothing);
+
+      final saved = await edit(tester, claude);
+
+      expect(saved?.leadDays, [14, 7, 3, 1, 0]);
+    });
+
+    // Opening the editor must never quietly rewrite a value it did not ask
+    // about, and the three-segment row cannot say "quarterly".
+    testWidgets('a cycle the form does not offer keeps its own segment', (
+      tester,
+    ) async {
+      final quarterly = TrackedItem(
+        id: 'domain',
+        name: 'Domain name',
+        category: Category.subscription,
+        expiresOn: d('2026-09-01'),
+        anchorDate: d('2026-09-01'),
+        cycle: Cycle.quarterly,
+      );
+
+      final saved = await edit(tester, quarterly);
+
+      expect(find.text('3 months'), findsOneWidget);
+      expect(saved?.cycle, Cycle.quarterly);
+    });
+
+    // The suggestion list would be offering to replace a name the user has
+    // already settled on.
+    testWidgets('a name that is already right is not re-matched', (
+      tester,
+    ) async {
+      final netflix = TrackedItem(
+        id: 'netflix',
+        name: 'Netflix Premium',
+        category: Category.subscription,
+        expiresOn: d('2026-09-01'),
+        anchorDate: d('2026-09-01'),
+      );
+
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          today: today,
+          initial: DraftItem.of(netflix),
+        ),
+      );
+
+      // One Netflix Premium on screen: the name field. Not a second one in a
+      // suggestion card underneath it.
+      expect(find.text('Netflix Premium'), findsOneWidget);
     });
   });
 

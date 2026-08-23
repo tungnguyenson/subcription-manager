@@ -22,6 +22,12 @@ class ItemDetailScreen extends StatelessWidget {
   final String? nextReminder;
 
   final VoidCallback? onBack;
+
+  /// Opens the form on this item. Reached from the link beside Back and from
+  /// the rows the form owns, so a user who came here to fix the price taps the
+  /// price rather than hunting for a pencil.
+  final VoidCallback? onEdit;
+
   final VoidCallback? onMarkPaid;
   final VoidCallback? onEditReminders;
 
@@ -42,6 +48,7 @@ class ItemDetailScreen extends StatelessWidget {
     this.scheduledCount = 0,
     this.nextReminder,
     this.onBack,
+    this.onEdit,
     this.onMarkPaid,
     this.onEditReminders,
     this.onSnooze,
@@ -62,7 +69,21 @@ class ItemDetailScreen extends StatelessWidget {
         SubdockSpacing.contentBottom,
       ),
       children: [
-        BackLink(onTap: onBack),
+        Row(
+          children: [
+            Expanded(child: BackLink(onTap: onBack)),
+            if (onEdit != null)
+              InkWell(
+                onTap: onEdit,
+                child: const Padding(
+                  // Matches BackLink's own padding so the two links sit on one
+                  // baseline at either end of the row.
+                  padding: EdgeInsets.fromLTRB(12, 2, 0, 14),
+                  child: Text('Edit', style: SubdockText.quietAction),
+                ),
+              ),
+          ],
+        ),
         Row(
           children: [
             ServiceTile(
@@ -91,11 +112,18 @@ class ItemDetailScreen extends StatelessWidget {
         GroupedCard(
           children: [
             if (position != null) _PaymentProgress(position: position),
+            // The three rows the form owns open the form. The rest of this
+            // card is derived or already has an editor of its own.
             DetailRow(
               label: 'Category',
               value: ItemPresenter.categoryLabel(item.category),
+              onTap: onEdit,
             ),
-            DetailRow(label: 'Repeats', value: ItemPresenter.repeatLabel(item)),
+            DetailRow(
+              label: 'Repeats',
+              value: ItemPresenter.repeatLabel(item),
+              onTap: onEdit,
+            ),
             if (Instalments.lastOccurrence(item) case final last?)
               DetailRow(
                 label: 'Last payment',
@@ -109,8 +137,17 @@ class ItemDetailScreen extends StatelessWidget {
             ),
             DetailRow(
               label: 'Cost',
-              value: money == null ? '—' : _costLabel(money),
+              // A dash on a row that leads somewhere reads as "nothing to see
+              // here". An item with no price has one, and this is where the
+              // user goes to put it in.
+              value: money != null
+                  ? _costLabel(money)
+                  : (onEdit == null ? '—' : 'Add a cost'),
               monoValue: money != null,
+              valueColor: money == null && onEdit != null
+                  ? SubdockColors.accent
+                  : null,
+              onTap: onEdit,
             ),
             if (Instalments.totalLeft(item) case final left?)
               DetailRow(

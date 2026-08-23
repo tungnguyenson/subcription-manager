@@ -249,6 +249,7 @@ class _HomePageState extends State<HomePage> {
         history: _history.where((e) => e.itemId == item.id).toList(),
         scheduledCount: held,
         nextReminder: next,
+        onEdit: () => _openEdit(item),
         onMarkPaid: () => _markPaid(item),
         onSnooze: () => _snooze(item, 3),
         onDelete: () => _delete(item),
@@ -278,6 +279,41 @@ class _HomePageState extends State<HomePage> {
         onPickDate: _pickDate,
       ),
     );
+  }
+
+  /// Opens the same form on an item that already exists.
+  void _openEdit(TrackedItem item) {
+    _push(
+      AddItemScreen(
+        catalog: widget.catalog,
+        today: LocalDate.today(),
+        initial: DraftItem.of(item),
+        onCancel: () => Navigator.of(context).maybePop(),
+        onSave: (draft) => _saveEdit(item, draft),
+        onPickDate: _pickDate,
+      ),
+    );
+  }
+
+  /// Writes the edit and puts the user back on the item's own screen.
+  ///
+  /// Two routes come off the stack, not one. The detail screen underneath the
+  /// editor is a snapshot of the item as it was before the edit, so leaving it
+  /// there would show the old price under a message saying the new one was
+  /// saved. It is replaced with the same screen built from the new item.
+  Future<void> _saveEdit(TrackedItem original, DraftItem draft) async {
+    final updated = draft.applyTo(original);
+    await widget.repository.upsert(
+      updated,
+      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    );
+    if (!mounted) return;
+
+    final navigator = Navigator.of(context);
+    navigator.pop();
+    if (navigator.canPop()) navigator.pop();
+    _openItem(updated);
+    _confirm('Saved "${updated.name}".');
   }
 
   void _openHistory() => _push(
@@ -311,12 +347,18 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<LocalDate?> _pickDate() async {
+  /// The calendar, opened on [from] when the form already holds a date.
+  ///
+  /// The range reaches into the past. A bill that is already overdue is a
+  /// real thing to add, and correcting a date the user typed wrong is the
+  /// whole point of the editor; a picker that only goes forwards can do
+  /// neither.
+  Future<LocalDate?> _pickDate([LocalDate? from]) async {
     final today = LocalDate.today();
     final picked = await showDatePicker(
       context: context,
-      initialDate: today.plusDays(30).toDateTimeMidnight(),
-      firstDate: today.toDateTimeMidnight(),
+      initialDate: (from ?? today.plusDays(30)).toDateTimeMidnight(),
+      firstDate: today.plusYears(-5).toDateTimeMidnight(),
       lastDate: today.plusYears(20).toDateTimeMidnight(),
     );
     return picked == null ? null : LocalDate.fromDateTime(picked);

@@ -148,4 +148,41 @@ void main() {
       throwsA(isA<ArgumentError>()),
     );
   });
+  test('occurrenceBefore steps back the same number of cycles', () {
+    expect(
+      Recurrence.occurrenceBefore(d('2026-08-20'), Cycle.monthly, 3),
+      d('2026-05-20'),
+    );
+    expect(
+      Recurrence.occurrenceBefore(d('2026-08-20'), Cycle.weekly, 2),
+      d('2026-08-06'),
+    );
+    expect(
+      Recurrence.occurrenceBefore(d('2026-08-20'), Cycle.yearly, 1),
+      d('2025-08-20'),
+    );
+  });
+
+  // Stepping back from a date that was itself clamped does not land on the
+  // day it was clamped from. The date the user typed is the one worth keeping,
+  // so the loss is documented rather than worked around.
+  test('occurrenceBefore is not an exact inverse across a clamped month', () {
+    final clamped = Recurrence.occurrenceAfter(
+      d('2026-01-31'),
+      Cycle.monthly,
+      1,
+    );
+    expect(clamped, d('2026-02-28'));
+    expect(
+      Recurrence.occurrenceBefore(clamped, Cycle.monthly, 1),
+      d('2026-01-28'),
+    );
+  });
+
+  test('a negative step back is rejected', () {
+    expect(
+      () => Recurrence.occurrenceBefore(d('2026-08-15'), Cycle.monthly, -1),
+      throwsA(isA<ArgumentError>()),
+    );
+  });
 }

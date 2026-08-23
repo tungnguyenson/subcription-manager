@@ -42,6 +42,26 @@ abstract final class Recurrence {
     };
   }
 
+  /// The occurrence [n] cycles *before* [date].
+  ///
+  /// The inverse of [occurrenceAfter], used when a due date is edited by hand
+  /// and the anchor has to move with it without losing the item's place in a
+  /// counted plan.
+  ///
+  /// Not an exact inverse where a month clamped: 31 Jan + 1 month is 28 Feb,
+  /// and 28 Feb - 1 month is 28 Jan. The day the user just typed is the one
+  /// worth keeping, so the loss lands on the anchor rather than on the date.
+  static LocalDate occurrenceBefore(LocalDate date, Cycle cycle, int n) {
+    if (n < 0) {
+      throw ArgumentError.value(n, 'n', 'must not be negative');
+    }
+    final amount = cycle.step * n;
+    return switch (cycle.unit) {
+      CycleUnit.day => date.minusDays(amount),
+      CycleUnit.month => date.plusMonths(-amount),
+    };
+  }
+
   /// How many whole cycles have elapsed from [anchor] up to and including
   /// [today].
   ///

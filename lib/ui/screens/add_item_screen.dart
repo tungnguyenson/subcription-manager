@@ -8,61 +8,40 @@ import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/domain/reminders.dart';
 import 'package:subdock/ui/date_copy.dart';
 import 'package:subdock/ui/icons.dart';
+import 'package:subdock/ui/item_draft.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/theme.dart';
+import 'package:subdock/ui/widgets/icon_gallery.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 
-/// What the form produces. The screen never writes to storage itself, so the
-/// same widget serves "add" and "edit" and neither needs a repository.
-class DraftItem {
-  final String name;
-  final LocalDate expiresOn;
-  final Category category;
+// The form's output type lives beside the presenter, not here, because the
+// merge back onto an existing item is domain reasoning rather than layout.
+// Re-exported so every caller of this screen has it in scope already.
+export 'package:subdock/ui/item_draft.dart';
 
-  /// The icon the user picked, or null to let the name decide.
-  final String? iconName;
-
-  final Cycle? cycle;
-
-  /// Null for "forever". Only ever set alongside a [cycle].
-  final int? repeatCount;
-
-  final int? amountMinor;
-  final String? currency;
-  final List<int> leadDays;
-
-  /// The catalog row the name matched, when it matched one. Carries the cancel
-  /// link and the note, neither of which the form asks for.
-  final CatalogEntry? matched;
-
-  const DraftItem({
-    required this.name,
-    required this.expiresOn,
-    this.category = Category.subscription,
-    this.iconName,
-    this.cycle,
-    this.repeatCount,
-    this.amountMinor,
-    this.currency,
-    this.leadDays = const [Reminders.defaultLead],
-    this.matched,
-  });
-}
-
+/// The item form. Adds an item when [initial] is null, edits one when it is
+/// not; the screen itself never writes to storage either way.
 class AddItemScreen extends StatefulWidget {
   final ServiceCatalog catalog;
   final LocalDate today;
 
+  /// The item being edited, already reduced to what this form asks for. Null
+  /// for a new item.
+  final DraftItem? initial;
+
   final VoidCallback? onCancel;
   final void Function(DraftItem draft)? onSave;
   final VoidCallback? onScan;
-  final Future<LocalDate?> Function()? onPickDate;
+
+  /// Opens the calendar, seeded with the date the form is holding.
+  final Future<LocalDate?> Function(LocalDate? from)? onPickDate;
 
   const AddItemScreen({
     super.key,
     required this.catalog,
     required this.today,
+    this.initial,
     this.onCancel,
     this.onSave,
     this.onScan,
@@ -73,13 +52,6 @@ class AddItemScreen extends StatefulWidget {
   State<AddItemScreen> createState() => _AddItemScreenState();
 }
 
-/// The three repeats the form offers, in the hand-off's order.
-///
-/// Three, not the five the domain can store. A form that lists every cycle it
-/// supports takes longer to fill in than the item is worth, and quarterly is
-/// reachable afterwards from the item's own screen.
-enum _Repeat { monthly, yearly, once }
-
 class _AddItemScreenState extends State<AddItemScreen> {
   final _name = TextEditingController();
   final _amount = TextEditingController();
@@ -89,7 +61,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   LocalDate? _expiresOn;
   Category _category = Category.subscription;
   String? _iconName;
-  _Repeat _repeat = _Repeat.monthly;
+  Cycle? _cycle = Cycle.monthly;
   int? _repeatCount;
   String _currency = 'VND';
   int _lead = Reminders.defaultLead;
@@ -100,12 +72,40 @@ class _AddItemScreenState extends State<AddItemScreen> {
   /// single biggest reduction in entry friction this app has.
   bool _nameSettled = false;
 
+  bool get _isEdit => widget.initial != null;
+
   @override
   void initState() {
     super.initState();
+    _seed(widget.initial);
+
     _name.addListener(() => setState(() {}));
     _amount.addListener(() => setState(() {}));
     _nameFocus.addListener(() => setState(() {}));
+  }
+
+  void _seed(DraftItem? initial) {
+    if (initial == null) return;
+
+    _name.text = initial.name;
+    _expiresOn = initial.expiresOn;
+    _category = initial.category;
+    _iconName = initial.iconName;
+    _cycle = initial.cycle;
+    _repeatCount = initial.repeatCount;
+    _lead = initial.leadDays.isEmpty
+        ? Reminders.defaultLead
+        : initial.leadDays.first;
+
+    final minor = initial.amountMinor;
+    if (minor != null) {
+      _amount.text = minor.toString();
+      _currency = initial.currency ?? _currency;
+    }
+
+    // The name is already what the user meant. Offering to replace it with a
+    // catalog row the moment the screen opens is an offer to undo their edit.
+    _nameSettled = true;
   }
 
   @override
@@ -121,11 +121,19 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   bool get _canSave => _name.text.trim().isNotEmpty && _expiresOn != null;
 
-  Cycle? get _cycle => switch (_repeat) {
-    _Repeat.monthly => Cycle.monthly,
-    _Repeat.yearly => Cycle.yearly,
-    _Repeat.once => null,
-  };
+  /// The repeats the form offers, in the hand-off's order.
+  ///
+  /// Three, not the five the domain can store. A form that lists every cycle
+  /// it supports takes longer to fill in than the item is worth. An item that
+  /// already carries one of the other two keeps it as a fourth option, because
+  /// opening the editor must never quietly rewrite a value it did not ask
+  /// about.
+  List<Cycle?> get _repeatOptions {
+    const offered = <Cycle?>[Cycle.monthly, Cycle.yearly, null];
+    final cycle = _cycle;
+    if (cycle == null || offered.contains(cycle)) return offered;
+    return [Cycle.monthly, Cycle.yearly, cycle, null];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,21 +159,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
               const SizedBox(height: SubdockSpacing.formBlock),
               Field(label: 'Date', bleed: true, child: _dateField()),
               const SizedBox(height: SubdockSpacing.formBlock),
-              _gutter(
-                Field(
-                  label: 'Repeat',
-                  child: SegmentedRow(
-                    labels: const ['Monthly', 'Yearly', 'Once'],
-                    selected: _repeat.index,
-                    onSelect: (i) => setState(() {
-                      _repeat = _Repeat.values[i];
-                      // "Once" and "how many times" cannot both be true.
-                      if (_repeat == _Repeat.once) _repeatCount = null;
-                    }),
-                  ),
-                ),
-              ),
-              if (_repeat != _Repeat.once) ...[
+              _gutter(Field(label: 'Repeat', child: _repeatRow())),
+              if (_cycle != null) ...[
                 const SizedBox(height: SubdockSpacing.formBlock),
                 _gutter(
                   Field(
@@ -184,8 +179,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   child: _costField(),
                 ),
               ),
-              const SizedBox(height: SubdockSpacing.formBlock),
-              Field(label: 'Remind me', bleed: true, child: _leadRail()),
+              // Editing does not show the reminder ladder. An item can hold
+              // several leads and this rail holds one, so offering it here
+              // would silently flatten "14, 7, 3, 1, 0 days before" down to
+              // whichever chip happened to be lit. The item's own screen has a
+              // reminders editor that can say all of them.
+              if (!_isEdit) ...[
+                const SizedBox(height: SubdockSpacing.formBlock),
+                Field(label: 'Remind me', bleed: true, child: _leadRail()),
+              ],
             ],
           ),
         ),
@@ -196,7 +198,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
             SubdockSpacing.screenH,
             12,
           ),
-          child: PrimaryButton('Save', onPressed: _canSave ? _save : null),
+          child: PrimaryButton(
+            _isEdit ? 'Save changes' : 'Save',
+            onPressed: _canSave ? _save : null,
+          ),
         ),
       ],
     );
@@ -210,7 +215,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
   Widget _header() {
     return Row(
       children: [
-        const Expanded(child: Text('New item', style: SubdockText.editorTitle)),
+        Expanded(
+          child: Text(
+            _isEdit ? 'Edit item' : 'New item',
+            style: SubdockText.editorTitle,
+          ),
+        ),
         if (widget.onScan != null) ...[
           InkWell(
             onTap: widget.onScan,
@@ -253,7 +263,11 @@ class _AddItemScreenState extends State<AddItemScreen> {
             child: TextField(
               controller: _name,
               focusNode: _nameFocus,
-              autofocus: true,
+              // An empty form is asking for a name and nothing else, so it
+              // opens with the keyboard up. A form that is already full is
+              // asking which field to change, and answering that from behind
+              // a keyboard means dismissing it first.
+              autofocus: !_isEdit,
               style: SubdockText.fieldValue,
               cursorColor: SubdockColors.accent,
               onChanged: (_) => _nameSettled = false,
@@ -338,6 +352,32 @@ class _AddItemScreenState extends State<AddItemScreen> {
       ],
     );
   }
+
+  Widget _repeatRow() {
+    final options = _repeatOptions;
+
+    return SegmentedRow(
+      labels: [for (final cycle in options) _repeatLabel(cycle)],
+      selected: options.indexOf(_cycle),
+      onSelect: (i) => setState(() {
+        _cycle = options[i];
+        // "Once" and "how many times" cannot both be true.
+        if (_cycle == null) _repeatCount = null;
+      }),
+    );
+  }
+
+  /// The segment labels. Shorter than [ItemPresenter.cycleLabel] because four
+  /// of these have to share the width of a phone: "Twice a year" does not fit
+  /// beside three siblings, "6 months" does.
+  static String _repeatLabel(Cycle? cycle) => switch (cycle) {
+    null => 'Once',
+    Cycle.weekly => 'Weekly',
+    Cycle.monthly => 'Monthly',
+    Cycle.quarterly => '3 months',
+    Cycle.semiannual => '6 months',
+    Cycle.yearly => 'Yearly',
+  };
 
   Widget _costField() {
     return FieldBox(
@@ -431,11 +471,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
       _name.text = entry.name;
       _nameSettled = true;
       _category = entry.category;
-      _repeat = switch (entry.defaultCycle) {
-        Cycle.yearly => _Repeat.yearly,
-        null => _Repeat.once,
-        _ => _Repeat.monthly,
-      };
+      _cycle = entry.defaultCycle;
+      if (_cycle == null) _repeatCount = null;
       final minor = entry.typicalAmountMinor;
       if (minor != null) {
         _amount.text = minor.toString();
@@ -454,7 +491,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   }
 
   Future<void> _pickDate() async {
-    final picked = await widget.onPickDate?.call();
+    final picked = await widget.onPickDate?.call(_expiresOn);
     if (picked != null && mounted) setState(() => _expiresOn = picked);
   }
 
@@ -469,7 +506,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
           top: Radius.circular(SubdockRadius.placard),
         ),
       ),
-      builder: (sheet) => _IconGallery(
+      builder: (sheet) => IconGallery(
         selected: _iconName ?? SubdockIcons.detect(_name.text),
         onPick: (key) => Navigator.of(sheet).pop(key),
       ),
@@ -501,7 +538,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     // "Until a date" is stored as a count, not as a second end-date field.
     // Two ways of saying when a series stops is two things that can disagree,
     // and the count is the one the reminder planner already understands.
-    final end = await widget.onPickDate?.call();
+    final end = await widget.onPickDate?.call(_expiresOn);
     final cycle = _cycle;
     if (end == null || cycle == null || !mounted) return;
     setState(() {
@@ -584,6 +621,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   void _save() {
     final amount = int.tryParse(_amount.text.trim());
+    final initial = widget.initial;
 
     widget.onSave?.call(
       DraftItem(
@@ -595,94 +633,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
         repeatCount: _cycle == null ? null : _repeatCount,
         amountMinor: amount,
         currency: amount == null ? null : _currency,
-        leadDays: [_lead],
+        // The ladder the item arrived with, untouched: the edit form does not
+        // show it, so it has nothing to say about it.
+        leadDays: initial?.leadDays ?? [_lead],
         matched: _matched,
-      ),
-    );
-  }
-}
-
-/// The icon gallery.
-///
-/// A grid rather than a list: these are chosen by recognising a shape, and a
-/// shape is recognised faster in a block than down a column of rows.
-class _IconGallery extends StatelessWidget {
-  final String? selected;
-  final ValueChanged<String> onPick;
-
-  const _IconGallery({required this.selected, required this.onPick});
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(
-          SubdockSpacing.screenH,
-          0,
-          SubdockSpacing.screenH,
-          20,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Padding(
-              padding: EdgeInsets.only(bottom: 12),
-              child: SectionLabel('Icon', tight: true),
-            ),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                for (final entry in SubdockIcons.all.entries)
-                  _IconChoice(
-                    icon: entry.value,
-                    selected: entry.key == selected,
-                    onTap: () => onPick(entry.key),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _IconChoice extends StatelessWidget {
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-
-  const _IconChoice({
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(SubdockRadius.chip),
-        boxShadow: selected ? const [] : SubdockShadow.soft,
-      ),
-      child: Material(
-        color: selected ? SubdockColors.accent : SubdockColors.card,
-        borderRadius: BorderRadius.circular(SubdockRadius.chip),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(SubdockRadius.chip),
-          child: SizedBox(
-            width: 48,
-            height: 48,
-            child: Icon(
-              icon,
-              size: 22,
-              color: selected ? SubdockColors.card : SubdockColors.inkMuted,
-            ),
-          ),
-        ),
       ),
     );
   }
