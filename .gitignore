@@ -1,8 +1,35 @@
+# Dart / Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
 build/
-.gradle/
-local.properties
+pubspec.lock.bak
+
+# Mã sinh tự động.
+#
+# Cố tình không commit. Một tệp .g.dart cũ nằm cạnh lược đồ đã sửa là lỗi âm
+# thầm: nó vẫn biên dịch, vẫn chạy, và ánh xạ sai cột. Thiếu hẳn tệp thì báo
+# lỗi ngay lúc biên dịch, ai cũng thấy. Chạy `dart run build_runner build`
+# sau khi clone hoặc sau khi sửa `lib/data/tables.drift`.
+*.g.dart
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Flutter/flutter_export_environment.sh
+ios/Runner/GeneratedPluginRegistrant.*
+**/xcuserdata/
+*.xcworkspace/xcuserdata/
+
+# Editor
 .idea/
 *.iml
+.vscode/
+
+# macOS
 .DS_Store
-xcuserdata/
-*.xcworkspace/xcuserdata/

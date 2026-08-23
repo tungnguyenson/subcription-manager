@@ -16,7 +16,7 @@ Ký hiệu: `[ ]` chưa làm, `[~]` đang làm, `[x]` xong, `[-]` hoãn.
 - [x] A4. Đặt cơ sở dữ liệu trong App Group ngay từ đầu (mục 9.0bis của spec)
 - [x] A5. Build thử, xác nhận biên dịch được
 
-## B. Tầng nghiệp vụ, Kotlin thuần, không phụ thuộc nền tảng
+## B. Tầng nghiệp vụ, Dart thuần, không phụ thuộc Flutter
 
 Đây là phần chứa các lỗi nguy hiểm nhất, nên viết test cho từng phần.
 
@@ -58,16 +58,34 @@ Ký hiệu: `[ ]` chưa làm, `[~]` đang làm, `[x]` xong, `[-]` hoãn.
 - [x] G2. Xuất ra CSV
 - [x] G3. Nhập lại từ tệp, có test đường khôi phục
 
-## H. Hoãn, chờ bản thiết kế
+## H. Giao diện
 
-- [-] H1. Màn hình Sắp tới
-- [-] H2. Form thêm mục
-- [-] H3. Màn hình chi tiết mục và chi tiết nhóm
-- [-] H4. Màn hình Tiền
-- [-] H5. Màn hình Cài đặt
-- [-] H6. Màn hình che và xác nhận gửi ảnh
-- [-] H7. Điều hướng giữa các màn hình
-- [-] H8. Hệ màu mức rủi ro
+Dựng theo bản thiết kế `Subdock Graphite`, chốt ngày 16/08/2026.
+
+- [x] H1. Màn hình Sắp đến hạn, gồm gom nhóm và mục xa hơn gập lại
+- [x] H2. Form thêm mục, gồm gợi ý từ danh mục dịch vụ
+- [x] H3. Màn hình chi tiết mục
+- [x] H4. Màn hình chi tiết nhóm, dùng chung cho mọi loại nhóm
+- [x] H5. Màn hình Tiền
+- [x] H6. Màn hình Cài đặt
+- [x] H7. Màn hình đối chiếu kết quả đọc ảnh
+- [x] H8. Màn hình lời nhắc
+- [x] H9. Màn hình những mục đã xong
+- [x] H10. Màn hình giới thiệu lần đầu
+- [x] H11. Điều hướng giữa các màn hình, có test chạy thật trên máy ảo
+- [x] H12. Hệ màu mức rủi ro, mã hóa ba lớp: màu, đặc hay rỗng, độ đậm chữ
+
+Hai chỗ lệch so với bản thiết kế, đều cố ý:
+
+- Chi tiết nhóm dựng thành màn hình dùng chung. Bản thiết kế còn phần chuyên
+  biệt cho SIM, là phần đã bỏ ở mục 4bis của đặc tả sản phẩm.
+- Thêm nút cộng ở đầu danh sách. Bản thiết kế không có chỗ nào để thêm mục mới.
+
+## H bis. Giao diện còn thiếu
+
+- [ ] Màn hình sửa từng trường trong chi tiết mục
+- [ ] Nút xuất và nhập tệp sao lưu, phần mã đã có và đã có test
+- [ ] Khóa bằng Face ID
 
 ## I. Việc ngoài code
 

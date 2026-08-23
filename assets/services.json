@@ -1,0 +1,745 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-15",
+  "entries": [
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "netflix"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 231000,
+      "currency": "VND",
+      "cancelUrl": "https://www.netflix.com/cancelplan"
+    },
+    {
+      "id": "youtube-premium",
+      "name": "YouTube Premium",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "youtube",
+        "ytb"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 79000,
+      "currency": "VND",
+      "cancelUrl": "https://www.youtube.com/paid_memberships"
+    },
+    {
+      "id": "spotify",
+      "name": "Spotify",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "spotify"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 59000,
+      "currency": "VND",
+      "cancelUrl": "https://www.spotify.com/account/subscription/"
+    },
+    {
+      "id": "hbo-go",
+      "name": "HBO Go",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "hbo"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 79000,
+      "currency": "VND"
+    },
+    {
+      "id": "disney-plus",
+      "name": "Disney+",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "disney"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "fpt-play",
+      "name": "FPT Play",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "fptplay",
+        "fpt play"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 66000,
+      "currency": "VND"
+    },
+    {
+      "id": "vieon",
+      "name": "VieON",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "vieon"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 50000,
+      "currency": "VND"
+    },
+    {
+      "id": "galaxy-play",
+      "name": "Galaxy Play",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "galaxyplay"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 50000,
+      "currency": "VND"
+    },
+    {
+      "id": "apple-tv",
+      "name": "Apple TV+",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "appletv"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "apple-music",
+      "name": "Apple Music",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "applemusic"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 59000,
+      "currency": "VND"
+    },
+    {
+      "id": "nhaccuatui",
+      "name": "NhacCuaTui",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "nct"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "zing-mp3",
+      "name": "Zing MP3",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "zingmp3",
+        "zing"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "xbox-gamepass",
+      "name": "Xbox Game Pass",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "gamepass",
+        "xbox"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "playstation-plus",
+      "name": "PlayStation Plus",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "psplus",
+        "ps plus"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "nintendo-online",
+      "name": "Nintendo Switch Online",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "nintendo"
+      ],
+      "defaultCycle": "YEARLY"
+    },
+    {
+      "id": "steam",
+      "name": "Steam",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "steam"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "claude",
+      "name": "Claude",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "anthropic",
+        "claude ai"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 2000,
+      "currency": "USD",
+      "cancelUrl": "https://claude.ai/settings/billing"
+    },
+    {
+      "id": "chatgpt",
+      "name": "ChatGPT Plus",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "openai",
+        "gpt",
+        "chat gpt"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 2000,
+      "currency": "USD",
+      "cancelUrl": "https://chatgpt.com/#settings/Subscription"
+    },
+    {
+      "id": "gemini",
+      "name": "Google Gemini",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "gemini",
+        "bard"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 1999,
+      "currency": "USD"
+    },
+    {
+      "id": "github-copilot",
+      "name": "GitHub Copilot",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "copilot"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 1000,
+      "currency": "USD",
+      "cancelUrl": "https://github.com/settings/copilot"
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "cursor"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 2000,
+      "currency": "USD"
+    },
+    {
+      "id": "midjourney",
+      "name": "Midjourney",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "midjourney",
+        "mj"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 1000,
+      "currency": "USD"
+    },
+    {
+      "id": "perplexity",
+      "name": "Perplexity",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "perplexity"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 2000,
+      "currency": "USD"
+    },
+    {
+      "id": "adobe-cc",
+      "name": "Adobe Creative Cloud",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "adobe",
+        "photoshop"
+      ],
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://account.adobe.com/plans"
+    },
+    {
+      "id": "figma",
+      "name": "Figma",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "figma"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 1200,
+      "currency": "USD"
+    },
+    {
+      "id": "notion",
+      "name": "Notion",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "notion"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 1000,
+      "currency": "USD"
+    },
+    {
+      "id": "jetbrains",
+      "name": "JetBrains All Products",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "intellij",
+        "jetbrains"
+      ],
+      "defaultCycle": "YEARLY",
+      "typicalAmountMinor": 28900,
+      "currency": "USD"
+    },
+    {
+      "id": "microsoft-365",
+      "name": "Microsoft 365",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "office",
+        "office365",
+        "m365"
+      ],
+      "defaultCycle": "YEARLY"
+    },
+    {
+      "id": "1password",
+      "name": "1Password",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "1password"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 299,
+      "currency": "USD"
+    },
+    {
+      "id": "domain",
+      "name": "Tên miền",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "domain",
+        "ten mien"
+      ],
+      "defaultCycle": "YEARLY"
+    },
+    {
+      "id": "vps-hosting",
+      "name": "VPS / Hosting",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "vps",
+        "hosting",
+        "server"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "vercel",
+      "name": "Vercel",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "vercel"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 2000,
+      "currency": "USD"
+    },
+    {
+      "id": "icloud",
+      "name": "iCloud+",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "icloud",
+        "apple storage"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 25000,
+      "currency": "VND",
+      "cancelUrl": "https://support.apple.com/en-vn/HT207594"
+    },
+    {
+      "id": "google-one",
+      "name": "Google One",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "googleone",
+        "google drive",
+        "drive"
+      ],
+      "defaultCycle": "MONTHLY",
+      "typicalAmountMinor": 45000,
+      "currency": "VND"
+    },
+    {
+      "id": "dropbox",
+      "name": "Dropbox",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "dropbox"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "onedrive",
+      "name": "OneDrive",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "onedrive"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "backblaze",
+      "name": "Backblaze",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "backblaze"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "sim-viettel",
+      "name": "SIM Viettel",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "viettel"
+      ],
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
+    },
+    {
+      "id": "sim-vinaphone",
+      "name": "SIM VinaPhone",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "vinaphone",
+        "vina"
+      ],
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
+    },
+    {
+      "id": "sim-mobifone",
+      "name": "SIM MobiFone",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "mobifone",
+        "mobi"
+      ],
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
+    },
+    {
+      "id": "sim-vietnamobile",
+      "name": "SIM Vietnamobile",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "vietnamobile",
+        "vnmb"
+      ],
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
+    },
+    {
+      "id": "sim-itel",
+      "name": "SIM iTel",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "itel"
+      ],
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
+    },
+    {
+      "id": "sim-wintel",
+      "name": "SIM Wintel",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "wintel",
+        "reddi"
+      ],
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao."
+    },
+    {
+      "id": "goi-cuoc-data",
+      "name": "Gói cước data",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "goi cuoc",
+        "data",
+        "4g",
+        "5g"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "internet-fpt",
+      "name": "Internet FPT",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "fpt internet",
+        "fpt telecom"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "internet-viettel",
+      "name": "Internet Viettel",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "viettel internet"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "internet-vnpt",
+      "name": "Internet VNPT",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "vnpt"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "truyen-hinh-cap",
+      "name": "Truyền hình cáp",
+      "category": "SUBSCRIPTION",
+      "aliases": [
+        "truyen hinh",
+        "cap",
+        "k+"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "dien",
+      "name": "Tiền điện",
+      "category": "BILL",
+      "aliases": [
+        "dien",
+        "evn",
+        "tien dien"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "nuoc",
+      "name": "Tiền nước",
+      "category": "BILL",
+      "aliases": [
+        "nuoc",
+        "tien nuoc"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "phi-chung-cu",
+      "name": "Phí chung cư",
+      "category": "BILL",
+      "aliases": [
+        "chung cu",
+        "quan ly"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "phi-rac",
+      "name": "Phí rác",
+      "category": "BILL",
+      "aliases": [
+        "rac",
+        "ve sinh"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "phi-gui-xe",
+      "name": "Phí gửi xe",
+      "category": "BILL",
+      "aliases": [
+        "gui xe",
+        "do xe"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "gas",
+      "name": "Tiền gas",
+      "category": "BILL",
+      "aliases": [
+        "gas"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "khoan-vay",
+      "name": "Khoản vay",
+      "category": "BILL",
+      "aliases": [
+        "vay",
+        "no",
+        "khoan vay"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "tra-gop",
+      "name": "Trả góp",
+      "category": "BILL",
+      "aliases": [
+        "tra gop",
+        "installment"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "the-tin-dung",
+      "name": "Sao kê thẻ tín dụng",
+      "category": "BILL",
+      "aliases": [
+        "the tin dung",
+        "credit card",
+        "sao ke"
+      ],
+      "defaultCycle": "MONTHLY"
+    },
+    {
+      "id": "phi-thuong-nien",
+      "name": "Phí thường niên thẻ",
+      "category": "BILL",
+      "aliases": [
+        "phi thuong nien",
+        "annual fee"
+      ],
+      "defaultCycle": "YEARLY"
+    },
+    {
+      "id": "bhyt",
+      "name": "Bảo hiểm y tế",
+      "category": "INSURANCE",
+      "aliases": [
+        "bhyt",
+        "y te",
+        "bao hiem y te"
+      ],
+      "defaultCycle": "YEARLY"
+    },
+    {
+      "id": "bh-nhan-tho",
+      "name": "Bảo hiểm nhân thọ",
+      "category": "INSURANCE",
+      "aliases": [
+        "nhan tho",
+        "bao hiem nhan tho"
+      ],
+      "defaultCycle": "YEARLY"
+    },
+    {
+      "id": "bh-xe",
+      "name": "Bảo hiểm xe",
+      "category": "INSURANCE",
+      "aliases": [
+        "bao hiem xe",
+        "tnds"
+      ],
+      "defaultCycle": "YEARLY"
+    },
+    {
+      "id": "bh-suc-khoe",
+      "name": "Bảo hiểm sức khỏe",
+      "category": "INSURANCE",
+      "aliases": [
+        "suc khoe"
+      ],
+      "defaultCycle": "YEARLY"
+    },
+    {
+      "id": "bh-du-lich",
+      "name": "Bảo hiểm du lịch",
+      "category": "INSURANCE",
+      "aliases": [
+        "du lich",
+        "travel"
+      ]
+    },
+    {
+      "id": "ho-chieu",
+      "name": "Hộ chiếu",
+      "category": "DOCUMENT",
+      "aliases": [
+        "ho chieu",
+        "passport"
+      ],
+      "noteVi": "Nhiều nước yêu cầu hộ chiếu còn hạn ít nhất 6 tháng, nên đặt ngày phải làm sớm."
+    },
+    {
+      "id": "cccd",
+      "name": "Căn cước công dân",
+      "category": "DOCUMENT",
+      "aliases": [
+        "cccd",
+        "can cuoc",
+        "cmnd"
+      ]
+    },
+    {
+      "id": "gplx",
+      "name": "Giấy phép lái xe",
+      "category": "DOCUMENT",
+      "aliases": [
+        "gplx",
+        "bang lai",
+        "lai xe"
+      ]
+    },
+    {
+      "id": "dang-kiem",
+      "name": "Đăng kiểm xe",
+      "category": "DOCUMENT",
+      "aliases": [
+        "dang kiem",
+        "kiem dinh"
+      ],
+      "noteVi": "Phải đi đăng kiểm trước ngày hết hạn tem, nên đặt ngày phải làm sớm."
+    },
+    {
+      "id": "visa",
+      "name": "Visa",
+      "category": "DOCUMENT",
+      "aliases": [
+        "visa",
+        "thi thuc"
+      ]
+    },
+    {
+      "id": "the-tam-tru",
+      "name": "Thẻ tạm trú",
+      "category": "DOCUMENT",
+      "aliases": [
+        "tam tru"
+      ]
+    },
+    {
+      "id": "giay-phep-kd",
+      "name": "Giấy phép kinh doanh",
+      "category": "DOCUMENT",
+      "aliases": [
+        "giay phep",
+        "kinh doanh"
+      ]
+    },
+    {
+      "id": "chung-chi",
+      "name": "Chứng chỉ hành nghề",
+      "category": "DOCUMENT",
+      "aliases": [
+        "chung chi"
+      ]
+    }
+  ]
+}

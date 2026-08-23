@@ -1,0 +1,137 @@
+-- Dates are ISO-8601 TEXT so the file stays readable from Swift (the widget
+-- target reads this same SQLite file out of the App Group container) and from a
+-- plain sqlite3 shell during debugging.
+--
+-- Money is INTEGER minor units. Never REAL. See product-spec.md section 6.2.
+--
+-- Table names keep the `Row` suffix so the generated classes never collide with
+-- the domain types they map to. The row and the model are genuinely different
+-- shapes: the row stores enums as text and lead days as a joined string.
+
+-- The `AS <Name>` clause pins the generated row class name. Without it the
+-- name comes out of drift's singularisation rules, which would make an
+-- unrelated schema edit rename a type across the whole data layer.
+
+CREATE TABLE itemRow (
+    id                TEXT NOT NULL PRIMARY KEY,
+    name              TEXT NOT NULL,
+
+    -- Subscription / Bill / Insurance / Document / Other. The item's one and
+    -- only classification; there is no second axis beside it.
+    category          TEXT NOT NULL,
+
+    -- The key of a chosen icon. NULL means "work it out from the name", which
+    -- is the normal state; a value here is an override the user made.
+    iconName          TEXT,
+
+    expiresOn         TEXT NOT NULL,
+    actByOffsetDays   INTEGER NOT NULL DEFAULT 0,
+    anchorDate        TEXT NOT NULL,
+    cycle             TEXT,
+
+    -- Total number of occurrences, or NULL for "forever". Only meaningful
+    -- alongside a cycle. Which payment is due now is derived from anchorDate,
+    -- never stored, so a re-recorded payment cannot desynchronise a counter.
+    repeatCount       INTEGER,
+
+    amountMinor       INTEGER,
+    currency          TEXT,
+
+    actionUrl         TEXT,
+    actionLabel       TEXT,
+    note              TEXT,
+
+    -- Comma-separated ints; a child table would buy nothing for a handful of values.
+    leadDays          TEXT NOT NULL,
+    remindAt          TEXT NOT NULL,
+    nagAfterDue       TEXT NOT NULL,
+
+    verifyEveryDays   INTEGER,
+    lastVerifiedAt    TEXT,
+    dateSource        TEXT NOT NULL,
+
+    -- One extra reminder the user asked for. Cleared once the occurrence is
+    -- handled, so a stale snooze cannot outlive what it was postponing.
+    snoozedUntil      TEXT,
+
+    state             TEXT NOT NULL,
+    createdAt         INTEGER NOT NULL
+) AS ItemRowData;
+
+CREATE INDEX item_expiresOn ON itemRow(expiresOn);
+CREATE INDEX item_state ON itemRow(state);
+
+-- Append-only. A row here is a thing that already happened, so nothing in it is
+-- ever updated except actualChargedMinor, which the user types off a bank
+-- statement.
+--
+-- The FX rate is snapshotted per row and never recomputed. Wallos stores one
+-- mutable rate per currency and overwrites it every six hours, so every
+-- historical figure in that app changes four times a day; that is the single
+-- largest cluster of bugs in the project. IAS 21 agrees: a settled foreign
+-- currency expense is recorded at the rate on the transaction date and is not
+-- retranslated. See product-spec.md section 6.3.
+
+CREATE TABLE handledEventRow (
+    id                   TEXT NOT NULL PRIMARY KEY,
+    itemId               TEXT NOT NULL REFERENCES itemRow(id) ON DELETE CASCADE,
+    handledAt            INTEGER NOT NULL,
+    forDueDate           TEXT NOT NULL,
+
+    amountMinor          INTEGER,
+    currency             TEXT,
+
+    fxRateScaled         INTEGER,
+    fxRateScale          INTEGER,
+    fxRateDate           TEXT,
+    fxSource             TEXT,
+    baseAmountMinor      INTEGER,
+
+    -- Typed off a statement. Overrides every computed figure when present, and
+    -- is the only way to capture the bank's foreign-currency fee (Vietcombank
+    -- charges 2.27%, so a computed figure is structurally low).
+    actualChargedMinor   INTEGER
+) AS HandledEventRowData;
+
+CREATE INDEX handledEvent_itemId ON handledEventRow(itemId);
+CREATE UNIQUE INDEX handledEvent_occurrence ON handledEventRow(itemId, forDueDate);
+
+-- Key-value, one row per setting. A column-per-setting table would need a
+-- migration for every preference the app grows, and there is only ever one row
+-- of it; the shape that fits is a dictionary.
+
+-- Named `settingKey` rather than `key`: drift drops a column called `key`
+-- from the generated data class, because `key` is taken on every Flutter
+-- widget it might otherwise sit beside.
+CREATE TABLE settingRow (
+    settingKey   TEXT NOT NULL PRIMARY KEY,
+    value        TEXT NOT NULL
+) AS SettingRowData;
+
+-- ---- settings ----
+
+selectAllSettings:
+SELECT * FROM settingRow;
+
+-- ---- items ----
+
+selectAll:
+SELECT * FROM itemRow ORDER BY expiresOn ASC;
+
+selectActive:
+SELECT * FROM itemRow WHERE state = 'ACTIVE' ORDER BY expiresOn ASC;
+
+selectById:
+SELECT * FROM itemRow WHERE id = :id;
+
+-- ---- history ----
+
+selectForItem:
+SELECT * FROM handledEventRow WHERE itemId = :itemId ORDER BY forDueDate DESC;
+
+selectOccurrence:
+SELECT * FROM handledEventRow WHERE itemId = :itemId AND forDueDate = :forDueDate;
+
+selectSince:
+SELECT * FROM handledEventRow WHERE forDueDate >= :from ORDER BY forDueDate DESC;
+
