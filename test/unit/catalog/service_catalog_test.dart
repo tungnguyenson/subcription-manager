@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:subdock/catalog/bundled_data.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/domain/reminders.dart';
 import 'package:subdock/ui/item_presenter.dart';
 
@@ -154,6 +155,200 @@ void main() {
           reason: 'insecure cancel url on ${entry.id}',
         );
       }
+    });
+  });
+
+  group('plans', () {
+    test('the catalog carries enough plans to be worth comparing', () {
+      final priced = catalog.entries.where((e) => e.plans.isNotEmpty);
+      expect(priced.length, greaterThanOrEqualTo(100));
+    });
+
+    // Without a source the price is a rumour, and a rumour rendered in the
+    // same type as a fact is exactly what this app is built not to do.
+    test('every plan names the page it was read off, and when', () {
+      for (final entry in catalog.entries) {
+        for (final plan in entry.plans) {
+          expect(
+            plan.source,
+            startsWith('https://'),
+            reason: '${entry.id}/${plan.tier} has no https source',
+          );
+          expect(
+            plan.checkedAt,
+            matches(r'^\d{4}-\d{2}-\d{2}$'),
+            reason: '${entry.id}/${plan.tier} has no check date',
+          );
+        }
+      }
+    });
+
+    test('the region a plan claims matches the currency it is in', () {
+      const currencyOf = {'VN': 'VND', 'GLOBAL': 'USD'};
+      for (final entry in catalog.entries) {
+        for (final plan in entry.plans) {
+          expect(
+            currencyOf[plan.region],
+            plan.currency,
+            reason: '${entry.id}/${plan.tier} is ${plan.region} '
+                'but priced in ${plan.currency}',
+          );
+        }
+      }
+    });
+
+    test('defaultPlan points at a tier that exists', () {
+      for (final entry in catalog.entries) {
+        if (entry.plans.isEmpty) continue;
+        expect(
+          entry.plans.map((p) => p.tier),
+          contains(entry.defaultPlan),
+          reason: '${entry.id} defaults to a tier it does not have',
+        );
+      }
+    });
+
+    // The slip that would make the app promise a 92% saving: the yearly row
+    // holding the monthly figure.
+    test('a yearly plan costs more than its monthly one, and less than 12', () {
+      for (final entry in catalog.entries) {
+        for (final yearly in entry.plans.where((p) => p.cycle == Cycle.yearly)) {
+          final monthly = entry.plans
+              .where(
+                (p) =>
+                    p.tier == yearly.tier &&
+                    p.region == yearly.region &&
+                    p.cycle == Cycle.monthly,
+              )
+              .firstOrNull;
+          if (monthly == null) continue;
+          expect(
+            yearly.amountMinor,
+            greaterThan(monthly.amountMinor),
+            reason: '${entry.id}/${yearly.tier} yearly is below monthly',
+          );
+          expect(
+            yearly.amountMinor,
+            lessThanOrEqualTo(monthly.amountMinor * 12),
+            reason: '${entry.id}/${yearly.tier} yearly beats paying monthly',
+          );
+        }
+      }
+    });
+
+    test('manage urls are https', () {
+      for (final entry in catalog.entries) {
+        final url = entry.manageUrl;
+        if (url == null) continue;
+        expect(url, startsWith('https://'), reason: entry.id);
+      }
+    });
+
+    test('every entry is shelved under a sector', () {
+      for (final entry in catalog.entries) {
+        expect(entry.sector, isNotEmpty, reason: entry.id);
+        expect(entry.sector, isNot('OTHER'), reason: entry.id);
+      }
+    });
+  });
+
+  group('the annual saving', () {
+    test('is twelve monthly payments minus the yearly price', () {
+      const monthly = CatalogPlan(
+        tier: 'pro',
+        name: 'Pro',
+        region: 'VN',
+        currency: 'VND',
+        cycle: Cycle.monthly,
+        amountMinor: 100000,
+        source: 'https://example.com/pricing',
+        checkedAt: '2026-08-23',
+      );
+      const yearly = CatalogPlan(
+        tier: 'pro',
+        name: 'Pro',
+        region: 'VN',
+        currency: 'VND',
+        cycle: Cycle.yearly,
+        amountMinor: 1000000,
+        source: 'https://example.com/pricing',
+        checkedAt: '2026-08-23',
+      );
+      const entry = CatalogEntry(
+        id: 'x',
+        name: 'X',
+        category: Category.subscription,
+        sector: 'AI',
+        defaultPlan: 'pro',
+        plans: [monthly, yearly],
+      );
+
+      expect(entry.annualSaving()!.savingMinor, 200000);
+      expect(entry.annualSaving()!.currency, 'VND');
+    });
+
+    test('is null when only one of the two cycles is published', () {
+      const entry = CatalogEntry(
+        id: 'x',
+        name: 'X',
+        category: Category.subscription,
+        sector: 'AI',
+        defaultPlan: 'pro',
+        plans: [
+          CatalogPlan(
+            tier: 'pro',
+            name: 'Pro',
+            region: 'VN',
+            currency: 'VND',
+            cycle: Cycle.monthly,
+            amountMinor: 100000,
+            source: 'https://example.com/pricing',
+            checkedAt: '2026-08-23',
+          ),
+        ],
+      );
+      expect(entry.annualSaving(), isNull);
+    });
+
+    // A tier is what makes two rows comparable. Netflix Standard against
+    // Netflix Premium is not a saving, it is a different product.
+    test('never compares across tiers', () {
+      const entry = CatalogEntry(
+        id: 'x',
+        name: 'X',
+        category: Category.subscription,
+        sector: 'AI',
+        defaultPlan: 'pro',
+        plans: [
+          CatalogPlan(
+            tier: 'pro',
+            name: 'Pro',
+            region: 'VN',
+            currency: 'VND',
+            cycle: Cycle.monthly,
+            amountMinor: 100000,
+            source: 'https://example.com/pricing',
+            checkedAt: '2026-08-23',
+          ),
+          CatalogPlan(
+            tier: 'basic',
+            name: 'Basic',
+            region: 'VN',
+            currency: 'VND',
+            cycle: Cycle.yearly,
+            amountMinor: 500000,
+            source: 'https://example.com/pricing',
+            checkedAt: '2026-08-23',
+          ),
+        ],
+      );
+      expect(entry.annualSaving(), isNull);
+    });
+
+    test('real entries in the catalog can answer the question', () {
+      final answerable = catalog.entries
+          .where((e) => e.annualSaving() != null || e.annualSaving(region: 'GLOBAL') != null);
+      expect(answerable.length, greaterThanOrEqualTo(50));
     });
   });
 

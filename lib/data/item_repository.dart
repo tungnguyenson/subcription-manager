@@ -65,6 +65,7 @@ class ItemRepository {
             dateSource: Value(item.dateSource.wireName),
             snoozedUntil: Value(item.snoozedUntil?.toString()),
             state: Value(item.state.wireName),
+            purchaseChannel: Value(item.purchaseChannel.wireName),
             createdAt: Value(createdAtEpochSeconds),
           ),
           mode: InsertMode.insertOrReplace,

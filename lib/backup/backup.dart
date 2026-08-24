@@ -73,6 +73,7 @@ class BackupItem {
   final String dateSource;
   final String? snoozedUntil;
   final String state;
+  final String purchaseChannel;
 
   const BackupItem({
     required this.id,
@@ -97,6 +98,7 @@ class BackupItem {
     required this.dateSource,
     this.snoozedUntil,
     required this.state,
+    required this.purchaseChannel,
   });
 
   factory BackupItem.fromTrackedItem(TrackedItem item) => BackupItem(
@@ -122,6 +124,7 @@ class BackupItem {
     dateSource: item.dateSource.wireName,
     snoozedUntil: item.snoozedUntil?.toString(),
     state: item.state.wireName,
+    purchaseChannel: item.purchaseChannel.wireName,
   );
 
   /// Reads the item's one category out of whatever the file happens to carry.
@@ -172,6 +175,10 @@ class BackupItem {
     verifyEveryDays: (json['verifyEveryDays'] as num?)?.toInt(),
     lastVerifiedAt: json['lastVerifiedAt'] as String?,
     dateSource: _requireString(json, 'dateSource'),
+    // Absent in files written before v4. Missing is not corrupt: it means the
+    // question had not been invented yet, which is what UNKNOWN says.
+    purchaseChannel:
+        json['purchaseChannel'] as String? ?? PurchaseChannel.unknown.wireName,
     snoozedUntil: json['snoozedUntil'] as String?,
     state: _requireString(json, 'state'),
   );
@@ -199,6 +206,7 @@ class BackupItem {
     dateSource: dateSource,
     snoozedUntil: snoozedUntil,
     state: state,
+    purchaseChannel: purchaseChannel,
   );
 
   Map<String, dynamic> toJson() => {
@@ -224,6 +232,7 @@ class BackupItem {
     'dateSource': dateSource,
     'snoozedUntil': snoozedUntil,
     'state': state,
+    'purchaseChannel': purchaseChannel,
   };
 }
 

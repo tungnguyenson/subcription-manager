@@ -1,0 +1,501 @@
+{
+  "batch": "social-news",
+  "sectors": [
+    "SOCIAL",
+    "NEWS"
+  ],
+  "entries": [
+    {
+      "id": "x-premium",
+      "name": "X Premium",
+      "aliases": [
+        "x premium",
+        "twitter premium",
+        "twitter blue",
+        "x blue"
+      ],
+      "sector": "SOCIAL",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://x.com/settings/premium",
+      "noteVi": "Giá VND lấy từ App Store VN (gói giữa 'X Premium', không phải Basic hay Premium+) — X không có trang giá riêng bằng VND, đây là giá X tự niêm yết trên App Store khu vực Việt Nam.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "X Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 150000,
+          "note": "Gói giữa, không phải Basic hay Premium+",
+          "source": "https://apps.apple.com/vn/app/x/id333903271",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "premium",
+          "name": "X Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 1500000,
+          "source": "https://apps.apple.com/vn/app/x/id333903271",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "telegram-premium",
+      "name": "Telegram Premium",
+      "aliases": [
+        "telegram premium",
+        "tele premium"
+      ],
+      "sector": "SOCIAL",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Không có trang hủy riêng — hủy qua App Store/Google Play (nếu mua trong app) hoặc qua @PremiumBot trong Telegram. Giá VND lấy từ App Store VN.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Telegram Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 93000,
+          "source": "https://apps.apple.com/vn/app/telegram-messenger/id686449807",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "premium",
+          "name": "Telegram Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 999000,
+          "source": "https://apps.apple.com/vn/app/telegram-messenger/id686449807",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "linkedin-premium",
+      "name": "LinkedIn Premium",
+      "aliases": [
+        "linkedin premium",
+        "linkedin"
+      ],
+      "sector": "SOCIAL",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://www.linkedin.com/premium/cancel",
+      "noteVi": "Giá cho gói 'Premium Career' (phổ biến nhất cho cá nhân tìm việc). LinkedIn hiện báo giá $39.99/tháng cho thuê bao mới; người dùng cũ có thể vẫn đang trả mức thấp hơn (khoảng $29.99/tháng).",
+      "defaultPlan": "career",
+      "plans": [
+        {
+          "tier": "career",
+          "name": "Premium Career",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 3999,
+          "source": "https://premium.linkedin.com/careers/career",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "career",
+          "name": "Premium Career",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 23988,
+          "source": "https://premium.linkedin.com/careers/career",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://www.linkedin.com/premium/manage/"
+    },
+    {
+      "id": "meta-verified",
+      "name": "Meta Verified",
+      "aliases": [
+        "meta verified",
+        "facebook verified",
+        "instagram verified"
+      ],
+      "sector": "SOCIAL",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://www.facebook.com/business/help/23875260945405570?id=579726174359330",
+      "noteVi": "Đăng ký qua web rẻ hơn qua app (11.99 USD so với 14.99 USD). Giá VND (gói Standard) lấy từ App Store VN qua app Instagram.",
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Meta Verified Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1199,
+          "note": "Giá đăng ký qua web; qua app là 14.99 USD/tháng",
+          "source": "https://www.meta.com/meta-verified/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard",
+          "name": "Meta Verified Standard",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 399000,
+          "source": "https://apps.apple.com/vn/app/instagram/id389801252",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "snapchat-plus",
+      "name": "Snapchat+",
+      "aliases": [
+        "snapchat+",
+        "snapchat plus",
+        "snap plus"
+      ],
+      "sector": "SOCIAL",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://support.snapchat.com/en-US/a/cancel-subscription",
+      "noteVi": "Trang giá chính thức (accounts.snapchat.com/plus/plans) chỉ render bằng JavaScript nên không lấy được số cụ thể; giá tháng lấy từ App Store Mỹ. Không xác minh được giá gói năm từ nguồn chính hãng nên bỏ qua.",
+      "defaultPlan": "plus",
+      "plans": [
+        {
+          "tier": "plus",
+          "name": "Snapchat+",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 499,
+          "source": "https://apps.apple.com/us/app/snapchat/id447188370",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "reddit-premium",
+      "name": "Reddit Premium",
+      "aliases": [
+        "reddit premium",
+        "reddit"
+      ],
+      "sector": "SOCIAL",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://www.reddit.com/settings/premium",
+      "noteVi": "reddit.com chặn truy cập tự động nên không lấy được giá trực tiếp từ trang chủ; giá lấy từ App Store Mỹ, có thể cao hơn giá trả qua web.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Reddit Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 699,
+          "source": "https://apps.apple.com/us/app/reddit/id1064216828",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "premium",
+          "name": "Reddit Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 5999,
+          "source": "https://apps.apple.com/us/app/reddit/id1064216828",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "apple-news",
+      "name": "Apple News+",
+      "aliases": [
+        "apple news+",
+        "apple news plus",
+        "apple news"
+      ],
+      "sector": "NEWS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://apps.apple.com/account/subscriptions",
+      "noteVi": "Chưa bán ở Việt Nam — chỉ có giá Mỹ (USD), không có bảng giá VND.",
+      "defaultPlan": "news-plus",
+      "plans": [
+        {
+          "tier": "news-plus",
+          "name": "Apple News+",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1299,
+          "source": "https://www.apple.com/apple-news/",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://apps.apple.com/account/subscriptions"
+    },
+    {
+      "id": "nyt",
+      "name": "The New York Times",
+      "aliases": [
+        "nyt",
+        "new york times",
+        "nytimes"
+      ],
+      "sector": "NEWS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://myaccount.nytimes.com/seg/subscription",
+      "noteVi": "Giá quảng cáo năm đầu thấp hơn nhiều (khoảng 1 USD/tuần); đây là giá niêm yết thường xuyên của gói All Access. nytimes.com chặn truy cập tự động nên giá lấy từ App Store Mỹ thay vì trang chủ.",
+      "defaultPlan": "all-access",
+      "plans": [
+        {
+          "tier": "all-access",
+          "name": "All Access",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2499,
+          "source": "https://apps.apple.com/us/app/nyt-new-york-times-news/id284862083",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "the-economist",
+      "name": "The Economist",
+      "aliases": [
+        "economist",
+        "the economist"
+      ],
+      "sector": "NEWS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Giá khuyến mãi năm đầu chỉ 328.30 USD; trang economist.com/subscribe ghi rõ giá gia hạn thường xuyên là 469 USD/năm — đây là con số đã lấy, không phải giá năm đầu.",
+      "defaultPlan": "digital",
+      "plans": [
+        {
+          "tier": "digital",
+          "name": "Digital",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 4690,
+          "note": "Giá gia hạn sau khi hết dùng thử miễn phí",
+          "source": "https://www.economist.com/subscribe",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "digital",
+          "name": "Digital",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 46900,
+          "note": "Giá gia hạn thường xuyên sau năm đầu khuyến mãi",
+          "source": "https://www.economist.com/subscribe",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "bloomberg",
+      "name": "Bloomberg",
+      "aliases": [
+        "bloomberg",
+        "bloomberg.com"
+      ],
+      "sector": "NEWS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "bloomberg.com/subscriptions chặn bằng CAPTCHA nên không lấy được giá trực tiếp; giá lấy từ App Store Mỹ. Giá quảng cáo năm đầu có thể thấp hơn 399 USD/năm ghi ở đây.",
+      "defaultPlan": "digital",
+      "plans": [
+        {
+          "tier": "digital",
+          "name": "Bloomberg.com Digital",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 3499,
+          "source": "https://apps.apple.com/us/app/bloomberg-business-news/id281941097",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "digital",
+          "name": "Bloomberg.com Digital",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 39900,
+          "note": "Giá gia hạn sau năm đầu khuyến mãi",
+          "source": "https://apps.apple.com/us/app/bloomberg-business-news/id281941097",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "wsj",
+      "name": "The Wall Street Journal",
+      "aliases": [
+        "wsj",
+        "wall street journal"
+      ],
+      "sector": "NEWS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://customercenter.wsj.com/",
+      "noteVi": "subscribe.wsj.com không hiển thị giá cụ thể (bắt chọn gói mới thấy giá); giá lấy từ App Store Mỹ. Giá quảng cáo ban đầu thấp hơn nhiều (khoảng 2-4 USD/tuần cho 12 tháng đầu). Không xác minh được giá gói năm nên bỏ qua.",
+      "defaultPlan": "digital",
+      "plans": [
+        {
+          "tier": "digital",
+          "name": "WSJ Digital",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 3899,
+          "source": "https://apps.apple.com/us/app/the-wall-street-journal/id364387007",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "financial-times",
+      "name": "Financial Times",
+      "aliases": [
+        "financial times",
+        "ft",
+        "ft.com"
+      ],
+      "sector": "NEWS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Giá cho gói 'Standard Digital' (gói Premium Digital cao hơn, 75 USD/tháng). ft.com ghi 'trả trước 1 năm tiết kiệm 20%' nhưng không ghi số tiền cụ thể; số năm lấy từ App Store Mỹ.",
+      "defaultPlan": "standard-digital",
+      "plans": [
+        {
+          "tier": "standard-digital",
+          "name": "Standard Digital",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 4500,
+          "source": "https://www.ft.com/products",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard-digital",
+          "name": "Standard Digital",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 42900,
+          "source": "https://apps.apple.com/us/app/financial-times-business-news/id1200842933",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "medium",
+      "name": "Medium",
+      "aliases": [
+        "medium",
+        "medium.com"
+      ],
+      "sector": "NEWS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Trang web chỉ bán gói năm (50 USD/năm); giá gói tháng chỉ thấy trên App Store (4.99 USD/tháng).",
+      "defaultPlan": "membership",
+      "plans": [
+        {
+          "tier": "membership",
+          "name": "Membership",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 499,
+          "source": "https://apps.apple.com/us/app/medium-read-write-stories/id828256236",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "membership",
+          "name": "Membership",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 5000,
+          "source": "https://medium.com/membership",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "substack",
+      "name": "Substack",
+      "aliases": [
+        "substack"
+      ],
+      "sector": "NEWS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Substack là nền tảng xuất bản — mỗi tác giả/newsletter tự đặt giá riêng, không có bảng giá chuẩn của Substack để ghi.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "the-athletic",
+      "name": "The Athletic",
+      "aliases": [
+        "the athletic",
+        "athletic"
+      ],
+      "sector": "NEWS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": "https://www.theathletic.com/account/",
+      "noteVi": "Giá khuyến mãi năm đầu có thể chỉ 1 USD/tháng; đây là giá thường xuyên sau khuyến mãi. The Athletic hiện thuộc sở hữu của The New York Times Company nhưng vẫn bán thuê bao riêng.",
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "The Athletic",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 799,
+          "source": "https://apps.apple.com/us/app/the-athletic-all-sports-news/id1135216317",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard",
+          "name": "The Athletic",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 7199,
+          "source": "https://apps.apple.com/us/app/the-athletic-all-sports-news/id1135216317",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    }
+  ]
+}

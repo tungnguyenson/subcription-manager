@@ -84,6 +84,11 @@ class BackupRestore {
           ? null
           : LocalDate.parse(row.snoozedUntil!),
       state: enumFromWire(ItemState.values, row.state, ItemState.active),
+      purchaseChannel: enumFromWire(
+        PurchaseChannel.values,
+        row.purchaseChannel,
+        PurchaseChannel.unknown,
+      ),
     );
   }
 

@@ -1,0 +1,601 @@
+{
+  "batch": "food-fitness",
+  "sectors": [
+    "FOOD",
+    "FITNESS"
+  ],
+  "entries": [
+    {
+      "id": "grab-unlimited",
+      "name": "GrabUnlimited",
+      "aliases": [
+        "grab unlimited",
+        "grabunlimited",
+        "grab"
+      ],
+      "sector": "FOOD",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "unlimited",
+      "plans": [
+        {
+          "tier": "unlimited",
+          "name": "GrabUnlimited",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 25000,
+          "note": "Ưu đãi GrabFood, GrabMart, GrabCar/GrabBike",
+          "source": "https://www.grab.com/vn/grabunlimited/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "unlimited",
+          "name": "GrabUnlimited",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 216000,
+          "note": "Gói 12 tháng, tương đương 18.000đ/tháng",
+          "source": "https://www.grab.com/vn/grabunlimited/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "be-hoi-vien",
+      "name": "beOne",
+      "aliases": [
+        "be",
+        "be hoi vien",
+        "beone",
+        "be one",
+        "hoi vien be"
+      ],
+      "sector": "FOOD",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Gói \"Hội viên\" cũ đã được thay bằng gói khách hàng ưu tiên beOne (từ 24/6/2026): 19.000đ/tháng, không có gói năm; cũng có thể được miễn phí nếu chi tiêu từ 1 triệu đồng/30 ngày. Tên gói nên cập nhật thành beOne.",
+      "defaultPlan": "beone",
+      "plans": [
+        {
+          "tier": "beone",
+          "name": "beOne",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 19000,
+          "note": "Thay thế cho beLoyalty/bePoint cũ; hoàn 10% beXu",
+          "source": "https://be.com.vn/uncategorized/be-group-ra-mat-beone/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "uber-one",
+      "name": "Uber One",
+      "aliases": [
+        "uber one",
+        "uberone",
+        "uber"
+      ],
+      "sector": "FOOD",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "one",
+      "plans": [
+        {
+          "tier": "one",
+          "name": "Uber One",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 999,
+          "note": "Chưa gồm thuế",
+          "source": "https://help.uber.com/en/riders/article/what-is-uber-one?nodeId=84846d69-45b7-49e3-a8b6-ad23ea583c17",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "one",
+          "name": "Uber One",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 9600,
+          "note": "Chưa gồm thuế",
+          "source": "https://help.uber.com/en/riders/article/what-is-uber-one?nodeId=84846d69-45b7-49e3-a8b6-ad23ea583c17",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "dashpass",
+      "name": "DoorDash DashPass",
+      "aliases": [
+        "dashpass",
+        "doordash dashpass",
+        "doordash"
+      ],
+      "sector": "FOOD",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ xác nhận được gói tháng qua mô tả app trên App Store (\"membership auto-renews at $9.99/month\"); không thấy gói năm được công bố.",
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "DashPass",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 999,
+          "note": "Giá gia hạn sau 30 ngày dùng thử miễn phí",
+          "source": "https://apps.apple.com/us/app/doordash-food-grocery-more/id719972451",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "deliveroo-plus",
+      "name": "Deliveroo Plus",
+      "aliases": [
+        "deliveroo plus",
+        "deliveroo"
+      ],
+      "sector": "FOOD",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Đã thử mở lại bằng trình duyệt thật: deliveroo.co.uk/plus vẫn bị Cloudflare chặn (\"Just a moment\"), và trang App Store của Deliveroo không liệt kê giá Plus. Nguồn thứ cấp nói gói Gold 4,99 GBP/tháng hoặc 49,90 GBP/năm nhưng chưa xác nhận được từ chính hãng nên để trống.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "hellofresh",
+      "name": "HelloFresh",
+      "aliases": [
+        "hellofresh",
+        "hello fresh"
+      ],
+      "sector": "FOOD",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "WEEKLY",
+      "cancelUrl": null,
+      "noteVi": "HelloFresh không có một mức giá cố định: giá đổi theo số người ăn và số bữa/tuần người dùng tự chọn, không phải phí thuê bao cố định như Netflix. Trang giá chính thức vẫn bị Cloudflare chặn khi thử lại bằng trình duyệt thật nên không lấy được số cụ thể — để trống thay vì suy đoán.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "strava",
+      "name": "Strava",
+      "aliases": [
+        "strava"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ xác nhận được giá niêm yết cho VN (trang giá tự động hiển thị theo khu vực truy cập); chưa xác nhận được giá GLOBAL/USD từ chính hãng nên không ghi thêm.",
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Strava Individual",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 129000,
+          "source": "https://www.strava.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "individual",
+          "name": "Strava Individual",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 859000,
+          "source": "https://www.strava.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "apple-fitness",
+      "name": "Apple Fitness+",
+      "aliases": [
+        "apple fitness",
+        "apple fitness plus",
+        "fitness plus"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://support.apple.com/en-us/HT202039",
+      "noteVi": null,
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 999,
+          "source": "https://www.apple.com/apple-fitness-plus/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 7999,
+          "source": "https://www.apple.com/apple-fitness-plus/",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://apps.apple.com/account/subscriptions"
+    },
+    {
+      "id": "myfitnesspal",
+      "name": "MyFitnessPal",
+      "aliases": [
+        "myfitnesspal",
+        "my fitness pal",
+        "mfp"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2499,
+          "source": "https://www.myfitnesspal.com/premium",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 7999,
+          "source": "https://www.myfitnesspal.com/premium",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "fitbit-premium",
+      "name": "Google Health Premium",
+      "aliases": [
+        "fitbit premium",
+        "fitbit",
+        "google health premium",
+        "google health"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Fitbit Premium đã đổi tên thành Google Health Premium (app Fitbit gộp vào app Google Health). Xác nhận bằng trình duyệt thật tại store.google.com: giá $9.99/tháng hoặc $99.99/năm. Đã đổi tên hiển thị (name) thành Google Health Premium cho đúng.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Google Health Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 999,
+          "source": "https://store.google.com/us/subscriptions/health-premium/purchase",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "premium",
+          "name": "Google Health Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 9999,
+          "source": "https://store.google.com/us/subscriptions/health-premium/purchase",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "garmin-connect-plus",
+      "name": "Garmin Connect+",
+      "aliases": [
+        "garmin connect plus",
+        "garmin connect+",
+        "garmin"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "connect-plus",
+      "plans": [
+        {
+          "tier": "connect-plus",
+          "name": "Garmin Connect+",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 699,
+          "source": "https://www.garmin.com/en-US/newsroom/press-release/wearables-health/elevate-your-health-and-fitness-goals-with-garmin-connect/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "connect-plus",
+          "name": "Garmin Connect+",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 6999,
+          "source": "https://www.garmin.com/en-US/newsroom/press-release/wearables-health/elevate-your-health-and-fitness-goals-with-garmin-connect/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "whoop",
+      "name": "Whoop",
+      "aliases": [
+        "whoop"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "whoop.com/us/en/membership/ mở được bằng trình duyệt thật. Whoop chỉ bán theo năm (không có gói tháng riêng), tier thấp nhất là \"One\" tại 199 USD/năm.",
+      "defaultPlan": "one",
+      "plans": [
+        {
+          "tier": "one",
+          "name": "WHOOP One",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 19900,
+          "source": "https://www.whoop.com/us/en/membership/",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "oura",
+      "name": "Oura",
+      "aliases": [
+        "oura",
+        "oura ring"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ tính phí membership, không gồm giá nhẫn Oura. Oura chỉ bán theo tháng, không có gói năm.",
+      "defaultPlan": "membership",
+      "plans": [
+        {
+          "tier": "membership",
+          "name": "Oura Membership",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 599,
+          "note": "Chỉ phí membership, không gồm giá nhẫn",
+          "source": "https://ouraring.com/membership",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "calm",
+      "name": "Calm",
+      "aliases": [
+        "calm"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "calm.com/pricing vẫn bị chặn khi thử bằng trình duyệt thật. Giá lấy từ mục \"Subscription pricing and terms\" trong mô tả app Calm trên App Store (nguồn chính thức của hãng).",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Calm Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1499,
+          "source": "https://apps.apple.com/us/app/calm/id571800810",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "premium",
+          "name": "Calm Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 6999,
+          "source": "https://apps.apple.com/us/app/calm/id571800810",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "headspace",
+      "name": "Headspace",
+      "aliases": [
+        "headspace"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Trang headspace.com vẫn không lộ giá qua HTML tĩnh. Giá lấy từ mô tả app Headspace trên App Store (nguồn chính thức của hãng): \"Subscription options: $12.99/month, $69.99/year\".",
+      "defaultPlan": "unlimited",
+      "plans": [
+        {
+          "tier": "unlimited",
+          "name": "Headspace",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1299,
+          "source": "https://apps.apple.com/us/app/headspace-sleep-meditation/id493145008",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "unlimited",
+          "name": "Headspace",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 6999,
+          "source": "https://apps.apple.com/us/app/headspace-sleep-meditation/id493145008",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "peloton",
+      "name": "Peloton",
+      "aliases": [
+        "peloton",
+        "peloton app"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Mở bằng trình duyệt thật onepeloton.com/app thấy rõ 2 tier: App One (không cần thiết bị Peloton) 12.99 USD/tháng, App+ (dùng với xe đạp/máy chạy Peloton) 28.99 USD/tháng. Chỉ xác nhận được giá tháng; nút chuyển sang \"Annual\" không đổi số hiển thị nên không ghi gói năm.",
+      "defaultPlan": "app-one",
+      "plans": [
+        {
+          "tier": "app-one",
+          "name": "Peloton App One",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1299,
+          "note": "Không cần thiết bị Peloton",
+          "source": "https://www.onepeloton.com/app",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "zwift",
+      "name": "Zwift",
+      "aliases": [
+        "zwift"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Zwift",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1999,
+          "source": "https://www.zwift.com/pricing",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "standard",
+          "name": "Zwift",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 19999,
+          "note": "16.67 USD/tháng, thanh toán theo năm",
+          "source": "https://www.zwift.com/pricing",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "noom",
+      "name": "Noom",
+      "aliases": [
+        "noom",
+        "noom weight"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Noom không bán gói theo tháng riêng — chỉ bán gói trả trước 6 tháng hoặc 12 tháng (số tiền dưới đây là tổng cả kỳ, không phải giá mỗi tháng), tự động gia hạn theo đúng chu kỳ đó.",
+      "defaultPlan": "weight",
+      "plans": [
+        {
+          "tier": "weight",
+          "name": "Noom Weight",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "SEMIANNUAL",
+          "amountMinor": 17900,
+          "note": "Gói trả trước 6 tháng, tổng 179 USD",
+          "source": "https://www.noom.com/plans",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "weight",
+          "name": "Noom Weight",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 20900,
+          "note": "Gói trả trước 12 tháng, tổng 209 USD",
+          "source": "https://www.noom.com/plans",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "the-tap-gym",
+      "name": "Thẻ tập gym",
+      "aliases": [
+        "gym",
+        "the tap gym",
+        "phong tap",
+        "phong gym",
+        "tap gym"
+      ],
+      "sector": "FITNESS",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Mục chung cho thẻ tập gym — mỗi phòng tập một giá khác nhau nên không có giá chuẩn để ghi.",
+      "defaultPlan": null,
+      "plans": []
+    }
+  ]
+}

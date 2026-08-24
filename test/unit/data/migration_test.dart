@@ -78,16 +78,38 @@ void main() {
       final raw = sqlite3.open(file.path);
       addTearDown(raw.close);
 
-      expect(raw.select('PRAGMA user_version;').single['user_version'], 3);
+      expect(raw.select('PRAGMA user_version;').single['user_version'], 4);
 
       final columns = raw
           .select('PRAGMA table_info(itemRow);')
           .map((r) => r['name'] as String);
-      expect(columns, containsAll(['category', 'repeatCount', 'iconName']));
+      expect(
+        columns,
+        containsAll([
+          'category',
+          'repeatCount',
+          'iconName',
+          // Added in v4, and reached from v1 through the v3 rebuild rather
+          // than through its own step. The rebuild copies the current schema
+          // out of the old table, so a column missing from this list makes the
+          // whole upgrade fail on a name the old file never had.
+          'purchaseChannel',
+        ]),
+      );
       expect(columns, isNot(contains('stake')));
       expect(columns, isNot(contains('kind')));
       expect(columns, isNot(contains('categoryId')));
       expect(columns, isNot(contains('groupId')));
+
+      // Rows that predate the question read as UNKNOWN, which is what is true
+      // of them: nobody was ever asked where they bought it.
+      expect(
+        raw
+            .select('SELECT purchaseChannel FROM itemRow;')
+            .map((r) => r['purchaseChannel'] as String)
+            .toSet(),
+        {'UNKNOWN'},
+      );
 
       final tables = raw
           .select("SELECT name FROM sqlite_master WHERE type = 'table';")

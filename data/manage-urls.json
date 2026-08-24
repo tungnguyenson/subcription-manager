@@ -1,0 +1,385 @@
+{
+  "note": "Do agent nghien cuu manage-links sinh ra. Chi chua muc da qua kiem chung. Xem docs/research/manage-links.md muc 3 de biet phuong phap va danh sach da thu nhung khong ket luan duoc. | 2026-08-24: gỡ toàn bộ mã USSD/SMS, giữ App Store ID (đều mức A). Lý do kép: nguồn không đủ tin cậy, và iOS không quay số USSD.",
+  "method": "Voi moi URL, goi thu chinh no VA mot duong dan rac tren cung host (control). Chi tinh la bang chung khi hai ket qua KHAC nhau, va URL that tra 2xx/3xx trong khi control tra 404. Neu ca hai giong nhau thi site do tra 200/403/302 cho moi thu, nen ma tra ve khong chung minh duoc gi.",
+  "generatedAt": "2026-08-24",
+  "entries": [
+    {
+      "id": "amazon-prime-video",
+      "manageUrl": "https://www.amazon.com/gp/primecentral",
+      "evidence": "302 sang amazon.com/ax/claim (luong dang nhap Amazon); control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "apple-arcade",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "evidence": "302 sang appleid.apple.com; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "apple-fitness",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "evidence": "302 sang appleid.apple.com; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "apple-music",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "evidence": "302 sang appleid.apple.com; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "apple-news",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "evidence": "302 sang appleid.apple.com; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "apple-tv",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "evidence": "302 sang appleid.apple.com; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "bitwarden",
+      "manageUrl": "https://vault.bitwarden.com/",
+      "evidence": "200; control /zzq-... tra 404. Vault la SPA, trang goi dich vu nam sau dang nhap nen khong tro sau hon duoc.",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "box",
+      "manageUrl": "https://app.box.com/account",
+      "evidence": "302 sang account.box.com/login?redirect_url=%2Faccount; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "claude",
+      "manageUrl": "https://claude.ai/settings/billing",
+      "evidence": "trung tam tro giup chinh thuc support.claude.com/en/articles/8325617 dat lien ket 'Settings > Billing' tro thang toi claude.ai/settings/billing. LUU Y: chi dung cho nguoi mua qua web/desktop. Anthropic huong dan khac han cho nguoi mua qua app iOS/Android. Bien the claude.ai/new#settings/billing KHONG xuat hien trong tai lieu chinh thuc.",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "dropbox",
+      "manageUrl": "https://www.dropbox.com/account/plan",
+      "evidence": "302 sang dropbox.com/login?cont=%2Faccount%2Fplan; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "duolingo",
+      "manageUrl": "https://www.duolingo.com/settings/account",
+      "evidence": "200; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "expressvpn",
+      "manageUrl": "https://www.expressvpn.com/subscriptions",
+      "evidence": "307 sang portal.expressvpn.com/api/auth/login/init?returnUrl=...my-subscription; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "fpt-play",
+      "manageUrl": "https://fptplay.vn/tai-khoan",
+      "evidence": "200; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "github",
+      "manageUrl": "https://github.com/settings/billing/summary",
+      "evidence": "302 sang github.com/login?return_to=%2Fsettings%2Fbilling%2Fsummary; control 404. Luu y: /settings/billing (khong co /summary) tra 404, tuc la duong dan do da doi.",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "github-copilot",
+      "manageUrl": "https://github.com/settings/copilot",
+      "evidence": "302 sang github.com/login?return_to=%2Fsettings%2Fcopilot; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "google-one",
+      "manageUrl": "https://one.google.com/settings",
+      "evidence": "302 sang accounts.google.com/v3/signin; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "icloud",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "evidence": "302 sang appleid.apple.com; control 404. Apple ghi nhan day la deep link chuan de mo danh sach goi dang ky.",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "jetbrains",
+      "manageUrl": "https://account.jetbrains.com/licenses",
+      "evidence": "302 sang account.jetbrains.com/login; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "linkedin-premium",
+      "manageUrl": "https://www.linkedin.com/premium/manage/",
+      "evidence": "302 sang linkedin.com/uas/login?session_redirect=...%2Fpremium%2Fmanage%2F; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "microsoft-365",
+      "manageUrl": "https://account.microsoft.com/services",
+      "evidence": "302 sang login.microsoftonline.com; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "netflix",
+      "manageUrl": "https://www.netflix.com/account",
+      "evidence": "trang tro giup chinh thuc help.netflix.com/en/node/407 ghi ro cac duong dan netflix.com/account, netflix.com/YourAccount, netflix.com/BillingActivity va netflix.com/cancelplan. Goi thu bang HTTP khong ket luan duoc vi netflix.com chuyen huong moi duong dan la.",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "onedrive",
+      "manageUrl": "https://account.microsoft.com/services",
+      "evidence": "cung trang voi microsoft-365: 302 sang login.microsoftonline.com; control 404. OneDrive la mot dong trong danh sach dich vu cua tai khoan Microsoft.",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "sim-itel",
+      "appStoreId": "1610306087",
+      "appStoreUrl": "https://apps.apple.com/vn/app/id1610306087",
+      "evidence": "appStoreId muc A: iTunes Search API tra ve 'My iTel', nha phat hanh 'INDOCHINA TELECOM MOBILE JOIN STOCK COMPANY', bundle itelecom.vn.myitel",
+      "checkedAt": "2026-08-24",
+      "note": "Mã USSD và SMS đã bỏ: nguồn chỉ đạt mức B/C, và iOS chặn USSD nên chúng không dùng được ở đây. Mở app nhà mạng là đường còn lại."
+    },
+    {
+      "id": "sim-mobifone",
+      "appStoreId": "719320091",
+      "appStoreUrl": "https://apps.apple.com/vn/app/id719320091",
+      "evidence": "appStoreId muc A: iTunes Search API tra ve 'My MobiFone', nha phat hanh 'VietNam Mobile Telecom Service', bundle vms.com.MyMobifone",
+      "checkedAt": "2026-08-24",
+      "note": "Mã USSD và SMS đã bỏ: nguồn chỉ đạt mức B/C, và iOS chặn USSD nên chúng không dùng được ở đây. Mở app nhà mạng là đường còn lại."
+    },
+    {
+      "id": "sim-vietnamobile",
+      "appStoreId": "1661082542",
+      "appStoreUrl": "https://apps.apple.com/vn/app/id1661082542",
+      "evidence": "appStoreId muc A: iTunes Search API tra ve 'Vietnamobile', nha phat hanh 'Vietnamobile Telecommunications Joint Stock Company'",
+      "checkedAt": "2026-08-24",
+      "note": "Mã USSD và SMS đã bỏ: nguồn chỉ đạt mức B/C, và iOS chặn USSD nên chúng không dùng được ở đây. Mở app nhà mạng là đường còn lại."
+    },
+    {
+      "id": "sim-viettel",
+      "appStoreId": "1014838705",
+      "appStoreUrl": "https://apps.apple.com/vn/app/id1014838705",
+      "evidence": "appStoreId muc A: iTunes Search API tra ve 'My Viettel', nha phat hanh 'Viettel Corporation', bundle com.viettel.ttnd.vietteldiscovery",
+      "checkedAt": "2026-08-24",
+      "note": "Mã USSD và SMS đã bỏ: nguồn chỉ đạt mức B/C, và iOS chặn USSD nên chúng không dùng được ở đây. Mở app nhà mạng là đường còn lại."
+    },
+    {
+      "id": "sim-vinaphone",
+      "appStoreId": "1017188399",
+      "appStoreUrl": "https://apps.apple.com/vn/app/id1017188399",
+      "evidence": "appStoreId muc A: iTunes Search API tra ve 'My VNPT', nha phat hanh 'VNPT Media Corporation', bundle com.vnp.myvinaphone",
+      "checkedAt": "2026-08-24",
+      "note": "Mã USSD và SMS đã bỏ: nguồn chỉ đạt mức B/C, và iOS chặn USSD nên chúng không dùng được ở đây. Mở app nhà mạng là đường còn lại."
+    },
+    {
+      "id": "sim-wintel",
+      "appStoreId": "1495002378",
+      "appStoreUrl": "https://apps.apple.com/vn/app/id1495002378",
+      "evidence": "appStoreId muc A: iTunes Search API tra ve 'Wintel - Mang di dong 055', nha phat hanh 'Mobicast Joint Stock Company'",
+      "checkedAt": "2026-08-24",
+      "note": "Mã USSD và SMS đã bỏ: nguồn chỉ đạt mức B/C, và iOS chặn USSD nên chúng không dùng được ở đây. Mở app nhà mạng là đường còn lại."
+    },
+    {
+      "id": "spotify",
+      "manageUrl": "https://www.spotify.com/account/subscription/manage/",
+      "evidence": "trang tro giup chinh thuc support.spotify.com/us/article/cancel-premium/ ghi ro duong dan nay la noi xem va huy goi Premium.",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "todoist",
+      "manageUrl": "https://app.todoist.com/app/settings/subscription",
+      "evidence": "200; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "tradingview",
+      "manageUrl": "https://www.tradingview.com/settings/",
+      "evidence": "200; control 404. Day la trang cai dat tai khoan chung, KHONG phai trang billing rieng. /settings/billing/ tra 404, /gopro/ chi chuyen huong sang trang bang gia.",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "vnsky",
+      "appStoreId": "6446885068",
+      "appStoreUrl": "https://apps.apple.com/vn/app/id6446885068",
+      "evidence": "appStoreId muc A: iTunes Search API tra ve 'VNSKY - Mua SIM & Goi Cuoc', nha phat hanh 'DIGILIFE VIET NAM DIGITAL SERVICES COMPANY LIMITED.'",
+      "checkedAt": "2026-08-24",
+      "note": "Mã USSD và SMS đã bỏ: nguồn chỉ đạt mức B/C, và iOS chặn USSD nên chúng không dùng được ở đây. Mở app nhà mạng là đường còn lại."
+    },
+    {
+      "id": "xbox-gamepass",
+      "manageUrl": "https://account.microsoft.com/services",
+      "evidence": "cung trang voi microsoft-365: 302 sang login.microsoftonline.com; control 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "youtube-premium",
+      "manageUrl": "https://www.youtube.com/paid_memberships",
+      "evidence": "mo thu tra 303 sang trang dang nhap Google (accounts.google.com/v3/signin); control /zzq-... tra 404",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "id": "zoom",
+      "manageUrl": "https://zoom.us/billing",
+      "evidence": "302 sang zoom.us/signin; control 404",
+      "checkedAt": "2026-08-24"
+    }
+  ],
+  "storeChannels": [
+    {
+      "channel": "APP_STORE",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "evidence": "302 sang appleid.apple.com; control /zzq-... tra 404. Tren iOS day la universal link cua App Store: mo thang muc Subscriptions trong app App Store, khong phai app Cai dat. Apple dung chinh URL nay trong tai lieu 'Setting up a link to manage subscriptions'.",
+      "checkedAt": "2026-08-24"
+    },
+    {
+      "channel": "PLAY_STORE",
+      "manageUrl": "https://play.google.com/store/account/subscriptions",
+      "deepLinkTemplate": "https://play.google.com/store/account/subscriptions?package={packageName}&sku={productId}",
+      "evidence": "302 sang accounts.google.com/v3/signin; control 404. Dang co tham so package+sku duoc Google Play Billing ghi trong tai lieu 'About subscriptions' de tro thang toi mot goi cu the.",
+      "checkedAt": "2026-08-24"
+    }
+  ],
+  "rejected": [
+    {
+      "id": "github",
+      "url": "https://github.com/settings/billing",
+      "reason": "404, trong khi /settings/copilot tren cung host tra 302. Duong dan da doi thanh /settings/billing/summary."
+    },
+    {
+      "id": "strava",
+      "url": "https://www.strava.com/settings/subscription",
+      "reason": "404. /subscribe/manage chi chuyen huong ve trang ban hang /subscribe?code=manage, khong phai trang quan ly."
+    },
+    {
+      "id": "tradingview",
+      "url": "https://www.tradingview.com/settings/billing/",
+      "reason": "404."
+    },
+    {
+      "id": "discord-nitro",
+      "url": "https://discord.com/billing",
+      "reason": "404."
+    },
+    {
+      "id": "coursera",
+      "url": "https://www.coursera.org/payments/manage-subscriptions",
+      "reason": "301 nhung diem den la trang chu coursera.org, tuc la soft 404."
+    },
+    {
+      "id": "vieon",
+      "url": "https://vieon.vn/tai-khoan",
+      "reason": "410, va control cung 410. Host chan bot hoan toan."
+    }
+  ],
+  "inconclusive": [
+    {
+      "id": "chatgpt",
+      "url": "https://chatgpt.com/#settings/Subscription",
+      "reason": "403, control cung 403. Ngoai ra phan sau dau # la fragment nen khong bao gio den server, khong the kiem chung bang HTTP."
+    },
+    {
+      "id": "x-premium",
+      "url": "https://x.com/settings/premium",
+      "reason": "200, control cung 200 (SPA tra ve cung mot khung cho moi duong dan)."
+    },
+    {
+      "id": "adobe-cc",
+      "url": "https://account.adobe.com/plans",
+      "reason": "200, control cung 200."
+    },
+    {
+      "id": "canva",
+      "url": "https://www.canva.com/settings/billing-and-plans",
+      "reason": "403, control cung 403."
+    },
+    {
+      "id": "disney-plus",
+      "url": "https://www.disneyplus.com/account/subscription",
+      "reason": "302, control cung 302."
+    },
+    {
+      "id": "crunchyroll",
+      "url": "https://www.crunchyroll.com/account/membership",
+      "reason": "403, control cung 403."
+    },
+    {
+      "id": "perplexity",
+      "url": "https://www.perplexity.ai/settings/account",
+      "reason": "403, control cung 403."
+    },
+    {
+      "id": "midjourney",
+      "url": "https://www.midjourney.com/account",
+      "reason": "403, control cung 403."
+    },
+    {
+      "id": "nordvpn",
+      "url": "https://my.nordaccount.com/",
+      "reason": "403, control cung 403."
+    },
+    {
+      "id": "proton-vpn",
+      "url": "https://account.proton.me/dashboard",
+      "reason": "200, control cung 200."
+    },
+    {
+      "id": "1password",
+      "url": "https://my.1password.com/",
+      "reason": "200, control cung 200. Ngoai ra URL that phu thuoc ten tai khoan cua tung nguoi."
+    },
+    {
+      "id": "mega",
+      "url": "https://mega.nz/fm/account",
+      "reason": "200, control cung 200 (dinh tuyen bang hash)."
+    },
+    {
+      "id": "notion",
+      "url": "https://www.notion.so/my-account",
+      "reason": "307, control cung 307. Billing cua Notion gan voi workspace nen khong co URL chung."
+    },
+    {
+      "id": "cursor",
+      "url": "https://www.cursor.com/dashboard",
+      "reason": "308, control cung 308."
+    },
+    {
+      "id": "grammarly",
+      "url": "https://account.grammarly.com/subscription",
+      "reason": "302, control cung 302."
+    },
+    {
+      "id": "evernote",
+      "url": "https://www.evernote.com/AccountSummary.action",
+      "reason": "302 vs control 301: khac nhau nhung ca hai deu chuyen huong, chua du de ket luan."
+    },
+    {
+      "id": "backblaze",
+      "url": "https://secure.backblaze.com/account_settings.htm",
+      "reason": "302, control cung 302."
+    },
+    {
+      "id": "figma",
+      "url": "https://www.figma.com/settings",
+      "reason": "302 vs control 308: khac nhau nhung yeu. Billing cua Figma gan voi to chuc."
+    },
+    {
+      "id": "slack",
+      "url": "https://slack.com/account/settings",
+      "reason": "403 vs control 404: co ve la duong dan that nhung bi chan. Billing gan voi workspace."
+    },
+    {
+      "id": "medium",
+      "url": "https://medium.com/me/settings/membership",
+      "reason": "curl bi chan hoan toan (khong nhan duoc phan hoi)."
+    },
+    {
+      "id": "roblox-premium",
+      "url": "https://www.roblox.com/premium/membership",
+      "reason": "curl bi chan hoan toan."
+    }
+  ]
+}

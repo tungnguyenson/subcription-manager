@@ -1,0 +1,795 @@
+{
+  "part": 1,
+  "entries": [
+    {
+      "id": "airalo",
+      "tier": 2,
+      "source": "file:airalo (không dùng làm vector)",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/d/dc/Airalo_logo.svg",
+      "license": "Public domain (Wikimedia Commons, PD-logo)",
+      "color": "4A4A4C",
+      "colorFrom": "logo SVG (Wikimedia Commons) -- màu chữ chủ đạo trong file, CẦN XÁC MINH LẠI",
+      "note": "Bản Commons nhiều màu/gradient (#4A4A4C, #B50D31, #C84E28 + linearGradient) và có <g transform> thật -- không sạch, không dùng làm vector. Trang airalo.com chặn bot (HTTP 403) nên không lấy được theme-color đối chiếu. Màu #4A4A4C lấy tạm từ chữ trong logo Commons nhưng KHÔNG khớp cảm nhận thương hiệu Airalo thường thấy (xanh lá/ngọc) -- rất nên khảo sát lại bằng trình duyệt thật trước khi merge."
+    },
+    {
+      "id": "airtable",
+      "tier": 1,
+      "source": "thesvg:airtable",
+      "url": "https://api.iconify.design/thesvg:airtable.svg",
+      "license": "MIT (theSVG)",
+      "color": "18BFFF",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "apple-arcade",
+      "tier": 1,
+      "source": "thesvg:apple-arcade",
+      "url": "https://api.iconify.design/thesvg:apple-arcade.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json (slug applearcade)",
+      "note": ""
+    },
+    {
+      "id": "apple-news",
+      "tier": 1,
+      "source": "thesvg:apple-news",
+      "url": "https://api.iconify.design/thesvg:apple-news.svg",
+      "license": "MIT (theSVG)",
+      "color": "FD415E",
+      "colorFrom": "simple-icons.json (slug applenews)",
+      "note": ""
+    },
+    {
+      "id": "asana",
+      "tier": 1,
+      "source": "thesvg:asana",
+      "url": "https://api.iconify.design/thesvg:asana.svg",
+      "license": "MIT (theSVG)",
+      "color": "F06A6A",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "audible",
+      "tier": 1,
+      "source": "thesvg:audible",
+      "url": "https://api.iconify.design/thesvg:audible.svg",
+      "license": "MIT (theSVG)",
+      "color": "F8991C",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "badoo",
+      "tier": 1,
+      "source": "thesvg:badoo",
+      "url": "https://api.iconify.design/thesvg:badoo.svg",
+      "license": "MIT (theSVG)",
+      "color": "783BF9",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "bitwarden",
+      "tier": 1,
+      "source": "thesvg:bitwarden",
+      "url": "https://api.iconify.design/thesvg:bitwarden.svg",
+      "license": "MIT (theSVG)",
+      "color": "175DDC",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "box",
+      "tier": 1,
+      "source": "thesvg:box",
+      "url": "https://api.iconify.design/thesvg:box.svg",
+      "license": "MIT (theSVG)",
+      "color": "0061D5",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "canva",
+      "tier": 1,
+      "source": "cib:canva",
+      "url": "https://api.iconify.design/cib:canva.svg",
+      "license": "CC0 1.0 (CoreUI Brands)",
+      "color": "00C4CC",
+      "colorFrom": "kiến thức thương hiệu phổ biến (Canva không còn trong simple-icons.json hiện tại) -- CẦN XÁC MINH LẠI hex chính xác, Canva dùng logo nhiều màu nên một mã đơn sắc chỉ là gần đúng",
+      "note": ""
+    },
+    {
+      "id": "cleanmymac",
+      "tier": 1,
+      "source": "thesvg:macpaw",
+      "url": "https://api.iconify.design/thesvg:macpaw.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json (slug macpaw, hãng mẹ MacPaw) -- CleanMyMac dùng chung dấu hiệu công ty mẹ, không có mark riêng trong bộ mở",
+      "note": ""
+    },
+    {
+      "id": "clickup",
+      "tier": 1,
+      "source": "thesvg:clickup",
+      "url": "https://api.iconify.design/thesvg:clickup.svg",
+      "license": "MIT (theSVG)",
+      "color": "7B68EE",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "cloudflare",
+      "tier": 1,
+      "source": "thesvg:cloudflare",
+      "url": "https://api.iconify.design/thesvg:cloudflare.svg",
+      "license": "MIT (theSVG)",
+      "color": "F38020",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "codecademy",
+      "tier": 1,
+      "source": "thesvg:codecademy",
+      "url": "https://api.iconify.design/thesvg:codecademy.svg",
+      "license": "MIT (theSVG)",
+      "color": "1F4056",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "coursera",
+      "tier": 1,
+      "source": "thesvg:coursera",
+      "url": "https://api.iconify.design/thesvg:coursera.svg",
+      "license": "MIT (theSVG)",
+      "color": "0056D2",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "crunchyroll",
+      "tier": 1,
+      "source": "thesvg:crunchyroll",
+      "url": "https://api.iconify.design/thesvg:crunchyroll.svg",
+      "license": "MIT (theSVG)",
+      "color": "FF5E00",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "dashlane",
+      "tier": 1,
+      "source": "thesvg:dashlane",
+      "url": "https://api.iconify.design/thesvg:dashlane.svg",
+      "license": "MIT (theSVG)",
+      "color": "0E353D",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "dashpass",
+      "tier": 1,
+      "source": "thesvg:doordash",
+      "url": "https://api.iconify.design/thesvg:doordash.svg",
+      "license": "MIT (theSVG)",
+      "color": "FF3008",
+      "colorFrom": "simple-icons.json (slug doordash)",
+      "note": "DashPass là tính năng của DoorDash, dùng chung dấu hiệu DoorDash, không có mark riêng -- tương tự tiền lệ Xbox Game Pass dùng mark Xbox"
+    },
+    {
+      "id": "datacamp",
+      "tier": 1,
+      "source": "thesvg:datacamp",
+      "url": "https://api.iconify.design/thesvg:datacamp.svg",
+      "license": "MIT (theSVG)",
+      "color": "03EF62",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "deepseek",
+      "tier": 1,
+      "source": "simple-icons:deepseek",
+      "url": "https://api.iconify.design/simple-icons:deepseek.svg",
+      "license": "CC0 1.0 (Simple Icons qua Iconify)",
+      "color": "5786FE",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "deezer",
+      "tier": 1,
+      "source": "thesvg:deezer",
+      "url": "https://api.iconify.design/thesvg:deezer.svg",
+      "license": "MIT (theSVG)",
+      "color": "A238FF",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "deliveroo-plus",
+      "tier": 1,
+      "source": "thesvg:deliveroo",
+      "url": "https://api.iconify.design/thesvg:deliveroo.svg",
+      "license": "MIT (theSVG)",
+      "color": "00CCBC",
+      "colorFrom": "simple-icons.json (slug deliveroo)",
+      "note": ""
+    },
+    {
+      "id": "discord-nitro",
+      "tier": 1,
+      "source": "thesvg:discord",
+      "url": "https://api.iconify.design/thesvg:discord.svg",
+      "license": "MIT (theSVG)",
+      "color": "5865F2",
+      "colorFrom": "simple-icons.json (slug discord)",
+      "note": "Discord Nitro dùng chung dấu hiệu Discord, không có mark riêng"
+    },
+    {
+      "id": "duolingo",
+      "tier": 1,
+      "source": "thesvg:duolingo",
+      "url": "https://api.iconify.design/thesvg:duolingo.svg",
+      "license": "MIT (theSVG)",
+      "color": "58CC02",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "ea-play",
+      "tier": 1,
+      "source": "thesvg:ea",
+      "url": "https://api.iconify.design/thesvg:ea.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json (slug ea)",
+      "note": "EA Play dùng chung dấu hiệu Electronic Arts"
+    },
+    {
+      "id": "elevenlabs",
+      "tier": 1,
+      "source": "thesvg:elevenlabs",
+      "url": "https://api.iconify.design/thesvg:elevenlabs.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "evernote",
+      "tier": 1,
+      "source": "thesvg:evernote",
+      "url": "https://api.iconify.design/thesvg:evernote.svg",
+      "license": "MIT (theSVG)",
+      "color": "00A82D",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "expressvpn",
+      "tier": 1,
+      "source": "thesvg:expressvpn",
+      "url": "https://api.iconify.design/thesvg:expressvpn.svg",
+      "license": "MIT (theSVG)",
+      "color": "DA3940",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "fitbit-premium",
+      "tier": 1,
+      "source": "thesvg:fitbit",
+      "url": "https://api.iconify.design/thesvg:fitbit.svg",
+      "license": "MIT (theSVG)",
+      "color": "00B0B9",
+      "colorFrom": "simple-icons.json (slug fitbit)",
+      "note": ""
+    },
+    {
+      "id": "garmin-connect-plus",
+      "tier": 1,
+      "source": "thesvg:garmin",
+      "url": "https://api.iconify.design/thesvg:garmin.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json (slug garmin)",
+      "note": ""
+    },
+    {
+      "id": "geforce-now",
+      "tier": 1,
+      "source": "thesvg:nvidia",
+      "url": "https://api.iconify.design/thesvg:nvidia.svg",
+      "license": "MIT (theSVG)",
+      "color": "76B900",
+      "colorFrom": "simple-icons.json (slug nvidia)",
+      "note": "GeForce NOW dùng chung dấu hiệu NVIDIA. Có tìm được logo 'GeForce Now' riêng trên Wikimedia Commons (PD, 3 màu #1e1e1e/#76b900/#fff) nhưng file thiếu viewBox -- không sạch, không dùng."
+    },
+    {
+      "id": "github",
+      "tier": 1,
+      "source": "thesvg:github",
+      "url": "https://api.iconify.design/thesvg:github.svg",
+      "license": "MIT (theSVG)",
+      "color": "181717",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "google-play-pass",
+      "tier": 1,
+      "source": "thesvg:google-play",
+      "url": "https://api.iconify.design/thesvg:google-play.svg",
+      "license": "MIT (theSVG)",
+      "color": "414141",
+      "colorFrom": "simple-icons.json (slug googleplay)",
+      "note": "Google Play Pass dùng chung dấu hiệu Google Play"
+    },
+    {
+      "id": "grab-unlimited",
+      "tier": 1,
+      "source": "thesvg:grab",
+      "url": "https://api.iconify.design/thesvg:grab.svg",
+      "license": "MIT (theSVG)",
+      "color": "00B14F",
+      "colorFrom": "simple-icons.json (slug grab)",
+      "note": ""
+    },
+    {
+      "id": "grammarly",
+      "tier": 1,
+      "source": "thesvg:grammarly",
+      "url": "https://api.iconify.design/thesvg:grammarly.svg",
+      "license": "MIT (theSVG)",
+      "color": "027E6F",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "headspace",
+      "tier": 1,
+      "source": "thesvg:headspace",
+      "url": "https://api.iconify.design/thesvg:headspace.svg",
+      "license": "MIT (theSVG)",
+      "color": "F47D31",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "hellofresh",
+      "tier": 1,
+      "source": "thesvg:hellofresh",
+      "url": "https://api.iconify.design/thesvg:hellofresh.svg",
+      "license": "MIT (theSVG)",
+      "color": "99CC33",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "hulu",
+      "tier": 1,
+      "source": "cib:hulu",
+      "url": "https://api.iconify.design/cib:hulu.svg",
+      "license": "CC0 1.0 (CoreUI Brands)",
+      "color": "1CE783",
+      "colorFrom": "kiến thức thương hiệu phổ biến (Hulu Green) -- Hulu không còn trong simple-icons.json hiện tại, dùng CoreUI Brands thay (giống tiền lệ Xbox/Nintendo/Adobe/Microsoft trong hệ thống hiện tại)",
+      "note": ""
+    },
+    {
+      "id": "kaspersky",
+      "tier": 1,
+      "source": "thesvg:kaspersky",
+      "url": "https://api.iconify.design/thesvg:kaspersky.svg",
+      "license": "MIT (theSVG)",
+      "color": "006D5C",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "kindle-unlimited",
+      "tier": 1,
+      "source": "file:kindle-unlimited",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/2/20/Amazon_Kindle_logo.svg",
+      "license": "Public domain (Wikimedia Commons, PD-logo -- hình đơn giản không đủ ngưỡng bản quyền), nhãn hiệu của Amazon",
+      "color": "FF9900",
+      "colorFrom": "logo SVG (Wikimedia Commons, tải 2026-08-23)",
+      "note": "Tải từ Wikimedia Commons chứ không phải trang chủ Amazon (trang Kindle không lộ SVG tĩnh dễ lấy). Là wordmark 'kindle', tỉ lệ 388x86 (~4.5:1), dùng chung cho Kindle Unlimited vì không có mark riêng."
+    },
+    {
+      "id": "lastpass",
+      "tier": 1,
+      "source": "thesvg:lastpass",
+      "url": "https://api.iconify.design/thesvg:lastpass.svg",
+      "license": "MIT (theSVG)",
+      "color": "D32D27",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "linear",
+      "tier": 1,
+      "source": "thesvg:linear",
+      "url": "https://api.iconify.design/thesvg:linear.svg",
+      "license": "MIT (theSVG)",
+      "color": "5E6AD2",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "linkedin-learning",
+      "tier": 1,
+      "source": "cib:linkedin",
+      "url": "https://api.iconify.design/cib:linkedin.svg",
+      "license": "CC0 1.0 (CoreUI Brands)",
+      "color": "0A66C2",
+      "colorFrom": "kiến thức thương hiệu phổ biến (LinkedIn Blue chính thức) -- LinkedIn không còn trong simple-icons.json hiện tại",
+      "note": "LinkedIn Learning dùng chung dấu hiệu LinkedIn, không có mark riêng trong bộ mở -- tương tự tiền lệ Google One dùng mark Google Drive"
+    },
+    {
+      "id": "linkedin-premium",
+      "tier": 1,
+      "source": "cib:linkedin",
+      "url": "https://api.iconify.design/cib:linkedin.svg",
+      "license": "CC0 1.0 (CoreUI Brands)",
+      "color": "0A66C2",
+      "colorFrom": "kiến thức thương hiệu phổ biến (LinkedIn Blue chính thức)",
+      "note": ""
+    },
+    {
+      "id": "malwarebytes",
+      "tier": 1,
+      "source": "thesvg:malwarebytes",
+      "url": "https://api.iconify.design/thesvg:malwarebytes.svg",
+      "license": "MIT (theSVG)",
+      "color": "0D3ECC",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "masterclass",
+      "tier": 1,
+      "source": "file:masterclass",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/9c/MasterClass_logo_2020_%28pink%29.svg",
+      "license": "Public domain (Wikimedia Commons, PD-logo), nhãn hiệu của MasterClass",
+      "color": "E32652",
+      "colorFrom": "logo SVG (Wikimedia Commons, tải 2026-08-23)",
+      "note": "Tải từ Wikimedia Commons (trang masterclass.com chặn bot, HTTP 403). File sạch: có viewBox, không <g transform>, một màu (#e32652 qua class CSS)."
+    },
+    {
+      "id": "mcafee",
+      "tier": 1,
+      "source": "thesvg:mcafee",
+      "url": "https://api.iconify.design/thesvg:mcafee.svg",
+      "license": "MIT (theSVG)",
+      "color": "C01818",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "medium",
+      "tier": 1,
+      "source": "thesvg:medium",
+      "url": "https://api.iconify.design/thesvg:medium.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "mega",
+      "tier": 1,
+      "source": "thesvg:mega",
+      "url": "https://api.iconify.design/thesvg:mega.svg",
+      "license": "MIT (theSVG)",
+      "color": "D9272E",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "meta-verified",
+      "tier": 1,
+      "source": "thesvg:meta",
+      "url": "https://api.iconify.design/thesvg:meta.svg",
+      "license": "MIT (theSVG)",
+      "color": "0467DF",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "bkav-pro",
+      "tier": 1,
+      "source": "file:bkav-pro",
+      "url": "https://www.bkav.com.vn/Bkav2021Theme/imageTheme/logo.svg",
+      "license": "nhãn hiệu của Bkav, tải 2026-08-23",
+      "color": "FF6E01",
+      "colorFrom": "logo SVG trang chủ",
+      "note": "Wordmark tỉ lệ 75x20 (~3.75:1), một màu (#FF6E01), không <g transform>, sạch."
+    },
+    {
+      "id": "fiin",
+      "tier": 1,
+      "source": "file:fiin",
+      "url": "https://fiintrade.vn/favicon.svg",
+      "license": "nhãn hiệu của FiinGroup, tải 2026-08-23",
+      "color": "06509F",
+      "colorFrom": "logo SVG trang chủ (favicon.svg)",
+      "note": "Một màu (#06509F), viewBox vuông, không <g transform> -- SẠCH nhưng fill-rule=evenodd khai báo qua class CSS (.st0{fill-rule:evenodd}) chứ không phải thuộc tính inline trên <path>, nên bộ sinh sẽ KHÔNG tự nhận ra evenodd (nó chỉ dò literal fill-rule=\"evenodd\" trong attrs của path). Cần thêm fill-rule=\"evenodd\" inline vào path trước khi build, nếu không phần lỗ tròn của mắt logo có thể bị tô đặc sai."
+    },
+    {
+      "id": "fonos",
+      "tier": 1,
+      "source": "file:fonos",
+      "url": "https://fonos.vn/_next/static/media/header-logo-subtract.3ae78aca.svg",
+      "license": "nhãn hiệu của Fonos, tải 2026-08-23",
+      "color": "ED7873",
+      "colorFrom": "một trong hai màu gradient của logo gốc (F2A864 -> ED7873)",
+      "note": "Logo gốc tô bằng gradient (linearGradient), không phải màu phẳng -- bộ sinh bỏ qua thuộc tính fill nên không sao, nhưng màu 'chính thức' chỉ là một điểm dừng gradient được chọn đại diện, không phải mã màu công bố chính thức của hãng."
+    },
+    {
+      "id": "elsa-speak",
+      "tier": 1,
+      "source": "file:elsa-speak",
+      "url": "https://vn.elsaspeak.com/wp-content/uploads/2020/09/LOGO-ELSA.svg",
+      "license": "nhãn hiệu của ELSA Corp, tải 2026-08-23",
+      "color": "042132",
+      "colorFrom": "logo SVG trang chủ (màu chữ ELSA)",
+      "note": "Logo gồm 2 path: chữ 'ELSA' màu navy #042132 và icon lá/sóng tô gradient nhiều màu (#007DF7/#46DF83/#F8DA49). Bộ sinh gộp cả hai path lại, không phân biệt màu gốc -- kết quả sẽ là một hình gộp chữ+icon tô đồng nhất theo màu BRANDS. Tỉ lệ 150x50 (~3:1)."
+    },
+    {
+      "id": "grindr",
+      "tier": 1,
+      "source": "file:grindr",
+      "url": "https://cdn.prod.website-files.com/641dc6058ca7b72a1422b5d7/651ddebd6b42b70beecc12f2_b0c7f8d0750f1e8e21151d72774e4cd5_logo-small-black.svg",
+      "license": "nhãn hiệu của Grindr LLC, tải 2026-08-23",
+      "color": "FFCC00",
+      "colorFrom": "logo SVG trang chủ khác (biến thể vàng .st0{fill:#fc0}), là 'màu vàng Grindr' được biết rộng rãi",
+      "note": "File là WORDMARK chữ 'GRINDR' tỉ lệ 3796x780 (~4.87:1) -- rất dẹt. Bộ sinh không stretch (chỉ scale đều + canh giữa) nên hình sẽ co lại thành một dải rất mỏng trong ô vuông 24 đơn vị, khó nhận diện ở kích thước icon nhỏ. Không có <g transform>, có viewBox, kỹ thuật sạch, nhưng NÊN CÂN NHẮC lại có đáng tier 1 hay không vì tính dễ đọc kém."
+    },
+    {
+      "id": "amazon-music",
+      "tier": 1,
+      "source": "simple-icons:amazonmusic",
+      "url": "https://api.iconify.design/simple-icons:amazonmusic.svg",
+      "license": "CC0 1.0 (Simple Icons qua Iconify)",
+      "color": "FF9900",
+      "colorFrom": "không có mã màu riêng công bố cho Amazon Music -- dùng cam Amazon chung, CẦN XÁC MINH LẠI",
+      "note": "CẢNH BÁO NGUỒN: slug 'amazonmusic' KHÔNG có trong data/simple-icons.json hiện tải về (bản 16.28.0, bản mới nhất trên npm) nhưng Iconify vẫn phục vụ được qua endpoint simple-icons:amazonmusic -- bộ dữ liệu icon-set của Iconify (@iconify/json) có vẻ khác đồng bộ so với gói npm simple-icons mới nhất. Nội dung SVG là CC0 hợp lệ (do Simple Icons phát hành), không phải hình vẽ lại, nhưng nguồn cụ thể không đối chiếu được với data/simple-icons.json như quy trình chuẩn yêu cầu. Xem thêm goi ý ở amazon-prime-video bên dưới, cùng vấn đề."
+    },
+    {
+      "id": "amazon-prime-video",
+      "tier": 1,
+      "source": "simple-icons:primevideo",
+      "url": "https://api.iconify.design/simple-icons:primevideo.svg",
+      "license": "CC0 1.0 (Simple Icons qua Iconify)",
+      "color": "00A8E1",
+      "colorFrom": "kiến thức thương hiệu phổ biến (xanh Prime) -- SVG dùng fill=currentColor, không có mã màu nhúng, CẦN XÁC MINH LẠI",
+      "note": "CẢNH BÁO NGUỒN giống Amazon Music: slug 'primevideo' KHÔNG có trong data/simple-icons.json (16.28.0) hiện tại nhưng Iconify vẫn phục vụ được. Cần xác nhận lại provenance trước khi merge."
+    },
+    {
+      "id": "everand",
+      "tier": 2,
+      "source": "-",
+      "url": "-",
+      "license": "-",
+      "color": "6B2D2D",
+      "colorFrom": "phỏng đoán từ nhận biết thương hiệu, KHÔNG xác minh được",
+      "note": "Everand tách khỏi bộ nhận diện Scribd (dùng tên khác, không còn dùng logo Scribd) dù cùng công ty (cookie scribd_ubtc vẫn thấy trên domain .everand.com) nên KHÔNG dùng lại mark Scribd (dù simple-icons:scribd / cib:scribd / logos:scribd đều có vector). Trang everand.com chặn bot (chỉ trả về trang 'Client Challenge'), không lấy được logo hay theme-color chính thức. Mã màu ở đây CHỈ LÀ PHỎNG ĐOÁN, không có nguồn xác thực -- cần một agent có trình duyệt thật để khảo sát lại, hoặc cân nhắc dùng tạm mark Scribd (simple-icons:scribd, hex sẽ cần tra riêng) như phương án tạm."
+    },
+    {
+      "id": "google-workspace",
+      "tier": 2,
+      "source": "logos:google-workspace (không dùng làm vector)",
+      "url": "https://api.iconify.design/logos:google-workspace.svg",
+      "license": "-",
+      "color": "4285F4",
+      "colorFrom": "logo SVG chính hãng (một trong các màu Google chuẩn dùng trong chính file)",
+      "note": "Có vector (logos:google-workspace) nhưng là wordmark 'Google Workspace' 5 màu (đỏ/vàng/xanh lá/xanh dương/xám), không gộp được về MỘT màu mà vẫn còn ý nghĩa -- không đạt yêu cầu 'đơn sắc'. Xếp tier 2, dùng xanh dương chủ đạo của Google."
+    },
+    {
+      "id": "lovable",
+      "tier": 2,
+      "source": "file:lovable (chưa tách được)",
+      "url": "https://lovable.dev/favicon.svg",
+      "license": "nhãn hiệu của Lovable Labs, tải 2026-08-23",
+      "color": "4B73FF",
+      "colorFrom": "logo SVG trang chủ (favicon.svg, gradient màu xanh dương chủ đạo)",
+      "note": "favicon.svg CÓ một hình dạng đơn sắc dùng được: <clipPath> chứa một <path> viền bo góc đặc trưng (hình 'lá cờ bo tròn') -- nhưng path đó nằm trong <clipPath>, còn phần hiển thị thực tế là 4 lớp gradient mờ (radialGradient, nhiều stop-color: #4B73FF xanh, #FF66F4 hồng, #FF0105 đỏ, #FE7B02 cam). File cũng chứa literal 'gradientTransform' nên bộ sinh sẽ dừng vì tưởng có <g transform> (dò chuỗi con '<g' + 'transform', dù đây không phải group transform thật). Muốn nâng lên tier 1 cần TÁCH TAY path trong clipPath ra thành file riêng -- việc này ngoài phạm vi khảo sát (chỉ tải, không chỉnh sửa hình)."
+    },
+    {
+      "id": "babbel",
+      "tier": 2,
+      "source": "file:babbel (không dùng làm vector)",
+      "url": "https://www.babbel.com/favicon.svg",
+      "license": "nhãn hiệu của Babbel, tải 2026-08-23",
+      "color": "FE4D01",
+      "colorFrom": "logo SVG trang chủ (favicon.svg)",
+      "note": "favicon.svg sạch về cấu trúc (có viewBox, không <g transform>) nhưng là icon 2 màu (nền cam bo góc #fe4d01 + chữ 'B' trắng #fff) -- gộp về một màu sẽ mất chữ B, không còn nhận ra được. Xếp tier 2, giữ màu cam #FE4D01."
+    },
+    {
+      "id": "k-plus",
+      "tier": 2,
+      "source": "file:k-plus (không dùng làm vector)",
+      "url": "https://kplus.vn/logo-kplus.svg",
+      "license": "nhãn hiệu của K+ (VSTV), tải 2026-08-23",
+      "color": "D41317",
+      "colorFrom": "logo SVG trang chủ",
+      "note": "Logo 3 màu (đỏ #d41317, trắng, đen mặc định) dạng khối hình học -- không gộp được về một màu mà vẫn giữ được hình dạng logo gốc. Xếp tier 2."
+    },
+    {
+      "id": "character-ai",
+      "tier": 1,
+      "source": "file:character-ai",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/19/Character.ai_2023_vector_logo.svg",
+      "license": "Public domain (Wikimedia Commons, PD-logo), nhãn hiệu của Character Technologies",
+      "color": "111111",
+      "colorFrom": "mẫu màu từ favicon chính thức (character.ai/apple-touch-icon.png, trung bình pixel ~#111111)",
+      "note": "Tải từ Wikimedia Commons (trang character.ai chặn bot, HTTP 403). Wordmark tỉ lệ 100.8x13.9 (~7.25:1) -- RẤT dẹt, tương tự vấn đề của Grindr, cân nhắc kỹ trước khi lên tier 1 thật sự. SVG không có fill nhúng (mặc định đen), khớp với màu mẫu từ favicon."
+    },
+    {
+      "id": "bumble",
+      "tier": 1,
+      "source": "file:bumble",
+      "url": "https://bumble.com/bumble-brand-assets/favicon/safari-pinned-tab.svg",
+      "license": "nhãn hiệu của Bumble Inc, tải 2026-08-23",
+      "color": "FFDB5B",
+      "colorFrom": "mẫu màu từ favicon chính thức (apple-touch-icon.png, màu vàng chủ đạo)",
+      "note": "safari-pinned-tab.svg là icon monochrome sạch (viewBox 598x598, một path, không <g transform>) -- đúng dạng 'mask icon' Apple Safari yêu cầu đơn sắc sẵn. Màu vàng Bumble lấy riêng từ favicon màu (không phải từ file mask, vốn chỉ để browser tô lại)."
+    },
+    {
+      "id": "apple-fitness",
+      "tier": 2,
+      "source": "-",
+      "url": "-",
+      "license": "-",
+      "color": "FA114F",
+      "colorFrom": "kiến thức phổ biến (hồng đỏ hệ Fitness/Activity của Apple, dùng cho vòng Move) -- KHÔNG có tài sản mở công khai từ Apple, Apple không cấp phép logo dịch vụ để tải",
+      "note": "Apple không phát hành SVG logo cho Apple Fitness+ (giống các dịch vụ Apple khác trong hệ thống hiện tại, đều lấy từ theSVG). Không tìm được biến thể theSVG/Iconify cho apple-fitness. Màu ở đây là suy đoán theo hệ màu 'Fitness' quen thuộc của Apple (vòng Move đỏ hồng), CẦN XÁC MINH LẠI."
+    },
+    {
+      "id": "be-hoi-vien",
+      "tier": 2,
+      "source": "-",
+      "url": "https://be.com.vn/favicon.ico",
+      "license": "-",
+      "color": "0E61AB",
+      "colorFrom": "favicon chính thức (be.com.vn/favicon.ico, màu xanh dương chủ đạo)",
+      "note": "'be' là dịch vụ gọi xe Việt Nam (Be Group). Không tìm được bản vector nào (theSVG/Iconify/Simple Icons đều không có; trang be.com.vn chặn bot ở trang HTML chính nhưng favicon.ico vẫn tải được). Màu lấy từ favicon: dải xanh dương #0E61AB."
+    },
+    {
+      "id": "bloomberg",
+      "tier": 2,
+      "source": "file:bloomberg (không dùng làm vector)",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/a/aa/Bloomberg_L.P._logo.svg",
+      "license": "Public domain (Wikimedia Commons, PD-logo)",
+      "color": "000000",
+      "colorFrom": "logo SVG (Wikimedia Commons) -- một màu đen duy nhất, khớp với thương hiệu Bloomberg (chữ đen)",
+      "note": "File tải từ Commons có màu đơn sắc #000000 sạch nhưng THIẾU viewBox (chỉ có width/height, không có thuộc tính viewBox) -- bộ sinh sẽ dừng ngay vì 'no viewBox'. Cần thêm viewBox thủ công (vd viewBox=\"0 0 885.82678 179.06989\" theo đúng width/height khai báo) trước khi dùng, hoặc tìm bản khác có viewBox."
+    },
+    {
+      "id": "brilliant",
+      "tier": 2,
+      "source": "file:brilliant (không dùng làm vector)",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/9/9e/Brilliant_%28website%29_Logo.svg",
+      "license": "Public domain (Wikimedia Commons, PD-logo)",
+      "color": "1A1A1A",
+      "colorFrom": "không có mã màu nhúng trong file (mặc định đen) -- CẦN XÁC MINH LẠI màu thương hiệu thật (brilliant.org chặn bot, không lấy được theme-color)",
+      "note": "File có viewBox vuông sạch (200.2x200.2), không có <g transform>, NHƯNG có transform='translate(...)' đặt TRỰC TIẾP trên thẻ <path> -- bộ sinh chỉ dò '<g' + 'transform' nên sẽ KHÔNG phát hiện ra và sẽ lặng lẽ vẽ sai vị trí nếu dùng thẳng (dịch chuyển toạ độ theo transform mà không xử lý). Đây là lỗ hổng thật của bước kiểm tra thô trong gen_service_marks.py, không riêng gì Brilliant."
+    },
+    {
+      "id": "calm",
+      "tier": 2,
+      "source": "-",
+      "url": "-",
+      "license": "-",
+      "color": "3F79E1",
+      "colorFrom": "mẫu màu từ favicon chính thức (calm.com/favicon.ico, các sắc xanh dương chủ đạo)",
+      "note": "Không tìm được vector nào (theSVG/Iconify/Simple Icons/Commons đều không có). calm.com chặn bot khi lấy trang HTML (403) nhưng favicon.ico vẫn tải được -- các màu trong đó đều thuộc dải xanh dương, khớp nhận diện 'Calm Blue' quen thuộc."
+    },
+    {
+      "id": "coffee-meets-bagel",
+      "tier": 2,
+      "source": "-",
+      "url": "-",
+      "license": "-",
+      "color": null,
+      "colorFrom": null,
+      "note": "Không tìm được vector (theSVG/Iconify/Simple Icons/Commons đều không có) và KHÔNG lấy được màu đáng tin cậy: trang coffeemeetsbagel.com không lộ theme-color, apple-touch-icon trả 404, og:image là ảnh JPG tổng hợp không đại diện màu thương hiệu. Không điền màu để tránh bịa. Cần khảo sát lại."
+    },
+    {
+      "id": "financial-times",
+      "tier": 2,
+      "source": "file:financial-times (không dùng làm vector)",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/7/79/Financial_Times_corporate_logo_%28pink%29.svg",
+      "license": "Public domain (Wikimedia Commons, PD-logo)",
+      "color": "FFF1E5",
+      "colorFrom": "kiến thức phổ biến ('FT Pink' -- màu giấy in đặc trưng của Financial Times, dùng trong hệ thống thiết kế Origami công khai của FT)",
+      "note": "Bản Commons có 2 màu (#333 chữ, #fc9 mảng hồng) và transform='matrix(...)' TRỰC TIẾP trên <path> (không phải trong <g>) -- bộ sinh không phát hiện ra transform kiểu này (chỉ dò '<g'+'transform'), sẽ vẽ sai nếu dùng thẳng. Cũng thiếu viewBox. Xếp tier 2, dùng mã hồng FT chính thức được biết rộng rãi thay vì màu #fc9 lấy trực tiếp từ file (vốn có thể là biến thể không chuẩn)."
+    },
+    {
+      "id": "frontend-masters",
+      "tier": 2,
+      "source": "-",
+      "url": "-",
+      "license": "-",
+      "color": "C6112D",
+      "colorFrom": "kiến thức phổ biến (đỏ Frontend Masters) -- CẦN XÁC MINH LẠI",
+      "note": "Tìm thấy đường dẫn logo thật (cdn.master.dev/.../logo-fm.svg) qua trang chủ nhưng tải về bị chặn (S3 AccessDenied). Không có vector dùng được. Màu là phỏng đoán theo nhận diện thương hiệu quen thuộc, chưa xác minh trực tiếp."
+    },
+    {
+      "id": "grok",
+      "tier": 1,
+      "source": "logos:x-ai",
+      "url": "https://api.iconify.design/logos:x-ai.svg",
+      "license": "CC0 (SVG Logos, Gil Barbara)",
+      "color": "000000",
+      "colorFrom": "kiến thức phổ biến (Grok/xAI dùng logo đen đơn sắc)",
+      "note": "Dùng dấu hiệu công ty mẹ xAI (chữ 'X' cách điệu) vì Grok không có mark sản phẩm riêng biệt trong các bộ mở -- đây cũng là icon xAI dùng phổ biến để đại diện Grok. File sạch: viewBox gần vuông (256x291), một path, không fill nhúng (mặc định đen), không <g>/transform. Có 'logos:grok' (wordmark chữ 'Grok', viewBox 512x188, ~2.7:1) là lựa chọn khác nếu muốn chữ thay vì icon."
+    },
+    {
+      "id": "happn",
+      "tier": 2,
+      "source": "-",
+      "url": "-",
+      "license": "-",
+      "color": null,
+      "colorFrom": null,
+      "note": "Không tìm được vector (theSVG/Iconify/Simple Icons/Commons đều không có) và KHÔNG lấy được màu đáng tin cậy: happn.com không lộ theme-color, apple-touch-icon 404, manifest.json 404. Không điền màu để tránh bịa. Cần khảo sát lại bằng trình duyệt thật."
+    },
+    {
+      "id": "hinge",
+      "tier": 2,
+      "source": "file:hinge (không dùng làm vector)",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/8/87/Hinge_logo.svg",
+      "license": "Public domain (Wikimedia Commons, PD-logo)",
+      "color": "1A1A1A",
+      "colorFrom": "mẫu màu từ icon chính thức (hinge.co/images/icons-192.png, toàn bộ ảnh chỉ có các sắc xám/đen, không có màu -- khớp nhận diện tối giản đen-trắng của Hinge)",
+      "note": "Bản Commons có viewBox tốt (102.76x125.99) và fill='currentColor' (đúng ý đơn sắc) NHƯNG bọc trong <g transform=\"translate(-114.61914)\">  -- bộ sinh sẽ dừng đúng như thiết kế ('has a transformed group, handle it by hand'). Cần dịch tay toạ độ trước khi dùng."
+    },
+    {
+      "id": "iqiyi",
+      "tier": 2,
+      "source": "file:iqiyi (không dùng làm vector)",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/0/0f/IQIYI_logo_%282022%29.svg",
+      "license": "Public domain (Wikimedia Commons, PD-logo)",
+      "color": "00DC5A",
+      "colorFrom": "logo SVG (Wikimedia Commons) -- một màu xanh lá duy nhất #00dc5a",
+      "note": "Bản Commons một màu sạch (#00dc5a) NHƯNG có 17 <g> và 17 chỗ dùng transform (dịch legend theo từng ký tự chữ 'iQIYI') -- rất nhiều group transform thật, không sạch. Thiếu cả viewBox chuẩn kiểu chuỗi mà regex hiện tại nhận (có viewBox nhưng cần re-kiểm). Xếp tier 2, giữ màu #00DC5A đáng tin cậy (khớp nhận diện xanh lá của iQIYI)."
+    },
+    {
+      "id": "leonardo-ai",
+      "tier": 2,
+      "source": "-",
+      "url": "-",
+      "license": "-",
+      "color": null,
+      "colorFrom": null,
+      "note": "leonardo.ai chặn bot hoàn toàn (HTTP 403 cho cả trang chính, favicon.ico, apple-touch-icon) -- không lấy được logo lẫn màu qua các kênh tự động đã thử. Không điền màu để tránh bịa. Cần khảo sát lại bằng trình duyệt thật hoặc tài khoản đăng nhập."
+    },
+    {
+      "id": "goi-cuoc-tra-sau",
+      "tier": 3,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": null,
+      "colorFrom": null,
+      "note": "'Gói cước trả sau' là mục chung (không gắn với một nhà mạng cụ thể), giống các mục hạng-mục-chung khác trong hệ thống hiện tại (tiền điện, phí gửi xe...). Không có hãng để tra logo/màu -- nên xử lý bằng CategoryGlyph (hạng mục PHONE có sẵn), không phải BrandMark. Không điền tier1/2 vì không có brand thật."
+    },
+    {
+      "id": "hoc-phi",
+      "tier": 3,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": null,
+      "colorFrom": null,
+      "note": "'Học phí' là mục chung, không gắn với một trường/tổ chức cụ thể. Tương tự goi-cuoc-tra-sau: không có hãng để tra icon/màu -- dùng CategoryGlyph (hạng mục EDUCATION), không phải BrandMark."
+    }
+  ]
+}

@@ -1,0 +1,865 @@
+{
+  "batch": "productivity",
+  "sectors": [
+    "PRODUCTIVITY"
+  ],
+  "entries": [
+    {
+      "id": "adobe-cc",
+      "name": "Adobe Creative Cloud",
+      "aliases": [
+        "adobe",
+        "photoshop",
+        "creative cloud",
+        "adobe cc"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://account.adobe.com/plans",
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Creative Cloud Pro (All Apps)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 6999,
+          "seats": 1,
+          "note": "Hợp đồng năm, trả theo tháng",
+          "source": "https://helpx.adobe.com/account/individual/subscriptions-and-plans/plan-types-and-eligibility/changes-to-individual-plan.html",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "pro",
+          "name": "Creative Cloud Pro (All Apps)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 77999,
+          "seats": 1,
+          "note": "Trả trước cả năm",
+          "source": "https://helpx.adobe.com/account/individual/subscriptions-and-plans/plan-types-and-eligibility/changes-to-individual-plan.html",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "figma",
+      "name": "Figma",
+      "aliases": [
+        "figma"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "professional",
+      "plans": [
+        {
+          "tier": "professional",
+          "name": "Professional (Full seat)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2000,
+          "seats": 1,
+          "note": "Full seat, trả theo tháng",
+          "source": "https://www.figma.com/pricing/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "professional",
+          "name": "Professional (Full seat)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 19200,
+          "seats": 1,
+          "note": "Full seat, trả theo năm (16 USD/tháng)",
+          "source": "https://www.figma.com/pricing/",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://www.figma.com/settings"
+    },
+    {
+      "id": "notion",
+      "name": "Notion",
+      "aliases": [
+        "notion"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "plus",
+      "plans": [
+        {
+          "tier": "plus",
+          "name": "Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1200,
+          "seats": 1,
+          "note": "Trả theo tháng",
+          "source": "https://www.notion.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "plus",
+          "name": "Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 12000,
+          "seats": 1,
+          "note": "Trả theo năm (10 USD/tháng)",
+          "source": "https://www.notion.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "jetbrains",
+      "name": "JetBrains All Products Pack",
+      "aliases": [
+        "intellij",
+        "jetbrains",
+        "all products pack"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Giá năm là giá năm đầu (299 USD); các năm gia hạn tiếp theo rẻ hơn nhờ continuity discount của JetBrains.",
+      "defaultPlan": "all-products-pack",
+      "plans": [
+        {
+          "tier": "all-products-pack",
+          "name": "All Products Pack (cá nhân)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2990,
+          "seats": 1,
+          "note": "Trả theo tháng",
+          "source": "https://www.jetbrains.com/store/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "all-products-pack",
+          "name": "All Products Pack (cá nhân)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 29900,
+          "seats": 1,
+          "note": "Trả theo năm, giá năm đầu tiên",
+          "source": "https://www.jetbrains.com/store/",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://account.jetbrains.com/licenses"
+    },
+    {
+      "id": "microsoft-365",
+      "name": "Microsoft 365",
+      "aliases": [
+        "office",
+        "office365",
+        "m365",
+        "microsoft 365"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "personal",
+      "plans": [
+        {
+          "tier": "personal",
+          "name": "Microsoft 365 Personal",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 999,
+          "seats": 1,
+          "note": "1 người dùng",
+          "source": "https://www.microsoft.com/en-us/microsoft-365/buy/compare-all-microsoft-365-products",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "personal",
+          "name": "Microsoft 365 Personal",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 9999,
+          "seats": 1,
+          "note": "1 người dùng, trả theo năm",
+          "source": "https://www.microsoft.com/en-us/microsoft-365/buy/compare-all-microsoft-365-products",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://account.microsoft.com/services"
+    },
+    {
+      "id": "domain",
+      "name": "Tên miền",
+      "aliases": [
+        "domain",
+        "ten mien"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Mục chung, không có brand — phí đăng ký/gia hạn khác nhau theo TLD và nhà cung cấp.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "vps-hosting",
+      "name": "VPS / Hosting",
+      "aliases": [
+        "vps",
+        "hosting",
+        "server"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Mục chung, không có brand — phí VPS/hosting khác nhau theo nhà cung cấp và cấu hình.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "vercel",
+      "name": "Vercel",
+      "aliases": [
+        "vercel"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Vercel Pro chỉ tính phí theo tháng (theo seat), không bán gói trả trước theo năm.",
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro (1 seat)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2000,
+          "seats": 1,
+          "note": "Phí nền tảng + 1 seat",
+          "source": "https://vercel.com/docs/plans/pro-plan",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "google-workspace",
+      "name": "Google Workspace",
+      "aliases": [
+        "google workspace",
+        "gsuite",
+        "g suite"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ xác nhận được giá cam kết năm (7 USD/user/tháng); trang giá không hiện tĩnh mức phí trả linh hoạt theo tháng.",
+      "defaultPlan": "business-starter",
+      "plans": [
+        {
+          "tier": "business-starter",
+          "name": "Business Starter",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 8400,
+          "seats": 1,
+          "note": "7 USD/user/tháng, cam kết năm, mỗi user",
+          "source": "https://workspace.google.com/pricing.html",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "canva",
+      "name": "Canva Pro",
+      "aliases": [
+        "canva"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Canva Pro",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 150000,
+          "note": "Giá 1 người dùng",
+          "source": "https://www.canva.com/pricing/",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "pro",
+          "name": "Canva Pro",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 1300000,
+          "note": "Tổng tiền cả năm, giá 1 người dùng",
+          "source": "https://www.canva.com/pricing/",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "zoom",
+      "name": "Zoom",
+      "aliases": [
+        "zoom"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1699,
+          "seats": 1,
+          "note": "Trả theo tháng",
+          "source": "https://zoom.us/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 16990,
+          "seats": 1,
+          "note": "Trả theo năm",
+          "source": "https://zoom.us/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://zoom.us/billing"
+    },
+    {
+      "id": "slack",
+      "name": "Slack",
+      "aliases": [
+        "slack"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 875,
+          "seats": 1,
+          "note": "Trả theo tháng, mỗi user",
+          "source": "https://slack.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 8700,
+          "seats": 1,
+          "note": "7.25 USD/tháng khi trả theo năm",
+          "source": "https://slack.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://slack.com/account/settings"
+    },
+    {
+      "id": "grammarly",
+      "name": "Grammarly",
+      "aliases": [
+        "grammarly"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 3000,
+          "seats": 1,
+          "note": "Trả theo tháng",
+          "source": "https://www.grammarly.com/plans",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 14400,
+          "seats": 1,
+          "note": "Trả theo năm (12 USD/tháng)",
+          "source": "https://www.grammarly.com/plans",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "todoist",
+      "name": "Todoist",
+      "aliases": [
+        "todoist"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 700,
+          "note": "Billed monthly",
+          "source": "https://www.todoist.com/pricing",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 6000,
+          "note": "Tổng tiền cả năm khi thanh toán theo năm ($5/tháng)",
+          "source": "https://www.todoist.com/pricing",
+          "checkedAt": "2026-08-24"
+        }
+      ],
+      "manageUrl": "https://app.todoist.com/app/settings/subscription"
+    },
+    {
+      "id": "evernote",
+      "name": "Evernote",
+      "aliases": [
+        "evernote"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Trang evernote.com/compare-plans mở được bằng trình duyệt thật nhưng hiện giá VND với số lẻ tới hàng thập phân (vd 62.766,58đ/tháng) — dấu hiệu quy đổi tỉ giá tự động theo IP chứ không phải bảng giá VND chính thức của hãng, nên không dùng. Danh sách In-App Purchase trên App Store cũng chỉ là các mục cũ chồng chéo (Premium/Plus/Personal, có cả gói trọn đời) không tách được cặp giá tháng/năm hiện hành rõ ràng.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "obsidian-sync",
+      "name": "Obsidian Sync",
+      "aliases": [
+        "obsidian sync",
+        "obsidian"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Sync Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 500,
+          "seats": 1,
+          "note": "Trả theo tháng",
+          "source": "https://obsidian.md/sync",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard",
+          "name": "Sync Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 4800,
+          "seats": 1,
+          "note": "Trả theo năm (4 USD/tháng)",
+          "source": "https://obsidian.md/sync",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "trello",
+      "name": "Trello",
+      "aliases": [
+        "trello"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 600,
+          "seats": 1,
+          "note": "Trả theo tháng, mỗi user",
+          "source": "https://trello.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard",
+          "name": "Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 6000,
+          "seats": 1,
+          "note": "5 USD/tháng khi trả theo năm",
+          "source": "https://trello.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "asana",
+      "name": "Asana",
+      "aliases": [
+        "asana"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "starter",
+      "plans": [
+        {
+          "tier": "starter",
+          "name": "Starter",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1349,
+          "seats": 1,
+          "note": "Trả theo tháng, mỗi user",
+          "source": "https://asana.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "starter",
+          "name": "Starter",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 13188,
+          "seats": 1,
+          "note": "10.99 USD/tháng khi trả theo năm",
+          "source": "https://asana.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "clickup",
+      "name": "ClickUp",
+      "aliases": [
+        "clickup"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "unlimited",
+      "plans": [
+        {
+          "tier": "unlimited",
+          "name": "Unlimited",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1000,
+          "seats": 1,
+          "note": "Trả theo tháng, mỗi user",
+          "source": "https://clickup.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "unlimited",
+          "name": "Unlimited",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 8400,
+          "seats": 1,
+          "note": "7 USD/tháng khi trả theo năm",
+          "source": "https://clickup.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "linear",
+      "name": "Linear",
+      "aliases": [
+        "linear"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ xác nhận được giá trả theo năm (10 USD/user/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
+      "defaultPlan": "basic",
+      "plans": [
+        {
+          "tier": "basic",
+          "name": "Basic",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 12000,
+          "seats": 1,
+          "note": "10 USD/user/tháng, trả theo năm",
+          "source": "https://linear.app/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "airtable",
+      "name": "Airtable",
+      "aliases": [
+        "airtable"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ xác nhận được giá trả theo năm (20 USD/user/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
+      "defaultPlan": "team",
+      "plans": [
+        {
+          "tier": "team",
+          "name": "Team",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 24000,
+          "seats": 1,
+          "note": "20 USD/user/tháng, trả theo năm",
+          "source": "https://airtable.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "miro",
+      "name": "Miro",
+      "aliases": [
+        "miro"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ xác nhận được giá trả theo năm (8 USD/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
+      "defaultPlan": "starter",
+      "plans": [
+        {
+          "tier": "starter",
+          "name": "Starter",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 9600,
+          "seats": 1,
+          "note": "8 USD/tháng, trả theo năm",
+          "source": "https://miro.com/pricing/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "raycast",
+      "name": "Raycast Pro",
+      "aliases": [
+        "raycast"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ xác nhận được giá trả theo năm (8 USD/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 9600,
+          "seats": 1,
+          "note": "8 USD/tháng, trả theo năm",
+          "source": "https://www.raycast.com/pro",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "setapp",
+      "name": "Setapp",
+      "aliases": [
+        "setapp"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "mac-ios",
+      "plans": [
+        {
+          "tier": "mac-ios",
+          "name": "Mac + iOS",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1899,
+          "note": "Gói phổ biến nhất (\"Popular choice\"), chưa gồm thuế, 1 Mac + 4 thiết bị iOS",
+          "source": "https://setapp.com/pricing",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "mac-ios",
+          "name": "Mac + iOS",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 13488,
+          "note": "Tổng tiền cả năm khi bật \"Save up to 40% yearly\", chưa gồm thuế",
+          "source": "https://setapp.com/pricing",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "aliases": [
+        "github"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Xác nhận lại bằng trình duyệt thật trên github.com/pricing: GitHub chỉ còn 3 gói Free, Team (4 USD/user/tháng, tính theo tổ chức chứ không phải cá nhân) và Enterprise (từ 21 USD/user/tháng); không còn gói Pro cho tài khoản cá nhân nên không có tier phù hợp để ghi giá.",
+      "defaultPlan": null,
+      "plans": [],
+      "manageUrl": "https://github.com/settings/billing/summary"
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare",
+      "aliases": [
+        "cloudflare"
+      ],
+      "sector": "PRODUCTIVITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Giá Pro tính theo 1 website/domain.",
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro (1 website)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2500,
+          "seats": 1,
+          "note": "Trả theo tháng",
+          "source": "https://www.cloudflare.com/plans/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "pro",
+          "name": "Pro (1 website)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 24000,
+          "seats": 1,
+          "note": "20 USD/tháng khi trả theo năm",
+          "source": "https://www.cloudflare.com/plans/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    }
+  ]
+}

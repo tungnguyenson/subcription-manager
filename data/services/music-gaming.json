@@ -1,0 +1,664 @@
+{
+  "batch": "music-gaming",
+  "sectors": [
+    "MUSIC",
+    "GAMING"
+  ],
+  "entries": [
+    {
+      "id": "spotify",
+      "name": "Spotify",
+      "aliases": [
+        "spotify"
+      ],
+      "sector": "MUSIC",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://www.spotify.com/account/subscription/",
+      "noteVi": "Spotify không bán gói năm trên trang giá — chỉ có gói tháng cho Individual.",
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 65000,
+          "note": "Giá niêm yết sau khi hết ưu đãi dùng thử",
+          "source": "https://www.spotify.com/vn-vi/premium/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1299,
+          "note": "Giá niêm yết sau khi hết ưu đãi dùng thử",
+          "source": "https://www.spotify.com/us/premium/",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://www.spotify.com/account/subscription/manage/"
+    },
+    {
+      "id": "apple-music",
+      "name": "Apple Music",
+      "aliases": [
+        "apple music",
+        "applemusic"
+      ],
+      "sector": "MUSIC",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Apple Music có gói năm cho cá nhân nhưng chỉ hiện trong mục quản lý tài khoản sau khi đã đăng ký gói tháng, không có trên trang giá công khai nên không ghi vào plans.",
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 65000,
+          "source": "https://www.apple.com/vn/apple-music/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1199,
+          "source": "https://www.apple.com/apple-music/",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://apps.apple.com/account/subscriptions"
+    },
+    {
+      "id": "nhaccuatui",
+      "name": "NhacCuaTui",
+      "aliases": [
+        "nhaccuatui",
+        "nct"
+      ],
+      "sector": "MUSIC",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "vip",
+      "plans": [
+        {
+          "tier": "vip",
+          "name": "VIP",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 49000,
+          "source": "https://www.nhaccuatui.com/nhaccuatui-vip/mua-vip",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "vip",
+          "name": "VIP",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 499000,
+          "source": "https://www.nhaccuatui.com/nhaccuatui-vip/mua-vip",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "zing-mp3",
+      "name": "Zing MP3",
+      "aliases": [
+        "zingmp3",
+        "zing",
+        "zing mp3"
+      ],
+      "sector": "MUSIC",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Đã xác minh lại độc lập trên zingmp3.vn (tên miền mới, mp3.zing.vn đã đổi): gói Premium đúng 49.000đ/tháng và 499.000đ/12 tháng (giảm 15%). Trùng với giá NhacCuaTui VIP là trùng hợp có thật giữa hai đối thủ, không phải lỗi copy dữ liệu.",
+      "defaultPlan": "vip",
+      "plans": [
+        {
+          "tier": "vip",
+          "name": "VIP",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 49000,
+          "source": "https://zingmp3.vn/vip/upgrade/premium",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "vip",
+          "name": "VIP",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 499000,
+          "source": "https://zingmp3.vn/vip/upgrade/premium",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "xbox-gamepass",
+      "name": "Xbox Game Pass",
+      "aliases": [
+        "gamepass",
+        "xbox",
+        "xbox game pass",
+        "game pass"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Không tìm được giá VND chính thức hiện hành trên xbox.com/vi-VN nên chỉ ghi giá USD toàn cầu. Chọn tier Ultimate vì đây là tier phổ biến nhất với người chơi cá nhân (đầy đủ console + PC + cloud + EA Play) và cũng là tier các cửa hàng bán lẻ VN bán nhiều nhất.",
+      "defaultPlan": "ultimate",
+      "plans": [
+        {
+          "tier": "ultimate",
+          "name": "Ultimate",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2299,
+          "source": "https://news.xbox.com/en-us/2026/04/21/xbox-game-pass-update/",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://account.microsoft.com/services"
+    },
+    {
+      "id": "playstation-plus",
+      "name": "PlayStation Plus",
+      "aliases": [
+        "psplus",
+        "ps plus",
+        "playstation plus"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://www.playstation.com/en-vn/support/subscriptions/change-ps-plus/",
+      "noteVi": "Việt Nam không có PS Store riêng; giá chính thức chỉ có bằng USD (mua qua tài khoản khu vực khác).",
+      "defaultPlan": "essential",
+      "plans": [
+        {
+          "tier": "essential",
+          "name": "Essential",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1099,
+          "source": "https://www.playstation.com/en-us/ps-plus/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "essential",
+          "name": "Essential",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 7999,
+          "source": "https://www.playstation.com/en-us/ps-plus/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "nintendo-online",
+      "name": "Nintendo Switch Online",
+      "aliases": [
+        "nintendo",
+        "nintendo switch online",
+        "switch online",
+        "nso"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Nintendo eShop không có gian hàng riêng cho VN nên giá chính thức chỉ có bằng USD. Trang giá chính chỉ niêm yết gói năm cho Individual, không hiện giá tháng.",
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 1999,
+          "source": "https://www.nintendo.com/us/online/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "soundcloud-go",
+      "name": "SoundCloud Go+",
+      "aliases": [
+        "soundcloud",
+        "soundcloud go",
+        "soundcloud go+"
+      ],
+      "sector": "MUSIC",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "checkout.soundcloud.com/go xác nhận bằng trình duyệt thật: SoundCloud Go+ chưa mở bán tại Việt Nam (\"still working on launching SoundCloud Go+ in your country\"). Giá lấy từ danh sách In-App Purchase trên App Store; không thấy gói năm.",
+      "defaultPlan": "go-plus",
+      "plans": [
+        {
+          "tier": "go-plus",
+          "name": "SoundCloud Go+",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1499,
+          "note": "Giá mua trong ứng dụng qua App Store",
+          "source": "https://apps.apple.com/us/app/soundcloud-the-music-you-love/id336353151",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "tidal",
+      "name": "Tidal",
+      "aliases": [
+        "tidal"
+      ],
+      "sector": "MUSIC",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "tidal.com vẫn chặn bot bằng captcha \"slide to secure\" dù dùng trình duyệt thật; giá lấy từ danh sách In-App Purchase trên App Store (đã gồm phần chênh do thanh toán qua Apple), không thấy gói năm trong danh sách này.",
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1549,
+          "note": "Giá mua trong ứng dụng qua App Store (có thể cao hơn giá web do phụ phí Apple)",
+          "source": "https://apps.apple.com/us/app/tidal-music-hifi-sound/id913943275",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "amazon-music",
+      "name": "Amazon Music Unlimited",
+      "aliases": [
+        "amazon music",
+        "amazon music unlimited"
+      ],
+      "sector": "MUSIC",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1299,
+          "note": "Giá gia hạn tiêu chuẩn sau dùng thử (11.99 USD/tháng nếu có Prime); không có gói năm",
+          "source": "https://www.amazon.com/music/unlimited",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "deezer",
+      "name": "Deezer",
+      "aliases": [
+        "deezer"
+      ],
+      "sector": "MUSIC",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1199,
+          "source": "https://www.deezer.com/us/offers/premium",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 10799,
+          "source": "https://www.deezer.com/us/offers/annual-plan",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "qobuz",
+      "name": "Qobuz",
+      "aliases": [
+        "qobuz"
+      ],
+      "sector": "MUSIC",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Gói năm không ghi được: trang hãng chỉ niêm yết mức quy ra tháng khi cam kết trả năm, không hiện tổng tiền cả năm.",
+      "defaultPlan": "solo",
+      "plans": [
+        {
+          "tier": "solo",
+          "name": "Studio Solo",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1299,
+          "note": "Gói tháng không cam kết",
+          "source": "https://www.qobuz.com/us-en/music/streaming/offers/studio",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "ea-play",
+      "name": "EA Play",
+      "aliases": [
+        "ea play",
+        "eaplay"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Có tier EA Play Pro (16.99 USD/tháng, chỉ dành cho PC) — mục này lấy tier EA Play chuẩn vì phổ biến hơn cho cá nhân.",
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "EA Play",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 599,
+          "source": "https://www.ea.com/ea-play",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard",
+          "name": "EA Play",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 3999,
+          "source": "https://www.ea.com/ea-play",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "ubisoft-plus",
+      "name": "Ubisoft+",
+      "aliases": [
+        "ubisoft plus",
+        "ubisoft+",
+        "uplay+"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Có tier Ubisoft+ Classics rẻ hơn (7.99 USD/tháng, chỉ thư viện game cũ) — mục này lấy tier Premium (đầy đủ, có game phát hành ngày đầu) vì đây là gói được biết đến rộng rãi hơn với tên \"Ubisoft+\". Không thấy gói năm trên trang giá chính thức.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1799,
+          "source": "https://store.ubisoft.com/us/ubisoftplus/premium?lang=en_US",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "apple-arcade",
+      "name": "Apple Arcade",
+      "aliases": [
+        "apple arcade",
+        "applearcade"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 179000,
+          "source": "https://www.apple.com/vn/apple-arcade/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 1199000,
+          "source": "https://www.apple.com/vn/apple-arcade/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 699,
+          "source": "https://www.apple.com/apple-arcade/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 4999,
+          "source": "https://www.apple.com/apple-arcade/",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://apps.apple.com/account/subscriptions"
+    },
+    {
+      "id": "google-play-pass",
+      "name": "Google Play Pass",
+      "aliases": [
+        "google play pass",
+        "play pass",
+        "playpass"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Xác nhận bằng trình duyệt thật (đã đăng nhập Google): play.google.com/store/pass/getstarted trả về \"Play Pass isn't available for your Google account\" — Play Pass chưa/không phục vụ tài khoản ở khu vực Việt Nam nên không có giá để ghi.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "geforce-now",
+      "name": "GeForce NOW",
+      "aliases": [
+        "geforce now",
+        "geforcenow",
+        "gfn"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "nvidia.com tự chuyển hướng sang locale en-vn và ghi rõ \"GeForce NOW is operated by GeForce NOW Alliance Partners in your region\" (đối tác vận hành riêng, ví dụ StarHub) — không có trang giá USD/VND thống nhất của chính NVIDIA áp dụng cho khu vực này để ghi.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "discord-nitro",
+      "name": "Discord Nitro",
+      "aliases": [
+        "discord nitro",
+        "nitro"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Trang chính thức discord.com/nitro chỉ hiện giá tháng, không hiện giá năm.",
+      "defaultPlan": "nitro",
+      "plans": [
+        {
+          "tier": "nitro",
+          "name": "Nitro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 999,
+          "source": "https://discord.com/nitro",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "roblox-premium",
+      "name": "Roblox Premium",
+      "aliases": [
+        "roblox premium",
+        "roblox"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "premium-450",
+      "plans": [
+        {
+          "tier": "premium-450",
+          "name": "Premium 450",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 499,
+          "note": "450 Robux/tháng, gói Premium thấp nhất; roblox.com chặn kết nối bot nên lấy từ App Store",
+          "source": "https://apps.apple.com/us/app/roblox/id431946152",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "minecraft-realms",
+      "name": "Minecraft Realms",
+      "aliases": [
+        "minecraft realms",
+        "realms"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "realms",
+      "plans": [
+        {
+          "tier": "realms",
+          "name": "Realms (Bedrock)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 399,
+          "note": "Gói cơ bản, bạn + 2 người chơi cùng lúc; không có gói năm",
+          "source": "https://www.minecraft.net/en-us/realms",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "wow-sub",
+      "name": "World of Warcraft",
+      "aliases": [
+        "world of warcraft",
+        "wow",
+        "wow sub"
+      ],
+      "sector": "GAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Subscription",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1499,
+          "note": "Gói 1 tháng, billed monthly",
+          "source": "https://us.shop.battle.net/en-us/product/world-of-warcraft-subscription",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "standard",
+          "name": "Subscription",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 15588,
+          "note": "Tổng tiền cả năm của gói \"12-Month Special Offer\" (12.99 USD/tháng x 12)",
+          "source": "https://us.shop.battle.net/en-us/product/world-of-warcraft-subscription",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    }
+  ]
+}

@@ -60,6 +60,36 @@ enum Category with WireNamed {
   final String wireName;
 }
 
+/// Where the user bought this subscription, which decides where they can go to
+/// look at it.
+///
+/// Not a property of the service: Claude sells through the web, the App Store
+/// and Google Play at once, and knowing that tells you nothing about where
+/// *this* user is billed. Only they know, so it lives on their item -- the same
+/// shape as [DateSource], and for the same reason.
+///
+/// [unknown] is the honest default. The app does not open with a question about
+/// billing plumbing; it shows the vendor's page and offers the store as the
+/// other answer, and the first tap records which one was right.
+enum PurchaseChannel with WireNamed {
+  unknown('UNKNOWN'),
+
+  /// Bought on the vendor's own site, so the vendor's billing page is the one
+  /// that shows it.
+  web('WEB'),
+
+  /// Bought as an in-app purchase on iOS. The vendor's own page will not show
+  /// this subscription at all, which is the trap this enum exists to avoid.
+  appStore('APP_STORE'),
+
+  playStore('PLAY_STORE');
+
+  const PurchaseChannel(this.wireName);
+
+  @override
+  final String wireName;
+}
+
 enum ItemState with WireNamed {
   active('ACTIVE'),
 
@@ -202,6 +232,9 @@ class TrackedItem {
 
   final ItemState state;
 
+  /// Where this one was bought. See [PurchaseChannel].
+  final PurchaseChannel purchaseChannel;
+
   TrackedItem({
     required this.id,
     required this.name,
@@ -225,6 +258,7 @@ class TrackedItem {
     this.dateSource = DateSource.userEstimated,
     this.snoozedUntil,
     this.state = ItemState.active,
+    this.purchaseChannel = PurchaseChannel.unknown,
     // Dart cannot express "default to null" and "default to a computed value"
     // in the same optional parameter, so an explicit null for a
     // category-defaulted field is passed as a flag instead of guessing.
@@ -272,6 +306,7 @@ class TrackedItem {
     DateSource? dateSource,
     LocalDate? Function()? snoozedUntil,
     ItemState? state,
+    PurchaseChannel? purchaseChannel,
   }) {
     return TrackedItem(
       id: id ?? this.id,
@@ -301,6 +336,7 @@ class TrackedItem {
       dateSource: dateSource ?? this.dateSource,
       snoozedUntil: snoozedUntil != null ? snoozedUntil() : this.snoozedUntil,
       state: state ?? this.state,
+      purchaseChannel: purchaseChannel ?? this.purchaseChannel,
     );
   }
 }

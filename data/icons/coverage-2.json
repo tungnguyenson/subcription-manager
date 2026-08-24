@@ -1,0 +1,805 @@
+{
+  "part": 2,
+  "entries": [
+    {
+      "id": "miro",
+      "tier": 1,
+      "source": "thesvg:miro",
+      "url": "https://api.iconify.design/thesvg:miro.svg",
+      "license": "MIT (theSVG)",
+      "color": "050038",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "mubi",
+      "tier": 1,
+      "source": "thesvg:mubi",
+      "url": "https://api.iconify.design/thesvg:mubi.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "mullvad",
+      "tier": 1,
+      "source": "thesvg:mullvad",
+      "url": "https://api.iconify.design/thesvg:mullvad.svg",
+      "license": "MIT (theSVG)",
+      "color": "294D73",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "nebula",
+      "tier": 1,
+      "source": "thesvg:nebula",
+      "url": "https://api.iconify.design/thesvg:nebula.svg",
+      "license": "MIT (theSVG)",
+      "color": "2CADFE",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "nordvpn",
+      "tier": 1,
+      "source": "thesvg:nordvpn",
+      "url": "https://api.iconify.design/thesvg:nordvpn.svg",
+      "license": "MIT (theSVG)",
+      "color": "4687FF",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "norton-360",
+      "tier": 1,
+      "source": "thesvg:norton",
+      "url": "https://api.iconify.design/thesvg:norton.svg",
+      "license": "MIT (theSVG)",
+      "color": "FFE01A",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "nyt",
+      "tier": 1,
+      "source": "thesvg:new-york-times",
+      "url": "https://api.iconify.design/thesvg:new-york-times.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": "slug SI là newyorktimes; theSVG dùng new-york-times"
+    },
+    {
+      "id": "obsidian-sync",
+      "tier": 1,
+      "source": "thesvg:obsidian",
+      "url": "https://api.iconify.design/thesvg:obsidian.svg",
+      "license": "MIT (theSVG)",
+      "color": "7C3AED",
+      "colorFrom": "simple-icons.json",
+      "note": "dùng chung dấu hiệu Obsidian (không có logo riêng cho tính năng Sync)"
+    },
+    {
+      "id": "okcupid",
+      "tier": 1,
+      "source": "thesvg:okcupid",
+      "url": "https://api.iconify.design/thesvg:okcupid.svg",
+      "license": "MIT (theSVG)",
+      "color": "0500BE",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "oreilly",
+      "tier": 1,
+      "source": "thesvg:o-reilly",
+      "url": "https://api.iconify.design/thesvg:o-reilly.svg",
+      "license": "MIT (theSVG)",
+      "color": "D3002D",
+      "colorFrom": "simple-icons.json",
+      "note": "slug SI là oreilly; theSVG dùng o-reilly"
+    },
+    {
+      "id": "paramount-plus",
+      "tier": 1,
+      "source": "thesvg:paramountplus",
+      "url": "https://api.iconify.design/thesvg:paramountplus.svg",
+      "license": "MIT (theSVG)",
+      "color": "0064FF",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "patreon",
+      "tier": 1,
+      "source": "thesvg:patreon",
+      "url": "https://api.iconify.design/thesvg:patreon.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "peloton",
+      "tier": 1,
+      "source": "thesvg:peloton",
+      "url": "https://api.iconify.design/thesvg:peloton.svg",
+      "license": "MIT (theSVG)",
+      "color": "181A1D",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "poe",
+      "tier": 1,
+      "source": "thesvg:poe",
+      "url": "https://api.iconify.design/thesvg:poe.svg",
+      "license": "MIT (theSVG)",
+      "color": "5D5CDE",
+      "colorFrom": "simple-icons.json",
+      "note": "Poe (poe.com, Quora) — kiểm tra source field trong simple-icons.json khớp poe.com"
+    },
+    {
+      "id": "proton-drive",
+      "tier": 1,
+      "source": "thesvg:proton-drive",
+      "url": "https://api.iconify.design/thesvg:proton-drive.svg",
+      "license": "MIT (theSVG)",
+      "color": "EB508D",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "proton-vpn",
+      "tier": 1,
+      "source": "thesvg:proton-vpn",
+      "url": "https://api.iconify.design/thesvg:proton-vpn.svg",
+      "license": "MIT (theSVG)",
+      "color": "66DEB1",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "quizlet",
+      "tier": 1,
+      "source": "thesvg:quizlet",
+      "url": "https://api.iconify.design/thesvg:quizlet.svg",
+      "license": "MIT (theSVG)",
+      "color": "4255FF",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "raycast",
+      "tier": 1,
+      "source": "thesvg:raycast",
+      "url": "https://api.iconify.design/thesvg:raycast.svg",
+      "license": "MIT (theSVG)",
+      "color": "FF6363",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "reddit-premium",
+      "tier": 1,
+      "source": "thesvg:reddit",
+      "url": "https://api.iconify.design/thesvg:reddit.svg",
+      "license": "MIT (theSVG)",
+      "color": "FF4500",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "replit",
+      "tier": 1,
+      "source": "thesvg:replit",
+      "url": "https://api.iconify.design/thesvg:replit.svg",
+      "license": "MIT (theSVG)",
+      "color": "F26207",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "roblox-premium",
+      "tier": 1,
+      "source": "thesvg:roblox",
+      "url": "https://api.iconify.design/thesvg:roblox.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "setapp",
+      "tier": 1,
+      "source": "thesvg:setapp",
+      "url": "https://api.iconify.design/thesvg:setapp.svg",
+      "license": "MIT (theSVG)",
+      "color": "E6C3A5",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "shopeefood-xtra",
+      "tier": 1,
+      "source": "thesvg:shopee",
+      "url": "https://api.iconify.design/thesvg:shopee.svg",
+      "license": "MIT (theSVG)",
+      "color": "EE4D2D",
+      "colorFrom": "simple-icons.json",
+      "note": "dùng dấu hiệu Shopee chung (ShopeeFood không có logo riêng ở bộ mở)"
+    },
+    {
+      "id": "skillshare",
+      "tier": 1,
+      "source": "thesvg:skillshare",
+      "url": "https://api.iconify.design/thesvg:skillshare.svg",
+      "license": "MIT (theSVG)",
+      "color": "00FF84",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "snapchat-plus",
+      "tier": 1,
+      "source": "thesvg:snapchat",
+      "url": "https://api.iconify.design/thesvg:snapchat.svg",
+      "license": "MIT (theSVG)",
+      "color": "FFFC00",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "soundcloud-go",
+      "tier": 1,
+      "source": "thesvg:soundcloud",
+      "url": "https://api.iconify.design/thesvg:soundcloud.svg",
+      "license": "MIT (theSVG)",
+      "color": "FF5500",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "strava",
+      "tier": 1,
+      "source": "thesvg:strava",
+      "url": "https://api.iconify.design/thesvg:strava.svg",
+      "license": "MIT (theSVG)",
+      "color": "FC4C02",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "substack",
+      "tier": 1,
+      "source": "thesvg:substack",
+      "url": "https://api.iconify.design/thesvg:substack.svg",
+      "license": "MIT (theSVG)",
+      "color": "FF6719",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "suno",
+      "tier": 1,
+      "source": "thesvg:suno",
+      "url": "https://api.iconify.design/thesvg:suno.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "surfshark",
+      "tier": 1,
+      "source": "thesvg:surfshark",
+      "url": "https://api.iconify.design/thesvg:surfshark.svg",
+      "license": "MIT (theSVG)",
+      "color": "1EBFBF",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "synology-c2",
+      "tier": 1,
+      "source": "thesvg:synology",
+      "url": "https://api.iconify.design/thesvg:synology.svg",
+      "license": "MIT (theSVG)",
+      "color": "B5B5B6",
+      "colorFrom": "simple-icons.json",
+      "note": "dùng dấu hiệu Synology chung (C2 không có logo riêng)"
+    },
+    {
+      "id": "telegram-premium",
+      "tier": 1,
+      "source": "thesvg:telegram",
+      "url": "https://api.iconify.design/thesvg:telegram.svg",
+      "license": "MIT (theSVG)",
+      "color": "26A5E4",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "tidal",
+      "tier": 1,
+      "source": "thesvg:tidal",
+      "url": "https://api.iconify.design/thesvg:tidal.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "tinder",
+      "tier": 1,
+      "source": "thesvg:tinder",
+      "url": "https://api.iconify.design/thesvg:tinder.svg",
+      "license": "MIT (theSVG)",
+      "color": "FF6B6B",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "todoist",
+      "tier": 1,
+      "source": "thesvg:todoist",
+      "url": "https://api.iconify.design/thesvg:todoist.svg",
+      "license": "MIT (theSVG)",
+      "color": "E44332",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "tradingview",
+      "tier": 1,
+      "source": "thesvg:tradingview",
+      "url": "https://api.iconify.design/thesvg:tradingview.svg",
+      "license": "MIT (theSVG)",
+      "color": "131622",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "trello",
+      "tier": 1,
+      "source": "thesvg:trello",
+      "url": "https://api.iconify.design/thesvg:trello.svg",
+      "license": "MIT (theSVG)",
+      "color": "0052CC",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "twitch-turbo",
+      "tier": 1,
+      "source": "thesvg:twitch",
+      "url": "https://api.iconify.design/thesvg:twitch.svg",
+      "license": "MIT (theSVG)",
+      "color": "9146FF",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "uber-one",
+      "tier": 1,
+      "source": "thesvg:uber",
+      "url": "https://api.iconify.design/thesvg:uber.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "ubisoft-plus",
+      "tier": 1,
+      "source": "thesvg:ubisoft",
+      "url": "https://api.iconify.design/thesvg:ubisoft.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "v0",
+      "tier": 1,
+      "source": "thesvg:v0",
+      "url": "https://api.iconify.design/thesvg:v0.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "webtoon",
+      "tier": 1,
+      "source": "thesvg:webtoon",
+      "url": "https://api.iconify.design/thesvg:webtoon.svg",
+      "license": "MIT (theSVG)",
+      "color": "00D564",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "windsurf",
+      "tier": 1,
+      "source": "thesvg:windsurf",
+      "url": "https://api.iconify.design/thesvg:windsurf.svg",
+      "license": "MIT (theSVG)",
+      "color": "0B100F",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "x-premium",
+      "tier": 1,
+      "source": "thesvg:x",
+      "url": "https://api.iconify.design/thesvg:x.svg",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "simple-icons.json",
+      "note": "slug SI là x (alias Twitter)"
+    },
+    {
+      "id": "zoom",
+      "tier": 1,
+      "source": "thesvg:zoom",
+      "url": "https://api.iconify.design/thesvg:zoom.svg",
+      "license": "MIT (theSVG)",
+      "color": "0B5CFF",
+      "colorFrom": "simple-icons.json",
+      "note": ""
+    },
+    {
+      "id": "slack",
+      "tier": 1,
+      "source": "simple-icons:slack",
+      "url": "https://api.iconify.design/simple-icons:slack.svg",
+      "license": "CC0 1.0 (Simple Icons)",
+      "color": "4A154B",
+      "colorFrom": "tra web (brand guidelines PDF chính thức của Slack, không có trong simple-icons.json bản hiện tại)",
+      "note": "Slack đã bị gỡ khỏi simple-icons.json bản mới nhất (giống Microsoft/Adobe/Xbox...) nhưng Iconify vẫn phục vụ được qua bản chụp cũ — cần theo dõi, có thể mất trong tương lai nếu Iconify đồng bộ lại."
+    },
+    {
+      "id": "noom",
+      "tier": 1,
+      "source": "file:noom",
+      "url": "tool/brand_icons/noom.svg (trích từ https://cdn.jsdelivr.net/npm/@thesvg/icons/dist/noom.js, chưa có trên bản chụp thesvg của Iconify)",
+      "license": "MIT (theSVG)",
+      "color": "FB513B",
+      "colorFrom": "khai báo hex trong file nguồn theSVG (khớp màu san hô đặc trưng)",
+      "note": ""
+    },
+    {
+      "id": "the-economist",
+      "tier": 1,
+      "source": "file:the-economist",
+      "url": "tool/brand_icons/the-economist.svg (trích từ https://cdn.jsdelivr.net/npm/@thesvg/icons/dist/the-economist.js, chưa có trên bản chụp thesvg của Iconify)",
+      "license": "MIT (theSVG)",
+      "color": "E3120B",
+      "colorFrom": "khai báo hex trong file nguồn theSVG (khớp đỏ Economist quen thuộc)",
+      "note": ""
+    },
+    {
+      "id": "whoop",
+      "tier": 1,
+      "source": "file:whoop",
+      "url": "tool/brand_icons/whoop.svg (trích từ https://cdn.jsdelivr.net/npm/@thesvg/icons/dist/whoop.js, chưa có trên bản chụp thesvg của Iconify)",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "khai báo hex trong file nguồn theSVG",
+      "note": "File gốc có <g transform=\"translate(.73 .541)\">; đã gộp độ lệch vào viewBox (0 0 39 39 -> -0.73 -0.541 39 39) thay vì sửa toạ độ từng path, giữ nguyên hình vẽ."
+    },
+    {
+      "id": "peacock",
+      "tier": 1,
+      "source": "file:peacock",
+      "url": "tool/brand_icons/peacock.svg (trích từ https://cdn.jsdelivr.net/npm/@thesvg/icons/dist/peacock.js, chưa có trên bản chụp thesvg của Iconify)",
+      "license": "MIT (theSVG)",
+      "color": "000000",
+      "colorFrom": "khai báo hex trong file nguồn theSVG (khớp chữ 'peacock' đen)",
+      "note": "File gốc là chữ 'peacock' đen + 6 chấm màu cầu vồng (không chồng lên nhau). Gộp về một màu vẫn ra chữ + 6 chấm rõ ràng, không mất khả năng nhận diện — đã kiểm bằng render thử."
+    },
+    {
+      "id": "microsoft-copilot",
+      "tier": 1,
+      "source": "file:microsoft-copilot",
+      "url": "tool/brand_icons/microsoft-copilot.svg (trích từ https://cdn.jsdelivr.net/npm/@thesvg/icons/dist/microsoft-copilot.js, chưa có trên bản chụp thesvg của Iconify)",
+      "license": "MIT (theSVG)",
+      "color": "0078D4",
+      "colorFrom": "không có mã chính thức (logo dùng gradient nhiều màu, đổi theo ngữ cảnh) — dùng lại xanh Microsoft 0078D4 đã khai báo cho mục 'microsoft' trong generator để nhất quán",
+      "note": "File gốc 6 path tô gradient khác nhau. Đã render thử với một màu đen duy nhất: hình cánh bướm vẫn ra hình rõ ràng vì các mảng không chồng nhau. Không có hex chính thức đơn sắc từ Microsoft."
+    },
+    {
+      "id": "runway",
+      "tier": 1,
+      "source": "file:runway",
+      "url": "tool/brand_icons/runway.svg (trích từ https://cdn.jsdelivr.net/npm/@thesvg/icons/dist/runway.js, chưa có trên bản chụp thesvg của Iconify)",
+      "license": "MIT (theSVG)",
+      "color": "0C0C0C",
+      "colorFrom": "meta theme-color tại runway.com",
+      "note": "File gốc theSVG có 5 path: 1 path viền trắng (#FEFEFE) vẽ chữ R lồng khối tròn, và 1 path nền đen hình vuông bo góc (dành cho app icon). Đã bỏ path nền, chỉ giữ path chữ R — kiểm bằng render thử, ra đúng chữ R viền của Runway. runwayml.com chuyển hướng (308) sang runway.com."
+    },
+    {
+      "id": "minecraft-realms",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "1DB53C",
+      "colorFrom": "ảnh chính thức minecraft.net (creeper face, minecraft-creeper-face.jpg)",
+      "note": "Không tìm được vector Mojang/Minecraft ở theSVG, Simple Icons, cib, logos hay mdi (có thể do chính sách thương hiệu, tương tự Xbox/Microsoft). Realms dùng chung màu xanh lá Minecraft."
+    },
+    {
+      "id": "money-lover",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "2FAD47",
+      "colorFrom": "logo SVG trang chủ (moneylover.me/img/logo.svg)",
+      "note": "Logo có nhiều sắc xanh lá (005F15, 019321, 267836, 2FAD47, 2BB84D, 71D187) + vàng FECF03, không gộp về một màu được. Lấy xanh lá đậm vừa (2FAD47) làm đại diện."
+    },
+    {
+      "id": "monkey-junior",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "ED202E",
+      "colorFrom": "favicon chính thức (monkey.edu.vn/favicon.ico, 289×289)",
+      "note": "monkeyjunior.vn chuyển hướng sang monkey.edu.vn. Không có SVG, chỉ có favicon PNG."
+    },
+    {
+      "id": "myfitnesspal",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "0066EE",
+      "colorFrom": "thẻ meta msapplication-TileColor (myfitnesspal.com)",
+      "note": "Không tìm được vector ở bộ mở nào."
+    },
+    {
+      "id": "mytv",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "F6932B",
+      "colorFrom": "ảnh app icon chính thức (mytv.com.vn/img/logo-app.png)",
+      "note": "Dịch vụ truyền hình VNPT, không có SVG công khai."
+    },
+    {
+      "id": "oura",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "151619",
+      "colorFrom": "brand guideline PDF chính thức (static.ouraring.com/pdfs/Oura_BrandGuidelines_v1.pdf, màu 'Oura Black') + đối chiếu favicon đơn sắc",
+      "note": ""
+    },
+    {
+      "id": "pcloud",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "34AADC",
+      "colorFrom": "tra web (brandfetch/brandcolorcode, đối chiếu nhiều nguồn)",
+      "note": "Cẩn thận: Simple Icons có 'UpCloud' (#7B00FF) là hãng khác hẳn, không phải pCloud — không được nhầm."
+    },
+    {
+      "id": "phi-quan-ly-tk",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": null,
+      "colorFrom": null,
+      "note": "Mục chung (phí ngân hàng), không phải tên một hãng cụ thể — không có màu thương hiệu để lấy. Nên dùng glyph hạng mục (mực xám), không cần bước nâng cấp icon."
+    },
+    {
+      "id": "priority-pass",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "827127",
+      "colorFrom": "favicon chính thức (prioritypass.com/icon.png, 32×32, chữ P vàng đồng)",
+      "note": ""
+    },
+    {
+      "id": "qobuz",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "000000",
+      "colorFrom": "favicon SVG chính thức (static.qobuz.com/images/favicon/favicon.svg — nền đen, chữ trắng)",
+      "note": "Favicon là SVG nhưng chữ 'Qobuz' cách điệu vẽ bằng path phức tạp trên nền hình chữ nhật bo góc đen; không tách gọn thành một path đơn sắc trong thời gian khảo sát — để tier 2, màu lấy trực tiếp từ nền SVG đó."
+    },
+    {
+      "id": "simplize",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "2C85EF",
+      "colorFrom": "apple-touch-icon chính thức (simplize.vn/apple-touch-icon.png)",
+      "note": "Logo 2 tông xanh dương/cam gần như ngang nhau về diện tích; chọn xanh dương làm màu đại diện."
+    },
+    {
+      "id": "sms-banking",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": null,
+      "colorFrom": null,
+      "note": "Mục chung (dịch vụ SMS Banking là tính năng ngân hàng, không phải một hãng), không có màu thương hiệu."
+    },
+    {
+      "id": "storytel",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "FF501C",
+      "colorFrom": "apple-touch-icon chính thức (storytel.com/apple-touch-icon.png)",
+      "note": ""
+    },
+    {
+      "id": "sync-com",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "00ADEF",
+      "colorFrom": "CSS logo chính thức (sync.com/hs-fs/hubfs/sync-logo-color.svg, class .st1)",
+      "note": "Logo dùng stroke (viền xám 8px) ngoài fill, generator hiện chỉ đọc path fill nên sẽ mất viền nếu ép tier 1 — để tier 2 an toàn hơn."
+    },
+    {
+      "id": "terabox",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "4B8AD9",
+      "colorFrom": "tra web (brandfetch/brandcolorcode)",
+      "note": ""
+    },
+    {
+      "id": "the-athletic",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "111111",
+      "colorFrom": "favicon chính thức (theathletic.com/favicon.ico, đơn sắc đen)",
+      "note": ""
+    },
+    {
+      "id": "the-tap-gym",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": null,
+      "colorFrom": null,
+      "note": "Mục chung (thẻ tập gym, không gắn với một phòng gym cụ thể), không có màu thương hiệu."
+    },
+    {
+      "id": "tv360",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "ED2D24",
+      "colorFrom": "logo SVG trang chủ (img-zlr2.tv360.vn/.../logo_new.svg, điểm dừng gradient đầu)",
+      "note": "Logo dùng gradient đỏ (ED2D24 → E92231 → B92032), thuộc dải đỏ Viettel — lấy điểm dừng đậm nhất làm đại diện."
+    },
+    {
+      "id": "ve-thang-xe-buyt",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": null,
+      "colorFrom": null,
+      "note": "Mục chung (vé tháng xe buýt/metro, không gắn với một đơn vị vận hành cụ thể), không có màu thương hiệu."
+    },
+    {
+      "id": "vietstock",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "01579B",
+      "colorFrom": "thẻ meta theme-color (vietstock.vn)",
+      "note": ""
+    },
+    {
+      "id": "viu",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "FFBF00",
+      "colorFrom": "apple-touch-icon chính thức (viu.com/apple-touch-icon.png)",
+      "note": ""
+    },
+    {
+      "id": "vnsky",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "005AAA",
+      "colorFrom": "logo SVG trang chủ (vnsky.vn/image/logo-vnsky.svg)",
+      "note": "Logo dùng <mask> và gradient cho phần lớn hình, chỉ path đầu tiên là fill phẳng (#005AAA) — không đủ sạch cho tier 1, lấy màu từ path đó."
+    },
+    {
+      "id": "waka",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "139F7C",
+      "colorFrom": "ảnh app icon chính thức (waka.vn/target/icons/icon_512x512...png)",
+      "note": ""
+    },
+    {
+      "id": "wetv",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "0083F5",
+      "colorFrom": "favicon chính thức (vfiles.wetvinfo.com/.../favicon.ico)",
+      "note": ""
+    },
+    {
+      "id": "wow-sub",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "3A2514",
+      "colorFrom": "ảnh og:image chính thức Blizzard (wow-opengraph.png) — màu nền đồng/nâu",
+      "note": "Độ tin cậy thấp: không tìm được logo World of Warcraft dạng vector ở bộ mở nào (kể cả cib/mdi/logos); og:image cho màu nền đồng-nâu chứ không hẳn là 'màu thương hiệu' chính thức. Cân nhắc xác nhận lại thủ công."
+    },
+    {
+      "id": "wsj",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "000000",
+      "colorFrom": "tra web (nhiều nguồn cho các biến thể than-đen gần nhau: #1c1c21, #222222, #2F2F2F) — chọn đen thuần cho đơn giản",
+      "note": ""
+    },
+    {
+      "id": "ynab",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "5A5FFF",
+      "colorFrom": "trang thương hiệu chính thức ynab.com (màu 'Blurple')",
+      "note": ""
+    },
+    {
+      "id": "zwift",
+      "tier": 2,
+      "source": null,
+      "url": null,
+      "license": null,
+      "color": "F26722",
+      "colorFrom": "favicon chính thức (zwift.com/icons/favicon_96x96.png)",
+      "note": ""
+    }
+  ]
+}

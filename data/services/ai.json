@@ -1,0 +1,614 @@
+{
+  "batch": "ai",
+  "sectors": [
+    "AI"
+  ],
+  "entries": [
+    {
+      "id": "claude",
+      "name": "Claude",
+      "aliases": [
+        "claude",
+        "anthropic",
+        "claude ai"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://claude.ai/settings/billing",
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2000,
+          "note": "$20/tháng nếu trả theo tháng",
+          "source": "https://claude.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 20000,
+          "note": "$200/năm, trả trước ($17/tháng quy đổi)",
+          "source": "https://claude.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://claude.ai/settings/billing"
+    },
+    {
+      "id": "chatgpt",
+      "name": "ChatGPT Plus",
+      "aliases": [
+        "chatgpt",
+        "openai",
+        "gpt",
+        "chat gpt"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://chatgpt.com/#settings/Subscription",
+      "noteVi": "ChatGPT Plus chỉ bán theo tháng, OpenAI không có gói năm cho tier này.",
+      "defaultPlan": "plus",
+      "plans": [
+        {
+          "tier": "plus",
+          "name": "Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2000,
+          "source": "https://openai.com/chatgpt/pricing/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "gemini",
+      "name": "Google Gemini",
+      "aliases": [
+        "gemini",
+        "bard",
+        "google gemini",
+        "google ai pro"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ thấy gói tháng, Google không hiện gói năm riêng cho Google AI Pro.",
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Google AI Pro",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 489000,
+          "source": "https://gemini.google/subscriptions/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "pro",
+          "name": "Google AI Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1999,
+          "source": "https://one.google.com/about/plans",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "github-copilot",
+      "name": "GitHub Copilot",
+      "aliases": [
+        "copilot",
+        "github copilot",
+        "gh copilot"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://github.com/settings/copilot",
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1000,
+          "source": "https://github.com/features/copilot/plans",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 10000,
+          "source": "https://github.com/features/copilot/plans",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://github.com/settings/copilot"
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "aliases": [
+        "cursor",
+        "cursor ai"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ thấy gói tháng trên trang giá, không thấy gói năm cho Pro.",
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2000,
+          "source": "https://cursor.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://www.cursor.com/dashboard"
+    },
+    {
+      "id": "midjourney",
+      "name": "Midjourney",
+      "aliases": [
+        "midjourney",
+        "mj"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 3000,
+          "source": "https://docs.midjourney.com/docs/plans",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard",
+          "name": "Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 28800,
+          "note": "$24/tháng quy đổi, trả cả năm",
+          "source": "https://docs.midjourney.com/docs/plans",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "perplexity",
+      "name": "Perplexity",
+      "aliases": [
+        "perplexity",
+        "perplexity ai",
+        "perplexity pro"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2000,
+          "source": "https://www.perplexity.ai/pro",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 20000,
+          "note": "$17/tháng quy đổi, trả cả năm",
+          "source": "https://www.perplexity.ai/pro",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "grok",
+      "name": "Grok",
+      "aliases": [
+        "grok",
+        "supergrok",
+        "xai",
+        "x ai"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Đây là giá gói SuperGrok mua riêng trên x.ai, không phải gói Grok đi kèm X Premium+.",
+      "defaultPlan": "supergrok",
+      "plans": [
+        {
+          "tier": "supergrok",
+          "name": "SuperGrok",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 3000,
+          "source": "https://x.ai/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "elevenlabs",
+      "name": "ElevenLabs",
+      "aliases": [
+        "elevenlabs",
+        "eleven labs",
+        "11labs"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Giá niêm yết chuẩn của gói Creator; tháng đầu tiên đang được giảm còn 11 USD.",
+      "defaultPlan": "creator",
+      "plans": [
+        {
+          "tier": "creator",
+          "name": "Creator",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2200,
+          "source": "https://elevenlabs.io/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "creator",
+          "name": "Creator",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 22000,
+          "note": "trả 10 tháng, tặng 2 tháng",
+          "source": "https://elevenlabs.io/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "suno",
+      "name": "Suno",
+      "aliases": [
+        "suno",
+        "suno ai"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1000,
+          "source": "https://suno.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 9600,
+          "source": "https://suno.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "runway",
+      "name": "Runway",
+      "aliases": [
+        "runway",
+        "runwayml",
+        "runway ml"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1500,
+          "source": "https://runwayml.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard",
+          "name": "Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 14400,
+          "note": "$12/tháng quy đổi, trả cả năm",
+          "source": "https://runwayml.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "leonardo-ai",
+      "name": "Leonardo AI",
+      "aliases": [
+        "leonardo ai",
+        "leonardo",
+        "leonardoai"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 3000,
+          "note": "Gói \"Best Offer\", chưa gồm thuế, billed monthly",
+          "source": "https://leonardo.ai/pricing",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 28800,
+          "note": "Tổng tiền cả năm khi bật \"Pay Yearly\" (24 USD/tháng x 12), chưa gồm thuế",
+          "source": "https://leonardo.ai/pricing",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "v0",
+      "name": "v0",
+      "aliases": [
+        "v0",
+        "v0 dev",
+        "vercel v0"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Giá tính theo credit sử dụng mỗi tháng, không phải hạn mức cố định.",
+      "defaultPlan": "plus",
+      "plans": [
+        {
+          "tier": "plus",
+          "name": "Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 3000,
+          "note": "kèm $30 credit dùng mỗi tháng",
+          "source": "https://v0.app/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "lovable",
+      "name": "Lovable",
+      "aliases": [
+        "lovable",
+        "lovable dev"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2500,
+          "note": "100 credits/tháng, billed monthly",
+          "source": "https://lovable.dev/pricing",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 25200,
+          "note": "Tổng tiền cả năm khi chọn Yearly (21 USD/tháng x 12, \"2 months free\")",
+          "source": "https://lovable.dev/pricing",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "replit",
+      "name": "Replit",
+      "aliases": [
+        "replit",
+        "repl it"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "core",
+      "plans": [
+        {
+          "tier": "core",
+          "name": "Core",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2500,
+          "source": "https://replit.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "core",
+          "name": "Core",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 24000,
+          "note": "$20/tháng quy đổi, trả cả năm",
+          "source": "https://replit.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "poe",
+      "name": "Poe",
+      "aliases": [
+        "poe",
+        "poe ai",
+        "quora poe"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "plus",
+      "plans": [
+        {
+          "tier": "plus",
+          "name": "Poe Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1999,
+          "note": "Giá niêm yết trong danh sách In-App Purchase trên App Store (Poe Monthly Subscription / Plus)",
+          "source": "https://apps.apple.com/us/app/poe-fast-ai-chat/id1640745955",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "plus",
+          "name": "Poe Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 19999,
+          "note": "Tổng tiền cả năm theo In-App Purchase trên App Store (Poe Annual Subscription - Plus)",
+          "source": "https://apps.apple.com/us/app/poe-fast-ai-chat/id1640745955",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "character-ai",
+      "name": "Character.AI",
+      "aliases": [
+        "character ai",
+        "characterai",
+        "c ai",
+        "cai"
+      ],
+      "sector": "AI",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "plus",
+      "plans": [
+        {
+          "tier": "plus",
+          "name": "c.ai+",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 999,
+          "source": "https://character.ai/subscribe",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "plus",
+          "name": "c.ai+",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 9499,
+          "note": "giảm 20% so với trả tháng",
+          "source": "https://character.ai/subscribe",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    }
+  ]
+}

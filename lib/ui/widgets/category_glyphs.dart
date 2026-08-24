@@ -43,6 +43,45 @@ enum CategoryGlyph {
   /// Building service charges: the management fee, the rubbish collection.
   building,
 
+  /// An AI service with no mark of its own.
+  ai,
+
+  /// A dating app.
+  dating,
+
+  /// Courses and language apps.
+  education,
+
+  /// Books and audiobooks.
+  book,
+
+  /// Budgeting and market-data apps: the money you watch, not the money you owe.
+  wallet,
+
+  /// Training, sleep and meditation apps.
+  fitness,
+
+  /// Food delivery memberships.
+  food,
+
+  /// A games subscription without a mark.
+  gaming,
+
+  /// Newspapers and magazines.
+  news,
+
+  /// A suite of tools rather than one tool.
+  apps,
+
+  /// Cloud storage.
+  storage,
+
+  /// Travel: lounges, transit passes, roaming data.
+  travel,
+
+  /// Antivirus, VPN, password managers.
+  shield,
+
   /// Anything about a vehicle: parking, inspection, motor insurance.
   vehicle,
 
@@ -118,6 +157,203 @@ class CategoryGlyphPainter extends CustomPainter {
     final fill = Paint()..color = colour;
 
     switch (glyph) {
+      case CategoryGlyph.ai:
+        // A four-point sparkle. The concave arms are what stop it reading as a
+        // star rating, which is the other thing a small filled star means.
+        canvas.drawPath(
+          Path()
+            ..moveTo(10, 2.4)
+            ..cubicTo(10.7, 7.0, 13.0, 9.3, 17.6, 10)
+            ..cubicTo(13.0, 10.7, 10.7, 13.0, 10, 17.6)
+            ..cubicTo(9.3, 13.0, 7.0, 10.7, 2.4, 10)
+            ..cubicTo(7.0, 9.3, 9.3, 7.0, 10, 2.4)
+            ..close(),
+          fill,
+        );
+
+      case CategoryGlyph.dating:
+        canvas.drawPath(
+          Path()
+            ..moveTo(10, 16.8)
+            ..cubicTo(10, 16.8, 3.0, 12.4, 3.0, 7.8)
+            ..cubicTo(3.0, 5.4, 4.9, 3.8, 7.0, 3.8)
+            ..cubicTo(8.5, 3.8, 9.6, 4.7, 10, 5.6)
+            ..cubicTo(10.4, 4.7, 11.5, 3.8, 13.0, 3.8)
+            ..cubicTo(15.1, 3.8, 17.0, 5.4, 17.0, 7.8)
+            ..cubicTo(17.0, 12.4, 10, 16.8, 10, 16.8)
+            ..close(),
+          stroke,
+        );
+
+      case CategoryGlyph.education:
+        // A mortarboard: the board alone is a diamond, so the head below it is
+        // what makes the shape a cap rather than a rotated square.
+        canvas.drawPath(
+          Path()
+            ..moveTo(10, 3.4)
+            ..lineTo(18.2, 7.4)
+            ..lineTo(10, 11.4)
+            ..lineTo(1.8, 7.4)
+            ..close(),
+          stroke,
+        );
+        canvas.drawPath(
+          Path()
+            ..moveTo(5.4, 9.0)
+            ..lineTo(5.4, 13.2)
+            ..cubicTo(5.4, 13.2, 7.2, 15.4, 10, 15.4)
+            ..cubicTo(12.8, 15.4, 14.6, 13.2, 14.6, 13.2)
+            ..lineTo(14.6, 9.0),
+          stroke,
+        );
+
+      case CategoryGlyph.book:
+        canvas.drawRRect(
+          RRect.fromLTRBR(4.0, 3.0, 16.4, 17.0, const Radius.circular(1.8)),
+          stroke,
+        );
+        canvas.drawLine(const Offset(7.2, 3.0), const Offset(7.2, 17.0), stroke);
+        canvas.drawLine(
+          const Offset(10.0, 7.2),
+          const Offset(13.6, 7.2),
+          stroke,
+        );
+
+      case CategoryGlyph.wallet:
+        canvas.drawRRect(
+          RRect.fromLTRBR(2.6, 5.4, 17.4, 16.2, const Radius.circular(2.4)),
+          stroke,
+        );
+        // The card poking out of the top is what separates a wallet from the
+        // plain rounded box that four other glyphs already are.
+        canvas.drawPath(
+          Path()
+            ..moveTo(5.0, 5.4)
+            ..lineTo(5.0, 3.4)
+            ..lineTo(13.4, 3.4)
+            ..lineTo(13.4, 5.4),
+          stroke,
+        );
+        canvas.drawCircle(const Offset(13.8, 10.8), 1.3, fill);
+
+      case CategoryGlyph.fitness:
+        canvas.drawLine(
+          const Offset(6.6, 10.0),
+          const Offset(13.4, 10.0),
+          stroke,
+        );
+        canvas.drawLine(const Offset(6.0, 6.6), const Offset(6.0, 13.4), stroke);
+        canvas.drawLine(
+          const Offset(14.0, 6.6),
+          const Offset(14.0, 13.4),
+          stroke,
+        );
+        canvas.drawLine(const Offset(3.2, 8.2), const Offset(3.2, 11.8), stroke);
+        canvas.drawLine(
+          const Offset(16.8, 8.2),
+          const Offset(16.8, 11.8),
+          stroke,
+        );
+
+      case CategoryGlyph.food:
+        // A bowl and chopsticks rather than a knife and fork: the list this
+        // sits in is mostly Vietnamese delivery memberships.
+        canvas.drawPath(
+          Path()
+            ..moveTo(2.8, 9.6)
+            ..lineTo(17.2, 9.6)
+            ..cubicTo(17.2, 14.0, 14.0, 17.0, 10, 17.0)
+            ..cubicTo(6.0, 17.0, 2.8, 14.0, 2.8, 9.6)
+            ..close(),
+          stroke,
+        );
+        canvas.drawLine(const Offset(8.6, 2.8), const Offset(11.4, 7.6), stroke);
+        canvas.drawLine(
+          const Offset(12.4, 2.8),
+          const Offset(13.4, 7.6),
+          stroke,
+        );
+
+      case CategoryGlyph.gaming:
+        canvas.drawRRect(
+          RRect.fromLTRBR(2.2, 6.6, 17.8, 15.4, const Radius.circular(3.4)),
+          stroke,
+        );
+        canvas.drawLine(const Offset(5.2, 11.0), const Offset(8.4, 11.0), stroke);
+        canvas.drawLine(const Offset(6.8, 9.4), const Offset(6.8, 12.6), stroke);
+        canvas.drawCircle(const Offset(13.2, 9.9), 1.05, fill);
+        canvas.drawCircle(const Offset(15.0, 12.1), 1.05, fill);
+
+      case CategoryGlyph.news:
+        canvas.drawRRect(
+          RRect.fromLTRBR(2.8, 4.2, 17.2, 15.8, const Radius.circular(1.6)),
+          stroke,
+        );
+        canvas.drawLine(const Offset(5.2, 7.2), const Offset(14.8, 7.2), stroke);
+        canvas.drawLine(const Offset(5.2, 10.2), const Offset(9.4, 10.2), stroke);
+        canvas.drawLine(const Offset(5.2, 12.6), const Offset(9.4, 12.6), stroke);
+        canvas.drawRect(const Rect.fromLTRB(11.4, 9.6, 14.8, 13.0), stroke);
+
+      case CategoryGlyph.apps:
+        const r = Radius.circular(1.4);
+        canvas.drawRRect(RRect.fromLTRBR(3.0, 3.0, 9.0, 9.0, r), stroke);
+        canvas.drawRRect(RRect.fromLTRBR(11.0, 3.0, 17.0, 9.0, r), stroke);
+        canvas.drawRRect(RRect.fromLTRBR(3.0, 11.0, 9.0, 17.0, r), stroke);
+        canvas.drawRRect(RRect.fromLTRBR(11.0, 11.0, 17.0, 17.0, r), stroke);
+
+      case CategoryGlyph.storage:
+        canvas.drawPath(
+          Path()
+            ..moveTo(6.6, 15.4)
+            ..cubicTo(4.2, 15.4, 2.4, 13.7, 2.4, 11.5)
+            ..cubicTo(2.4, 9.6, 3.8, 8.0, 5.7, 7.7)
+            ..cubicTo(6.2, 5.5, 8.1, 3.8, 10.5, 3.8)
+            ..cubicTo(13.1, 3.8, 15.2, 5.8, 15.5, 8.3)
+            ..cubicTo(17.0, 8.8, 18.0, 10.2, 18.0, 11.8)
+            ..cubicTo(18.0, 13.8, 16.5, 15.4, 14.4, 15.4)
+            ..close(),
+          stroke,
+        );
+
+      case CategoryGlyph.travel:
+        canvas.drawPath(
+          Path()
+            ..moveTo(10, 2.4)
+            ..cubicTo(10.9, 2.4, 11.5, 3.5, 11.5, 5.0)
+            ..lineTo(11.5, 8.2)
+            ..lineTo(17.6, 11.8)
+            ..lineTo(17.6, 13.4)
+            ..lineTo(11.5, 11.6)
+            ..lineTo(11.5, 15.0)
+            ..lineTo(13.6, 16.6)
+            ..lineTo(13.6, 17.6)
+            ..lineTo(10, 16.8)
+            ..lineTo(6.4, 17.6)
+            ..lineTo(6.4, 16.6)
+            ..lineTo(8.5, 15.0)
+            ..lineTo(8.5, 11.6)
+            ..lineTo(2.4, 13.4)
+            ..lineTo(2.4, 11.8)
+            ..lineTo(8.5, 8.2)
+            ..lineTo(8.5, 5.0)
+            ..cubicTo(8.5, 3.5, 9.1, 2.4, 10, 2.4)
+            ..close(),
+          fill,
+        );
+
+      case CategoryGlyph.shield:
+        canvas.drawPath(
+          Path()
+            ..moveTo(10, 2.8)
+            ..lineTo(16.8, 5.4)
+            ..lineTo(16.8, 10.2)
+            ..cubicTo(16.8, 14.0, 13.8, 16.4, 10, 17.4)
+            ..cubicTo(6.2, 16.4, 3.2, 14.0, 3.2, 10.2)
+            ..lineTo(3.2, 5.4)
+            ..close(),
+          stroke,
+        );
+
       case CategoryGlyph.streaming:
         // A screen with a play triangle: the triangle alone reads as a button,
         // and half the app's rows are things you press a button in.

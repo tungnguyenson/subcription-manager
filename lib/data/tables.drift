@@ -55,6 +55,12 @@ CREATE TABLE itemRow (
     snoozedUntil      TEXT,
 
     state             TEXT NOT NULL,
+
+    -- Where the user bought it: UNKNOWN / WEB / APP_STORE / PLAY_STORE.
+    -- Decides which page can actually show them this subscription. Defaults to
+    -- UNKNOWN because the app never asks up front; the first tap answers it.
+    purchaseChannel   TEXT NOT NULL DEFAULT 'UNKNOWN',
+
     createdAt         INTEGER NOT NULL
 ) AS ItemRowData;
 

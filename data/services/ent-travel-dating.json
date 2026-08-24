@@ -1,0 +1,468 @@
+{
+  "batch": "ent-travel-dating",
+  "sectors": [
+    "ENTERTAINMENT",
+    "TRAVEL",
+    "DATING"
+  ],
+  "entries": [
+    {
+      "id": "audible",
+      "name": "Audible",
+      "aliases": [
+        "audible"
+      ],
+      "sector": "ENTERTAINMENT",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://help.audible.com/s/topic/0TO4z000000SoIzGAK/cancel?language=en_US",
+      "noteVi": null,
+      "defaultPlan": "premium-plus",
+      "plans": [
+        {
+          "tier": "premium-plus",
+          "name": "Premium Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1495,
+          "note": "1 credit sách/tháng + toàn bộ Plus Catalog",
+          "source": "https://www.audible.com/ep/memberbenefits",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "kindle-unlimited",
+      "name": "Kindle Unlimited",
+      "aliases": [
+        "kindle unlimited",
+        "ku",
+        "kindle"
+      ],
+      "sector": "ENTERTAINMENT",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://www.amazon.com/gp/help/customer/display.html?nodeId=GLSQ4722655M4ZEJ",
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Kindle Unlimited",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1199,
+          "note": "Mượn tối đa 20 tựa cùng lúc",
+          "source": "https://www.amazon.com/b?ie=UTF8&node=18473854011",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "everand",
+      "name": "Everand",
+      "aliases": [
+        "everand",
+        "scribd"
+      ],
+      "sector": "ENTERTAINMENT",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Everand (Scribd cũ) đổi sang mô hình unlock theo thẻ; gói Standard chỉ có 1 lượt unlock mỗi tháng.",
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1199,
+          "note": "1 lượt unlock/tháng",
+          "source": "https://support.scribd.com/hc/en-us/articles/40678839226644-Everand-plans-Standard-Plus-and-Deluxe",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "storytel",
+      "name": "Storytel",
+      "aliases": [
+        "storytel"
+      ],
+      "sector": "ENTERTAINMENT",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Xác nhận qua trình duyệt thật ở trang chọn quốc gia storytel.com/store-select: Việt Nam không nằm trong danh sách quốc gia Storytel phục vụ (chỉ có Ấn Độ, Indonesia, Singapore, Hàn Quốc, Thái Lan ở khu vực Á); Storytel cũng không có bảng giá USD toàn cầu, mỗi nước niêm yết bằng nội tệ riêng, nên không có giá để tham chiếu cho người dùng VN.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "waka",
+      "name": "Waka",
+      "aliases": [
+        "waka"
+      ],
+      "sector": "ENTERTAINMENT",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "QUARTERLY",
+      "cancelUrl": null,
+      "noteVi": "Đã xác minh lại độc lập trên waka.vn: bảng giá chính thức liệt kê 03 tháng = 207.000đ, 06 tháng = 414.000đ, 12 tháng = 828.000đ — đúng là không giảm giá gì cho gói dài hơn (828.000 = 4 lần 207.000), không phải suy luận sai của lần thu thập trước, đây là giá thật của hãng.",
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Hội viên Waka",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "QUARTERLY",
+          "amountMinor": 207000,
+          "note": "Gói 3 tháng, truy cập không giới hạn kho hội viên",
+          "source": "https://waka.vn/quyen-loi-hoi-vien-waka",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard",
+          "name": "Hội viên Waka",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 828000,
+          "note": "Gói 12 tháng, truy cập không giới hạn kho hội viên",
+          "source": "https://waka.vn/quyen-loi-hoi-vien-waka",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "fonos",
+      "name": "Fonos",
+      "aliases": [
+        "fonos"
+      ],
+      "sector": "ENTERTAINMENT",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 129000,
+          "note": "1 thẻ sách/tháng để đổi sách nói bất kỳ",
+          "source": "https://book.fonos.vn/products/the-hoi-vien-fonos-goi-thang",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 899000,
+          "note": "12 thẻ sách/năm, tặng kèm khi kích hoạt",
+          "source": "https://book.fonos.vn/products/the-hoi-vien-fonos-goi-nam",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "patreon",
+      "name": "Patreon",
+      "aliases": [
+        "patreon"
+      ],
+      "sector": "ENTERTAINMENT",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://support.patreon.com/hc/en-us/articles/360005502572-Canceling-a-paid-membership",
+      "noteVi": "Giá do từng creator tự đặt, Patreon không có bảng giá chung.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "nebula",
+      "name": "Nebula",
+      "aliases": [
+        "nebula"
+      ],
+      "sector": "ENTERTAINMENT",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Nebula",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 600,
+          "source": "https://blog.nebula.tv/pricing-updates/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard",
+          "name": "Nebula",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 6000,
+          "source": "https://blog.nebula.tv/pricing-updates/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "mubi",
+      "name": "MUBI",
+      "aliases": [
+        "mubi"
+      ],
+      "sector": "ENTERTAINMENT",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://help.mubi.com/article/68-how-do-i-cancel-my-subscription-if-i-purchased-it-online-through-the-web",
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Membership",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 190000,
+          "source": "https://mubi.com/en/vn/memberships",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard",
+          "name": "Membership",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 1320000,
+          "source": "https://mubi.com/en/vn/memberships",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "webtoon",
+      "name": "WEBTOON",
+      "aliases": [
+        "webtoon",
+        "webtoon comics"
+      ],
+      "sector": "ENTERTAINMENT",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "WEBTOON bán 4 mức Premium theo số Coin/tháng (3.99-49.99 USD); ghi mức phổ biến nhất, không có gói năm.",
+      "defaultPlan": "premium-100",
+      "plans": [
+        {
+          "tier": "premium-100",
+          "name": "Premium 100 Coins",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 999,
+          "note": "100 Coin/tháng, đọc không quảng cáo trên các bộ Original",
+          "source": "https://webtoon.zendesk.com/hc/en-us/articles/14400167339284-Monthly-Coin-Premium-Summary-FAQ",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "priority-pass",
+      "name": "Priority Pass",
+      "aliases": [
+        "priority pass",
+        "priority-pass"
+      ],
+      "sector": "TRAVEL",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": "https://www.prioritypass.com/en-GB/support/membership-help/how-do-i-cancel-my-membership",
+      "noteVi": "Priority Pass chỉ bán theo năm, không có gói tháng; hạng Standard vẫn tính 35 USD mỗi lượt vào phòng chờ.",
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 9900,
+          "note": "Không có lượt miễn phí, 35 USD/lượt vào phòng chờ",
+          "source": "https://www.prioritypass.com/en-us/join",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "airalo",
+      "name": "Airalo",
+      "aliases": [
+        "airalo",
+        "airalo esim"
+      ],
+      "sector": "TRAVEL",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Airalo bán gói eSIM theo dung lượng/quốc gia dùng một lần, không phải thuê bao định kỳ nên không có giá chuẩn để lưu.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "ve-thang-xe-buyt",
+      "name": "Vé tháng xe buýt / metro",
+      "aliases": [
+        "ve thang xe buyt",
+        "ve thang metro",
+        "xe buyt",
+        "metro"
+      ],
+      "sector": "TRAVEL",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Mục chung: giá vé tháng xe buýt/metro khác nhau theo tuyến và thành phố, không có mức giá chuẩn toàn quốc.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "tinder",
+      "name": "Tinder",
+      "aliases": [
+        "tinder"
+      ],
+      "sector": "DATING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Tinder định giá theo tuổi và khu vực, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "bumble",
+      "name": "Bumble Premium",
+      "aliases": [
+        "bumble",
+        "bumble premium"
+      ],
+      "sector": "DATING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Bumble định giá theo tuổi và khu vực, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "hinge",
+      "name": "Hinge",
+      "aliases": [
+        "hinge",
+        "hinge x"
+      ],
+      "sector": "DATING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Hinge định giá theo tuổi và khu vực, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "grindr",
+      "name": "Grindr XTRA",
+      "aliases": [
+        "grindr",
+        "grindr xtra"
+      ],
+      "sector": "DATING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Grindr XTRA định giá theo khu vực và không có trang giá chính thức công khai ổn định nên không lưu giá (không lấy giá từ blog).",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "coffee-meets-bagel",
+      "name": "Coffee Meets Bagel",
+      "aliases": [
+        "coffee meets bagel",
+        "cmb"
+      ],
+      "sector": "DATING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Coffee Meets Bagel định giá theo khu vực/thời hạn, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "badoo",
+      "name": "Badoo Premium",
+      "aliases": [
+        "badoo",
+        "badoo premium"
+      ],
+      "sector": "DATING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Badoo định giá theo quốc gia/thiết bị/khuyến mãi, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "happn",
+      "name": "happn Premium",
+      "aliases": [
+        "happn",
+        "happn premium"
+      ],
+      "sector": "DATING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "happn định giá theo khu vực/thiết bị, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "okcupid",
+      "name": "OkCupid",
+      "aliases": [
+        "okcupid",
+        "ok cupid"
+      ],
+      "sector": "DATING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "OkCupid định giá động theo người dùng (giới tính, tuổi, khu vực...), không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
+      "defaultPlan": null,
+      "plans": []
+    }
+  ]
+}

@@ -1,0 +1,509 @@
+{
+  "batch": "streaming",
+  "sectors": [
+    "STREAMING"
+  ],
+  "entries": [
+    {
+      "id": "netflix",
+      "name": "Netflix",
+      "aliases": [
+        "netflix"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://www.netflix.com/cancelplan",
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Standard",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 231000,
+          "seats": 2,
+          "note": "1080p, 2 thiết bị xem cùng lúc",
+          "source": "https://help.netflix.com/vi/node/24926",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://www.netflix.com/account"
+    },
+    {
+      "id": "youtube-premium",
+      "name": "YouTube Premium",
+      "aliases": [
+        "youtube",
+        "ytb"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://www.youtube.com/paid_memberships",
+      "noteVi": null,
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 79000,
+          "note": "Chưa gồm VAT; trang không hiển thị gói năm",
+          "source": "https://www.youtube.com/premium",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://www.youtube.com/paid_memberships"
+    },
+    {
+      "id": "hbo-go",
+      "name": "Max",
+      "aliases": [
+        "hbo",
+        "hbo go",
+        "max"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "HBO Go đã đổi thương hiệu thành Max tại Việt Nam (Max ra mắt 16/6/2026, HBO Go ngừng phân phối từ 15/6/2026); chỉ xác minh được giá gói năm, chưa tìm được giá gói tháng trên trang chính hãng.",
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Standard",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 699000,
+          "seats": 2,
+          "note": "Full HD, 2 thiết bị, 30 lượt tải xuống",
+          "source": "https://www.hbomax.com/vn/en",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "disney-plus",
+      "name": "Disney+",
+      "aliases": [
+        "disney",
+        "disney+",
+        "disney plus"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Không bán chính thức tại VN (disneyplus.com báo lỗi \"unavailable\" khi truy cập). Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Premium (không quảng cáo, 4K, tải xuống) vì đây là tier đầy đủ và được nhắc tới nhiều nhất cho cá nhân, có cả giá tháng và năm nhất quán trong danh sách IAP.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1899,
+          "note": "Không quảng cáo, 4K UHD, tải xuống offline",
+          "source": "https://apps.apple.com/us/app/disney/id1446075923",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 18999,
+          "note": "Không quảng cáo, 4K UHD, tải xuống offline",
+          "source": "https://apps.apple.com/us/app/disney/id1446075923",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "fpt-play",
+      "name": "FPT Play",
+      "aliases": [
+        "fptplay",
+        "fpt play"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "fptplay.vn yêu cầu đăng nhập mới hiện được bảng giá gói trên web; lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng). App Store liệt kê nhiều gói (MAX, SMAX, Premium, Cine, VIP, VIP A...); chọn gói VIP vì đây là tên gói phổ biến/được biết đến rộng rãi nhất với người dùng cá nhân. Không xác nhận được gói năm qua kênh này.",
+      "defaultPlan": "vip",
+      "plans": [
+        {
+          "tier": "vip",
+          "name": "VIP",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 139000,
+          "note": "Giá mua trong ứng dụng qua App Store VN",
+          "source": "https://apps.apple.com/vn/app/fpt-play-phim-anime-b%C3%B3ng-%C4%91%C3%A1/id646297996",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://fptplay.vn/tai-khoan"
+    },
+    {
+      "id": "vieon",
+      "name": "VieON",
+      "aliases": [
+        "vieon"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "vieon.vn/mua-goi hiện được danh sách gói (VIP, VIP PRO) nhưng bấm đăng ký sẽ chuyển sang trang đăng nhập, không lộ giá cho khách chưa đăng nhập. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng); danh sách có nhiều mốc giá VIP 1 tháng khác nhau (79.000đ xuất hiện nhiều nhất), không thấy gói 12 tháng nên chỉ ghi giá tháng.",
+      "defaultPlan": "vip",
+      "plans": [
+        {
+          "tier": "vip",
+          "name": "VIP",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 79000,
+          "note": "Giá mua trong ứng dụng qua App Store VN",
+          "source": "https://apps.apple.com/vn/app/vieon-dramas-show-tv/id1357819721",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "galaxy-play",
+      "name": "Galaxy Play",
+      "aliases": [
+        "galaxyplay"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 60000,
+          "note": "Giá cho thuê bao mới; trang không hiển thị gói năm",
+          "source": "https://galaxyplay.vn",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "apple-tv",
+      "name": "Apple TV+",
+      "aliases": [
+        "appletv"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://apps.apple.com/account/subscriptions",
+      "noteVi": "Đã xác minh lại độc lập trên tv.apple.com/vn: giá đúng 179.000đ/tháng. Trùng với giá Apple Arcade VN cùng thời điểm (cũng 179.000đ/tháng) — đã kiểm tra riêng trên apple.com/vn/apple-arcade, đây là trùng hợp thật của bảng giá VN, không phải lỗi nhập liệu (giá GLOBAL hai dịch vụ khác nhau: TV+ 12.99 USD, Arcade 6.99 USD).",
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Apple TV+",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 179000,
+          "note": "Không có gói năm riêng lẻ, chỉ có qua bundle Apple One",
+          "source": "https://tv.apple.com/vn",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://apps.apple.com/account/subscriptions"
+    },
+    {
+      "id": "tv360",
+      "name": "TV360",
+      "aliases": [
+        "tv360"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "tv360.vn render động không tải được bảng giá tĩnh. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng); chọn gói Standard Tháng vì đây là gói phổ biến nhất cho người dùng cá nhân (các gói khác như VSPORT, VCINE, WORLDCUP là gói bổ sung theo chủ đề). Không thấy gói 12 tháng trong danh sách IAP.",
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Standard",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 69000,
+          "note": "Giá mua trong ứng dụng qua App Store VN",
+          "source": "https://apps.apple.com/vn/app/tv360-phim-th%E1%BB%83-thao-show/id1536071266",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "mytv",
+      "name": "MyTV",
+      "aliases": [
+        "mytv"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Ghi chú cũ nói MyTV chỉ có combo Internet+truyền hình là chưa đúng: App Store VN liệt kê nhiều gói ứng dụng độc lập (VIP, Nâng cao Plus, Chuẩn...). Lấy giá gói VIP vì đây là gói phổ biến/đầy đủ nhất cho người dùng cá nhân. Không thấy gói 12 tháng trong danh sách IAP.",
+      "defaultPlan": "vip",
+      "plans": [
+        {
+          "tier": "vip",
+          "name": "VIP",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 69000,
+          "note": "Giá mua trong ứng dụng qua App Store VN",
+          "source": "https://apps.apple.com/vn/app/mytv-b%C3%B3ng-%C4%91%C3%A1-xem-phim-tivi/id1505256562",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "amazon-prime-video",
+      "name": "Amazon Prime Video",
+      "aliases": [
+        "prime video",
+        "amazon prime"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Xác nhận qua trình duyệt thật: primevideo.com trả về trang \"servicerestricted\" khi truy cập từ Việt Nam, tức Prime Video không phục vụ trực tiếp tại VN. Trang App Store (US) chỉ liệt kê gói mua thêm \"Ad free $2.99\" chứ không phải giá thuê bao Prime Video/Prime gốc, nên vẫn không có giá tier phổ biến để ghi.",
+      "defaultPlan": null,
+      "plans": [],
+      "manageUrl": "https://www.amazon.com/gp/primecentral"
+    },
+    {
+      "id": "viu",
+      "name": "Viu",
+      "aliases": [
+        "viu"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Xác nhận qua trình duyệt thật: viu.com tự chuyển hướng sang trang \"No Service\" (https://www.viu.com/ott/no-service/) khi mở từ Việt Nam, tức Viu hiện không phục vụ thị trường VN.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "iqiyi",
+      "name": "iQIYI",
+      "aliases": [
+        "iqiyi",
+        "iq"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Không kết nối được iq.com trực tiếp. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng), chọn gói Diamond VIP (tier cao cấp phổ biến nhất). Danh sách IAP có nhiều mốc giá khác nhau cho cùng tên gói (có thể do lịch sử đổi giá); chọn cặp giá tháng/năm xuất hiện nhất quán và tỉ lệ hợp lý (59.000đ/tháng, 599.000đ/năm).",
+      "defaultPlan": "diamond-vip",
+      "plans": [
+        {
+          "tier": "diamond-vip",
+          "name": "Diamond VIP",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 59000,
+          "note": "Giá mua trong ứng dụng qua App Store VN",
+          "source": "https://apps.apple.com/vn/app/iqiyi-video/id1190755526",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "diamond-vip",
+          "name": "Diamond VIP",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 599000,
+          "note": "Giá mua trong ứng dụng qua App Store VN",
+          "source": "https://apps.apple.com/vn/app/iqiyi-video/id1190755526",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "wetv",
+      "name": "WeTV",
+      "aliases": [
+        "wetv"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "wetv.vip không hiển thị giá cụ thể khi chưa đăng nhập. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng): WeTV VIP Monthly Subscription. Không thấy gói 12 tháng trong danh sách IAP (chỉ có gói tháng và gói quý).",
+      "defaultPlan": "vip",
+      "plans": [
+        {
+          "tier": "vip",
+          "name": "WeTV VIP",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 55000,
+          "note": "Giá mua trong ứng dụng qua App Store VN",
+          "source": "https://apps.apple.com/vn/app/wetv-watch-asian-content/id1457825066",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "crunchyroll",
+      "name": "Crunchyroll",
+      "aliases": [
+        "crunchyroll"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "crunchyroll.com/plans chặn truy cập tự động (403). Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Mega Fan vì có cả giá tháng và giá năm nhất quán trong danh sách IAP (đây cũng là tier phổ biến, đầy đủ tính năng tải xuống/nhiều thiết bị).",
+      "defaultPlan": "mega-fan",
+      "plans": [
+        {
+          "tier": "mega-fan",
+          "name": "Mega Fan",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1399,
+          "source": "https://apps.apple.com/us/app/crunchyroll/id329913454",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "mega-fan",
+          "name": "Mega Fan",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 13999,
+          "source": "https://apps.apple.com/us/app/crunchyroll/id329913454",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "paramount-plus",
+      "name": "Paramount+",
+      "aliases": [
+        "paramount",
+        "paramount plus",
+        "paramount+"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "paramountplus.com trả lỗi 406 khi truy cập tự động. Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Essential (gói cơ bản/rẻ nhất, phổ biến nhất cho cá nhân, có quảng cáo). Không thấy gói năm trong danh sách IAP.",
+      "defaultPlan": "essential",
+      "plans": [
+        {
+          "tier": "essential",
+          "name": "Essential",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 899,
+          "source": "https://apps.apple.com/us/app/paramount/id530168168",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "peacock",
+      "name": "Peacock",
+      "aliases": [
+        "peacock"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "peacocktv.com chỉ khả dụng khi truy cập từ Mỹ (chặn theo khu vực). Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Premium (gói tiêu chuẩn có quảng cáo, phổ biến nhất), có cả giá tháng và năm.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1299,
+          "source": "https://apps.apple.com/us/app/peacock-tv-stream-tv-movies/id1508186374",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 12999,
+          "source": "https://apps.apple.com/us/app/peacock-tv-stream-tv-movies/id1508186374",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "twitch-turbo",
+      "name": "Twitch Turbo",
+      "aliases": [
+        "twitch turbo",
+        "twitch"
+      ],
+      "sector": "STREAMING",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "turbo",
+      "plans": [
+        {
+          "tier": "turbo",
+          "name": "Turbo",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1199,
+          "note": "Giá mua qua web; giá qua app di động cao hơn (15.99 USD) do phụ phí App Store/Google Play",
+          "source": "https://www.twitch.tv/turbo",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    }
+  ]
+}

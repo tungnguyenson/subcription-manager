@@ -1,0 +1,400 @@
+{
+  "part": 1,
+  "entries": [
+    {
+      "id": "airalo",
+      "name": "Airalo",
+      "sector": "TRAVEL"
+    },
+    {
+      "id": "airtable",
+      "name": "Airtable",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "amazon-music",
+      "name": "Amazon Music Unlimited",
+      "sector": "MUSIC"
+    },
+    {
+      "id": "amazon-prime-video",
+      "name": "Amazon Prime Video",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "apple-arcade",
+      "name": "Apple Arcade",
+      "sector": "GAMING"
+    },
+    {
+      "id": "apple-fitness",
+      "name": "Apple Fitness+",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "apple-news",
+      "name": "Apple News+",
+      "sector": "NEWS"
+    },
+    {
+      "id": "asana",
+      "name": "Asana",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "audible",
+      "name": "Audible",
+      "sector": "ENTERTAINMENT"
+    },
+    {
+      "id": "babbel",
+      "name": "Babbel",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "badoo",
+      "name": "Badoo Premium",
+      "sector": "DATING"
+    },
+    {
+      "id": "be-hoi-vien",
+      "name": "be — Hội viên",
+      "sector": "FOOD"
+    },
+    {
+      "id": "bitwarden",
+      "name": "Bitwarden Premium",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "bkav-pro",
+      "name": "Bkav Pro",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "bloomberg",
+      "name": "Bloomberg",
+      "sector": "NEWS"
+    },
+    {
+      "id": "box",
+      "name": "Box",
+      "sector": "STORAGE"
+    },
+    {
+      "id": "brilliant",
+      "name": "Brilliant",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "bumble",
+      "name": "Bumble Premium",
+      "sector": "DATING"
+    },
+    {
+      "id": "calm",
+      "name": "Calm",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "canva",
+      "name": "Canva Pro",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "character-ai",
+      "name": "Character.AI",
+      "sector": "AI"
+    },
+    {
+      "id": "cleanmymac",
+      "name": "CleanMyMac",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "clickup",
+      "name": "ClickUp",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "cloudflare",
+      "name": "Cloudflare",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "codecademy",
+      "name": "Codecademy Pro",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "coffee-meets-bagel",
+      "name": "Coffee Meets Bagel",
+      "sector": "DATING"
+    },
+    {
+      "id": "coursera",
+      "name": "Coursera Plus",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "crunchyroll",
+      "name": "Crunchyroll",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "dashlane",
+      "name": "Dashlane",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "dashpass",
+      "name": "DoorDash DashPass",
+      "sector": "FOOD"
+    },
+    {
+      "id": "datacamp",
+      "name": "DataCamp",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "sector": "AI"
+    },
+    {
+      "id": "deezer",
+      "name": "Deezer",
+      "sector": "MUSIC"
+    },
+    {
+      "id": "deliveroo-plus",
+      "name": "Deliveroo Plus",
+      "sector": "FOOD"
+    },
+    {
+      "id": "discord-nitro",
+      "name": "Discord Nitro",
+      "sector": "GAMING"
+    },
+    {
+      "id": "duolingo",
+      "name": "Duolingo Super",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "ea-play",
+      "name": "EA Play",
+      "sector": "GAMING"
+    },
+    {
+      "id": "elevenlabs",
+      "name": "ElevenLabs",
+      "sector": "AI"
+    },
+    {
+      "id": "elsa-speak",
+      "name": "ELSA Speak",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "everand",
+      "name": "Everand",
+      "sector": "ENTERTAINMENT"
+    },
+    {
+      "id": "evernote",
+      "name": "Evernote",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "expressvpn",
+      "name": "ExpressVPN",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "fiin",
+      "name": "FiinTrade",
+      "sector": "FINANCE"
+    },
+    {
+      "id": "financial-times",
+      "name": "Financial Times",
+      "sector": "NEWS"
+    },
+    {
+      "id": "fitbit-premium",
+      "name": "Fitbit Premium",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "fonos",
+      "name": "Fonos",
+      "sector": "ENTERTAINMENT"
+    },
+    {
+      "id": "frontend-masters",
+      "name": "Frontend Masters",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "garmin-connect-plus",
+      "name": "Garmin Connect+",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "geforce-now",
+      "name": "GeForce NOW",
+      "sector": "GAMING"
+    },
+    {
+      "id": "github",
+      "name": "GitHub",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "goi-cuoc-tra-sau",
+      "name": "Gói cước trả sau",
+      "sector": "PHONE"
+    },
+    {
+      "id": "google-play-pass",
+      "name": "Google Play Pass",
+      "sector": "GAMING"
+    },
+    {
+      "id": "google-workspace",
+      "name": "Google Workspace",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "grab-unlimited",
+      "name": "GrabUnlimited",
+      "sector": "FOOD"
+    },
+    {
+      "id": "grammarly",
+      "name": "Grammarly",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "grindr",
+      "name": "Grindr XTRA",
+      "sector": "DATING"
+    },
+    {
+      "id": "grok",
+      "name": "Grok",
+      "sector": "AI"
+    },
+    {
+      "id": "happn",
+      "name": "happn Premium",
+      "sector": "DATING"
+    },
+    {
+      "id": "headspace",
+      "name": "Headspace",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "hellofresh",
+      "name": "HelloFresh",
+      "sector": "FOOD"
+    },
+    {
+      "id": "hinge",
+      "name": "Hinge",
+      "sector": "DATING"
+    },
+    {
+      "id": "hoc-phi",
+      "name": "Học phí",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "hulu",
+      "name": "Hulu",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "iqiyi",
+      "name": "iQIYI",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "k-plus",
+      "name": "K+",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "kaspersky",
+      "name": "Kaspersky",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "kindle-unlimited",
+      "name": "Kindle Unlimited",
+      "sector": "ENTERTAINMENT"
+    },
+    {
+      "id": "lastpass",
+      "name": "LastPass",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "leonardo-ai",
+      "name": "Leonardo AI",
+      "sector": "AI"
+    },
+    {
+      "id": "linear",
+      "name": "Linear",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "linkedin-learning",
+      "name": "LinkedIn Learning",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "linkedin-premium",
+      "name": "LinkedIn Premium",
+      "sector": "SOCIAL"
+    },
+    {
+      "id": "lovable",
+      "name": "Lovable",
+      "sector": "AI"
+    },
+    {
+      "id": "malwarebytes",
+      "name": "Malwarebytes",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "masterclass",
+      "name": "MasterClass",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "mcafee",
+      "name": "McAfee",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "medium",
+      "name": "Medium",
+      "sector": "NEWS"
+    },
+    {
+      "id": "mega",
+      "name": "MEGA",
+      "sector": "STORAGE"
+    },
+    {
+      "id": "meta-verified",
+      "name": "Meta Verified",
+      "sector": "SOCIAL"
+    }
+  ]
+}

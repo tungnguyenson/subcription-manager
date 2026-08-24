@@ -1,0 +1,820 @@
+{
+  "batch": "security-storage",
+  "sectors": [
+    "SECURITY",
+    "STORAGE"
+  ],
+  "entries": [
+    {
+      "id": "1password",
+      "name": "1Password",
+      "aliases": [
+        "1password"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "1Password chỉ bán gói Individual theo năm, không có gói theo tháng riêng.",
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 4788,
+          "note": "3.99 USD/tháng, thanh toán theo năm",
+          "source": "https://1password.com/pricing/personal",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "icloud",
+      "name": "iCloud+",
+      "aliases": [
+        "icloud",
+        "apple storage"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": "https://support.apple.com/en-vn/HT207594",
+      "noteVi": null,
+      "defaultPlan": "50gb",
+      "plans": [
+        {
+          "tier": "50gb",
+          "name": "50GB",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 25000,
+          "note": "50GB",
+          "source": "https://support.apple.com/en-us/108047",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://apps.apple.com/account/subscriptions"
+    },
+    {
+      "id": "google-one",
+      "name": "Google One",
+      "aliases": [
+        "googleone",
+        "google drive",
+        "drive"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "100gb",
+      "plans": [
+        {
+          "tier": "100gb",
+          "name": "Basic 100GB",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 45000,
+          "note": "100GB",
+          "source": "https://one.google.com/about/plans",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://one.google.com/settings"
+    },
+    {
+      "id": "dropbox",
+      "name": "Dropbox",
+      "aliases": [
+        "dropbox"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "plus",
+      "plans": [
+        {
+          "tier": "plus",
+          "name": "Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 999,
+          "note": "2TB",
+          "source": "https://www.dropbox.com/plans",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://www.dropbox.com/account/plan"
+    },
+    {
+      "id": "onedrive",
+      "name": "OneDrive",
+      "aliases": [
+        "onedrive"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Gói lưu trữ 100GB độc lập nay bán dưới tên Microsoft 365 Basic.",
+      "defaultPlan": "basic-100gb",
+      "plans": [
+        {
+          "tier": "basic-100gb",
+          "name": "Microsoft 365 Basic (100GB)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 199,
+          "note": "100GB",
+          "source": "https://www.microsoft.com/en-us/microsoft-365/onedrive/personal",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "basic-100gb",
+          "name": "Microsoft 365 Basic (100GB)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 1999,
+          "note": "100GB",
+          "source": "https://www.microsoft.com/en-us/microsoft-365/onedrive/personal",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://account.microsoft.com/services"
+    },
+    {
+      "id": "backblaze",
+      "name": "Backblaze",
+      "aliases": [
+        "backblaze"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "personal",
+      "plans": [
+        {
+          "tier": "personal",
+          "name": "Personal Backup",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 900,
+          "note": "Dung lượng không giới hạn, 1 máy tính",
+          "source": "https://www.backblaze.com/cloud-backup/personal",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "personal",
+          "name": "Personal Backup",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 9900,
+          "note": "Dung lượng không giới hạn, 1 máy tính",
+          "source": "https://www.backblaze.com/cloud-backup/personal",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://secure.backblaze.com/account_settings.htm"
+    },
+    {
+      "id": "nordvpn",
+      "name": "NordVPN",
+      "aliases": [
+        "nordvpn",
+        "nord vpn",
+        "nord"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "basic",
+      "plans": [
+        {
+          "tier": "basic",
+          "name": "Basic",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1499,
+          "note": null,
+          "source": "https://nordvpn.com/pricing/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "basic",
+          "name": "Basic",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 6588,
+          "note": "Tổng tiền 12 tháng đầu (65.88 USD)",
+          "source": "https://nordvpn.com/pricing/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "expressvpn",
+      "name": "ExpressVPN",
+      "aliases": [
+        "expressvpn",
+        "express vpn"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Trang đặt hàng chính hãng (expressvpn.com/pricing) có bộ chọn kỳ hạn ẩn (\"2-year plans / 12-month plans / 1-month plans\"). Chọn \"1-month plans\" hiện đúng giá gia hạn tháng; cả 3 kỳ hạn của tier Basic đều ghi rõ \"Then autorenews at $99.95 annually\" — đây là giá gia hạn thường xuyên dùng cho gói năm, không phải giá khuyến mãi.",
+      "defaultPlan": "basic",
+      "plans": [
+        {
+          "tier": "basic",
+          "name": "ExpressVPN Basic",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1499,
+          "source": "https://www.expressvpn.com/pricing",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "basic",
+          "name": "ExpressVPN Basic",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 9995,
+          "note": "Giá gia hạn thường xuyên hàng năm (ghi rõ trên trang, áp dụng chung cho gói 1 năm/2 năm sau khi hết ưu đãi)",
+          "source": "https://www.expressvpn.com/pricing",
+          "checkedAt": "2026-08-24"
+        }
+      ],
+      "manageUrl": "https://www.expressvpn.com/subscriptions"
+    },
+    {
+      "id": "surfshark",
+      "name": "Surfshark",
+      "aliases": [
+        "surfshark",
+        "surf shark"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "surfshark.com/pricing có tab \"1 month\" cho ra giá gia hạn tháng thật (16.45 USD/mo). Tab \"12 months\"/\"24 months\" chỉ hiện giá khuyến mãi kỳ đầu, không công bố số tiền gia hạn cụ thể (chỉ nói chung chung \"charged the applicable renewal price\") nên không ghi được gói năm mà không đoán.",
+      "defaultPlan": "starter",
+      "plans": [
+        {
+          "tier": "starter",
+          "name": "Surfshark Starter",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1645,
+          "source": "https://surfshark.com/pricing",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "proton-vpn",
+      "name": "Proton VPN",
+      "aliases": [
+        "protonvpn",
+        "proton vpn"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Chưa xác nhận được giá gói năm vì trang giá hiển thị số động qua JavaScript.",
+      "defaultPlan": "plus",
+      "plans": [
+        {
+          "tier": "plus",
+          "name": "VPN Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 999,
+          "note": null,
+          "source": "https://protonvpn.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "mullvad",
+      "name": "Mullvad",
+      "aliases": [
+        "mullvad",
+        "mullvad vpn"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Xác nhận lại bằng trình duyệt thật tại mullvad.net/en: vẫn chỉ niêm yết €5/tháng cố định (không giảm giá theo năm, không có bảng giá USD/VND) nên không ghi được theo chuẩn dữ liệu này (không tự quy đổi tỉ giá).",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "bitwarden",
+      "name": "Bitwarden Premium",
+      "aliases": [
+        "bitwarden",
+        "bit warden"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ bán theo năm, không có gói theo tháng riêng.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 1980,
+          "note": null,
+          "source": "https://bitwarden.com/pricing/",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://vault.bitwarden.com/"
+    },
+    {
+      "id": "dashlane",
+      "name": "Dashlane",
+      "aliases": [
+        "dashlane"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "dashlane.com/personal-password-manager (chính hãng) mở bằng trình duyệt thật hiện rõ giá: Premium $5.42/tháng, chỉ bán theo hình thức thanh toán năm, không có gói tháng riêng.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Dashlane Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 6504,
+          "note": "5.42 USD/tháng, chỉ thanh toán theo năm",
+          "source": "https://www.dashlane.com/personal-password-manager",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "lastpass",
+      "name": "LastPass",
+      "aliases": [
+        "lastpass",
+        "last pass"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "lastpass.com/pricing (chính hãng) mở bằng trình duyệt thật hiện rõ giá: Premium 3.00 USD/tháng, chỉ thanh toán theo năm (36 USD/năm). Trang đang chạy khuyến mãi giảm 30% còn 2.10 USD/tháng — ghi giá gốc không khuyến mãi theo đúng luật giá.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "LastPass Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 3600,
+          "note": "3.00 USD/tháng, chỉ thanh toán theo năm (giá gốc, chưa trừ khuyến mãi 30% đang chạy)",
+          "source": "https://www.lastpass.com/pricing",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "norton-360",
+      "name": "Norton 360",
+      "aliases": [
+        "norton",
+        "norton 360",
+        "norton360"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ bán theo năm. Giá ghi là giá gia hạn chuẩn; năm đầu thường có giá khuyến mãi thấp hơn nhiều (khoảng 34.99 USD).",
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "Norton 360 Standard",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 9499,
+          "note": "Giá gia hạn chuẩn, không tính khuyến mãi năm đầu",
+          "source": "https://us.norton.com/products/norton-360-standard",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "kaspersky",
+      "name": "Kaspersky",
+      "aliases": [
+        "kaspersky",
+        "kaspersky antivirus"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "kaspersky.com/premium (chính hãng) mở bằng trình duyệt thật: chỉ bán theo năm. Trang ghi rõ giá gia hạn thường xuyên \"Thereafter your subscription will be renewed automatically at $119.99 per year\" cho gói Premium 5 thiết bị (giá hiển thị nổi bật $72.99 chỉ là ưu đãi năm đầu 15 tháng).",
+      "defaultPlan": "premium-5",
+      "plans": [
+        {
+          "tier": "premium-5",
+          "name": "Kaspersky Premium (5 thiết bị)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 11999,
+          "note": "Giá gia hạn thường xuyên, không tính ưu đãi năm đầu ($72.99)",
+          "source": "https://www.kaspersky.com/premium",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "mcafee",
+      "name": "McAfee",
+      "aliases": [
+        "mcafee",
+        "mc afee"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ bán theo năm. Giá ghi là giá gia hạn chuẩn; năm đầu thường có giá khuyến mãi thấp hơn nhiều (khoảng 39.99 USD).",
+      "defaultPlan": "essential",
+      "plans": [
+        {
+          "tier": "essential",
+          "name": "Total Protection Essential",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 11999,
+          "note": "5 thiết bị, giá gia hạn chuẩn",
+          "source": "https://www.mcafee.com/en-us/antivirus.html",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "malwarebytes",
+      "name": "Malwarebytes",
+      "aliases": [
+        "malwarebytes",
+        "malware bytes"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ bán theo năm, không có gói theo tháng riêng.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Premium (1 thiết bị)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 4499,
+          "note": "1 thiết bị",
+          "source": "https://www.malwarebytes.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "bkav-pro",
+      "name": "Bkav Pro",
+      "aliases": [
+        "bkav",
+        "bkav pro"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Xác nhận lại bằng trình duyệt thật tại bkav.com/bkav-pro và trang đặt mua: vẫn chỉ ghi giá 299.000đ/Thẻ mà không nêu rõ thời hạn sử dụng (1 năm hay khác) ở bất kỳ đâu trên trang, nên không thể ghi vào plans mà không đoán.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "cleanmymac",
+      "name": "CleanMyMac",
+      "aliases": [
+        "cleanmymac",
+        "clean my mac"
+      ],
+      "sector": "SECURITY",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Là phần mềm dọn dẹp/tối ưu máy Mac, không phải phần mềm bảo mật — sector SECURITY trong stub có thể chưa đúng, cân nhắc đổi sang UTILITIES. Chỉ bán theo năm cho 1 thiết bị.",
+      "defaultPlan": "single-device",
+      "plans": [
+        {
+          "tier": "single-device",
+          "name": "1 thiết bị",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 3996,
+          "note": "3.33 USD/tháng, thanh toán theo năm",
+          "source": "https://macpaw.com/cleanmymac",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "mega",
+      "name": "MEGA",
+      "aliases": [
+        "mega",
+        "mega.nz",
+        "mega io"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ có giá thanh toán theo năm. Trang ghi rõ đây là giá USD ước tính, khách sẽ bị tính phí thật bằng EUR nên số tiền trên sao kê có thể khác đôi chút.",
+      "defaultPlan": "pro-lite",
+      "plans": [
+        {
+          "tier": "pro-lite",
+          "name": "Pro Lite",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 7008,
+          "note": "750GB, 5.84 USD/tháng, thanh toán theo năm",
+          "source": "https://mega.nz/pro",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "pcloud",
+      "name": "pCloud",
+      "aliases": [
+        "pcloud",
+        "p cloud"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Bỏ gói trọn đời theo yêu cầu, chỉ lấy gói năm. Chưa xác nhận được giá gói tháng.",
+      "defaultPlan": "premium-500gb",
+      "plans": [
+        {
+          "tier": "premium-500gb",
+          "name": "Premium 500GB",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 4999,
+          "note": "500GB",
+          "source": "https://www.pcloud.com/cloud-storage-pricing-plans.html",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "proton-drive",
+      "name": "Proton Drive",
+      "aliases": [
+        "protondrive",
+        "proton drive"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "proton.me/drive/pricing (chính hãng) mở được bằng trình duyệt thật, có tab Monthly/Yearly riêng biệt. Tier thấp nhất có tên riêng là Drive Plus (200GB).",
+      "defaultPlan": "drive-plus",
+      "plans": [
+        {
+          "tier": "drive-plus",
+          "name": "Proton Drive Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 499,
+          "note": "200GB",
+          "source": "https://proton.me/drive/pricing",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "drive-plus",
+          "name": "Proton Drive Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 4788,
+          "note": "200GB, 3.99 USD/tháng thanh toán theo năm",
+          "source": "https://proton.me/drive/pricing",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "box",
+      "name": "Box",
+      "aliases": [
+        "box",
+        "box.com"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "box.com/pricing/individual (chính hãng) mở được bằng trình duyệt thật, có toggle Monthly/Annually riêng cho tier Personal Pro.",
+      "defaultPlan": "personal-pro",
+      "plans": [
+        {
+          "tier": "personal-pro",
+          "name": "Box Personal Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1600,
+          "note": "100GB",
+          "source": "https://www.box.com/pricing/individual",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "personal-pro",
+          "name": "Box Personal Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 13800,
+          "note": "100GB, 11.50 USD/tháng thanh toán theo năm",
+          "source": "https://www.box.com/pricing/individual",
+          "checkedAt": "2026-08-24"
+        }
+      ],
+      "manageUrl": "https://app.box.com/account"
+    },
+    {
+      "id": "sync-com",
+      "name": "Sync.com",
+      "aliases": [
+        "sync",
+        "sync.com",
+        "synccom"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Trang giá ghi kèm khuyến mãi \"Save 50% năm đầu\" nên số liệu có thể là giá năm đầu, không chắc là giá gia hạn chuẩn.",
+      "defaultPlan": "personal-150gb",
+      "plans": [
+        {
+          "tier": "personal-150gb",
+          "name": "Personal 150GB",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 400,
+          "note": "150GB",
+          "source": "https://www.sync.com/pricing-individual/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "personal-150gb",
+          "name": "Personal 150GB",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 4200,
+          "note": "150GB, 3.50 USD/tháng thanh toán theo năm",
+          "source": "https://www.sync.com/pricing-individual/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "synology-c2",
+      "name": "Synology C2",
+      "aliases": [
+        "synology c2",
+        "c2 backup",
+        "synology"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "c2.synology.com/en-global/pricing/backup/personal (chính hãng) mở được bằng trình duyệt thật, có tab Monthly billing/Annual billing riêng cho gói 500GB (tier thấp nhất trong 3 gói 500GB/1TB/2TB).",
+      "defaultPlan": "500gb",
+      "plans": [
+        {
+          "tier": "500gb",
+          "name": "C2 Backup for Individuals 500GB",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 349,
+          "note": "Chưa gồm VAT",
+          "source": "https://c2.synology.com/en-global/pricing/backup/personal",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "500gb",
+          "name": "C2 Backup for Individuals 500GB",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 3499,
+          "note": "Chưa gồm VAT",
+          "source": "https://c2.synology.com/en-global/pricing/backup/personal",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "terabox",
+      "name": "TeraBox",
+      "aliases": [
+        "terabox",
+        "tera box"
+      ],
+      "sector": "STORAGE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "terabox.com/cloud-storage-pricing-plans (chính hãng) mở được bằng trình duyệt thật, tự động hiện giá VNĐ theo vùng truy cập. Trang ghi rõ giá gia hạn thường xuyên (\"Automatically renew at X\"), không phải giá khuyến mãi.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "TeraBox Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 84755,
+          "note": "2048GB",
+          "source": "https://www.terabox.com/cloud-storage-pricing-plans",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "premium",
+          "name": "TeraBox Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 948171,
+          "note": "2048GB",
+          "source": "https://www.terabox.com/cloud-storage-pricing-plans",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    }
+  ]
+}

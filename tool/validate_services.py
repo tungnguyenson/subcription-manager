@@ -145,9 +145,10 @@ def check_entry(rep, entry, seen_ids):
     if cycle is not None and cycle not in CYCLES:
         rep.error(eid, f'defaultCycle "{cycle}" is not one of {sorted(CYCLES)}')
 
-    url = entry.get("cancelUrl")
-    if url is not None and not str(url).startswith("https://"):
-        rep.error(eid, "cancelUrl must be https")
+    for field in ("cancelUrl", "manageUrl"):
+        url = entry.get(field)
+        if url is not None and not str(url).startswith("https://"):
+            rep.error(eid, f"{field} must be https")
 
     if entry.get("_todo"):
         rep.error(eid, "still marked _todo — the stub was never filled in")

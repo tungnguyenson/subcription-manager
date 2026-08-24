@@ -1,0 +1,405 @@
+{
+  "part": 2,
+  "entries": [
+    {
+      "id": "microsoft-copilot",
+      "name": "Microsoft Copilot",
+      "sector": "AI"
+    },
+    {
+      "id": "minecraft-realms",
+      "name": "Minecraft Realms",
+      "sector": "GAMING"
+    },
+    {
+      "id": "miro",
+      "name": "Miro",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "money-lover",
+      "name": "Money Lover",
+      "sector": "FINANCE"
+    },
+    {
+      "id": "monkey-junior",
+      "name": "Monkey",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "mubi",
+      "name": "MUBI",
+      "sector": "ENTERTAINMENT"
+    },
+    {
+      "id": "mullvad",
+      "name": "Mullvad",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "myfitnesspal",
+      "name": "MyFitnessPal",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "mytv",
+      "name": "MyTV",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "nebula",
+      "name": "Nebula",
+      "sector": "ENTERTAINMENT"
+    },
+    {
+      "id": "noom",
+      "name": "Noom",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "nordvpn",
+      "name": "NordVPN",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "norton-360",
+      "name": "Norton 360",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "nyt",
+      "name": "The New York Times",
+      "sector": "NEWS"
+    },
+    {
+      "id": "obsidian-sync",
+      "name": "Obsidian Sync",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "okcupid",
+      "name": "OkCupid",
+      "sector": "DATING"
+    },
+    {
+      "id": "oreilly",
+      "name": "O'Reilly",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "oura",
+      "name": "Oura",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "paramount-plus",
+      "name": "Paramount+",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "patreon",
+      "name": "Patreon",
+      "sector": "ENTERTAINMENT"
+    },
+    {
+      "id": "pcloud",
+      "name": "pCloud",
+      "sector": "STORAGE"
+    },
+    {
+      "id": "peacock",
+      "name": "Peacock",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "peloton",
+      "name": "Peloton",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "phi-quan-ly-tk",
+      "name": "Phí quản lý tài khoản ngân hàng",
+      "sector": "FINANCE"
+    },
+    {
+      "id": "poe",
+      "name": "Poe",
+      "sector": "AI"
+    },
+    {
+      "id": "priority-pass",
+      "name": "Priority Pass",
+      "sector": "TRAVEL"
+    },
+    {
+      "id": "proton-drive",
+      "name": "Proton Drive",
+      "sector": "STORAGE"
+    },
+    {
+      "id": "proton-vpn",
+      "name": "Proton VPN",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "qobuz",
+      "name": "Qobuz",
+      "sector": "MUSIC"
+    },
+    {
+      "id": "quizlet",
+      "name": "Quizlet Plus",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "raycast",
+      "name": "Raycast Pro",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "reddit-premium",
+      "name": "Reddit Premium",
+      "sector": "SOCIAL"
+    },
+    {
+      "id": "replit",
+      "name": "Replit",
+      "sector": "AI"
+    },
+    {
+      "id": "roblox-premium",
+      "name": "Roblox Premium",
+      "sector": "GAMING"
+    },
+    {
+      "id": "runway",
+      "name": "Runway",
+      "sector": "AI"
+    },
+    {
+      "id": "setapp",
+      "name": "Setapp",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "shopeefood-xtra",
+      "name": "ShopeeFood Xtra",
+      "sector": "FOOD"
+    },
+    {
+      "id": "simplize",
+      "name": "Simplize",
+      "sector": "FINANCE"
+    },
+    {
+      "id": "skillshare",
+      "name": "Skillshare",
+      "sector": "EDUCATION"
+    },
+    {
+      "id": "slack",
+      "name": "Slack",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "sms-banking",
+      "name": "SMS Banking",
+      "sector": "FINANCE"
+    },
+    {
+      "id": "snapchat-plus",
+      "name": "Snapchat+",
+      "sector": "SOCIAL"
+    },
+    {
+      "id": "soundcloud-go",
+      "name": "SoundCloud Go+",
+      "sector": "MUSIC"
+    },
+    {
+      "id": "storytel",
+      "name": "Storytel",
+      "sector": "ENTERTAINMENT"
+    },
+    {
+      "id": "strava",
+      "name": "Strava",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "substack",
+      "name": "Substack",
+      "sector": "NEWS"
+    },
+    {
+      "id": "suno",
+      "name": "Suno",
+      "sector": "AI"
+    },
+    {
+      "id": "surfshark",
+      "name": "Surfshark",
+      "sector": "SECURITY"
+    },
+    {
+      "id": "sync-com",
+      "name": "Sync.com",
+      "sector": "STORAGE"
+    },
+    {
+      "id": "synology-c2",
+      "name": "Synology C2",
+      "sector": "STORAGE"
+    },
+    {
+      "id": "telegram-premium",
+      "name": "Telegram Premium",
+      "sector": "SOCIAL"
+    },
+    {
+      "id": "terabox",
+      "name": "TeraBox",
+      "sector": "STORAGE"
+    },
+    {
+      "id": "the-athletic",
+      "name": "The Athletic",
+      "sector": "NEWS"
+    },
+    {
+      "id": "the-economist",
+      "name": "The Economist",
+      "sector": "NEWS"
+    },
+    {
+      "id": "the-tap-gym",
+      "name": "Thẻ tập gym",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "tidal",
+      "name": "Tidal",
+      "sector": "MUSIC"
+    },
+    {
+      "id": "tinder",
+      "name": "Tinder",
+      "sector": "DATING"
+    },
+    {
+      "id": "todoist",
+      "name": "Todoist",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "tradingview",
+      "name": "TradingView",
+      "sector": "FINANCE"
+    },
+    {
+      "id": "trello",
+      "name": "Trello",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "tv360",
+      "name": "TV360",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "twitch-turbo",
+      "name": "Twitch Turbo",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "uber-one",
+      "name": "Uber One",
+      "sector": "FOOD"
+    },
+    {
+      "id": "ubisoft-plus",
+      "name": "Ubisoft+",
+      "sector": "GAMING"
+    },
+    {
+      "id": "v0",
+      "name": "v0",
+      "sector": "AI"
+    },
+    {
+      "id": "ve-thang-xe-buyt",
+      "name": "Vé tháng xe buýt / metro",
+      "sector": "TRAVEL"
+    },
+    {
+      "id": "vietstock",
+      "name": "Vietstock",
+      "sector": "FINANCE"
+    },
+    {
+      "id": "viu",
+      "name": "Viu",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "vnsky",
+      "name": "VNSKY",
+      "sector": "PHONE"
+    },
+    {
+      "id": "waka",
+      "name": "Waka",
+      "sector": "ENTERTAINMENT"
+    },
+    {
+      "id": "webtoon",
+      "name": "WEBTOON",
+      "sector": "ENTERTAINMENT"
+    },
+    {
+      "id": "wetv",
+      "name": "WeTV",
+      "sector": "STREAMING"
+    },
+    {
+      "id": "whoop",
+      "name": "Whoop",
+      "sector": "FITNESS"
+    },
+    {
+      "id": "windsurf",
+      "name": "Windsurf",
+      "sector": "AI"
+    },
+    {
+      "id": "wow-sub",
+      "name": "World of Warcraft",
+      "sector": "GAMING"
+    },
+    {
+      "id": "wsj",
+      "name": "The Wall Street Journal",
+      "sector": "NEWS"
+    },
+    {
+      "id": "x-premium",
+      "name": "X Premium",
+      "sector": "SOCIAL"
+    },
+    {
+      "id": "ynab",
+      "name": "YNAB",
+      "sector": "FINANCE"
+    },
+    {
+      "id": "zoom",
+      "name": "Zoom",
+      "sector": "PRODUCTIVITY"
+    },
+    {
+      "id": "zwift",
+      "name": "Zwift",
+      "sector": "FITNESS"
+    }
+  ]
+}

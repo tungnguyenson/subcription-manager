@@ -53,6 +53,13 @@ extension ItemRowMapper on ItemRowData {
     ),
     snoozedUntil: snoozedUntil == null ? null : LocalDate.parse(snoozedUntil!),
     state: enumFromWire(ItemState.values, state, ItemState.active),
+    // An unrecognised channel must fall back to "we do not know", never to a
+    // guess: pointing someone at the wrong billing page wastes the trip.
+    purchaseChannel: enumFromWire(
+      PurchaseChannel.values,
+      purchaseChannel,
+      PurchaseChannel.unknown,
+    ),
   );
 }
 

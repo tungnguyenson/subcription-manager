@@ -1,0 +1,774 @@
+{
+  "batch": "finance-education",
+  "sectors": [
+    "FINANCE",
+    "EDUCATION"
+  ],
+  "entries": [
+    {
+      "id": "khoan-vay",
+      "name": "Khoản vay",
+      "aliases": [
+        "vay",
+        "no",
+        "khoan vay"
+      ],
+      "sector": "FINANCE",
+      "category": "BILL",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "tra-gop",
+      "name": "Trả góp",
+      "aliases": [
+        "tra gop",
+        "installment"
+      ],
+      "sector": "FINANCE",
+      "category": "BILL",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "the-tin-dung",
+      "name": "Sao kê thẻ tín dụng",
+      "aliases": [
+        "the tin dung",
+        "credit card",
+        "sao ke"
+      ],
+      "sector": "FINANCE",
+      "category": "BILL",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "phi-thuong-nien",
+      "name": "Phí thường niên thẻ",
+      "aliases": [
+        "phi thuong nien",
+        "annual fee"
+      ],
+      "sector": "FINANCE",
+      "category": "BILL",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "tradingview",
+      "name": "TradingView",
+      "aliases": [
+        "tradingview",
+        "trading view"
+      ],
+      "sector": "FINANCE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "essential",
+      "plans": [
+        {
+          "tier": "essential",
+          "name": "Essential",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1495,
+          "note": "Billed monthly",
+          "source": "https://www.tradingview.com/pricing/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "essential",
+          "name": "Essential",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 15540,
+          "note": "Billed annually, one payment (equivalent $12.95/mo)",
+          "source": "https://www.tradingview.com/pricing/",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://www.tradingview.com/settings/"
+    },
+    {
+      "id": "money-lover",
+      "name": "Money Lover",
+      "aliases": [
+        "money lover",
+        "moneylover"
+      ],
+      "sector": "FINANCE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Kiểm tra lại qua danh sách In-App Purchase trên App Store: vẫn là các mục cũ chồng chéo (gói trọn đời, các đợt giảm giá cũ, phí liên kết ngân hàng, Budget Plus...) không có cặp giá Premium tháng/năm hiện hành rõ ràng để ghi.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "ynab",
+      "name": "YNAB",
+      "aliases": [
+        "ynab",
+        "you need a budget"
+      ],
+      "sector": "FINANCE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "YNAB",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1499,
+          "note": null,
+          "source": "https://www.ynab.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "standard",
+          "name": "YNAB",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 10900,
+          "note": null,
+          "source": "https://www.ynab.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "fiin",
+      "name": "FiinTrade",
+      "aliases": [
+        "fiintrade",
+        "fiin trade",
+        "fiin"
+      ],
+      "sector": "FINANCE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Chỉ bán theo kỳ hạn dài (3 tháng/6 tháng/1 năm/3 năm), không có gói tháng lẻ nên chỉ ghi được chu kỳ năm.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "FiinTrade Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 9233400,
+          "note": "Gói 1 năm, đã gồm VAT 8%",
+          "source": "https://web.fiintrade.vn/chinh-sach-gia",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "vietstock",
+      "name": "Vietstock",
+      "aliases": [
+        "vietstock",
+        "viet stock"
+      ],
+      "sector": "FINANCE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "standard",
+      "plans": [
+        {
+          "tier": "standard",
+          "name": "VietstockFinance Standard",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 126600,
+          "note": "Giá khi chọn chu kỳ thanh toán 1 tháng",
+          "source": "https://finance.vietstock.vn/chinh-sach-thanh-vien",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "standard",
+          "name": "VietstockFinance Standard",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 894000,
+          "note": "Tổng tiền cả năm khi chọn chu kỳ thanh toán 1 năm",
+          "source": "https://finance.vietstock.vn/chinh-sach-thanh-vien",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "simplize",
+      "name": "Simplize",
+      "aliases": [
+        "simplize"
+      ],
+      "sector": "FINANCE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "professional",
+      "plans": [
+        {
+          "tier": "professional",
+          "name": "Professional",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 599000,
+          "note": null,
+          "source": "https://simplize.vn/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "professional",
+          "name": "Professional",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 7188000,
+          "note": "Giá niêm yết (chưa trừ khuyến mãi 17% hiển thị trên trang)",
+          "source": "https://simplize.vn/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "phi-quan-ly-tk",
+      "name": "Phí quản lý tài khoản ngân hàng",
+      "aliases": [
+        "phi quan ly tai khoan",
+        "phi quan ly tk",
+        "phi tai khoan ngan hang"
+      ],
+      "sector": "FINANCE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "sms-banking",
+      "name": "SMS Banking",
+      "aliases": [
+        "sms banking",
+        "phi sms",
+        "bao dong so du"
+      ],
+      "sector": "FINANCE",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "duolingo",
+      "name": "Duolingo Super",
+      "aliases": [
+        "duolingo",
+        "duolingo super"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Duolingo không công khai giá trên trang web (chỉ hiện sau khi vào luồng mua trong app); giá lấy từ mục mua trong ứng dụng trên App Store, là giá niêm yết thường xuyên, không phải giá khuyến mãi.",
+      "defaultPlan": "super",
+      "plans": [
+        {
+          "tier": "super",
+          "name": "Super (cá nhân)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1299,
+          "note": null,
+          "source": "https://apps.apple.com/us/app/duolingo-language-lessons/id570060128",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "super",
+          "name": "Super (cá nhân)",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 8399,
+          "note": null,
+          "source": "https://apps.apple.com/us/app/duolingo-language-lessons/id570060128",
+          "checkedAt": "2026-08-23"
+        }
+      ],
+      "manageUrl": "https://www.duolingo.com/settings/account"
+    },
+    {
+      "id": "elsa-speak",
+      "name": "ELSA Speak",
+      "aliases": [
+        "elsa",
+        "elsa speak"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Trang bán hàng riêng cho VN (vn.elsaspeak.com) chạy mã giảm giá liên tục nên không dùng làm nguồn; giá lấy từ mục mua trong ứng dụng ELSA Premium trên App Store VN.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "ELSA Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 145000,
+          "note": null,
+          "source": "https://apps.apple.com/vn/app/elsa-speak-language-learning/id1083804886",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "premium",
+          "name": "ELSA Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 1590000,
+          "note": null,
+          "source": "https://apps.apple.com/vn/app/elsa-speak-language-learning/id1083804886",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "monkey-junior",
+      "name": "Monkey",
+      "aliases": [
+        "monkey",
+        "monkey junior"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Monkey Junior chỉ bán theo gói 6 tháng/1 năm/trọn đời, không có gói tháng; chỉ lấy gói 1 năm theo đúng luật giá, bỏ qua gói trọn đời.",
+      "defaultPlan": "1-year",
+      "plans": [
+        {
+          "tier": "1-year",
+          "name": "Monkey Junior 1 năm",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 799000,
+          "note": "Giá bán hiện tại trên site (giá gốc niêm yết 1.359.000đ)",
+          "source": "https://monkey.edu.vn/dang-ky-hoc",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "coursera",
+      "name": "Coursera Plus",
+      "aliases": [
+        "coursera",
+        "coursera plus"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Coursera có ưu đãi 40% cho 3 tháng đầu với gói tháng; ghi giá niêm yết thường xuyên ($24/tháng), không phải giá khuyến mãi.",
+      "defaultPlan": "plus",
+      "plans": [
+        {
+          "tier": "plus",
+          "name": "Coursera Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 2400,
+          "note": null,
+          "source": "https://www.coursera.org/courseraplus",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "plus",
+          "name": "Coursera Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 16000,
+          "note": null,
+          "source": "https://www.coursera.org/courseraplus",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "skillshare",
+      "name": "Skillshare",
+      "aliases": [
+        "skillshare"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "skillshare.com/en/pricing mở được bằng trình duyệt thật: chỉ có một mức giá 13.99 USD/tháng nhưng bắt buộc thanh toán theo năm (167.88 USD/năm), không có hình thức trả theo tháng riêng.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Skillshare Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 16788,
+          "note": "13.99 USD/tháng, chỉ thanh toán theo năm",
+          "source": "https://www.skillshare.com/en/pricing",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "masterclass",
+      "name": "MasterClass",
+      "aliases": [
+        "masterclass",
+        "master class"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "MasterClass chỉ bán theo năm, không có gói tháng; trang giá chính thức chặn truy cập tự động (403) nên giá lấy từ mục mua trong ứng dụng trên App Store.",
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 11999,
+          "note": null,
+          "source": "https://apps.apple.com/us/app/masterclass-online-classes/id1273867416",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "linkedin-learning",
+      "name": "LinkedIn Learning",
+      "aliases": [
+        "linkedin learning"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Đã thử lại bằng trình duyệt thật (linkedin.com/learning-login/checkout, trang App Store, Play Store): không nơi nào công khai giá cụ thể, chỉ hiện sau khi đăng nhập tài khoản.",
+      "defaultPlan": null,
+      "plans": []
+    },
+    {
+      "id": "datacamp",
+      "name": "DataCamp",
+      "aliases": [
+        "datacamp",
+        "data camp"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "DataCamp Premium chỉ hiển thị một hình thức thanh toán (billed annually, $13/tháng); không tra được gói trả theo tháng riêng lẻ.",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Premium",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 15600,
+          "note": "$13/tháng, thanh toán theo năm",
+          "source": "https://www.datacamp.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "codecademy",
+      "name": "Codecademy Pro",
+      "aliases": [
+        "codecademy",
+        "code academy"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "pro",
+      "plans": [
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1999,
+          "note": null,
+          "source": "https://www.codecademy.com/pricing",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "pro",
+          "name": "Pro",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 19188,
+          "note": "$15.99/tháng, thanh toán theo năm",
+          "source": "https://www.codecademy.com/pricing",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "brilliant",
+      "name": "Brilliant",
+      "aliases": [
+        "brilliant"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Trình duyệt thật mở brilliant.org/premium (chuyển hướng sang /subscribe/) hiện giá bằng VNĐ theo vùng truy cập: gói tháng 400.000đ, gói năm hiển thị 250.000đ/tháng \"billed as one payment, renews annually\" — tổng năm suy ra 3.000.000đ (chưa xác nhận được số lẻ chính xác vì cần đăng nhập để vào trang thanh toán).",
+      "defaultPlan": "premium",
+      "plans": [
+        {
+          "tier": "premium",
+          "name": "Brilliant Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "MONTHLY",
+          "amountMinor": 400000,
+          "source": "https://brilliant.org/subscribe/",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "premium",
+          "name": "Brilliant Premium",
+          "region": "VN",
+          "currency": "VND",
+          "cycle": "YEARLY",
+          "amountMinor": 3000000,
+          "note": "250.000đ/tháng, thanh toán theo năm (suy ra từ giá hiển thị x12, trang yêu cầu đăng nhập mới thấy số chốt ở bước thanh toán)",
+          "source": "https://brilliant.org/subscribe/",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "quizlet",
+      "name": "Quizlet Plus",
+      "aliases": [
+        "quizlet",
+        "quizlet plus"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "Trang quizlet.com/plus chặn truy cập tự động (captcha); giá lấy từ mục mua trong ứng dụng trên App Store.",
+      "defaultPlan": "plus",
+      "plans": [
+        {
+          "tier": "plus",
+          "name": "Quizlet Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 999,
+          "note": null,
+          "source": "https://apps.apple.com/us/app/quizlet-more-than-flashcards/id546473125",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "plus",
+          "name": "Quizlet Plus",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 4499,
+          "note": null,
+          "source": "https://apps.apple.com/us/app/quizlet-more-than-flashcards/id546473125",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "oreilly",
+      "name": "O'Reilly",
+      "aliases": [
+        "oreilly",
+        "o'reilly",
+        "oreilly learning"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": "oreilly.com/online-learning/pricing.html vẫn chặn bot, nhưng trang đăng ký learning.oreilly.com/signup/ (chính hãng) hiện đủ 3 mức giá không cần đăng nhập.",
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "O'Reilly Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 1400,
+          "source": "https://learning.oreilly.com/signup/",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "individual",
+          "name": "O'Reilly Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 13500,
+          "note": "Gói năm giảm 15% so với trả tháng x12",
+          "source": "https://learning.oreilly.com/signup/",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "frontend-masters",
+      "name": "Frontend Masters",
+      "aliases": [
+        "frontend masters",
+        "frontendmasters"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "MONTHLY",
+          "amountMinor": 3900,
+          "note": "Giá niêm yết gốc (site đang chạy khuyến mãi giảm còn $24/tháng)",
+          "source": "https://frontendmasters.com/join/",
+          "checkedAt": "2026-08-23"
+        },
+        {
+          "tier": "individual",
+          "name": "Individual",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 39000,
+          "note": "Giá niêm yết gốc (site đang chạy khuyến mãi giảm còn $240/năm)",
+          "source": "https://frontendmasters.com/join/",
+          "checkedAt": "2026-08-23"
+        }
+      ]
+    },
+    {
+      "id": "babbel",
+      "name": "Babbel",
+      "aliases": [
+        "babbel"
+      ],
+      "sector": "EDUCATION",
+      "category": "SUBSCRIPTION",
+      "defaultCycle": "YEARLY",
+      "cancelUrl": null,
+      "noteVi": "Trang my.babbel.com/en/prices (chính hãng) mở được bằng trình duyệt thật: hiện tại chỉ có MỘT tier \"Individual Plan\" áp dụng cho cả 14 ngôn ngữ ở mọi kỳ hạn — không còn phân biệt gói 1 ngôn ngữ/tháng như ghi chú cũ. Không có gói 1 tháng lẻ, chỉ bán theo kỳ trả trước 3/6/12 tháng (giá dưới đây là tổng cả kỳ); lấy kỳ ngắn nhất (3 tháng) và kỳ 12 tháng theo đúng luật giá.",
+      "defaultPlan": "individual",
+      "plans": [
+        {
+          "tier": "individual",
+          "name": "Babbel Individual Plan",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "QUARTERLY",
+          "amountMinor": 4575,
+          "note": "Gói trả trước 3 tháng, 15.25 USD/tháng",
+          "source": "https://my.babbel.com/en/prices",
+          "checkedAt": "2026-08-24"
+        },
+        {
+          "tier": "individual",
+          "name": "Babbel Individual Plan",
+          "region": "GLOBAL",
+          "currency": "USD",
+          "cycle": "YEARLY",
+          "amountMinor": 10740,
+          "note": "Gói trả trước 12 tháng, 8.95 USD/tháng",
+          "source": "https://my.babbel.com/en/prices",
+          "checkedAt": "2026-08-24"
+        }
+      ]
+    },
+    {
+      "id": "hoc-phi",
+      "name": "Học phí",
+      "aliases": [
+        "hoc phi",
+        "tuition"
+      ],
+      "sector": "EDUCATION",
+      "category": "BILL",
+      "defaultCycle": "MONTHLY",
+      "cancelUrl": null,
+      "noteVi": null,
+      "defaultPlan": null,
+      "plans": []
+    }
+  ]
+}

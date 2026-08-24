@@ -12,7 +12,7 @@ class SubdockDatabase extends _$SubdockDatabase {
   SubdockDatabase(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -67,12 +67,28 @@ class SubdockDatabase extends _$SubdockDatabase {
               if (from < 2) itemRow.repeatCount,
               itemRow.iconName,
               itemRow.snoozedUntil,
+              // Every column added after v3 has to be listed here too, not just
+              // in its own step below. This rebuild copies the *current*
+              // schema out of the old table, so a column the old file never
+              // had makes the SELECT fail on a name that does not exist there.
+              itemRow.purchaseChannel,
             ],
           ),
         );
 
         // Nothing points at it any more, so it can go.
         await m.deleteTable('itemGroupRow');
+      }
+
+      // v4 adds where the subscription was bought. A plain addColumn is enough
+      // because the column has a default: existing rows become UNKNOWN, which
+      // is exactly what is true of them -- nobody was ever asked.
+      //
+      // Only for a file that is already at v3. Anything older went through the
+      // rebuild above, which recreated the table at the current schema and so
+      // already has this column; adding it twice fails on a duplicate name.
+      if (from >= 3 && from < 4) {
+        await m.addColumn(itemRow, itemRow.purchaseChannel);
       }
     },
     beforeOpen: (details) async {
