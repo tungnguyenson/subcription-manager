@@ -170,16 +170,30 @@ class NotificationScheduler {
     return settings?.isEnabled ?? false;
   }
 
-  /// Exact alarms are a permission of their own on Android 12+, denied by
-  /// default from Android 13. Scheduling an exact alarm without it does not
+  /// Whether a reminder will arrive at the minute it was set for.
+  ///
+  /// Null where the question does not arise -- iOS schedules a local
+  /// notification to the minute and offers nothing to turn that off. Android
+  /// makes it a second permission on top of notifications, not pre-granted on
+  /// a fresh install, and a user who granted one and not the other has no way
+  /// to tell from the app that their 08:30 reminder now arrives whenever the
+  /// system next wakes.
+  Future<bool?> hasExactTiming() async {
+    final android = _android;
+    if (android == null) return null;
+    return await android.canScheduleExactNotifications() ?? false;
+  }
+
+  /// Exact alarms are a permission of their own on Android 12+, and not
+  /// pre-granted on a fresh install for an app targeting API 33 or higher.
+  /// Scheduling an exact alarm without it does not
   /// degrade -- `zonedSchedule` throws, and one throw aborts the whole
   /// `apply` loop, leaving the user with no reminders at all. So ask first
   /// and drop to inexact, which costs a delivery window of some minutes.
   Future<AndroidScheduleMode> _scheduleMode() async {
-    final android = _android;
-    if (android == null) return AndroidScheduleMode.exactAllowWhileIdle;
+    final exact = await hasExactTiming();
+    if (exact == null) return AndroidScheduleMode.exactAllowWhileIdle;
 
-    final exact = await android.canScheduleExactNotifications() ?? false;
     return exact
         ? AndroidScheduleMode.exactAllowWhileIdle
         : AndroidScheduleMode.inexactAllowWhileIdle;

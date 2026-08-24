@@ -92,6 +92,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool _onboardingDismissed = false;
   bool _notificationsGranted = false;
 
+  /// Null until the first read, and null for good on any platform that does
+  /// not gate exact alarms behind their own permission.
+  bool? _exactTiming;
+
   /// The identifiers currently on the device. Re-scheduling means cancelling
   /// and re-adding all of them, which is cheap but not free, so it only runs
   /// when the plan actually differs.
@@ -175,7 +179,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Future<void> _refreshPermission() async {
     final granted = await widget.scheduler.hasPermission();
-    if (mounted) setState(() => _notificationsGranted = granted);
+    // Read even when permission is off, so the reminders screen has the answer
+    // ready the moment the user grants it.
+    final exact = await widget.scheduler.hasExactTiming();
+    if (mounted) {
+      setState(() {
+        _notificationsGranted = granted;
+        _exactTiming = exact;
+      });
+    }
   }
 
   Future<void> _applyPlan() async {
@@ -372,6 +384,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     ReminderRulesScreen(
       settings: _settings,
       pushGranted: _notificationsGranted,
+      exactTiming: _exactTiming,
       onEnablePush: _requestNotifications,
       onToggleLead: (lead, on) =>
           widget.settings.save(_settings.withLead(lead, on)),

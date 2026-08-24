@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/ui/reminders_presenter.dart';
 
 void main() {
@@ -98,17 +99,27 @@ void main() {
       );
     });
 
-    // iOS keeps 64 pending notifications and evicts the rest silently, so this
+    // The platform evicts pending notifications past its cap silently, so this
     // is a real shared resource and the screen says so out loud.
     test('the budget line names the cost to other items', () {
       expect(
         RemindersPresenter.budgetLine(4, 0),
-        'Holds 4 of the 64 reminder slots iOS allows.',
+        'Holds 4 of the ${NotificationPlanner.budget} reminder slots '
+        'this app schedules.',
       );
       expect(
         RemindersPresenter.budgetLine(4, 2),
         contains('2 reminders on other items had to be dropped'),
       );
+    });
+
+    // The same string is shown on iOS and on Android. Naming one of them makes
+    // it a lie on the other, which is the kind of small false note this app
+    // cannot afford on the screen that says what will be delivered.
+    test('the budget line names no platform', () {
+      final line = RemindersPresenter.budgetLine(4, 2);
+      expect(line, isNot(contains('iOS')));
+      expect(line, isNot(contains('Android')));
     });
   });
 }

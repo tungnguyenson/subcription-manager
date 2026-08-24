@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 12 tro len. Hai khoi tach roi: cloud-backup la sao luu len Google,
+  device-transfer la chuyen thang sang may moi. Khoa API phai bi loai o ca hai,
+  vi khoa boc no nam trong keystore phan cung va khong di theo duoc.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml"/>
+        <exclude domain="sharedpref" path="FlutterSecureStorageConfiguration.xml"/>
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="sharedpref" path="FlutterSecureStorage.xml"/>
+        <exclude domain="sharedpref" path="FlutterSecureStorageConfiguration.xml"/>
+    </device-transfer>
+</data-extraction-rules>

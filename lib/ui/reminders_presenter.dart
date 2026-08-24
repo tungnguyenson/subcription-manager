@@ -1,5 +1,6 @@
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/ui/money_format.dart';
 
 enum ReminderStatus {
@@ -109,10 +110,15 @@ abstract final class RemindersPresenter {
 
   /// How much of the device's notification budget this item holds.
   ///
-  /// iOS keeps 64 pending notifications per app and silently evicts the rest,
-  /// so this is a real shared resource and the screen says so out loud.
+  /// The budget is a real shared resource, so the screen says so out loud. It
+  /// is stated as the app's own limit rather than the platform's: the number
+  /// comes from iOS keeping only 64 pending notifications per app, and the
+  /// same allocation runs on Android because the app has no verified figure
+  /// for that platform and will not print one it cannot stand behind.
   static String budgetLine(int held, int droppedElsewhere) {
-    final base = 'Holds $held of the 64 reminder slots iOS allows.';
+    final base =
+        'Holds $held of the '
+        '${NotificationPlanner.budget} reminder slots this app schedules.';
     return droppedElsewhere == 0
         ? base
         : '$base $droppedElsewhere reminders on other items had to be dropped.';

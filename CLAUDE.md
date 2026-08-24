@@ -1,7 +1,12 @@
 # Subdock
 
-App iOS theo dõi mọi thứ có ngày hết hạn. Flutter, chạy hoàn toàn ngoại tuyến, không tài
-khoản, không máy chủ, một người dùng trên máy của chính họ.
+App theo dõi mọi thứ có ngày hết hạn, chạy trên iOS và Android. Flutter, hoàn toàn
+ngoại tuyến, không tài khoản, không máy chủ, một người dùng trên máy của chính họ.
+
+Hai nền tảng ngang hàng nhau. Thêm bất cứ thứ gì chạm tới hệ điều hành thì câu hỏi bắt
+buộc là: **nền tảng kia làm việc này thế nào, và nếu nó không làm được thì giao diện có
+nói ra không.** Lịch sử của repo nghiêng về iOS nên vẫn còn comment viết như thể chỉ có
+iOS; đó là dấu vết cũ, không phải chủ ý.
 
 ## Quản lý công việc
 
@@ -65,12 +70,19 @@ python3 tool/merge_services.py --write                     # gộp vào assets/s
 python3 tool/coverage_table.py > docs/research/catalog-coverage.md
 python3 tool/gen_service_marks.py                          # biên dịch icon thành Dart
 flutter test test/golden/ --update-goldens                 # sau khi đổi icon
+
+flutter build apk --debug && flutter install -d <device-id>   # cài lên máy Android
+adb devices                                                # máy báo "unauthorized" thì
+                                                           # phải bấm Allow trên điện thoại
 ```
+
+Lần build Android đầu tiên sau khi clone mất khoảng nửa tiếng: Gradle tự tải NDK. Không
+phải treo.
 
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Tám cái bẫy đã vấp, đừng vấp lại
+## Mười một cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -90,6 +102,26 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 8. **`AnnualSaving.savingMinor` có thể bằng 0.** Có hãng niêm yết gói năm đúng bằng 12
    lần gói tháng và để phần giảm giá ở khuyến mãi. Chỗ nào hiện khoản tiết kiệm phải tự
    loại trường hợp này, không thì ra dòng chữ "Save 0 ₫ a year".
+9. **Android tách quyền thông báo và quyền báo thức đúng giờ làm hai.** Có quyền thứ nhất
+   mà thiếu quyền thứ hai thì nhắc hạn vẫn tới, nhưng tới lúc hệ thống thức dậy chứ không
+   đúng phút đã hẹn. `SCHEDULE_EXACT_ALARM` không được cấp sẵn khi cài mới, với app target
+   API 33 trở lên. Tệ hơn: `zonedSchedule` **ném lỗi** chứ không tự hạ cấp, một lần ném là
+   hỏng cả vòng `apply` và người dùng mất sạch nhắc hạn. `notification_scheduler.dart` hỏi
+   `canScheduleExactNotifications()` trước rồi mới chọn `exact` hay `inexact`, và
+   `reminder_rules_screen.dart` nói ra khi đang chạy inexact.
+   **Đừng dò quyền này bằng `adb shell dumpsys package`**: nó in `granted=true` cho cả máy
+   chưa thật sự cho phép, vì đây là quyền đặc biệt và cổng thật nằm ở AppOps. `cmd appops
+   get <pkg> SCHEDULE_EXACT_ALARM` trả `Default mode: default` cũng không kết luận được.
+   Chỉ có `canScheduleExactAlarms()` hỏi từ trong app mới ra câu trả lời thật.
+10. **`compileSdk` của thư viện bị ghim xuống 36 trong `android/build.gradle.kts`.**
+    `flutter_secure_storage` đặt cứng 37 nhưng SDK chỉ có gói tên `android-37.0` còn AGP
+    đi tìm `android-37`. Khối override phải nằm **trên** khối `evaluationDependsOn(":app")`
+    và phải là `afterEvaluate`; đặt sai một trong hai chỗ là build gãy theo hai kiểu khác
+    nhau. Điều kiện gỡ bỏ ghi trong comment ngay tại đó.
+11. **Ngân sách 50 nhắc hạn là giới hạn của iOS, đang áp cho cả hai nền tảng.** Không có
+    con số công bố cho Android mà app dám trích, nên nó dùng chung con số đã biết thay vì
+    đoán một con số to hơn. Chữ trên giao diện vì thế **không được nêu tên nền tảng nào**,
+    có test khoá điều này.
 
 ## Viết tài liệu
 
@@ -105,6 +137,7 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 |---|---|
 | App làm gì và vì sao | `docs/product-spec.md` |
 | Giao diện | Canvas `Subdock Handoff.dc.html` bên Claude Design, **không nằm trong repo**. `docs/design-spec.md` đã cũ và có ghi rõ ở đầu file |
+| Phần riêng của Android | `android/build.gradle.kts`, `android/app/src/main/AndroidManifest.xml`, `android/app/src/main/res/xml/` |
 | Danh mục dịch vụ | `docs/research/README.md` |
 | Icon | `docs/icon-credits.md` |
 | Việc còn dang dở | `data/services/_verify.md` |

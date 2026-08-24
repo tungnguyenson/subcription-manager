@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android 11 tro xuong. Cap doi cua file nay la data_extraction_rules.xml.
+
+  Chi loai tru dung hai file cua flutter_secure_storage. Co so du lieu cua app
+  van duoc sao luu: do la du lieu cua nguoi dung va ho nen lay lai duoc khi doi
+  may. Rieng khoa API thi khong, xem lib/platform/secure_store.dart.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="FlutterSecureStorage.xml"/>
+    <exclude domain="sharedpref" path="FlutterSecureStorageConfiguration.xml"/>
+</full-backup-content>

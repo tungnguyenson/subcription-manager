@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/item_row.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 
 class SettingsScreen extends StatelessWidget {
   /// Alerts the planner had to leave out. Shown at the top, not buried in a
-  /// log: iOS drops the furthest-out pending notifications silently, and the
-  /// user has no other way to learn that a reminder they are relying on was
-  /// never actually scheduled.
+  /// log: the platform drops the furthest-out pending notifications silently,
+  /// and the user has no other way to learn that a reminder they are relying
+  /// on was never actually scheduled.
   final List<String> droppedReminders;
 
   final String currencyLabel;
@@ -46,8 +47,9 @@ class SettingsScreen extends StatelessWidget {
             title:
                 '${droppedReminders.length} reminders could not be scheduled',
             body:
-                'iOS holds 64 pending reminders. Left out: '
-                '${droppedReminders.join(", ")}.',
+                'This app schedules at most '
+                '${NotificationPlanner.budget} reminders at a time. '
+                'Left out: ${droppedReminders.join(", ")}.',
           ),
         ],
         const SizedBox(height: 20),

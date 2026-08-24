@@ -1,7 +1,7 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-/// Keychain-backed storage for the one secret this app holds: the user's own
-/// OpenAI API key.
+/// Keystore-backed storage for the one secret this app holds: the user's own
+/// OpenAI API key. Keychain on iOS, Android Keystore on Android.
 ///
 /// The key is the user's property and their liability. It never leaves the
 /// device except in the `Authorization` header of a request to OpenAI, it is
@@ -22,6 +22,16 @@ class SecureStore {
               // it again rather than silently carrying a credential across.
               accessibility: KeychainAccessibility.first_unlock_this_device,
             ),
+            // Android has no accessibility flag to match the iOS one; the
+            // same guarantee is bought in two other places. The wrapping key
+            // lives in the hardware keystore and cannot be exported, so a
+            // ciphertext restored onto another phone is undecryptable there.
+            // `resetOnError` then clears it instead of throwing, which is what
+            // turns "undecryptable" into "the app asks for the key again".
+            // Auto-backup is told to skip the file as well, in
+            // res/xml/backup_rules.xml, so the ciphertext does not travel at
+            // all rather than travelling and failing.
+            aOptions: AndroidOptions(resetOnError: true),
           );
 
   Future<String?> readApiKey() => _storage.read(key: _apiKeyKey);

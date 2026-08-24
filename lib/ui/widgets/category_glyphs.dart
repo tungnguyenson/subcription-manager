@@ -212,7 +212,11 @@ class CategoryGlyphPainter extends CustomPainter {
           RRect.fromLTRBR(4.0, 3.0, 16.4, 17.0, const Radius.circular(1.8)),
           stroke,
         );
-        canvas.drawLine(const Offset(7.2, 3.0), const Offset(7.2, 17.0), stroke);
+        canvas.drawLine(
+          const Offset(7.2, 3.0),
+          const Offset(7.2, 17.0),
+          stroke,
+        );
         canvas.drawLine(
           const Offset(10.0, 7.2),
           const Offset(13.6, 7.2),
@@ -242,13 +246,21 @@ class CategoryGlyphPainter extends CustomPainter {
           const Offset(13.4, 10.0),
           stroke,
         );
-        canvas.drawLine(const Offset(6.0, 6.6), const Offset(6.0, 13.4), stroke);
+        canvas.drawLine(
+          const Offset(6.0, 6.6),
+          const Offset(6.0, 13.4),
+          stroke,
+        );
         canvas.drawLine(
           const Offset(14.0, 6.6),
           const Offset(14.0, 13.4),
           stroke,
         );
-        canvas.drawLine(const Offset(3.2, 8.2), const Offset(3.2, 11.8), stroke);
+        canvas.drawLine(
+          const Offset(3.2, 8.2),
+          const Offset(3.2, 11.8),
+          stroke,
+        );
         canvas.drawLine(
           const Offset(16.8, 8.2),
           const Offset(16.8, 11.8),
@@ -267,7 +279,11 @@ class CategoryGlyphPainter extends CustomPainter {
             ..close(),
           stroke,
         );
-        canvas.drawLine(const Offset(8.6, 2.8), const Offset(11.4, 7.6), stroke);
+        canvas.drawLine(
+          const Offset(8.6, 2.8),
+          const Offset(11.4, 7.6),
+          stroke,
+        );
         canvas.drawLine(
           const Offset(12.4, 2.8),
           const Offset(13.4, 7.6),
@@ -279,8 +295,16 @@ class CategoryGlyphPainter extends CustomPainter {
           RRect.fromLTRBR(2.2, 6.6, 17.8, 15.4, const Radius.circular(3.4)),
           stroke,
         );
-        canvas.drawLine(const Offset(5.2, 11.0), const Offset(8.4, 11.0), stroke);
-        canvas.drawLine(const Offset(6.8, 9.4), const Offset(6.8, 12.6), stroke);
+        canvas.drawLine(
+          const Offset(5.2, 11.0),
+          const Offset(8.4, 11.0),
+          stroke,
+        );
+        canvas.drawLine(
+          const Offset(6.8, 9.4),
+          const Offset(6.8, 12.6),
+          stroke,
+        );
         canvas.drawCircle(const Offset(13.2, 9.9), 1.05, fill);
         canvas.drawCircle(const Offset(15.0, 12.1), 1.05, fill);
 
@@ -289,9 +313,21 @@ class CategoryGlyphPainter extends CustomPainter {
           RRect.fromLTRBR(2.8, 4.2, 17.2, 15.8, const Radius.circular(1.6)),
           stroke,
         );
-        canvas.drawLine(const Offset(5.2, 7.2), const Offset(14.8, 7.2), stroke);
-        canvas.drawLine(const Offset(5.2, 10.2), const Offset(9.4, 10.2), stroke);
-        canvas.drawLine(const Offset(5.2, 12.6), const Offset(9.4, 12.6), stroke);
+        canvas.drawLine(
+          const Offset(5.2, 7.2),
+          const Offset(14.8, 7.2),
+          stroke,
+        );
+        canvas.drawLine(
+          const Offset(5.2, 10.2),
+          const Offset(9.4, 10.2),
+          stroke,
+        );
+        canvas.drawLine(
+          const Offset(5.2, 12.6),
+          const Offset(9.4, 12.6),
+          stroke,
+        );
         canvas.drawRect(const Rect.fromLTRB(11.4, 9.6, 14.8, 13.0), stroke);
 
       case CategoryGlyph.apps:

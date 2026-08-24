@@ -7,6 +7,7 @@ import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/settings_store.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/extract/extraction_review.dart';
 import 'package:subdock/extract/extraction_schema.dart';
@@ -290,7 +291,10 @@ void main() {
         ),
       );
 
-      expect(find.textContaining('Holds 4 of the 64'), findsOneWidget);
+      expect(
+        find.textContaining('Holds 4 of the ${NotificationPlanner.budget}'),
+        findsOneWidget,
+      );
       expect(
         find.textContaining('2 reminders on other items had to be dropped'),
         findsOneWidget,
@@ -343,6 +347,53 @@ void main() {
       );
 
       expect(find.byType(Footnote), findsNothing);
+    });
+
+    // Android grants notifications and exact alarms separately. With only the
+    // first, a reminder set for 08:30 still arrives -- whenever the system
+    // next wakes. The screen shows a time, so it has to say when that time is
+    // not being honoured.
+    testWidgets('a device that will not fire on time says so', (tester) async {
+      await show(
+        tester,
+        const ReminderRulesScreen(
+          settings: AppSettings(),
+          pushGranted: true,
+          exactTiming: false,
+        ),
+      );
+
+      expect(find.textContaining('not allowing alarms'), findsOneWidget);
+    });
+
+    testWidgets('exact timing granted adds no footnote', (tester) async {
+      await show(
+        tester,
+        const ReminderRulesScreen(
+          settings: AppSettings(),
+          pushGranted: true,
+          exactTiming: true,
+        ),
+      );
+
+      expect(find.byType(Footnote), findsNothing);
+    });
+
+    // Notifications off is the bigger fact and the only one shown; stacking a
+    // second footnote about timing under it explains a delivery that is not
+    // happening at all.
+    testWidgets('timing is not mentioned while push is off', (tester) async {
+      await show(
+        tester,
+        const ReminderRulesScreen(
+          settings: AppSettings(),
+          pushGranted: false,
+          exactTiming: false,
+        ),
+      );
+
+      expect(find.byType(Footnote), findsOneWidget);
+      expect(find.textContaining('Notifications are off'), findsOneWidget);
     });
   });
 

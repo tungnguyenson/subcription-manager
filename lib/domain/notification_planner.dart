@@ -75,7 +75,7 @@ class NotificationPlan {
   bool get isTruncated => dropped.isNotEmpty;
 }
 
-/// Turns the item list into the set of notifications to have pending with iOS.
+/// Turns the item list into the set of notifications to have pending.
 ///
 /// This is an allocator against a hard resource budget, not a per-item
 /// "schedule a reminder" call. iOS keeps at most 64 pending local notifications
@@ -84,10 +84,18 @@ class NotificationPlan {
 /// only way the app can say anything true about what it will remind you of.
 /// See product-spec.md section 7.3.
 ///
+/// Android is not known to cap pending alarms the same way, and no figure for
+/// it is published that this app could cite. So the iOS budget runs on both
+/// rather than a guessed larger one: the cost is that a heavy Android list
+/// truncates earlier than it strictly must, and the alternative is a number
+/// the app cannot stand behind -- printed to the user, on a screen whose whole
+/// job is telling them what will and will not be delivered.
+///
 /// Pure function, so the ranking and truncation rules are testable without a
 /// device.
 abstract final class NotificationPlanner {
   /// iOS keeps 64; leave headroom so nothing we schedule evicts anything else.
+  /// Applied on Android too -- see the note on this class.
   static const int budget = 50;
 
   /// Alerts further out than this are not scheduled; a later re-plan picks

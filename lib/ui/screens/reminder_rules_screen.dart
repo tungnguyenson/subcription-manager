@@ -14,10 +14,20 @@ import 'package:subdock/ui/widgets/primitives.dart';
 class ReminderRulesScreen extends StatelessWidget {
   final AppSettings settings;
 
-  /// Whether iOS will actually deliver anything. The switch below reports this
-  /// rather than a preference of its own: an in-app "push" toggle that says on
-  /// while the system permission is off is a lie the user cannot see through.
+  /// Whether the system will actually deliver anything. The switch below
+  /// reports this rather than a preference of its own: an in-app "push" toggle
+  /// that says on while the system permission is off is a lie the user cannot
+  /// see through.
   final bool pushGranted;
+
+  /// Whether a reminder lands at the minute it was set for. Null where the
+  /// question does not arise, which is every platform but Android -- see
+  /// [NotificationScheduler.hasExactTiming].
+  ///
+  /// Separate from [pushGranted] because they fail separately: permission
+  /// granted plus exact timing denied still delivers, just late, and "late"
+  /// is the difference between catching a deadline and missing it.
+  final bool? exactTiming;
 
   final void Function(int lead, bool on)? onToggleLead;
   final VoidCallback? onPickTime;
@@ -28,6 +38,7 @@ class ReminderRulesScreen extends StatelessWidget {
     super.key,
     required this.settings,
     this.pushGranted = false,
+    this.exactTiming,
     this.onToggleLead,
     this.onPickTime,
     this.onEnablePush,
@@ -89,7 +100,14 @@ class ReminderRulesScreen extends StatelessWidget {
         // defaults propagate is documentation, and documentation does not
         // belong on a settings page.
         if (!pushGranted)
-          const Footnote('Notifications are off, so nothing is delivered.'),
+          const Footnote('Notifications are off, so nothing is delivered.')
+        else if (exactTiming == false)
+          const Footnote(
+            'This device is not allowing alarms at an exact time, so '
+            'reminders arrive when the system next wakes rather than at the '
+            'minute above. Allow "Alarms & reminders" in system settings to '
+            'fix it.',
+          ),
       ],
     );
   }
