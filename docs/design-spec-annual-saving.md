@@ -1,5 +1,17 @@
 # Đặc tả thiết kế: so sánh gói năm & nút mở trang thuê bao
 
+> **Trạng thái 24/08/2026: đã dựng xong bản đầu.** Cả hai bề mặt đã chạy trong app,
+> dùng đúng chữ và đúng các trạng thái mô tả dưới đây, vẽ bằng bộ widget sẵn có
+> (`GroupedCard`, `SecondaryButton`, `QuietButton`). Phần logic nằm ở
+> `lib/ui/annual_saving_presenter.dart` và `lib/ui/manage_presenter.dart`, tách khỏi
+> widget nên bố cục đổi được mà không đụng tới luật.
+>
+> Tài liệu vẫn là đặc tả gốc, chưa sửa theo bản đã dựng. Ba chỗ bản dựng đi thêm so với
+> tài liệu, đều theo hướng dè dặt hơn: khoản tiết kiệm bằng 0 thì không hiện gì (có mục
+> niêm yết gói năm đúng bằng 12 lần gói tháng); mục trả theo quý vẫn được so sánh nhưng
+> không hiện dòng đối chiếu giá vì hai con số khác đơn vị; và số tiền viết theo quy ước
+> sẵn có của app, tức có dấu cách trước ký hiệu `₫`.
+
 Tài liệu này dành cho người thiết kế màn hình. Nó mô tả **hai bề mặt mới**, cả hai
 đều nằm trên màn chi tiết một mục:
 

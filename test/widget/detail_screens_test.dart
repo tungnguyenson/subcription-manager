@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:subdock/catalog/bundled_data.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/settings_store.dart';
 import 'package:subdock/domain/local_date.dart';
@@ -14,6 +17,7 @@ import 'package:subdock/ui/screens/onboarding_screen.dart';
 import 'package:subdock/ui/screens/reminder_rules_screen.dart';
 import 'package:subdock/ui/screens/reminders_screen.dart';
 import 'package:subdock/ui/screens/review_extraction_screen.dart';
+import 'package:subdock/ui/manage_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 
@@ -886,6 +890,123 @@ void main() {
         find.textContaining('Nothing here is confirmed until you save it'),
         findsOneWidget,
       );
+    });
+  });
+
+  // Driven by the catalogue the app actually ships rather than a fixture, so a
+  // data change that emptied Claude's plans fails here instead of shipping a
+  // screen with a blank space where the comparison used to be.
+  group('what the catalogue puts on the item screen', () {
+    final shipped = ServiceCatalog(
+      BundledData.parseCatalog(File('assets/services.json').readAsStringSync())
+          .entries,
+    );
+    final checked = LocalDate.parse('2026-08-24');
+
+    TrackedItem claudeItem({
+      PurchaseChannel channel = PurchaseChannel.unknown,
+    }) => TrackedItem(
+      id: 'claude',
+      name: 'Claude',
+      category: Category.subscription,
+      expiresOn: d('2026-09-17'),
+      anchorDate: d('2026-09-17'),
+      cycle: Cycle.monthly,
+      amountMinor: 2000,
+      currency: 'USD',
+      purchaseChannel: channel,
+    );
+
+    Widget screen({
+      TrackedItem? item,
+      bool matched = true,
+      void Function(ManageAction)? onOpenManage,
+    }) {
+      final subject = item ?? claudeItem();
+      return ItemDetailScreen(
+        item: subject,
+        today: checked,
+        catalogEntry: matched ? shipped.matchByName(subject.name) : null,
+        onOpenManage: onOpenManage ?? (_) {},
+      );
+    }
+
+    testWidgets('the yearly comparison, with its sum spelled out', (
+      tester,
+    ) async {
+      await show(tester, screen());
+
+      expect(find.text('YEARLY PLAN'), findsOneWidget);
+      expect(find.textContaining('Save', findRichText: true), findsWidgets);
+      expect(find.text(r'$20.00 × 12 = $240.00'), findsOneWidget);
+      expect(find.text(r'$200.00'), findsOneWidget);
+      expect(find.text('Listed price, checked 23 Aug 2026'), findsOneWidget);
+    });
+
+    testWidgets('nothing at all when the name matches no catalog row', (
+      tester,
+    ) async {
+      await show(tester, screen(matched: false));
+
+      expect(find.text('YEARLY PLAN'), findsNothing);
+      expect(find.text('Open Claude account'), findsNothing);
+      // Still offered the store: something that renews every month is worth a
+      // link to Apple's list even when the app has never heard of it.
+      expect(find.text('Manage in the App Store'), findsOneWidget);
+    });
+
+    testWidgets('the vendor page, with the store offered underneath', (
+      tester,
+    ) async {
+      await show(tester, screen());
+
+      expect(find.text('Open Claude account'), findsOneWidget);
+      expect(find.text('Bought through the App Store?'), findsOneWidget);
+    });
+
+    testWidgets('either tap tells the app where it was bought', (tester) async {
+      final taps = <ManageAction>[];
+      await show(tester, screen(onOpenManage: taps.add));
+
+      await tester.tap(find.text('Open Claude account'));
+      await tester.tap(find.text('Bought through the App Store?'));
+      await tester.pump();
+
+      expect(taps.map((a) => a.records), [
+        PurchaseChannel.web,
+        PurchaseChannel.appStore,
+      ]);
+      expect(taps.first.url, 'https://claude.ai/settings/billing');
+    });
+
+    testWidgets('the question is gone once it has been answered', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        screen(item: claudeItem(channel: PurchaseChannel.appStore)),
+      );
+
+      expect(find.text('Bought through the App Store?'), findsNothing);
+      expect(find.text('Manage in the App Store'), findsOneWidget);
+    });
+
+    // A screen with no handler cannot open anything, so it must not draw a
+    // button that does nothing when tapped.
+    testWidgets('no button on a screen that cannot open a link', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        ItemDetailScreen(
+          item: claudeItem(),
+          today: checked,
+          catalogEntry: shipped.matchByName('Claude'),
+        ),
+      );
+
+      expect(find.text('Open Claude account'), findsNothing);
+      expect(find.text('YEARLY PLAN'), findsOneWidget);
     });
   });
 }

@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/domain/instalments.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/money.dart';
+import 'package:subdock/ui/annual_saving_presenter.dart';
 import 'package:subdock/ui/item_presenter.dart';
+import 'package:subdock/ui/manage_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
@@ -20,6 +23,14 @@ class ItemDetailScreen extends StatelessWidget {
 
   /// The next reminder, already worded. Null when nothing is pending.
   final String? nextReminder;
+
+  /// The catalog row this item's name matches exactly, when it matches one.
+  ///
+  /// Resolved at display time rather than stored on the item, for the same
+  /// reason the icon is: the catalogue ships with the binary and gets better
+  /// between releases, so an item created before a price was collected picks
+  /// it up on the next update without a migration.
+  final CatalogEntry? catalogEntry;
 
   final VoidCallback? onBack;
 
@@ -40,6 +51,10 @@ class ItemDetailScreen extends StatelessWidget {
 
   final VoidCallback? onDelete;
 
+  /// Leaves the app for the page that holds the real answer, and records what
+  /// the tap revealed about where this subscription was bought.
+  final void Function(ManageAction action)? onOpenManage;
+
   const ItemDetailScreen({
     super.key,
     required this.item,
@@ -47,6 +62,7 @@ class ItemDetailScreen extends StatelessWidget {
     this.history = const [],
     this.scheduledCount = 0,
     this.nextReminder,
+    this.catalogEntry,
     this.onBack,
     this.onEdit,
     this.onMarkPaid,
@@ -54,12 +70,21 @@ class ItemDetailScreen extends StatelessWidget {
     this.onSnooze,
     this.onStop,
     this.onDelete,
+    this.onOpenManage,
   });
 
   @override
   Widget build(BuildContext context) {
     final position = Instalments.of(item);
     final money = item.money;
+    final saving = AnnualSavingPresenter.of(
+      item: item,
+      entry: catalogEntry,
+      today: today,
+    );
+    final manage = onOpenManage == null
+        ? null
+        : ManagePresenter.of(item: item, entry: catalogEntry);
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(
@@ -162,6 +187,28 @@ class ItemDetailScreen extends StatelessWidget {
             DetailRow(label: 'Note', value: item.note ?? '—'),
           ],
         ),
+        // Both blocks answer "what about this one?", which is this screen's
+        // question. Neither belongs on the list, which answers "what is coming
+        // up?" -- see design-spec.md 2.2.
+        if (saving != null) ...[
+          const SectionLabel('Yearly plan'),
+          _AnnualSavingCard(copy: saving),
+        ],
+        if (manage != null) ...[
+          // The saving block ends in exactly one action, and it is this
+          // button. The app cannot switch anyone's plan and must not put a
+          // control on screen that suggests it can.
+          SizedBox(height: saving != null ? 10 : SubdockSpacing.sectionTop),
+          SecondaryButton(
+            manage.primary.label,
+            onPressed: () => onOpenManage?.call(manage.primary),
+          ),
+          if (manage.alternate case final alternate?)
+            QuietButton(
+              alternate.label,
+              onPressed: () => onOpenManage?.call(alternate),
+            ),
+        ],
         const SectionLabel('Actions'),
         PrimaryButton(_markLabel(position), onPressed: onMarkPaid),
         const SizedBox(height: 10),
@@ -304,6 +351,99 @@ class _PaymentProgress extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// What paying yearly instead of monthly is worth, on the vendor's own numbers.
+///
+/// Deliberately not a warning colour and deliberately not a badge. Saving money
+/// is not a hazard, and this app spends its red on the one thing it is for:
+/// something about to be lost that cannot be got back. A yearly plan that goes
+/// unclaimed costs money, and money can be earned again.
+class _AnnualSavingCard extends StatelessWidget {
+  final AnnualSavingCopy copy;
+
+  const _AnnualSavingCard({required this.copy});
+
+  @override
+  Widget build(BuildContext context) {
+    return GroupedCard(
+      padding: const EdgeInsets.fromLTRB(
+        SubdockSpacing.rowH,
+        16,
+        SubdockSpacing.rowH,
+        16,
+      ),
+      children: [
+        // A sentence with a figure inside it, so the figure is set in the
+        // figure face and the words are not. Joining them into one string and
+        // one style would make the number read as prose.
+        Text.rich(
+          TextSpan(
+            style: SubdockText.detailTitle.copyWith(fontSize: 19),
+            children: [
+              TextSpan(text: '${copy.savingLead} '),
+              TextSpan(
+                text: copy.savingAmount,
+                style: const TextStyle(
+                  fontFamily: SubdockText.mono,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const TextSpan(text: ' a year'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        _SumLine(label: 'Monthly', value: copy.monthlyValue),
+        const SizedBox(height: 6),
+        _SumLine(label: 'Yearly', value: copy.yearlyValue),
+        const SizedBox(height: 14),
+        Text(
+          copy.sourceLine,
+          // The provenance line is the whole reason this block is allowed to
+          // exist, and once the price is over a year old it stops being an
+          // aside. It gets the body colour then, not the footnote grey.
+          style: copy.stale
+              ? SubdockText.footnote.copyWith(color: SubdockColors.inkMuted)
+              : SubdockText.footnote,
+        ),
+        if (copy.mismatchLine case final mismatch?) ...[
+          const SizedBox(height: 6),
+          Text(mismatch, style: SubdockText.footnote),
+        ],
+      ],
+    );
+  }
+}
+
+/// One side of the comparison: a word on the left, a figure on the right.
+class _SumLine extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _SumLine({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.baseline,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        SizedBox(
+          // Fixed rather than intrinsic so the two figures start on the same
+          // vertical, which is what makes them comparable at a glance.
+          width: 66,
+          child: Text(label, style: SubdockText.rowLabel),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: SubdockText.monoInline.copyWith(color: SubdockColors.ink),
+          ),
+        ),
+      ],
     );
   }
 }

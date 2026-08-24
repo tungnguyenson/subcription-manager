@@ -53,6 +53,17 @@ abstract final class DateCopy {
   static String lockScreenDate(LocalDate date) =>
       '${weekday(date)} ${date.day} ${month(date.month)}';
 
+  /// `23 Aug 2026`. The form a *sourced* date takes: the day a catalog price
+  /// was read off the vendor's page.
+  ///
+  /// Spelled out rather than 23/08/2026 because it sits inside a sentence
+  /// about where a number came from, and a slashed date beside a slashed due
+  /// date reads as a second due date. The year is always shown: a price with
+  /// no year on it cannot be judged stale, and judging that is the only reason
+  /// this date is on screen.
+  static String listedDate(LocalDate date) =>
+      '${date.day} ${month(date.month).substring(0, 3)} ${date.year}';
+
   /// The shortcuts beside the date field, in the order the design shows them.
   ///
   /// Shortcuts only: the calendar is its own row above them, so this rail

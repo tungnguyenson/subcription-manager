@@ -76,15 +76,70 @@ class NotificationScheduler {
       ],
     );
 
+    // Android refuses to initialise without its own settings block, and the
+    // failure is a thrown ArgumentError inside `main` -- the app never reaches
+    // `runApp` and the screen stays black. `@mipmap/ic_launcher` is the icon
+    // `flutter create` puts in the Android project.
+    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+
     await _plugin.initialize(
-      settings: InitializationSettings(iOS: darwin),
+      settings: InitializationSettings(iOS: darwin, android: android),
       onDidReceiveNotificationResponse: (response) =>
           onTap?.call(response.payload, response.actionId),
     );
+
+    await _createAndroidChannels();
   }
+
+  /// Android carries importance on the channel, not on the notification.
+  ///
+  /// The two channels mirror the two iOS categories, so a deadline the user
+  /// cannot recover from can ring while a routine renewal stays quiet. Created
+  /// up front rather than on first send: a channel's importance is fixed at
+  /// creation and the user owns it afterwards, so it must exist before the
+  /// first alert decides which one it belongs to.
+  Future<void> _createAndroidChannels() async {
+    final android = _android;
+    if (android == null) return;
+
+    await android.createNotificationChannel(
+      const AndroidNotificationChannel(
+        NotificationCategory.actionable,
+        'Deadlines',
+        description: 'Things you lose if the date passes.',
+        importance: Importance.high,
+      ),
+    );
+    await android.createNotificationChannel(
+      const AndroidNotificationChannel(
+        NotificationCategory.informational,
+        'Reminders',
+        description: 'Renewals and dates worth a glance.',
+        importance: Importance.low,
+      ),
+    );
+  }
+
+  /// Null on every platform but Android, which is how this class tells them
+  /// apart -- cheaper than a `dart:io` check and it works under test.
+  AndroidFlutterLocalNotificationsPlugin? get _android => _plugin
+      .resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin
+      >();
 
   /// Asks for permission at the moment the user has been told what it buys.
   Future<bool> requestPermission() async {
+    final android = _android;
+    if (android != null) {
+      final granted = await android.requestNotificationsPermission();
+      // A second, separate grant, and it is the one that decides whether a
+      // reminder lands at 08:30 or whenever the system next wakes. Asked for
+      // here so the two prompts arrive together, on the screen that has just
+      // explained them; a refusal is not fatal -- `_scheduleMode` falls back.
+      await android.requestExactAlarmsPermission();
+      return granted ?? false;
+    }
+
     final ios = _plugin
         .resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin
@@ -102,12 +157,32 @@ class NotificationScheduler {
   }
 
   Future<bool> hasPermission() async {
+    final android = _android;
+    if (android != null) {
+      return await android.areNotificationsEnabled() ?? false;
+    }
+
     final ios = _plugin
         .resolvePlatformSpecificImplementation<
           IOSFlutterLocalNotificationsPlugin
         >();
     final settings = await ios?.checkPermissions();
     return settings?.isEnabled ?? false;
+  }
+
+  /// Exact alarms are a permission of their own on Android 12+, denied by
+  /// default from Android 13. Scheduling an exact alarm without it does not
+  /// degrade -- `zonedSchedule` throws, and one throw aborts the whole
+  /// `apply` loop, leaving the user with no reminders at all. So ask first
+  /// and drop to inexact, which costs a delivery window of some minutes.
+  Future<AndroidScheduleMode> _scheduleMode() async {
+    final android = _android;
+    if (android == null) return AndroidScheduleMode.exactAllowWhileIdle;
+
+    final exact = await android.canScheduleExactNotifications() ?? false;
+    return exact
+        ? AndroidScheduleMode.exactAllowWhileIdle
+        : AndroidScheduleMode.inexactAllowWhileIdle;
   }
 
   /// Replaces every pending notification with [plan].
@@ -120,8 +195,12 @@ class NotificationScheduler {
     await _ensureTimezone();
     await _plugin.cancelAll();
 
+    // Resolved once per apply, not per alert: it is a platform channel round
+    // trip and the answer cannot change midway through the loop.
+    final mode = await _scheduleMode();
+
     for (final alert in plan.alerts) {
-      await _schedule(alert);
+      await _schedule(alert, mode);
     }
   }
 
@@ -130,7 +209,7 @@ class NotificationScheduler {
   Future<int> pendingCount() async =>
       (await _plugin.pendingNotificationRequests()).length;
 
-  Future<void> _schedule(PlannedAlert alert) {
+  Future<void> _schedule(PlannedAlert alert, AndroidScheduleMode mode) {
     final when = tz.TZDateTime(
       tz.local,
       alert.date.year,
@@ -145,9 +224,45 @@ class NotificationScheduler {
       title: _title(alert),
       body: alert.itemName,
       scheduledDate: when,
-      // iOS-only app, but the parameter is required by the shared signature.
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      androidScheduleMode: mode,
       notificationDetails: NotificationDetails(
+        android: AndroidNotificationDetails(
+          alert.timeSensitive
+              ? NotificationCategory.actionable
+              : NotificationCategory.informational,
+          alert.timeSensitive ? 'Deadlines' : 'Reminders',
+          // Set here too because the channel carries it only from the moment
+          // the channel is created; these decide how the post is drawn on
+          // Android 7 and below, which has no channels at all.
+          importance: alert.timeSensitive ? Importance.high : Importance.low,
+          priority: alert.timeSensitive ? Priority.high : Priority.low,
+          // Same ids as the iOS actions, so one handler serves both.
+          actions: <AndroidNotificationAction>[
+            if (alert.timeSensitive) ...[
+              const AndroidNotificationAction(
+                NotificationAction.done,
+                'Mark as paid',
+              ),
+              const AndroidNotificationAction(
+                NotificationAction.snoozeOneDay,
+                'Remind tomorrow',
+              ),
+              const AndroidNotificationAction(
+                NotificationAction.openItem,
+                'Open',
+                showsUserInterface: true,
+                cancelNotification: false,
+              ),
+            ] else
+              const AndroidNotificationAction(
+                NotificationAction.done,
+                'Got it',
+              ),
+          ],
+          // Android's counterpart to threadIdentifier: three reminders for one
+          // subscription collapse into one stack rather than three rows.
+          groupKey: alert.itemId,
+        ),
         iOS: DarwinNotificationDetails(
           categoryIdentifier: alert.timeSensitive
               ? NotificationCategory.actionable

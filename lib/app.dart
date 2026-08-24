@@ -12,6 +12,7 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
 import 'package:subdock/ui/app_shell.dart';
+import 'package:subdock/ui/manage_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/screens/add_item_screen.dart';
 import 'package:subdock/ui/screens/history_screen.dart';
@@ -25,6 +26,7 @@ import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
 import 'package:subdock/ui/widgets/item_row.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SubdockApp extends StatelessWidget {
   final ItemRepository repository;
@@ -74,7 +76,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   ShellTab _tab = ShellTab.upcoming;
 
   List<TrackedItem> _items = const [];
@@ -95,9 +97,25 @@ class _HomePageState extends State<HomePage> {
   /// when the plan actually differs.
   String _appliedSignature = '';
 
+  /// The item whose provider page the user was just sent to, if they have not
+  /// come back yet.
+  ///
+  /// This is the app's one chance to turn a guessed date into a confirmed one:
+  /// the user has just read the real renewal date off the provider's own page,
+  /// and thirty seconds later they will not remember it. Everything else the
+  /// app knows about dates is what someone typed from memory.
+  String? _openedProviderPageFor;
+
+  /// Items already asked about after such a trip. Held for this run only, and
+  /// deliberately not persisted: the rule is "do not ask twice in a row", not
+  /// "never ask again", and a stored flag would silently close the door on a
+  /// user who dismissed the prompt with their thumb on the way past.
+  final Set<String> _askedRenewal = {};
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     // Subscribed here rather than through a StreamBuilder because re-planning
     // notifications is a side effect, and a side effect inside build() runs on
@@ -129,10 +147,30 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _itemSubscription?.cancel();
     _historySubscription?.cancel();
     _settingsSubscription?.cancel();
     super.dispose();
+  }
+
+  /// Catches the user coming back from a provider's billing page.
+  ///
+  /// [launchUrl] returns the moment iOS accepts the hand-off, not when the
+  /// user returns, so the trip has to be noticed here instead.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+
+    final itemId = _openedProviderPageFor;
+    _openedProviderPageFor = null;
+    if (itemId == null) return;
+
+    final item = _items.where((i) => i.id == itemId).firstOrNull;
+    if (item == null) return;
+    if (!_askedRenewal.add(item.id)) return;
+
+    _offerRenewalDate(item);
   }
 
   Future<void> _refreshPermission() async {
@@ -254,6 +292,11 @@ class _HomePageState extends State<HomePage> {
         onSnooze: () => _snooze(item, 3),
         onDelete: () => _delete(item),
         onStop: () => _stop(item),
+        // Matched by name at display time, not stored on the item. The
+        // catalogue grows between releases, so an item added before its
+        // service had a price picks one up on the next update.
+        catalogEntry: widget.catalog.matchByName(item.name),
+        onOpenManage: (action) => _openManage(item, action),
         onEditReminders: () => _push(
           RemindersScreen(
             item: item,
@@ -419,6 +462,118 @@ class _HomePageState extends State<HomePage> {
       return 'Saved "${item.name}" — it is under Next 30 days.';
     }
     return 'Saved "${item.name}".';
+  }
+
+  /// Leaves for the page that actually holds this subscription.
+  ///
+  /// The tap is also the answer to a question the app never asks out loud.
+  /// Someone who opens the App Store listing has just said where they bought
+  /// the thing, so it is written down and the alternatives stop being offered.
+  /// Asking up front instead would put a question about billing plumbing
+  /// between the user and adding their first item.
+  Future<void> _openManage(TrackedItem item, ManageAction action) async {
+    var current = item;
+    final learned = current.purchaseChannel != action.records;
+    if (learned) {
+      current = current.copyWith(purchaseChannel: action.records);
+      await widget.repository.upsert(
+        current,
+        DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      );
+    }
+    if (!mounted) return;
+
+    // Only when something on the screen behind actually changed. That screen
+    // is a snapshot taken before the channel was recorded, so it would still
+    // be offering the choice the user has just made -- but rebuilding it on
+    // every visit would throw the scroll position away to no purpose, and put
+    // a route transition on screen at the moment the browser opens.
+    if (learned) {
+      final navigator = Navigator.of(context);
+      if (navigator.canPop()) navigator.pop();
+      _openItem(current);
+    }
+
+    final uri = Uri.tryParse(action.url);
+    if (uri == null) return;
+
+    _openedProviderPageFor = current.id;
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (opened || !mounted) return;
+
+    // Nothing on the device would take the link. Say so rather than leaving
+    // the user tapping a button that does nothing -- the exact failure mode
+    // that ruled out a USSD button for prepaid SIMs.
+    _openedProviderPageFor = null;
+    _confirm('Could not open that page.');
+  }
+
+  /// The prompt on the way back in.
+  ///
+  /// One question, one action, and no second attempt. The user has just seen
+  /// the real renewal date; a date they type now is [DateSource.userConfirmed]
+  /// rather than a guess, which is the strongest thing this app can ever say
+  /// about a date.
+  void _offerRenewalDate(TrackedItem item) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Did you see the renewal date?',
+          style: SubdockText.rowValue.copyWith(color: SubdockColors.card),
+        ),
+        backgroundColor: SubdockColors.ink,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(SubdockRadius.card),
+        ),
+        duration: const Duration(seconds: 8),
+        action: SnackBarAction(
+          label: 'Enter date',
+          textColor: SubdockColors.card,
+          onPressed: () => unawaited(_confirmRenewalDate(item)),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmRenewalDate(TrackedItem item) async {
+    final picked = await _pickDate(item.expiresOn);
+    if (picked == null || !mounted) return;
+
+    // Routed through the same draft the editor uses so the anchor moves with
+    // the date. Writing `expiresOn` on its own would leave an instalment plan
+    // counting from the old day of the month.
+    final moved = DraftItem(
+      name: item.name,
+      expiresOn: picked,
+      category: item.category,
+      iconName: item.iconName,
+      cycle: item.cycle,
+      repeatCount: item.repeatCount,
+      amountMinor: item.amountMinor,
+      currency: item.currency,
+      leadDays: item.leadDays,
+    ).applyTo(item);
+
+    // The one override. `applyTo` marks a retyped date as remembered, which is
+    // right everywhere else and wrong here: this one was read off the
+    // provider's own page a moment ago.
+    final updated = moved.copyWith(dateSource: DateSource.userConfirmed);
+
+    await widget.repository.upsert(
+      updated,
+      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    );
+    if (!mounted) return;
+
+    // Back to the list and straight into the item, rather than popping
+    // whatever happens to be on top. The prompt lives for eight seconds and
+    // the user may have wandered somewhere else in them; this lands on the
+    // item they just dated wherever they answered from.
+    final navigator = Navigator.of(context);
+    navigator.popUntil((route) => route.isFirst);
+    _openItem(updated);
+    _confirm('Saved ${MoneyFormat.date(picked)} as confirmed.');
   }
 
   void _confirm(String message) {

@@ -190,7 +190,8 @@ void main() {
           expect(
             currencyOf[plan.region],
             plan.currency,
-            reason: '${entry.id}/${plan.tier} is ${plan.region} '
+            reason:
+                '${entry.id}/${plan.tier} is ${plan.region} '
                 'but priced in ${plan.currency}',
           );
         }
@@ -212,7 +213,9 @@ void main() {
     // holding the monthly figure.
     test('a yearly plan costs more than its monthly one, and less than 12', () {
       for (final entry in catalog.entries) {
-        for (final yearly in entry.plans.where((p) => p.cycle == Cycle.yearly)) {
+        for (final yearly in entry.plans.where(
+          (p) => p.cycle == Cycle.yearly,
+        )) {
           final monthly = entry.plans
               .where(
                 (p) =>
@@ -346,8 +349,11 @@ void main() {
     });
 
     test('real entries in the catalog can answer the question', () {
-      final answerable = catalog.entries
-          .where((e) => e.annualSaving() != null || e.annualSaving(region: 'GLOBAL') != null);
+      final answerable = catalog.entries.where(
+        (e) =>
+            e.annualSaving() != null ||
+            e.annualSaving(region: 'GLOBAL') != null,
+      );
       expect(answerable.length, greaterThanOrEqualTo(50));
     });
   });
@@ -380,6 +386,96 @@ void main() {
 
     test('results are capped so the suggestion list stays scannable', () {
       expect(lookup.search('s', limit: 3).length, lessThanOrEqualTo(3));
+    });
+  });
+
+  // Everything below is what the item screen hangs a price on. Search may be
+  // forgiving because the user reads the result before tapping it; this
+  // lookup runs behind their back, so a wrong hit puts another company's
+  // price on their item with nothing on screen to say so.
+  group('matching an existing item name to a catalog row', () {
+    test('an exact name matches, whatever the case', () {
+      expect(lookup.matchByName('Netflix')?.id, isNotNull);
+      expect(
+        lookup.matchByName('netflix')?.id,
+        lookup.matchByName('Netflix')?.id,
+      );
+      expect(
+        lookup.matchByName('  NETFLIX  ')?.id,
+        lookup.matchByName('Netflix')?.id,
+      );
+    });
+
+    test('an alias matches, diacritics folded', () {
+      final viettel = lookup.matchByName('Viettel');
+      expect(viettel, isNotNull);
+    });
+
+    test('a prefix does not match', () {
+      expect(lookup.matchByName('Netfl'), isNull);
+      expect(lookup.matchByName('Net'), isNull);
+    });
+
+    // The case this method exists for. "Netflix (mum's account)" is a real
+    // thing people type, the price would be right, and the sum would still be
+    // wrong because that account is split four ways.
+    test('a name with anything extra on it does not match', () {
+      expect(lookup.matchByName("Netflix (mum's account)"), isNull);
+      expect(lookup.matchByName('Netflix Premium 4K'), isNull);
+    });
+
+    test('an empty or blank name matches nothing', () {
+      expect(lookup.matchByName(''), isNull);
+      expect(lookup.matchByName('   '), isNull);
+    });
+  });
+
+  group('the shipped data behind the item screen', () {
+    // The yearly-comparison block is absent for most items by design. This
+    // guards the other direction: a data change that quietly emptied the
+    // plans would leave the feature dead with every test still green.
+    test('a useful number of entries can compare monthly against yearly', () {
+      final comparable = catalog.entries
+          .where(
+            (e) =>
+                e.annualSaving() != null ||
+                e.annualSaving(region: 'GLOBAL') != null,
+          )
+          .length;
+      expect(comparable, greaterThanOrEqualTo(60));
+    });
+
+    // Zero is legal and does occur: Simplize lists its yearly plan at exactly
+    // twelve monthly payments. Negative is not, and would mean the collection
+    // recorded a yearly price dearer than paying monthly.
+    test('no yearly plan costs more than twelve monthly ones', () {
+      for (final entry in catalog.entries) {
+        for (final region in ['VN', 'GLOBAL']) {
+          final saving = entry.annualSaving(region: region);
+          if (saving == null) continue;
+          expect(
+            saving.savingMinor,
+            greaterThanOrEqualTo(0),
+            reason: '${entry.id} in $region',
+          );
+        }
+      }
+    });
+
+    test('a useful number of entries link to the page that has the answer', () {
+      final linked = catalog.entries.where((e) => e.manageUrl != null).length;
+      expect(linked, greaterThanOrEqualTo(25));
+    });
+
+    // A link the app opens must be one the OS will accept and one that cannot
+    // be read on the way. `http://` here would be a downgrade nobody chose.
+    test('every link the app would open is https', () {
+      for (final entry in catalog.entries) {
+        for (final url in [entry.manageUrl, entry.cancelUrl]) {
+          if (url == null) continue;
+          expect(url, startsWith('https://'), reason: entry.id);
+        }
+      }
     });
   });
 

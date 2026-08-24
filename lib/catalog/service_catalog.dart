@@ -108,8 +108,13 @@ class AnnualSaving {
 
   String get currency => yearly.currency;
 
-  /// Twelve months at the monthly price, minus the yearly price. Always
-  /// positive: the catalogue rejects a yearly plan that costs more.
+  /// Twelve months at the monthly price, minus the yearly price.
+  ///
+  /// Never negative -- the catalogue's validator rejects a yearly plan dearer
+  /// than twelve monthly ones -- but it can be exactly zero, and is for at
+  /// least one shipped entry: some vendors list the yearly plan at twelve
+  /// times the monthly price and put the discount in a promotion instead.
+  /// Callers must decide what a zero saving means rather than assume it away.
   int get savingMinor => monthly.amountMinor * 12 - yearly.amountMinor;
 }
 
@@ -178,9 +183,7 @@ class CatalogEntry {
     if (tier == null) return null;
 
     CatalogPlan? pick(Cycle cycle) => plans
-        .where(
-          (p) => p.tier == tier && p.region == region && p.cycle == cycle,
-        )
+        .where((p) => p.tier == tier && p.region == region && p.cycle == cycle)
         .firstOrNull;
 
     final monthly = pick(Cycle.monthly);
@@ -271,6 +274,24 @@ class ServiceCatalog {
 
   CatalogEntry? byId(String id) =>
       _entries.where((e) => e.id == id).firstOrNull;
+
+  /// The entry whose own name or one of whose aliases *is* what the user
+  /// typed, ignoring case and diacritics. Null otherwise.
+  ///
+  /// Deliberately far stricter than [search]. A prefix hit is good enough to
+  /// put in a suggestion list the user reads before tapping; it is nowhere
+  /// near good enough to hang a price on behind their back. An item named
+  /// "Viet" must not quietly acquire Viettel's plans, and one named "Netflix
+  /// (mum's account)" must not acquire Netflix's either -- the price would be
+  /// right and the sum would still be wrong, because that account is split
+  /// four ways.
+  CatalogEntry? matchByName(String name) {
+    final q = _normalize(name);
+    if (q.isEmpty) return null;
+    return _entries
+        .where((e) => [e.name, ...e.aliases].map(_normalize).any((h) => h == q))
+        .firstOrNull;
+  }
 
   /// Type-ahead suggestions. Exact name matches first, then prefix matches,
   /// then substring matches, so typing "net" surfaces Netflix before

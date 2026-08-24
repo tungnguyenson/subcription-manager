@@ -3,7 +3,7 @@
 ## Xong 2026-08-24 — pha B, C, D, E hoàn tất
 
 **223 mục | 166 có giá | 82 đủ cặp tháng+năm | 32 có manageUrl | 257 dòng giá.**
-351 test pass, `flutter analyze` sạch.
+`flutter analyze` sạch. Số test tại thời điểm đó là 351, hiện là 410.
 
 Mọi giá đều kèm `source` là trang của chính hãng và `checkedAt`. Mục không tra được để
 `plans: []` kèm lý do trong `noteVi` — không mục nào mang số đoán.
@@ -21,11 +21,35 @@ Mọi giá đều kèm `source` là trang của chính hãng và `checkedAt`. M�
 
 ### Việc còn lại
 
-1. **UI cho hai bề mặt trong `design-spec-annual-saving.md`** — phần domain đã xong và
-   có test, chưa màn hình nào gọi tới.
-2. **17 `manageUrl` không kết luận được** (ChatGPT, X, Adobe, Disney+, Notion...): các
+1. **17 `manageUrl` không kết luận được** (ChatGPT, X, Adobe, Disney+, Notion...): các
    trang này là SPA/OAuth trả cùng kết quả cho mọi đường dẫn, nên URL thật và URL bịa
    không phân biệt được kể cả bằng trình duyệt thật. Cần đăng nhập thật mới xác minh.
+2. **13 mục chưa có giá và đáng tra lại**: deliveroo-plus, hellofresh, linkedin-learning,
+   google-play-pass, sim-wintel, github, geforce-now, amazon-prime-video, viu, airalo,
+   money-lover, bkav-pro, evernote.
+
+### Đã đưa vào app 2026-08-24
+
+Hai bề mặt trong `docs/design-spec-annual-saving.md` đã dựng xong và có test.
+
+- **Khối so sánh gói năm** trên màn chi tiết một mục. `AnnualSavingPresenter` dựng chữ,
+  `_AnnualSavingCard` vẽ. Đủ năm trạng thái trong đặc tả, cộng ba luật: giá quá 12 tháng
+  thì đổi giọng sang "Save about" kèm câu nhắc tra lại; giá người dùng nhập lệch quá 10%
+  so với giá niêm yết thì nói rõ phép tính dựa trên giá nào; ưu tiên vùng VN, rơi về
+  GLOBAL khi vùng VN không có gì để so.
+- **Nút mở trang thuê bao**, bốn trạng thái theo `purchaseChannel`. Cú chạm đầu tiên ghi
+  luôn kênh mua, nên dòng "Bought through the App Store?" chỉ xuất hiện một lần.
+- **Hỏi ngày gia hạn khi quay lại app**. `launchUrl` trả về ngay lúc iOS nhận đường dẫn
+  chứ không phải lúc người dùng quay lại, nên phải bắt bằng `didChangeAppLifecycleState`.
+  Ngày nhập ở đây được ghi là `userConfirmed`, không phải ước lượng.
+- **`ServiceCatalog.matchByName`**: khớp đúng tên hoặc đúng alias, không khớp tiền tố.
+  Search có thể dễ dãi vì người dùng đọc kết quả trước khi chạm, còn hàm này chạy sau
+  lưng họ, nên "Netflix (acc của mẹ)" phải không khớp.
+- **`url_launcher`** vào `pubspec.yaml`. Build iOS simulator chạy được, 410 test pass.
+
+Một lỗi dữ liệu lộ ra lúc viết test: **`simplize` niêm yết gói năm đúng bằng 12 lần gói
+tháng**, nên `savingMinor` bằng 0 chứ không dương như comment cũ khẳng định. Đã sửa
+comment và bỏ hẳn khối so sánh khi khoản tiết kiệm bằng 0.
 
 ### Mục đã bỏ khỏi catalog
 

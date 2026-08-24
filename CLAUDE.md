@@ -70,7 +70,7 @@ flutter test test/golden/ --update-goldens                 # sau khi đổi icon
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Bảy cái bẫy đã vấp, đừng vấp lại
+## Tám cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -87,6 +87,9 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
    độ phủ icon bằng mã trạng thái sẽ ra kết quả sai hoàn toàn.
 7. **iOS chặn hoàn toàn việc quay số USSD từ app**, và `%23` làm `canOpenURL:` trả `true`
    nên code trông như chạy được trong khi dialer im lặng không mở.
+8. **`AnnualSaving.savingMinor` có thể bằng 0.** Có hãng niêm yết gói năm đúng bằng 12
+   lần gói tháng và để phần giảm giá ở khuyến mãi. Chỗ nào hiện khoản tiết kiệm phải tự
+   loại trường hợp này, không thì ra dòng chữ "Save 0 ₫ a year".
 
 ## Viết tài liệu
 
@@ -105,3 +108,4 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | Danh mục dịch vụ | `docs/research/README.md` |
 | Icon | `docs/icon-credits.md` |
 | Việc còn dang dở | `data/services/_verify.md` |
+| Khối so sánh gói năm và nút trang thuê bao | `docs/design-spec-annual-saving.md`, đã dựng, logic ở `lib/ui/annual_saving_presenter.dart` và `lib/ui/manage_presenter.dart` |
