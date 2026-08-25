@@ -108,9 +108,18 @@ class MixedTotal {
   /// The truth: one exact subtotal per currency. Always shown.
   final Map<String, Money> perCurrency;
 
-  /// Orientation only. Null when no usable rate exists. Always shown with a
-  /// tilde.
+  /// Orientation only. Null when no usable rate exists.
   final Money? approximateBase;
+
+  /// Whether a rate was actually applied to build [approximateBase].
+  ///
+  /// False when every amount was already in the base currency, and that case
+  /// is not a detail: the figure is then exact to the dong, and a UI that
+  /// prints a tilde over it is claiming an imprecision it did not incur. Also
+  /// false when a foreign amount was dropped for want of a usable rate --
+  /// what survives is still exact, and [unconvertedCount] is what says it is
+  /// incomplete.
+  final bool converted;
 
   final FxRate? rate;
 
@@ -120,6 +129,7 @@ class MixedTotal {
   const MixedTotal({
     required this.perCurrency,
     required this.approximateBase,
+    required this.converted,
     required this.rate,
     required this.unconvertedCount,
   });
@@ -172,6 +182,7 @@ abstract final class Fx {
     var approx = 0;
     var unconverted = 0;
     var hasBaseContribution = false;
+    var converted = false;
 
     for (final entry in perCurrency.entries) {
       final currency = entry.key;
@@ -185,6 +196,7 @@ abstract final class Fx {
           usableRate.to == base) {
         approx += usableRate.convert(money).minor;
         hasBaseContribution = true;
+        converted = true;
       } else {
         unconverted++;
       }
@@ -193,6 +205,7 @@ abstract final class Fx {
     return MixedTotal(
       perCurrency: Map.unmodifiable(perCurrency),
       approximateBase: hasBaseContribution ? Money(approx, base) : null,
+      converted: converted,
       rate: usableRate,
       unconvertedCount: unconverted,
     );

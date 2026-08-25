@@ -86,7 +86,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Hai mươi hai cái bẫy đã vấp, đừng vấp lại
+## Hai mươi bốn cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -226,9 +226,37 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     nằm ở tương lai, nên các tháng trước nó trống. Đó là đúng với những gì app biết, không
     phải lỗi. Chart đầy dần theo thời gian vì `anchorDate` không bao giờ bị sửa.
     Cột của tháng chưa tới vẽ nhạt hơn, vì đó là số tính trước chứ không phải việc đã xảy
-    ra, và dòng dưới tổng nói thẳng điều đó khi người dùng chọn một tháng như vậy.
+    ra, **kể cả khi nó đang là cột được chọn**: chọn vào thì nó tô màu nhấn nhưng nhạt
+    bớt, chứ không đặc như tháng đã qua. Trước đây chọn vào là tô đặc và việc nói ra giao
+    cho một dòng chữ dưới con số, xem bẫy 24.
     Cùng một phép tính lo cả ba thứ trên card: cột chart, con số lớn, và danh sách By item.
     Thêm điều kiện lọc mới thì sửa ở `_chargesByMonth`, đừng sửa riêng chỗ nào.
+
+23. **Dấu `≈` trên màn Money chỉ có một nghĩa: đã đem một khoản ngoại tệ nhân với tỉ giá
+    đóng gói sẵn.** Nó không nói về phép nhân theo chu kỳ, vì nhân một số tiền đồng với
+    12 là số nguyên, không sai một đồng nào. `MixedTotal.converted` là chỗ trả lời câu
+    hỏi đó, và cả con số lớn lẫn từng dòng trong Where it goes đều hỏi riêng, vì một card
+    có thể có một nhóm toàn tiền đồng đứng cạnh một nhóm có tiền đô. Trước đây `≈` được
+    ghép cứng vào con số lớn nên người dùng chỉ có mục tiền đồng vẫn thấy nó, tức là app
+    tự nhận một sai số nó không hề mắc.
+    Tỉ giá đi kèm ngay dòng quy đổi ra đô, để trong ngoặc, chứ không có dòng riêng dưới
+    đáy card. Không kèm ngày nữa: `Fx.total` vứt bỏ tỉ giá cũ quá `Fx.maxDisplayAgeDays`
+    thay vì quy đổi bằng nó, nên tỉ giá nào lên được tới màn hình cũng là tỉ giá app dám
+    đứng sau. Dòng dưới đáy card giờ chỉ còn lại khi có tiền rơi ra ngoài tổng, và đó là
+    một lời cảnh báo chứ không phải chú thích.
+
+24. **Card trên màn Money phải có đúng số dòng như nhau ở mọi tháng.** Người dùng đọc
+    card này bằng cách bấm qua lại giữa các cột chart, nên một dòng chữ lúc có lúc không
+    sẽ đẩy chart chạy lên chạy xuống ngay dưới ngón tay họ. Vì vậy giữa con số lớn và
+    chart **không còn dòng chữ nào**. Hai dòng từng nằm đó đều đã bỏ: số mục đếm được thì
+    danh sách By item ngay bên dưới đã nói, còn "tháng này chưa tới" thì cột chart tự nói
+    bằng màu.
+    Dòng quy đổi ra đô cũng theo luật này: nó hiện ở **mọi** tháng một khi người dùng có
+    bất kỳ mục nào tính bằng ngoại tệ, kể cả tháng mà các khoản trong đó toàn tiền đồng.
+    Người dùng giữ những loại tiền nào là chuyện của họ, không phải chuyện của tháng Ba.
+    Đó là tham số `restate` của `MoneyPresenter.alternateTotal`.
+    Dấu `≈` trên con số lớn thì vẫn theo bẫy 23, tức là chỉ có khi tháng đó thật sự có
+    quy đổi. Nó là một ký tự nằm cùng dòng, không thêm bớt dòng nào.
 
 ## Viết tài liệu
 

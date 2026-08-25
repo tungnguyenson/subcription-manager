@@ -51,7 +51,6 @@ void main() {
       ], MoneySpan.month);
 
       expect(month.items.map((i) => i.name), ['Netflix']);
-      expect(month.subtitle, '1 item counted');
     });
 
     test('the breakdown is biggest first', () {
@@ -86,7 +85,6 @@ void main() {
       expect(month.trials.single.name, 'Claude Pro');
       expect(month.trials.single.cost, '520,000 ₫');
       expect(month.trials.single.startsCharging, '20/08');
-      expect(month.subtitle, '1 item counted · 1 trial not counted yet');
     });
 
     // A service switched off is still being charged: the switch stops
@@ -157,13 +155,8 @@ void main() {
       );
     });
 
-    // An estimate has to say it is one. A bill carried twelve times forward at
-    // today's amount is a guess about the other eleven months.
-    test('the year figure says out loud that it is an estimate', () {
-      final year = view([item('Netflix')], MoneySpan.year);
-
-      expect(year.label, 'Next 12 months');
-      expect(year.subtitle, startsWith('Estimate.'));
+    test('the year span names itself', () {
+      expect(view([item('Netflix')], MoneySpan.year).label, 'Next 12 months');
     });
 
     // One number said twice, so the two can never disagree: converted from the
@@ -178,7 +171,70 @@ void main() {
 
       // 3,120,000 ₫ + $240.00 at 26,046 = 9,371,040 ₫, back at the same rate.
       expect(year.total.approximateBase?.minor, 9371040);
-      expect(year.alternateTotal, r'≈ $359.79');
+      // The rate rides on this line rather than on one of its own at the foot
+      // of the card: it is what makes both figures approximate, and beside the
+      // figure it produced it reads as an explanation instead of trivia.
+      expect(year.alternateTotal, r'≈ $359.79 (26,046 ₫/$)');
+    });
+
+    // The tilde stands for one thing: a foreign amount went through the
+    // bundled rate. Multiplying a dong figure by a cycle is exact, and a
+    // tilde over it claims an imprecision the arithmetic never incurred.
+    test('a dong-only total is not marked approximate', () {
+      final year = view([item('Netflix', amountMinor: 260000)], MoneySpan.year);
+
+      expect(year.total.converted, isFalse);
+      expect(year.bands.every((band) => !band.converted), isTrue);
+    });
+
+    test('a total with a converted amount in it is marked approximate', () {
+      final year = view([
+        item('Netflix', amountMinor: 260000),
+        item('Claude', amountMinor: 2000, currency: 'USD'),
+      ], MoneySpan.year);
+
+      expect(year.total.converted, isTrue);
+    });
+
+    // Band by band, not card-wide. A card can hold one band of dong and one
+    // band with dollars in it, and only the second is approximate.
+    test('a band of dong keeps its exact figure beside a converted one', () {
+      final year = view([
+        item('Electricity', amountMinor: 842000, categoryId: 'UTILITIES'),
+        item('Claude', amountMinor: 2000, currency: 'USD'),
+      ], MoneySpan.year);
+
+      final bands = {for (final band in year.bands) band.label: band};
+      expect(bands['Bills and utilities']!.converted, isFalse);
+      expect(bands['Subscriptions']!.converted, isTrue);
+    });
+
+    // Which currencies a person keeps is a fact about them, not about March.
+    // A restatement that came and went with the month moved the chart under
+    // the reader's thumb every time they tapped a column.
+    test('every month is restated once any item is in another currency', () {
+      final items = [
+        item('Netflix', expiresOn: '2026-08-20', amountMinor: 260000),
+        item(
+          'Claude',
+          expiresOn: '2026-09-04',
+          amountMinor: 2000,
+          currency: 'USD',
+        ),
+      ];
+
+      MoneyView at(int month) => MoneyPresenter.build(
+        categories: CategoryBook.shipped,
+        items: items,
+        today: today,
+        span: MoneySpan.month,
+        month: month,
+      );
+
+      // August is charged in dong only, and still carries the dollar line.
+      expect(at(8).total.converted, isFalse);
+      expect(at(8).alternateTotal, isNotNull);
+      expect(at(9).alternateTotal, isNotNull);
     });
 
     // A dong figure restated in dollars answers a question a dong-only user
@@ -456,16 +512,23 @@ void main() {
       expect(at(4, items).items.map((i) => i.name), ['Netflix']);
     });
 
-    // A month that has not happened is the cycles read forward, and the card
-    // says so rather than sitting there looking like a receipt.
-    test('a month still ahead says its figure is worked out', () {
-      expect(at(11, [item('Netflix')]).subtitle, contains('not due yet'));
-      expect(at(8, [item('Netflix')]).subtitle, isNot(contains('not due yet')));
+    // A month that has not happened is the cycles read forward, and the chart
+    // says so rather than sitting there looking like a receipt. It says it on
+    // the column the reader is on, not only on the ones beside it -- that flag
+    // is what the screen draws the selected column back with.
+    test('a month still ahead is flagged on the column being read', () {
+      final ahead = at(11, [item('Netflix')]).bars;
+      expect(ahead.singleWhere((bar) => bar.selected).ahead, isTrue);
+
+      final behind = at(8, [item('Netflix')]).bars;
+      expect(behind.singleWhere((bar) => bar.selected).ahead, isFalse);
     });
 
-    // A trial converts on one date, and that date is ahead of the user, not
-    // back in March.
-    test('trials are only named on the month the user is in', () {
+    // A trial is listed under its own heading and never inside the total, on
+    // whichever month the card is showing. It used to be named a second time
+    // in a line under the figure, which appeared only on the month the user
+    // was in and moved the chart every time they left it.
+    test('a trial stays out of the total and in its own section', () {
       final items = [
         item('Netflix'),
         item(
@@ -475,8 +538,13 @@ void main() {
         ),
       ];
 
-      expect(at(8, items).subtitle, contains('1 trial not counted yet'));
-      expect(at(3, items).subtitle, isNot(contains('trial')));
+      for (final month in [3, 8]) {
+        expect(at(month, items).trials.single.name, 'Claude Pro');
+        expect(
+          at(month, items).items.map((i) => i.name),
+          isNot(contains('Claude Pro')),
+        );
+      }
     });
 
     // Twice in one month is one subscription billed twice, not two

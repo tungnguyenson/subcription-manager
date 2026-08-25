@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:subdock/domain/fx.dart';
 import 'package:subdock/domain/money.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/money_presenter.dart';
@@ -33,10 +32,8 @@ class SavingsTeaser {
 ///
 /// Two spans, because they answer two different questions and the wrong one is
 /// misleading. **This month** is what will actually leave the account before the
-/// month is out — a fact. **Next 12 months** is what the current set of
-/// commitments adds up to — an estimate, and labelled as one, because a bill
-/// carried twelve times forward at today's amount is a guess about the other
-/// eleven.
+/// month is out. **Next 12 months** is what the current set of commitments adds
+/// up to, a bill carried twelve times forward at today's amount.
 ///
 /// The month breakdown is by item, not by category. Categories answer "what kind
 /// of spender am I", which is a question for a budgeting app; this list answers
@@ -296,10 +293,16 @@ class _TotalCard extends StatelessWidget {
         FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
-          child: Text(
-            approximate == null ? '—' : '≈ ${MoneyFormat.full(approximate)}',
-            style: SubdockText.figure,
-          ),
+          child: Text(switch (approximate) {
+            null => '—',
+            // The tilde is earned, not decorative. It stands for one thing
+            // and one thing only: a foreign amount went through the bundled
+            // rate to get here. Multiplying a dong figure by a cycle is
+            // exact, so a list with no foreign currency in it gets the
+            // figure plain.
+            final money when total.converted => '≈ ${MoneyFormat.full(money)}',
+            final money => MoneyFormat.full(money),
+          }, style: SubdockText.figure),
         ),
         // The same total in the other currency, directly under it and quiet.
         // One number said twice, which is the whole of what a second currency
@@ -315,8 +318,6 @@ class _TotalCard extends StatelessWidget {
             ),
           ),
         ],
-        const SizedBox(height: 7),
-        Text(view.subtitle, style: SubdockText.footnote),
         if (view.bars.isNotEmpty) ...[
           const SizedBox(height: 18),
           _BarChart(bars: view.bars, onMonth: onMonth),
@@ -332,40 +333,37 @@ class _TotalCard extends StatelessWidget {
               for (final band in view.bands)
                 _CardRow(
                   label: band.label,
-                  value: '≈ ${MoneyFormat.full(band.total)}',
+                  value: band.converted
+                      ? '≈ ${MoneyFormat.full(band.total)}'
+                      : MoneyFormat.full(band.total),
                 ),
             ],
           ),
-        const SizedBox(height: 12),
-        Container(
-          padding: const EdgeInsets.only(top: 10),
-          decoration: const BoxDecoration(
-            border: Border(top: BorderSide(color: SubdockColors.hairline)),
+        // What used to sit here was the rate, its source and its date, on
+        // every visit, whether or not anything had been converted. The rate
+        // has moved up beside the dollar figure it explains; a card with one
+        // currency on it now ends where its numbers end.
+        //
+        // The warning stays, and stays a warning: money that fell out of the
+        // total is the one thing on this card the figures cannot say for
+        // themselves.
+        if (total.unconvertedCount > 0) ...[
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.only(top: 10),
+            decoration: const BoxDecoration(
+              border: Border(top: BorderSide(color: SubdockColors.hairline)),
+            ),
+            child: Text(
+              'No usable rate — ${total.unconvertedCount} '
+              '${total.unconvertedCount == 1 ? "currency" : "currencies"} '
+              'left unconverted',
+              style: SubdockText.caption,
+            ),
           ),
-          child: Text(
-            _provenance(total.rate, total.unconvertedCount),
-            style: SubdockText.caption,
-          ),
-        ),
+        ],
       ],
     );
-  }
-
-  /// Never shows a converted figure without saying which rate produced it and
-  /// when. A number with no provenance silently rewrites itself.
-  String _provenance(FxRate? rate, int unconverted) {
-    if (rate == null) {
-      return unconverted > 0
-          ? 'No usable rate — $unconverted currencies left unconverted'
-          : 'One currency only, nothing to convert';
-    }
-
-    final line =
-        'rate ${MoneyFormat.rate(rate)} · ${rate.source} · '
-        '${MoneyFormat.date(rate.asOf)}';
-    return unconverted > 0
-        ? '$line · $unconverted currencies left unconverted'
-        : line;
   }
 }
 
@@ -536,10 +534,16 @@ class _Column extends StatelessWidget {
                 height: height,
                 decoration: BoxDecoration(
                   color: switch (bar) {
-                    SpendBar(selected: true) => SubdockColors.accent,
                     // A month still ahead is a figure read forward off the
                     // cycles, and it is drawn back from the months that have
-                    // already happened.
+                    // already happened -- including while it is the one being
+                    // read. Selecting it used to fill it solid, which took the
+                    // only remaining sign that its figure has not happened yet
+                    // and handed the job to a line of text under the total;
+                    // that line came and went with the month and shifted this
+                    // chart under the reader's thumb.
+                    SpendBar(selected: true, ahead: true) => _aheadSelected,
+                    SpendBar(selected: true) => SubdockColors.accent,
                     SpendBar(ahead: true) => _aheadFill,
                     _ => SubdockColors.accentSoft,
                   },
@@ -575,6 +579,12 @@ class _Column extends StatelessWidget {
   /// it means one thing — a month that has not happened — and a token would
   /// invite it onto surfaces where it means nothing.
   static const Color _aheadFill = Color(0x1C466FBD);
+
+  /// The same month once it is the one being read: the accent, held back.
+  /// Far enough from [SubdockColors.accent] to say the figure above it was
+  /// worked out rather than paid, far enough from [_aheadFill] to be the
+  /// column the reader just tapped.
+  static const Color _aheadSelected = Color(0x8C466FBD);
 }
 
 /// The way through to Savings.

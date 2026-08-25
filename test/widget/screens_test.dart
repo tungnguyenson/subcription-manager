@@ -231,14 +231,12 @@ void main() {
     /// [MoneyView]; the assertions below are unchanged in what they check.
     MoneyView view(
       MixedTotal total, {
-      String subtitle = '1 item counted',
       List<ItemSpend> items = const [],
       List<SpendBar> bars = const [],
     }) => MoneyView(
       span: MoneySpan.month,
       label: 'This month',
       total: total,
-      subtitle: subtitle,
       // Derived the way the real presenter derives it rather than hand-built:
       // the point of the line is that it is the headline converted, and a
       // fixture that makes up a figure cannot check that.
@@ -247,7 +245,7 @@ void main() {
       bars: bars,
     );
 
-    testWidgets('shows the approximation and the exact subtotals under it', (
+    testWidgets('restates a mixed total once, in the other currency', (
       tester,
     ) async {
       final total = Fx.total(
@@ -260,30 +258,46 @@ void main() {
       // `Money` on the screen, `Spending` on the tab that opens it. See the
       // comment on the title in MoneyScreen.
       expect(find.text('Money'), findsOneWidget);
-      expect(find.textContaining('≈'), findsWidgets);
-      expect(find.textContaining('618,000 ₫'), findsWidgets);
-      expect(find.textContaining(r'$20.00'), findsWidgets);
+      // 618,000 ₫ + $20 at 26,046, then the same figure back at the same rate.
+      expect(find.textContaining('1,138,920 ₫'), findsOneWidget);
+      expect(find.textContaining(r'$43.73'), findsOneWidget);
       // The same total in the other currency, quietly, under the headline.
       // Three groups of figures on this card was the bug; one restatement is
       // what a second currency actually needs.
       expect(find.text('EXACT AMOUNTS'), findsNothing);
-      // The dollar line carries its own conversion, so the sum is followable.
-      expect(find.textContaining('520,920 ₫'), findsOneWidget);
     });
 
-    // A converted figure with no rate date silently rewrites itself.
-    testWidgets('the converted total always carries its rate and date', (
+    // The rate sits against the figure it produced, once, and nowhere else.
+    // It used to have a line of its own at the foot of the card, where it
+    // showed up whether or not anything had been converted.
+    testWidgets('the converted figure carries its rate, and only there', (
       tester,
     ) async {
       final total = Fx.total(
-        [Money.usd(20)],
+        [Money.vnd(618000), Money.usd(20)],
         rate: Fx.bundledUsdVnd,
         today: today,
       );
       await show(tester, MoneyScreen(view: view(total)));
 
-      expect(find.textContaining('26,046'), findsOneWidget);
-      expect(find.textContaining('14/08/2026'), findsOneWidget);
+      expect(find.textContaining(r'(26,046 ₫/$)'), findsOneWidget);
+      expect(find.textContaining('rate 26,046'), findsNothing);
+      expect(find.textContaining('14/08/2026'), findsNothing);
+    });
+
+    // The tilde means a rate was applied. A list of dong amounts is exact to
+    // the dong, and a tilde over it claims an imprecision it never incurred.
+    testWidgets('a dong-only total is shown without a tilde', (tester) async {
+      final total = Fx.total(
+        [Money.vnd(618000)],
+        rate: Fx.bundledUsdVnd,
+        today: today,
+      );
+      await show(tester, MoneyScreen(view: view(total)));
+
+      expect(find.text('618,000 ₫'), findsOneWidget);
+      expect(find.textContaining('≈'), findsNothing);
+      expect(find.textContaining('26,046'), findsNothing);
     });
 
     testWidgets('a stale rate leaves no confident number on screen', (
@@ -298,6 +312,7 @@ void main() {
 
       expect(find.text('—'), findsWidgets);
       expect(find.textContaining('left unconverted'), findsOneWidget);
+      expect(find.textContaining('26,046'), findsNothing);
     });
 
     // The breakdown answers "what is taking my money", not "what kind of
@@ -312,7 +327,6 @@ void main() {
               rate: Fx.bundledUsdVnd,
               today: today,
             ),
-            subtitle: '2 items counted',
             items: [
               ItemSpend(name: 'Electricity bill', total: Money.vnd(842000)),
               ItemSpend(name: 'Netflix Premium', total: Money.vnd(260000)),
@@ -323,7 +337,6 @@ void main() {
 
       expect(find.text('BY ITEM'), findsOneWidget);
       expect(find.text('842,000 ₫'), findsOneWidget);
-      expect(find.text('2 items counted'), findsOneWidget);
     });
 
     // Six zeroed columns claim "you spent nothing"; no chart at all says "no

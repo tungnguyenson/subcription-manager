@@ -19,7 +19,15 @@ class YearBand {
   final String label;
   final Money total;
 
-  const YearBand({required this.label, required this.total});
+  /// Whether a rate was applied to build [total]. A band made entirely of dong
+  /// amounts is exact, and printing a tilde over it claims otherwise.
+  final bool converted;
+
+  const YearBand({
+    required this.label,
+    required this.total,
+    required this.converted,
+  });
 }
 
 /// One column of the six-month chart on the month view.
@@ -103,24 +111,29 @@ class MoneyView {
 
   final MixedTotal total;
 
-  /// The line under the figure: what was counted, and what was not.
-  final String subtitle;
-
   /// Per-item, for the month view. Empty on the year view, where a list of
   /// forty annualised figures answers nothing a person asked.
   final List<ItemSpend> items;
 
   /// The same total in the other currency, small, under the headline.
   ///
-  /// Null when nothing is charged in another currency — a dong figure restated
-  /// in dollars answers a question a dong-only user never asked.
+  /// Null when the user tracks nothing in another currency — a dong figure
+  /// restated in dollars answers a question a dong-only user never asked.
+  ///
+  /// Present on *every* month once they do track one, including a month whose
+  /// own charges happen to be all dong. The card is read by flicking between
+  /// months, and a line that comes and going with the month moves the chart
+  /// under the reader's thumb. Which currencies a person keeps is a fact about
+  /// them, not about March.
   ///
   /// The exact per-currency subtotals used to sit here instead, each with its
   /// own conversion. They were correct and they were unreadable: three groups
   /// of figures on one card, two of them decompositions of the same total, and
   /// a reader has to work out which is which before any of it means anything.
-  /// The `≈` and the rate line at the foot of the card still say this figure is
-  /// converted rather than counted.
+  /// Carries the rate that produced it, in brackets, because this is the one
+  /// line on the card where a rate belongs: it sits against the figure it
+  /// explains rather than at the foot of the card, where it read as a stray
+  /// fact about the app.
   final String? alternateTotal;
 
   /// Three bands, for the year view. Empty on the month view.
@@ -146,7 +159,6 @@ class MoneyView {
     this.showingMonth,
     required this.label,
     required this.total,
-    required this.subtitle,
     this.alternateTotal,
     this.items = const [],
     this.bands = const [],
@@ -191,7 +203,16 @@ abstract final class MoneyPresenter {
           ),
     ];
 
-    if (span == MoneySpan.year) return _year(live, categories, today, trials);
+    // A fact about the person, not about the month they are looking at. Worked
+    // out from the whole list so that every month of the card is laid out the
+    // same way; see [MoneyView.alternateTotal].
+    final restate = live.any(
+      (item) => item.money != null && item.money!.currency != Fx.baseCurrency,
+    );
+
+    if (span == MoneySpan.year) {
+      return _year(live, categories, today, trials, restate: restate);
+    }
 
     // One pass over the items for the whole year, so the column the user taps
     // and the figures they land on are literally the same arithmetic. Two
@@ -204,6 +225,7 @@ abstract final class MoneyPresenter {
       showing: (month ?? today.month).clamp(1, 12),
       charges: charges,
       trials: trials,
+      restate: restate,
     );
   }
 
@@ -215,9 +237,8 @@ abstract final class MoneyPresenter {
     required int showing,
     required Map<int, List<TrackedItem>> charges,
     required List<TrialSpend> trials,
+    required bool restate,
   }) {
-    final isThisMonth = showing == today.month;
-
     // Repeated once per occurrence, so a weekly charge counts four times in a
     // four-week month rather than once.
     final counted = charges[showing] ?? const <TrackedItem>[];
@@ -265,14 +286,15 @@ abstract final class MoneyPresenter {
     return MoneyView(
       span: MoneySpan.month,
       showingMonth: showing,
-      label: isThisMonth ? 'This month' : DateCopy.month(showing),
+      label: showing == today.month ? 'This month' : DateCopy.month(showing),
       total: total,
-      subtitle: _monthSubtitle(
-        counted: occurrences.length,
-        trials: isThisMonth ? trials.length : 0,
-        ahead: showing > today.month,
-      ),
-      alternateTotal: MoneyPresenter.alternateTotal(total),
+      // Nothing under the figure. The two lines that used to live here -- the
+      // count of items, and a note that a month still ahead was read off the
+      // cycles -- appeared on some months and not others, so the chart below
+      // shifted every time the reader tapped a different column. The trials
+      // have their own section further down and the chart says for itself
+      // which months have not happened.
+      alternateTotal: MoneyPresenter.alternateTotal(total, restate: restate),
       items: rows,
       bars: _bars(charges: charges, today: today, showing: showing),
       trials: trials,
@@ -364,31 +386,15 @@ abstract final class MoneyPresenter {
     }
   }
 
-  static String _monthSubtitle({
-    required int counted,
-    required int trials,
-    required bool ahead,
-  }) {
-    final head = '$counted ${counted == 1 ? "item" : "items"} counted';
-    if (ahead) {
-      // A month that has not happened yet is the cycles read forward, and it
-      // says so rather than sitting there looking like a receipt.
-      return '$head · not due yet, worked out from the cycles';
-    }
-    return trials == 0
-        ? head
-        : '$head · ${trials == 1 ? "1 trial" : "$trials trials"} '
-              'not counted yet';
-  }
-
   // ---- next twelve months ----
 
   static MoneyView _year(
     List<TrackedItem> live,
     CategoryBook categories,
     LocalDate today,
-    List<TrialSpend> trials,
-  ) {
+    List<TrialSpend> trials, {
+    required bool restate,
+  }) {
     final subscriptions = <Money>[];
     final bills = <Money>[];
     final annual = <Money>[];
@@ -412,9 +418,9 @@ abstract final class MoneyPresenter {
       }
     }
 
-    Money? band(List<Money> parts) => parts.isEmpty
+    MixedTotal? band(List<Money> parts) => parts.isEmpty
         ? null
-        : Fx.total(parts, rate: Fx.bundledUsdVnd, today: today).approximateBase;
+        : Fx.total(parts, rate: Fx.bundledUsdVnd, today: today);
 
     final total = Fx.total(all, rate: Fx.bundledUsdVnd, today: today);
 
@@ -422,18 +428,20 @@ abstract final class MoneyPresenter {
       span: MoneySpan.year,
       label: 'Next 12 months',
       total: total,
-      subtitle:
-          'Estimate. A monthly bill is carried twelve times forward at '
-          "today's amount; a yearly charge is counted once.",
-      alternateTotal: MoneyPresenter.alternateTotal(total),
+      // No sentence explaining that twelve monthly charges come to twelve
+      // times one. The heading already says which twelve months, and a reader
+      // who has entered their own cycles does not need the arithmetic read
+      // back to them.
+      alternateTotal: MoneyPresenter.alternateTotal(total, restate: restate),
       bands: [
         for (final (label, parts) in [
           ('Subscriptions', subscriptions),
           ('Bills and utilities', bills),
           ('Charged once a year', annual),
         ])
-          if (band(parts) case final Money total)
-            YearBand(label: label, total: total),
+          if (band(parts) case final MixedTotal band)
+            if (band.approximateBase case final Money total)
+              YearBand(label: label, total: total, converted: band.converted),
       ],
       trials: trials,
     );
@@ -444,14 +452,24 @@ abstract final class MoneyPresenter {
   ///
   /// Converted from the base total rather than summed separately, so the two
   /// figures on the card can never disagree: one number, said twice.
-  static String? alternateTotal(MixedTotal total) {
-    if (total.perCurrency.length < 2) return null;
+  static String? alternateTotal(MixedTotal total, {bool restate = false}) {
+    if (!restate && total.perCurrency.length < 2) return null;
 
     final base = total.approximateBase;
     final rate = total.rate;
     if (base == null || rate == null || rate.to != base.currency) return null;
 
-    return '≈ ${MoneyFormat.full(rate.invert(base))}';
+    // The rate rides on this line rather than on a line of its own at the
+    // foot of the card. It is the whole reason both figures on the card are
+    // approximate, and beside the figure it produced it reads as an
+    // explanation instead of as trivia.
+    //
+    // Without its date, which the old foot line carried. [Fx.total] drops a
+    // rate older than [Fx.maxDisplayAgeDays] rather than converting with it,
+    // so a rate that reaches the screen at all is one the app is prepared to
+    // stand behind; past that there is no converted figure here to date.
+    return '≈ ${MoneyFormat.full(rate.invert(base))} '
+        '(${MoneyFormat.rate(rate)})';
   }
 
   /// What this item costs over twelve months, or null when there is no amount
