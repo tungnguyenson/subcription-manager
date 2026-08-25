@@ -400,7 +400,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             categories: _categories,
             today: today,
             span: _span,
-            history: _history,
           ),
           onSpan: (span) => setState(() => _span = span),
           // The teaser only appears when there is something behind it. A card

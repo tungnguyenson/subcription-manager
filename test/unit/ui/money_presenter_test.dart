@@ -1,7 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:subdock/domain/category_book.dart';
+import 'package:subdock/domain/fx.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/domain/money.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/ui/money_presenter.dart';
 
@@ -196,25 +198,18 @@ void main() {
     });
   });
 
+  // The chart is derived from the list, not from what has been marked paid.
+  // Everything the app needs is already on the item: an amount, a cycle, and
+  // an anchor the cycle counts from.
   group('the six-month chart', () {
-    HandledEvent paid(
-      String on, {
-      int? baseAmountMinor = 100000,
-      int? actualChargedMinor,
-    }) => HandledEvent(
-      id: 'e-$on-$baseAmountMinor-$actualChargedMinor',
-      itemId: 'any',
-      handledAtEpochSeconds: 0,
-      forDueDate: d(on),
-      baseAmountMinor: baseAmountMinor,
-      actualChargedMinor: actualChargedMinor,
+    List<SpendBar> bars(List<TrackedItem> items) => MoneyPresenter.bars(
+      items: items,
+      categories: CategoryBook.shipped,
+      today: today,
     );
 
-    List<SpendBar> bars(List<HandledEvent> history) =>
-        MoneyPresenter.bars(history: history, today: today);
-
     test('runs six months back and ends on the month the user is in', () {
-      final chart = bars([paid('2026-08-01')]);
+      final chart = bars([item('Netflix', expiresOn: '2026-03-05')]);
 
       expect(chart.length, MoneyPresenter.barMonths);
       expect(chart.map((b) => b.longLabel), [
@@ -229,82 +224,158 @@ void main() {
       expect(chart.where((b) => b.current).length, 1);
     });
 
+    test('a monthly item lands on every month from its anchor onward', () {
+      final chart = bars([item('Netflix', expiresOn: '2026-03-05')]);
+
+      expect(chart.map((b) => b.minor), [
+        260000,
+        260000,
+        260000,
+        260000,
+        260000,
+        260000,
+      ]);
+    });
+
+    // The anchor is the earliest date the app has any evidence for. Filling in
+    // the months before it would invent a subscription history nobody typed.
+    test('months before the anchor stay empty', () {
+      final chart = bars([item('Netflix', expiresOn: '2026-06-05')]);
+
+      expect(chart.map((b) => b.minor), [0, 0, 0, 260000, 260000, 260000]);
+    });
+
+    test('a yearly charge lands on one month only', () {
+      final chart = bars([
+        item(
+          'Domain',
+          expiresOn: '2026-05-09',
+          cycle: Cycle.yearly,
+          amountMinor: 300000,
+          categoryId: 'UTILITIES',
+        ),
+      ]);
+
+      expect(chart.map((b) => b.minor), [0, 0, 300000, 0, 0, 0]);
+    });
+
+    test('a one-off lands on the month it falls in', () {
+      final chart = bars([
+        item(
+          'Passport fee',
+          expiresOn: '2026-07-02',
+          cycle: null,
+          amountMinor: 200000,
+          categoryId: 'UTILITIES',
+        ),
+      ]);
+
+      expect(chart.map((b) => b.minor), [0, 0, 0, 0, 200000, 0]);
+    });
+
     // Crossing the year boundary is the case a naive `month - 5` gets wrong.
     test('counts back across the turn of the year', () {
       final chart = MoneyPresenter.bars(
-        history: [paid('2025-11-04')],
+        items: [item('Netflix', expiresOn: '2025-11-04')],
+        categories: CategoryBook.shipped,
         today: d('2026-02-10'),
       );
 
       expect(chart.first.longLabel, 'September');
       expect(chart.last.longLabel, 'February');
-      expect(chart[2].longLabel, 'November');
-      expect(chart[2].minor, 100000);
+      expect(chart.map((b) => b.minor), [0, 0, 260000, 260000, 260000, 260000]);
     });
 
-    test('adds every event that falls in the same month', () {
-      final chart = bars([paid('2026-06-02'), paid('2026-06-28')]);
-
-      expect(chart[3].longLabel, 'June');
-      expect(chart[3].minor, 200000);
-    });
-
-    // The bank's foreign-currency fee makes the computed figure structurally
-    // low, so a figure read off a statement always wins.
-    test('a figure typed off a statement beats the computed one', () {
+    // Adding 2000 US cents to a dong figure would draw a column an order of
+    // magnitude short of the truth.
+    test('a foreign amount is converted rather than added raw', () {
       final chart = bars([
-        paid('2026-08-03', baseAmountMinor: 100000, actualChargedMinor: 137000),
+        item(
+          'Claude Pro',
+          expiresOn: '2026-08-04',
+          amountMinor: 2000,
+          currency: 'USD',
+        ),
       ]);
 
-      expect(chart.last.minor, 137000);
+      final converted = Fx.total(
+        [Money(2000, 'USD')],
+        rate: Fx.bundledUsdVnd,
+        today: today,
+      ).approximateBase!;
+      expect(chart.last.minor, converted.minor);
     });
 
-    test(
-      'an event with no amount on it is left out rather than guessed at',
-      () {
-        final chart = bars([paid('2026-08-03', baseAmountMinor: null)]);
+    // A trial is free until it converts, and the total above the chart says so
+    // in as many words.
+    test('a trial is not counted', () {
+      final chart = bars([
+        item(
+          'Claude Pro',
+          expiresOn: '2026-08-26',
+          trialStart: d('2026-08-12'),
+        ),
+      ]);
 
-        expect(chart, isEmpty);
+      expect(chart, isEmpty);
+    });
+
+    test('an item with no amount on it is left out rather than guessed at', () {
+      expect(bars([item('Netflix', amountMinor: null)]), isEmpty);
+    });
+
+    test('an archived item is gone from the chart as well', () {
+      final chart = bars([
+        item('Netflix', expiresOn: '2026-03-05', state: ItemState.archived),
+      ]);
+
+      expect(chart, isEmpty);
+    });
+
+    // The switch stops reminders, not the vendor.
+    test('a paused item is still being charged and still counted', () {
+      final chart = bars([
+        item('Netflix', expiresOn: '2026-03-05', paused: true),
+      ]);
+
+      expect(chart.last.minor, 260000);
+    });
+
+    // Rolling a counted plan past its last payment would draw an instalment
+    // the user never owes.
+    test('an instalment plan stops after its last payment', () {
+      final chart = bars([
+        TrackedItem(
+          id: 'course',
+          name: 'Course',
+          categoryId: 'EDUCATION',
+          expiresOn: d('2026-05-10'),
+          anchorDate: d('2026-03-10'),
+          cycle: Cycle.monthly,
+          repeatCount: 3,
+          amountMinor: 500000,
+          currency: 'VND',
+        ),
+      ]);
+
+      expect(chart.map((b) => b.minor), [500000, 500000, 500000, 0, 0, 0]);
+    });
+
+    // Six zeroed columns claim "you spent nothing"; no chart says "nothing
+    // here yet", which is the truth about a list with nothing in the window.
+    test(
+      'nothing in the window draws no chart rather than six empty columns',
+      () {
+        expect(bars(const []), isEmpty);
+        expect(bars([item('Netflix', expiresOn: '2026-11-05')]), isEmpty);
       },
     );
 
-    // Six zeroed columns claim "you spent nothing"; no chart says "no record
-    // yet", which is the truth about a database with no history in it.
-    test('no history at all draws no chart rather than six empty columns', () {
-      expect(bars(const []), isEmpty);
-    });
-
-    test('anything older than the window is outside it', () {
-      final chart = bars([paid('2026-02-20'), paid('2026-03-01')]);
-
-      expect(chart.first.longLabel, 'March');
-      expect(chart.first.minor, 100000);
-      expect(chart.fold<int>(0, (n, b) => n + b.minor), 100000);
-    });
-
     test('the chart is on the month view and not on the year one', () {
-      final history = [paid('2026-08-03')];
+      final items = [item('Netflix', expiresOn: '2026-03-05')];
 
-      expect(
-        MoneyPresenter.build(
-          categories: CategoryBook.shipped,
-          items: [item('Netflix')],
-          today: today,
-          span: MoneySpan.month,
-          history: history,
-        ).bars,
-        isNotEmpty,
-      );
-      expect(
-        MoneyPresenter.build(
-          categories: CategoryBook.shipped,
-          items: [item('Netflix')],
-          today: today,
-          span: MoneySpan.year,
-          history: history,
-        ).bars,
-        isEmpty,
-      );
+      expect(view(items, MoneySpan.month).bars, isNotEmpty);
+      expect(view(items, MoneySpan.year).bars, isEmpty);
     });
   });
 }

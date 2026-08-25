@@ -363,12 +363,17 @@ class _TotalCard extends StatelessWidget {
   }
 }
 
-/// Six months of what actually left the account.
+/// Six months of what the list says each month costs.
+///
+/// Worked out from the items — amount, cycle, anchor — rather than from what
+/// has been marked paid, so the chart stands up on a list nobody has confirmed
+/// a payment on yet. The last column is the month the user is in, and it is
+/// the same figure as the total above it, arrived at the same way.
 ///
 /// Deliberately unlabelled with figures. The bars answer one question — is
 /// this month unusual — and a column of nine-digit dong amounts at this width
 /// would answer it worse than the shapes do. The exact figures for the current
-/// month are in the list below; the older ones are on the history screen.
+/// month are in the list below.
 ///
 /// Heights are relative to the tallest of the six, not to any absolute scale,
 /// which is why nothing here is presented as a value to read off an axis.
@@ -396,7 +401,7 @@ class _BarChart extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('PAID, LAST 6 MONTHS', style: SubdockText.sectionLabel),
+        Text('COST BY MONTH', style: SubdockText.sectionLabel),
         const SizedBox(height: 12),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -405,7 +410,7 @@ class _BarChart extends StatelessWidget {
               Expanded(
                 child: Semantics(
                   label: bar.minor == 0
-                      ? '${bar.longLabel}: nothing recorded'
+                      ? '${bar.longLabel}: nothing due'
                       : '${bar.longLabel}: ${MoneyFormat.grouped(bar.minor)} dong',
                   excludeSemantics: true,
                   child: Padding(

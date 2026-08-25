@@ -24,12 +24,14 @@ class YearBand {
 
 /// One column of the six-month chart on the month view.
 ///
-/// The figure is money that has **already left the account**, read off the
-/// closed occurrences in history, and it is deliberately not the same kind of
-/// number as the total above it: the total is what the current commitments
-/// come to, which is a claim about the future. Mixing a forecast into a row of
-/// bars labelled with past months would invent five months of spending the app
-/// never saw.
+/// The figure is what the list says that month came to: every occurrence of
+/// every counted item that lands in it, at the amount on the item. The same
+/// kind of number as the total above the chart, and worked out the same way,
+/// so the current month's column *is* that total.
+///
+/// It is not a record of what was paid. Nothing here reads the history of
+/// marked payments, and a column can stand over a month whose bill the user
+/// never confirmed.
 @immutable
 class SpendBar {
   /// `A` — the month's initial, which is all the width allows.
@@ -103,12 +105,12 @@ class MoneyView {
   /// Three bands, for the year view. Empty on the month view.
   final List<YearBand> bands;
 
-  /// Six columns of what was actually paid, for the month view.
+  /// Six columns of what each month costs, for the month view.
   ///
-  /// Empty when nothing has ever been closed, and empty rather than six zeroed
-  /// columns: a flat row of stubs reads as "you spent nothing", which is a
-  /// claim, where an absent chart reads as "no record yet", which is the truth
-  /// about a database with no history in it.
+  /// Empty when no counted item has an occurrence anywhere in the window, and
+  /// empty rather than six zeroed columns: a flat row of stubs reads as "you
+  /// spend nothing", which is a claim, where an absent chart reads as "nothing
+  /// in here yet", which is the truth about a list the window cannot reach.
   final List<SpendBar> bars;
 
   /// Trials, listed under a heading that says they are not in the total.
@@ -140,7 +142,6 @@ abstract final class MoneyPresenter {
     required CategoryBook categories,
     required LocalDate today,
     required MoneySpan span,
-    List<HandledEvent> history = const [],
   }) {
     // Archived is gone; paused is not. A service switched off is still being
     // charged — the switch stops reminders, not the vendor — so leaving it out
@@ -165,7 +166,7 @@ abstract final class MoneyPresenter {
             categories,
             today,
             trials,
-            bars(history: history, today: today),
+            bars(items: live, categories: categories, today: today),
           )
         : _year(live, categories, today, trials);
   }
@@ -220,45 +221,96 @@ abstract final class MoneyPresenter {
     );
   }
 
-  /// The last [barMonths] calendar months of closed occurrences, oldest first.
+  /// The last [barMonths] calendar months of what the list says each month
+  /// costs, oldest first.
   ///
-  /// Reads the figure the same way the history screen does: the amount typed
-  /// off a bank statement wins over the computed one, because the bank's
-  /// foreign-currency fee makes the computed figure structurally low. An event
-  /// with neither is counted as nothing rather than guessed at — it is a
-  /// closed occurrence with no price on it, which is a real thing to have.
+  /// Worked out from the items themselves rather than from what has been
+  /// marked paid. An amount, a cycle and an anchor are everything a month's
+  /// figure needs, and a chart that waited on the user to mark payments would
+  /// sit blank over a list that is perfectly well filled in.
+  ///
+  /// Counting starts at the anchor and never runs behind it. The anchor is the
+  /// earliest date the app has any evidence for; carrying a monthly charge
+  /// back through months the user never mentioned would draw a subscription
+  /// history out of nothing.
+  ///
+  /// The same test as the total above the chart decides what counts, so the
+  /// current month's column and the headline figure can never disagree.
   static List<SpendBar> bars({
-    required List<HandledEvent> history,
+    required List<TrackedItem> items,
+    required CategoryBook categories,
     required LocalDate today,
   }) {
-    // Keyed `year * 12 + month` so December to January is one step like any
-    // other, and so the arithmetic below never has to touch day lengths.
-    int key(int year, int month) => year * 12 + (month - 1);
-
-    final newest = key(today.year, today.month);
+    final newest = _monthKey(today);
     final oldest = newest - (barMonths - 1);
 
-    final totals = <int, int>{};
-    for (final event in history) {
-      final minor = event.actualChargedMinor ?? event.baseAmountMinor;
-      if (minor == null) continue;
+    // Kept as amounts rather than summed on the way in, because two currencies
+    // in one month have to go through the same conversion the totals do.
+    final amounts = <int, List<Money>>{};
+    for (final item in items) {
+      if (item.state == ItemState.archived) continue;
+      if (!item.countsTowardSpend(categories[item.categoryId])) continue;
 
-      final at = key(event.forDueDate.year, event.forDueDate.month);
-      if (at < oldest || at > newest) continue;
-      totals[at] = (totals[at] ?? 0) + minor;
+      for (final on in _occurrences(item, oldest: oldest, newest: newest)) {
+        (amounts[_monthKey(on)] ??= []).add(item.money!);
+      }
     }
 
-    if (totals.isEmpty) return const [];
+    if (amounts.isEmpty) return const [];
 
     return [
       for (var at = oldest; at <= newest; at++)
         SpendBar(
           label: DateCopy.month(at % 12 + 1).substring(0, 1),
           longLabel: DateCopy.month(at % 12 + 1),
-          minor: totals[at] ?? 0,
+          minor: switch (amounts[at]) {
+            null => 0,
+            final month =>
+              Fx.total(
+                    month,
+                    rate: Fx.bundledUsdVnd,
+                    today: today,
+                  ).approximateBase?.minor ??
+                  0,
+          },
           current: at == newest,
         ),
     ];
+  }
+
+  /// Keyed `year * 12 + month` so December to January is one step like any
+  /// other, and so the arithmetic around it never has to touch day lengths.
+  static int _monthKey(LocalDate date) => date.year * 12 + (date.month - 1);
+
+  /// Every occurrence of [item] falling inside the window, oldest first.
+  ///
+  /// Walks forward from the anchor rather than back from the due date, because
+  /// the anchor is the date cycle maths is defined against — stepping back a
+  /// month at a time from the 31st loses the 31st for good. A counted plan
+  /// stops at its last instalment: rolling it on would draw a payment the user
+  /// does not owe.
+  static Iterable<LocalDate> _occurrences(
+    TrackedItem item, {
+    required int oldest,
+    required int newest,
+  }) sync* {
+    final cycle = item.cycle;
+    if (cycle == null) {
+      // A one-off happens on its own date and never again.
+      if (_monthKey(item.expiresOn) >= oldest &&
+          _monthKey(item.expiresOn) <= newest) {
+        yield item.expiresOn;
+      }
+      return;
+    }
+
+    final instalments = item.repeatCount;
+    for (var n = 0; instalments == null || n < instalments; n++) {
+      final on = Recurrence.occurrenceAfter(item.anchorDate, cycle, n);
+      final at = _monthKey(on);
+      if (at > newest) return;
+      if (at >= oldest) yield on;
+    }
   }
 
   static String _monthSubtitle(int counted, int trials) {

@@ -125,6 +125,11 @@ class ItemDetailScreen extends StatelessWidget {
           children: [
             ServiceTile(
               item.name,
+              // The mark the user picked, not the one the name suggests. Every
+              // other surface that draws an item passes this; leaving it off
+              // here made an icon changed in the editor look like it had not
+              // saved, because the screen the editor returns to is this one.
+              iconName: item.iconName,
               size: 48,
               radius: SubdockRadius.field,
               fontSize: 19,

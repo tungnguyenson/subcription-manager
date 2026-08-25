@@ -91,6 +91,24 @@ void main() {
       expect(find.text(r'Due in 2 days · 17/08 · $20.00'), findsOneWidget);
     });
 
+    // The editor returns here, so a mark this screen redetected from the name
+    // would read as an icon change that never saved.
+    testWidgets('draws the mark the user picked, not the detected one', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        ItemDetailScreen(
+          item: claude.copyWith(iconName: () => 'spotify'),
+          category: CategoryBook.shipped[claude.categoryId],
+          today: today,
+        ),
+      );
+
+      final tile = tester.widget<ServiceTile>(find.byType(ServiceTile).first);
+      expect(tile.iconName, 'spotify');
+    });
+
     // The app only knows what the user typed. This row is what stops a
     // remembered date from looking like a confirmed one.
     testWidgets('shows where the date came from', (tester) async {

@@ -338,7 +338,7 @@ void main() {
       );
 
       await show(tester, MoneyScreen(view: view(total)));
-      expect(find.text('PAID, LAST 6 MONTHS'), findsNothing);
+      expect(find.text('COST BY MONTH'), findsNothing);
 
       await show(
         tester,
@@ -357,7 +357,7 @@ void main() {
           ),
         ),
       );
-      expect(find.text('PAID, LAST 6 MONTHS'), findsOneWidget);
+      expect(find.text('COST BY MONTH'), findsOneWidget);
     });
   });
 
