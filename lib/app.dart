@@ -116,6 +116,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// so it survives the rebuild every data change causes.
   MoneySpan _span = MoneySpan.month;
 
+  /// Which month of the chart the Spending screen is showing, 1 to 12. Null
+  /// until the user taps a column, which is how the screen keeps following the
+  /// calendar for anyone who never touches it: a session left open past
+  /// midnight on the 31st opens on the new month rather than on the old one.
+  int? _monthShowing;
+
   /// What Upcoming is narrowed to. Held here for the same reason as [_span],
   /// and written to storage as well, so it also survives the app being killed.
   UpcomingFilter _filter = UpcomingFilter.none;
@@ -400,8 +406,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             categories: _categories,
             today: today,
             span: _span,
+            month: _monthShowing,
           ),
           onSpan: (span) => setState(() => _span = span),
+          onMonth: (month) => setState(() => _monthShowing = month),
           // The teaser only appears when there is something behind it. A card
           // saying "cut 0 ₫ a year" is worse than no card: it teaches the user
           // that the savings screen has nothing on it.

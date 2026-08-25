@@ -85,6 +85,11 @@ BRANDS = {
     "airtable":             ("thesvg:airtable", "18BFFF", None),
     "amazon-music":         ("simple-icons:amazonmusic", "FF9900", "amazonmusic"),
     "amazon-prime-video":   ("simple-icons:primevideo", "00A8E1", "primevideo"),
+    # The maker's own mark, for everything they sell that has no mark of its
+    # own: Apple Developer, Apple One, an App Store charge, Google Fi, a Cloud
+    # bill. It sits *after* every apple-* and google-* rule in
+    # service_mark.dart, so it only catches what nothing else named.
+    "apple":                ("thesvg:apple", "000000", "apple"),
     "apple-arcade":         ("thesvg:apple-arcade", "000000", None),
     "apple-news":           ("thesvg:apple-news", "FD415E", None),
     "asana":                ("thesvg:asana", "F06A6A", None),
@@ -118,6 +123,7 @@ BRANDS = {
     "garmin-connect-plus":  ("thesvg:garmin", "000000", None),
     "geforce-now":          ("thesvg:nvidia", "76B900", None),
     "github":               ("thesvg:github", "181717", None),
+    "google":               ("thesvg:google", "4285F4", "google"),
     "google-play-pass":     ("thesvg:google-play", "414141", None),
     "grab-unlimited":       ("thesvg:grab", "00B14F", None),
     "grammarly":            ("thesvg:grammarly", "027E6F", None),

@@ -201,33 +201,88 @@ void main() {
   // The chart is derived from the list, not from what has been marked paid.
   // Everything the app needs is already on the item: an amount, a cycle, and
   // an anchor the cycle counts from.
-  group('the six-month chart', () {
-    List<SpendBar> bars(List<TrackedItem> items) => MoneyPresenter.bars(
-      items: items,
-      categories: CategoryBook.shipped,
-      today: today,
-    );
+  // The chart is derived from the list, not from what has been marked paid.
+  // Everything the app needs is already on the item: an amount, a cycle, and
+  // an anchor the cycle counts from.
+  group('the year chart', () {
+    List<SpendBar> bars(List<TrackedItem> items, {int? month}) =>
+        MoneyPresenter.build(
+          categories: CategoryBook.shipped,
+          items: items,
+          today: today,
+          span: MoneySpan.month,
+          month: month,
+        ).bars;
 
-    test('runs six months back and ends on the month the user is in', () {
+    test('carries the calendar year, January first', () {
       final chart = bars([item('Netflix', expiresOn: '2026-03-05')]);
 
-      expect(chart.length, MoneyPresenter.barMonths);
-      expect(chart.map((b) => b.longLabel), [
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
+      expect(chart.length, 12);
+      expect(chart.map((b) => b.month), [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
       ]);
-      expect(chart.last.current, isTrue);
-      expect(chart.where((b) => b.current).length, 1);
+      expect(chart.map((b) => b.label), [
+        '1',
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        '10',
+        '11',
+        '12',
+      ]);
+      expect(chart[2].longLabel, 'March');
+    });
+
+    test('the month the user is in is marked wherever they are looking', () {
+      expect(bars([item('Netflix')]).where((b) => b.current).single.month, 8);
+      expect(
+        bars([item('Netflix')], month: 3).where((b) => b.current).single.month,
+        8,
+      );
+    });
+
+    test('the chart opens on the month the user is in', () {
+      expect(bars([item('Netflix')]).where((b) => b.selected).single.month, 8);
+    });
+
+    test('tapping a column moves the selection there and nowhere else', () {
+      final chart = bars([item('Netflix')], month: 3);
+
+      expect(chart.where((b) => b.selected).single.month, 3);
+    });
+
+    test('months that have not arrived are marked as such', () {
+      final chart = bars([item('Netflix')]);
+
+      expect(chart.where((b) => b.ahead).map((b) => b.month), [9, 10, 11, 12]);
     });
 
     test('a monthly item lands on every month from its anchor onward', () {
       final chart = bars([item('Netflix', expiresOn: '2026-03-05')]);
 
       expect(chart.map((b) => b.minor), [
+        0,
+        0,
+        260000,
+        260000,
+        260000,
+        260000,
         260000,
         260000,
         260000,
@@ -242,7 +297,8 @@ void main() {
     test('months before the anchor stay empty', () {
       final chart = bars([item('Netflix', expiresOn: '2026-06-05')]);
 
-      expect(chart.map((b) => b.minor), [0, 0, 0, 260000, 260000, 260000]);
+      expect(chart.take(5).map((b) => b.minor), [0, 0, 0, 0, 0]);
+      expect(chart[5].minor, 260000);
     });
 
     test('a yearly charge lands on one month only', () {
@@ -256,7 +312,8 @@ void main() {
         ),
       ]);
 
-      expect(chart.map((b) => b.minor), [0, 0, 300000, 0, 0, 0]);
+      expect(chart.where((b) => b.minor > 0).single.month, 5);
+      expect(chart[4].minor, 300000);
     });
 
     test('a one-off lands on the month it falls in', () {
@@ -270,20 +327,7 @@ void main() {
         ),
       ]);
 
-      expect(chart.map((b) => b.minor), [0, 0, 0, 0, 200000, 0]);
-    });
-
-    // Crossing the year boundary is the case a naive `month - 5` gets wrong.
-    test('counts back across the turn of the year', () {
-      final chart = MoneyPresenter.bars(
-        items: [item('Netflix', expiresOn: '2025-11-04')],
-        categories: CategoryBook.shipped,
-        today: d('2026-02-10'),
-      );
-
-      expect(chart.first.longLabel, 'September');
-      expect(chart.last.longLabel, 'February');
-      expect(chart.map((b) => b.minor), [0, 0, 260000, 260000, 260000, 260000]);
+      expect(chart.where((b) => b.minor > 0).single.month, 7);
     });
 
     // Adding 2000 US cents to a dong figure would draw a column an order of
@@ -303,21 +347,22 @@ void main() {
         rate: Fx.bundledUsdVnd,
         today: today,
       ).approximateBase!;
-      expect(chart.last.minor, converted.minor);
+      expect(chart[7].minor, converted.minor);
     });
 
     // A trial is free until it converts, and the total above the chart says so
     // in as many words.
     test('a trial is not counted', () {
-      final chart = bars([
-        item(
-          'Claude Pro',
-          expiresOn: '2026-08-26',
-          trialStart: d('2026-08-12'),
-        ),
-      ]);
-
-      expect(chart, isEmpty);
+      expect(
+        bars([
+          item(
+            'Claude Pro',
+            expiresOn: '2026-08-26',
+            trialStart: d('2026-08-12'),
+          ),
+        ]),
+        isEmpty,
+      );
     });
 
     test('an item with no amount on it is left out rather than guessed at', () {
@@ -325,11 +370,12 @@ void main() {
     });
 
     test('an archived item is gone from the chart as well', () {
-      final chart = bars([
-        item('Netflix', expiresOn: '2026-03-05', state: ItemState.archived),
-      ]);
-
-      expect(chart, isEmpty);
+      expect(
+        bars([
+          item('Netflix', expiresOn: '2026-03-05', state: ItemState.archived),
+        ]),
+        isEmpty,
+      );
     });
 
     // The switch stops reminders, not the vendor.
@@ -338,7 +384,7 @@ void main() {
         item('Netflix', expiresOn: '2026-03-05', paused: true),
       ]);
 
-      expect(chart.last.minor, 260000);
+      expect(chart[7].minor, 260000);
     });
 
     // Rolling a counted plan past its last payment would draw an instalment
@@ -358,24 +404,97 @@ void main() {
         ),
       ]);
 
-      expect(chart.map((b) => b.minor), [500000, 500000, 500000, 0, 0, 0]);
+      expect(chart.where((b) => b.minor > 0).map((b) => b.month), [3, 4, 5]);
     });
 
-    // Six zeroed columns claim "you spent nothing"; no chart says "nothing
-    // here yet", which is the truth about a list with nothing in the window.
-    test(
-      'nothing in the window draws no chart rather than six empty columns',
-      () {
-        expect(bars(const []), isEmpty);
-        expect(bars([item('Netflix', expiresOn: '2026-11-05')]), isEmpty);
-      },
-    );
+    // Anything anchored in a later year has not started; anything that ended
+    // in an earlier one is over. Neither belongs on this year's chart.
+    test('an item outside the year draws no chart at all', () {
+      expect(bars(const []), isEmpty);
+      expect(bars([item('Netflix', expiresOn: '2027-02-05')]), isEmpty);
+    });
 
     test('the chart is on the month view and not on the year one', () {
       final items = [item('Netflix', expiresOn: '2026-03-05')];
 
       expect(view(items, MoneySpan.month).bars, isNotEmpty);
       expect(view(items, MoneySpan.year).bars, isEmpty);
+    });
+  });
+
+  group('a month other than this one', () {
+    MoneyView at(int month, List<TrackedItem> items) => MoneyPresenter.build(
+      categories: CategoryBook.shipped,
+      items: items,
+      today: today,
+      span: MoneySpan.month,
+      month: month,
+    );
+
+    test('the card names the month it is showing', () {
+      final items = [item('Netflix', expiresOn: '2026-03-05')];
+
+      expect(at(8, items).label, 'This month');
+      expect(at(3, items).label, 'March');
+      expect(at(3, items).showingMonth, 3);
+    });
+
+    test('the total and the list follow the month', () {
+      final items = [
+        item('Netflix', expiresOn: '2026-03-05'),
+        item(
+          'Domain',
+          expiresOn: '2026-05-09',
+          cycle: Cycle.yearly,
+          amountMinor: 300000,
+          categoryId: 'UTILITIES',
+        ),
+      ];
+
+      expect(at(5, items).items.map((i) => i.name), ['Domain', 'Netflix']);
+      expect(at(5, items).total.approximateBase!.minor, 560000);
+      expect(at(4, items).items.map((i) => i.name), ['Netflix']);
+    });
+
+    // A month that has not happened is the cycles read forward, and the card
+    // says so rather than sitting there looking like a receipt.
+    test('a month still ahead says its figure is worked out', () {
+      expect(at(11, [item('Netflix')]).subtitle, contains('not due yet'));
+      expect(at(8, [item('Netflix')]).subtitle, isNot(contains('not due yet')));
+    });
+
+    // A trial converts on one date, and that date is ahead of the user, not
+    // back in March.
+    test('trials are only named on the month the user is in', () {
+      final items = [
+        item('Netflix'),
+        item(
+          'Claude Pro',
+          expiresOn: '2026-08-26',
+          trialStart: d('2026-08-12'),
+        ),
+      ];
+
+      expect(at(8, items).subtitle, contains('1 trial not counted yet'));
+      expect(at(3, items).subtitle, isNot(contains('trial')));
+    });
+
+    // Twice in one month is one subscription billed twice, not two
+    // subscriptions.
+    test('a charge landing more than once in a month says how many', () {
+      final weekly = at(8, [
+        item(
+          'Gym',
+          expiresOn: '2026-08-03',
+          cycle: Cycle.weekly,
+          amountMinor: 50000,
+          categoryId: 'FITNESS',
+        ),
+      ]);
+
+      expect(weekly.items.single.name, 'Gym ×5');
+      expect(weekly.items.single.total.minor, 250000);
+      expect(weekly.total.approximateBase!.minor, 250000);
     });
   });
 }

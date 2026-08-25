@@ -303,6 +303,11 @@ void main() {
 
     await tapText('Spending');
     await shot('money');
+    // A month other than the one the user is in. The whole card follows the
+    // column, so this is the shot that shows whether it really does.
+    await tapText('9');
+    await shot('money-picked');
+    await tapText('8');
     // The year view too. It is the densest card in the app -- a headline, a
     // per-currency sum and a per-kind sum, all of the same money -- and it is
     // where an unlabelled figure reads as a number the app made up.

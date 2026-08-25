@@ -34,7 +34,12 @@ class YearBand {
 /// never confirmed.
 @immutable
 class SpendBar {
-  /// `A` — the month's initial, which is all the width allows.
+  /// 1 to 12. What a tap on this column selects.
+  final int month;
+
+  /// `3` — the month's number. Numerals rather than initials because three of
+  /// the twelve initials are `J` and two more are `M`, and a row of twelve
+  /// columns is exactly where that stops being readable.
   final String label;
 
   /// The month in full, for the screen reader, since one letter is not a
@@ -44,14 +49,26 @@ class SpendBar {
   /// Base-currency minor units paid in that month.
   final int minor;
 
-  /// The month the user is in. Drawn in the accent; the rest are the soft one.
+  /// The month the user is in. Marked whether or not it is the one being
+  /// shown, so the chart never loses the reader's place in the year.
   final bool current;
 
+  /// The column the card is showing. Exactly one of the twelve.
+  final bool selected;
+
+  /// A month that has not arrived. Its figure is the cycles read forward,
+  /// which is a different kind of number from the months behind it, and the
+  /// chart draws it back so the two do not read as one row of facts.
+  final bool ahead;
+
   const SpendBar({
+    required this.month,
     required this.label,
     required this.longLabel,
     required this.minor,
     this.current = false,
+    this.selected = false,
+    this.ahead = false,
   });
 }
 
@@ -77,7 +94,11 @@ class TrialSpend {
 class MoneyView {
   final MoneySpan span;
 
-  /// `THIS MONTH` / `NEXT 12 MONTHS`.
+  /// Which month of the current year the card is showing, 1 to 12, or null on
+  /// the year view. The chart column that matches it is the selected one.
+  final int? showingMonth;
+
+  /// `THIS MONTH` / `MARCH` / `NEXT 12 MONTHS`.
   final String label;
 
   final MixedTotal total;
@@ -122,6 +143,7 @@ class MoneyView {
 
   const MoneyView({
     required this.span,
+    this.showingMonth,
     required this.label,
     required this.total,
     required this.subtitle,
@@ -134,14 +156,23 @@ class MoneyView {
 }
 
 abstract final class MoneyPresenter {
-  /// How many columns the chart carries, including the current month.
-  static const int barMonths = 6;
+  /// How many columns the chart carries: the calendar year, January to
+  /// December.
+  ///
+  /// A calendar year rather than a rolling window because that is how a person
+  /// talks about the months of their own spending — "back in March" means a
+  /// square on a grid they already hold, not "five columns to the left".
+  static const int barMonths = 12;
 
   static MoneyView build({
     required List<TrackedItem> items,
     required CategoryBook categories,
     required LocalDate today,
     required MoneySpan span,
+
+    /// Which month of [today]'s year the card is showing, 1 to 12. Null is the
+    /// month the user is in, which is where the screen opens.
+    int? month,
   }) {
     // Archived is gone; paused is not. A service switched off is still being
     // charged — the switch stops reminders, not the vendor — so leaving it out
@@ -160,47 +191,69 @@ abstract final class MoneyPresenter {
           ),
     ];
 
-    return span == MoneySpan.month
-        ? _month(
-            live,
-            categories,
-            today,
-            trials,
-            bars(items: live, categories: categories, today: today),
-          )
-        : _year(live, categories, today, trials);
+    if (span == MoneySpan.year) return _year(live, categories, today, trials);
+
+    // One pass over the items for the whole year, so the column the user taps
+    // and the figures they land on are literally the same arithmetic. Two
+    // passes would be two chances to disagree.
+    final charges = _chargesByMonth(live, categories, today.year);
+
+    return _month(
+      categories: categories,
+      today: today,
+      showing: (month ?? today.month).clamp(1, 12),
+      charges: charges,
+      trials: trials,
+    );
   }
 
-  // ---- this month ----
+  // ---- one month of the year ----
 
-  static MoneyView _month(
-    List<TrackedItem> live,
-    CategoryBook categories,
-    LocalDate today,
-    List<TrialSpend> trials,
-    List<SpendBar> bars,
-  ) {
-    final counted = [
-      for (final item in live)
-        if (item.countsTowardSpend(categories[item.categoryId]) &&
-            item.expiresOn.month == today.month &&
-            item.expiresOn.year == today.year)
-          item,
-    ];
+  static MoneyView _month({
+    required CategoryBook categories,
+    required LocalDate today,
+    required int showing,
+    required Map<int, List<TrackedItem>> charges,
+    required List<TrialSpend> trials,
+  }) {
+    final isThisMonth = showing == today.month;
+
+    // Repeated once per occurrence, so a weekly charge counts four times in a
+    // four-week month rather than once.
+    final counted = charges[showing] ?? const <TrackedItem>[];
+
+    // Grouped back up for the list, because two rows with one name on them
+    // read as two subscriptions rather than as one billed twice.
+    final occurrences = <String, int>{};
+    final byId = <String, TrackedItem>{};
+    for (final item in counted) {
+      occurrences[item.id] = (occurrences[item.id] ?? 0) + 1;
+      byId[item.id] = item;
+    }
 
     final rows = [
-      for (final item in counted)
-        ItemSpend(
-          name: item.name,
-          total: Fx.total(
-            [item.money!],
-            rate: Fx.bundledUsdVnd,
-            today: today,
-          ).approximateBase!,
-          // The exact foreign figure is kept beside the converted one, because
-          // it is the part that is actually true.
-          foreign: item.currency == Fx.bundledUsdVnd.to ? null : item.money,
-        ),
+      for (final entry in occurrences.entries)
+        () {
+          final item = byId[entry.key]!;
+          final times = entry.value;
+          final money = item.money!;
+          return ItemSpend(
+            // A charge that lands more than once in the month says so.
+            // Netflix at four times the price with no explanation reads as
+            // a mistake in the app.
+            name: times == 1 ? item.name : '${item.name} ×$times',
+            total: Fx.total(
+              [Money(money.minor * times, money.currency)],
+              rate: Fx.bundledUsdVnd,
+              today: today,
+            ).approximateBase!,
+            // The exact foreign figure is kept beside the converted one,
+            // because it is the part that is actually true.
+            foreign: money.currency == Fx.bundledUsdVnd.to
+                ? null
+                : Money(money.minor * times, money.currency),
+          );
+        }(),
     ]..sort((a, b) => b.total.minor.compareTo(a.total.minor));
 
     final total = Fx.total(
@@ -211,78 +264,81 @@ abstract final class MoneyPresenter {
 
     return MoneyView(
       span: MoneySpan.month,
-      label: 'This month',
+      showingMonth: showing,
+      label: isThisMonth ? 'This month' : DateCopy.month(showing),
       total: total,
-      subtitle: _monthSubtitle(counted.length, trials.length),
+      subtitle: _monthSubtitle(
+        counted: occurrences.length,
+        trials: isThisMonth ? trials.length : 0,
+        ahead: showing > today.month,
+      ),
       alternateTotal: MoneyPresenter.alternateTotal(total),
       items: rows,
-      bars: bars,
+      bars: _bars(charges: charges, today: today, showing: showing),
       trials: trials,
     );
   }
 
-  /// The last [barMonths] calendar months of what the list says each month
-  /// costs, oldest first.
+  /// The twelve columns of [today]'s calendar year, January first.
   ///
   /// Worked out from the items themselves rather than from what has been
   /// marked paid. An amount, a cycle and an anchor are everything a month's
   /// figure needs, and a chart that waited on the user to mark payments would
   /// sit blank over a list that is perfectly well filled in.
-  ///
-  /// Counting starts at the anchor and never runs behind it. The anchor is the
-  /// earliest date the app has any evidence for; carrying a monthly charge
-  /// back through months the user never mentioned would draw a subscription
-  /// history out of nothing.
-  ///
-  /// The same test as the total above the chart decides what counts, so the
-  /// current month's column and the headline figure can never disagree.
-  static List<SpendBar> bars({
-    required List<TrackedItem> items,
-    required CategoryBook categories,
+  static List<SpendBar> _bars({
+    required Map<int, List<TrackedItem>> charges,
     required LocalDate today,
+    required int showing,
   }) {
-    final newest = _monthKey(today);
-    final oldest = newest - (barMonths - 1);
-
-    // Kept as amounts rather than summed on the way in, because two currencies
-    // in one month have to go through the same conversion the totals do.
-    final amounts = <int, List<Money>>{};
-    for (final item in items) {
-      if (item.state == ItemState.archived) continue;
-      if (!item.countsTowardSpend(categories[item.categoryId])) continue;
-
-      for (final on in _occurrences(item, oldest: oldest, newest: newest)) {
-        (amounts[_monthKey(on)] ??= []).add(item.money!);
-      }
-    }
-
-    if (amounts.isEmpty) return const [];
+    if (charges.isEmpty) return const [];
 
     return [
-      for (var at = oldest; at <= newest; at++)
+      for (var month = 1; month <= barMonths; month++)
         SpendBar(
-          label: DateCopy.month(at % 12 + 1).substring(0, 1),
-          longLabel: DateCopy.month(at % 12 + 1),
-          minor: switch (amounts[at]) {
+          month: month,
+          label: '$month',
+          longLabel: DateCopy.month(month),
+          minor: switch (charges[month]) {
             null => 0,
-            final month =>
+            final items =>
               Fx.total(
-                    month,
+                    [for (final item in items) item.money!],
                     rate: Fx.bundledUsdVnd,
                     today: today,
                   ).approximateBase?.minor ??
                   0,
           },
-          current: at == newest,
+          current: month == today.month,
+          selected: month == showing,
+          ahead: month > today.month,
         ),
     ];
   }
 
-  /// Keyed `year * 12 + month` so December to January is one step like any
-  /// other, and so the arithmetic around it never has to touch day lengths.
-  static int _monthKey(LocalDate date) => date.year * 12 + (date.month - 1);
+  /// Which counted items are charged in each month of [year], one entry per
+  /// occurrence.
+  ///
+  /// Counting starts at the anchor and never runs behind it. The anchor is the
+  /// earliest date the app has any evidence for; carrying a monthly charge
+  /// back through months the user never mentioned would draw a subscription
+  /// history out of nothing.
+  static Map<int, List<TrackedItem>> _chargesByMonth(
+    List<TrackedItem> live,
+    CategoryBook categories,
+    int year,
+  ) {
+    final charges = <int, List<TrackedItem>>{};
+    for (final item in live) {
+      if (!item.countsTowardSpend(categories[item.categoryId])) continue;
 
-  /// Every occurrence of [item] falling inside the window, oldest first.
+      for (final on in _occurrences(item, year: year)) {
+        (charges[on.month] ??= []).add(item);
+      }
+    }
+    return charges;
+  }
+
+  /// Every occurrence of [item] that falls inside [year], oldest first.
   ///
   /// Walks forward from the anchor rather than back from the due date, because
   /// the anchor is the date cycle maths is defined against — stepping back a
@@ -291,30 +347,34 @@ abstract final class MoneyPresenter {
   /// does not owe.
   static Iterable<LocalDate> _occurrences(
     TrackedItem item, {
-    required int oldest,
-    required int newest,
+    required int year,
   }) sync* {
     final cycle = item.cycle;
     if (cycle == null) {
       // A one-off happens on its own date and never again.
-      if (_monthKey(item.expiresOn) >= oldest &&
-          _monthKey(item.expiresOn) <= newest) {
-        yield item.expiresOn;
-      }
+      if (item.expiresOn.year == year) yield item.expiresOn;
       return;
     }
 
     final instalments = item.repeatCount;
     for (var n = 0; instalments == null || n < instalments; n++) {
       final on = Recurrence.occurrenceAfter(item.anchorDate, cycle, n);
-      final at = _monthKey(on);
-      if (at > newest) return;
-      if (at >= oldest) yield on;
+      if (on.year > year) return;
+      if (on.year == year) yield on;
     }
   }
 
-  static String _monthSubtitle(int counted, int trials) {
+  static String _monthSubtitle({
+    required int counted,
+    required int trials,
+    required bool ahead,
+  }) {
     final head = '$counted ${counted == 1 ? "item" : "items"} counted';
+    if (ahead) {
+      // A month that has not happened yet is the cycles read forward, and it
+      // says so rather than sitting there looking like a receipt.
+      return '$head · not due yet, worked out from the cycles';
+    }
     return trials == 0
         ? head
         : '$head · ${trials == 1 ? "1 trial" : "$trials trials"} '

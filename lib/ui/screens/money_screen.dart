@@ -50,6 +50,10 @@ class MoneyScreen extends StatelessWidget {
   /// survives a rebuild from new data.
   final ValueChanged<MoneySpan>? onSpan;
 
+  /// Which month of the chart was tapped, 1 to 12. Held by the caller for the
+  /// same reason as [onSpan].
+  final ValueChanged<int>? onMonth;
+
   final SavingsTeaser? savings;
   final VoidCallback? onOpenSavings;
   final VoidCallback? onOpenHistory;
@@ -58,6 +62,7 @@ class MoneyScreen extends StatelessWidget {
     super.key,
     required this.view,
     this.onSpan,
+    this.onMonth,
     this.savings,
     this.onOpenSavings,
     this.onOpenHistory,
@@ -74,7 +79,7 @@ class MoneyScreen extends StatelessWidget {
         // not being spent. The hand-off screenshots settle it this way.
         const Text('Money', style: SubdockText.screenTitle),
         const SizedBox(height: 18),
-        _TotalCard(view: view, onSpan: onSpan),
+        _TotalCard(view: view, onSpan: onSpan, onMonth: onMonth),
         if (savings != null) ...[
           const SizedBox(height: 12),
           _SavingsLink(teaser: savings!, onTap: onOpenSavings),
@@ -248,8 +253,9 @@ class _CardRow extends StatelessWidget {
 class _TotalCard extends StatelessWidget {
   final MoneyView view;
   final ValueChanged<MoneySpan>? onSpan;
+  final ValueChanged<int>? onMonth;
 
-  const _TotalCard({required this.view, this.onSpan});
+  const _TotalCard({required this.view, this.onSpan, this.onMonth});
 
   @override
   Widget build(BuildContext context) {
@@ -313,7 +319,7 @@ class _TotalCard extends StatelessWidget {
         Text(view.subtitle, style: SubdockText.footnote),
         if (view.bars.isNotEmpty) ...[
           const SizedBox(height: 18),
-          _BarChart(bars: view.bars),
+          _BarChart(bars: view.bars, onMonth: onMonth),
         ],
         // A *second* breakdown of the same total, which is why it says so. Three
         // figures under a total, with nothing between them but a hairline, read
@@ -363,22 +369,27 @@ class _TotalCard extends StatelessWidget {
   }
 }
 
-/// Six months of what the list says each month costs.
+/// The twelve months of the year, and the one the card is showing.
 ///
 /// Worked out from the items — amount, cycle, anchor — rather than from what
 /// has been marked paid, so the chart stands up on a list nobody has confirmed
-/// a payment on yet. The last column is the month the user is in, and it is
-/// the same figure as the total above it, arrived at the same way.
+/// a payment on yet. Tapping a column moves the whole card to that month.
 ///
-/// Deliberately unlabelled with figures. The bars answer one question — is
-/// this month unusual — and a column of nine-digit dong amounts at this width
-/// would answer it worse than the shapes do. The exact figures for the current
-/// month are in the list below.
+/// Deliberately unlabelled with figures. The bars answer one question — which
+/// months are unusual — and twelve columns of nine-digit dong amounts at this
+/// width would answer it worse than the shapes do. The exact figures for the
+/// month being shown are in the list below.
 ///
-/// Heights are relative to the tallest of the six, not to any absolute scale,
-/// which is why nothing here is presented as a value to read off an axis.
-class _BarChart extends StatelessWidget {
+/// Heights are relative to the tallest of the twelve, not to any absolute
+/// scale, which is why nothing here is presented as a value to read off an
+/// axis.
+///
+/// Scrolls sideways rather than squeezing: twelve columns inside a phone's
+/// card width leaves each one narrower than the gap beside it, and a chart
+/// whose bars are thinner than its whitespace has stopped being a chart.
+class _BarChart extends StatefulWidget {
   final List<SpendBar> bars;
+  final ValueChanged<int>? onMonth;
 
   /// The tallest column. Short enough that the card stays the shape the design
   /// draws it, tall enough that a half-height month is visibly half.
@@ -389,10 +400,66 @@ class _BarChart extends StatelessWidget {
   /// it would then sit beside nothing.
   static const double emptyHeight = 6;
 
-  const _BarChart({required this.bars});
+  static const double barWidth = 26;
+  static const double gap = 8;
+
+  const _BarChart({required this.bars, this.onMonth});
+
+  @override
+  State<_BarChart> createState() => _BarChartState();
+}
+
+class _BarChartState extends State<_BarChart> {
+  final ScrollController _controller = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _revealSelected();
+  }
+
+  @override
+  void didUpdateWidget(_BarChart old) {
+    super.didUpdateWidget(old);
+    if (_selectedIndex(old.bars) != _selectedIndex(widget.bars)) {
+      _revealSelected();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  int _selectedIndex(List<SpendBar> bars) =>
+      bars.indexWhere((bar) => bar.selected);
+
+  /// Puts the selected column in the middle of the viewport.
+  ///
+  /// Runs after layout because the offset depends on how wide the card turned
+  /// out to be, and jumps rather than animates: this fires when the screen is
+  /// first built, and a chart that scrolls itself on arrival reads as a chart
+  /// that has not finished loading.
+  void _revealSelected() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_controller.hasClients) return;
+
+      final index = _selectedIndex(widget.bars);
+      if (index < 0) return;
+
+      final viewport = _controller.position.viewportDimension;
+      final step = _BarChart.barWidth + _BarChart.gap;
+      final target = index * step - (viewport - _BarChart.barWidth) / 2;
+      _controller.jumpTo(
+        target.clamp(0.0, _controller.position.maxScrollExtent),
+      );
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final bars = widget.bars;
     final peak = bars.fold<int>(
       0,
       (best, bar) => bar.minor > best ? bar.minor : best,
@@ -403,50 +470,111 @@ class _BarChart extends StatelessWidget {
       children: [
         Text('COST BY MONTH', style: SubdockText.sectionLabel),
         const SizedBox(height: 12),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            for (final bar in bars)
-              Expanded(
-                child: Semantics(
-                  label: bar.minor == 0
-                      ? '${bar.longLabel}: nothing due'
-                      : '${bar.longLabel}: ${MoneyFormat.grouped(bar.minor)} dong',
-                  excludeSemantics: true,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: peak == 0
-                              ? emptyHeight
-                              : emptyHeight +
-                                    (maxHeight - emptyHeight) *
-                                        (bar.minor / peak),
-                          decoration: BoxDecoration(
-                            color: bar.current
-                                ? SubdockColors.accent
-                                : SubdockColors.accentSoft,
-                            borderRadius: const BorderRadius.vertical(
-                              top: Radius.circular(5),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          bar.label,
-                          style: SubdockText.caption.copyWith(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                  ),
+        SingleChildScrollView(
+          controller: _controller,
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              for (var i = 0; i < bars.length; i++) ...[
+                if (i > 0) const SizedBox(width: _BarChart.gap),
+                _Column(
+                  bar: bars[i],
+                  peak: peak,
+                  onTap: widget.onMonth == null
+                      ? null
+                      : () => widget.onMonth!(bars[i].month),
                 ),
-              ),
-          ],
+              ],
+            ],
+          ),
         ),
       ],
     );
   }
+}
+
+/// One month: the bar, and the numeral under it.
+class _Column extends StatelessWidget {
+  final SpendBar bar;
+  final int peak;
+  final VoidCallback? onTap;
+
+  const _Column({required this.bar, required this.peak, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final height = peak == 0
+        ? _BarChart.emptyHeight
+        : _BarChart.emptyHeight +
+              (_BarChart.maxHeight - _BarChart.emptyHeight) *
+                  (bar.minor / peak);
+
+    return Semantics(
+      button: onTap != null,
+      selected: bar.selected,
+      label: [
+        bar.longLabel,
+        if (bar.minor == 0)
+          'nothing due'
+        else
+          '${MoneyFormat.grouped(bar.minor)} dong',
+        if (bar.ahead) 'not due yet',
+      ].join(': '),
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        // The whole column height answers the tap, not just the few pixels a
+        // near-empty month draws.
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          width: _BarChart.barWidth,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                height: height,
+                decoration: BoxDecoration(
+                  color: switch (bar) {
+                    SpendBar(selected: true) => SubdockColors.accent,
+                    // A month still ahead is a figure read forward off the
+                    // cycles, and it is drawn back from the months that have
+                    // already happened.
+                    SpendBar(ahead: true) => _aheadFill,
+                    _ => SubdockColors.accentSoft,
+                  },
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              // The month the user is in keeps its numeral marked even while
+              // they are reading another month, so nobody loses their place in
+              // the year.
+              Text(
+                bar.label,
+                style: SubdockText.caption.copyWith(
+                  fontSize: 12,
+                  fontWeight: bar.current
+                      ? SubdockWeight.semibold
+                      : SubdockWeight.regular,
+                  color: bar.current
+                      ? SubdockColors.accent
+                      : SubdockText.caption.color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// [SubdockColors.accentSoft] at half strength. Local to the chart because
+  /// it means one thing — a month that has not happened — and a token would
+  /// invite it onto surfaces where it means nothing.
+  static const Color _aheadFill = Color(0x1C466FBD);
 }
 
 /// The way through to Savings.

@@ -87,4 +87,55 @@ void main() {
   test('an unknown key resolves to nothing rather than crashing', () {
     expect(SubdockMarks.forKey('not_a_mark'), isNull);
   });
+
+  // The maker's own mark exists for everything Apple and Google sell that has
+  // no mark of its own, and it must not have eaten the products that do.
+  group('the maker marks', () {
+    test('a named product still wins over its maker', () {
+      expect(SubdockMarks.detectKey('Apple Music'), 'apple-music');
+      expect(SubdockMarks.detectKey('Apple TV+'), 'apple-tv');
+      expect(SubdockMarks.detectKey('Apple Arcade'), 'apple-arcade');
+      expect(SubdockMarks.detectKey('Google One'), 'google-drive');
+      expect(SubdockMarks.detectKey('Google Drive'), 'google-drive');
+      expect(SubdockMarks.detectKey('Google Play Pass'), 'google-play-pass');
+    });
+
+    test('what no product rule names falls to the maker', () {
+      expect(SubdockMarks.detectKey('Apple Developer'), 'apple');
+      expect(SubdockMarks.detectKey('Apple One'), 'apple');
+      expect(SubdockMarks.detectKey('Google Fi'), 'google');
+      expect(SubdockMarks.detectKey('Google Cloud'), 'google');
+    });
+  });
+
+  group('gallery search', () {
+    test('an empty query keeps everything', () {
+      for (final key in SubdockMarks.pickable) {
+        expect(SubdockMarks.matches(key, '   '), isTrue, reason: key);
+      }
+    });
+
+    test('a key is found by its own name, hyphen or camel hump', () {
+      expect(SubdockMarks.matches('apple-tv', 'apple tv'), isTrue);
+      expect(SubdockMarks.matches('identityCard', 'identity card'), isTrue);
+      expect(SubdockMarks.matches('netflix', 'FLIX'), isTrue);
+    });
+
+    // The aliases are already written down for the detector, so a search that
+    // ignored them would know less about the icons than typing the same word
+    // into the name field does.
+    test('a key is found by any name the detector knows it under', () {
+      expect(SubdockMarks.matches('hbo', 'max'), isTrue);
+      expect(SubdockMarks.matches('streaming', 'disney'), isTrue);
+      expect(SubdockMarks.matches('apple-music', 'itunes'), isTrue);
+      expect(SubdockMarks.matches('sim', 'viettel'), isTrue);
+    });
+
+    test('a query nothing answers to matches nothing at all', () {
+      expect(
+        SubdockMarks.pickable.where((k) => SubdockMarks.matches(k, 'zzzz')),
+        isEmpty,
+      );
+    });
+  });
 }

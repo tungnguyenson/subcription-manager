@@ -327,8 +327,8 @@ void main() {
     });
 
     // Six zeroed columns claim "you spent nothing"; no chart at all says "no
-    // record yet", which is the truth about a database with no history in it.
-    testWidgets('the chart is absent until something has been paid', (
+    // record yet", which is the truth about a list with nothing in the year.
+    testWidgets('the chart is absent when the year holds nothing', (
       tester,
     ) async {
       final total = Fx.total(
@@ -346,18 +346,54 @@ void main() {
           view: view(
             total,
             bars: const [
-              SpendBar(label: 'J', longLabel: 'July', minor: 100000),
+              SpendBar(month: 7, label: '7', longLabel: 'July', minor: 100000),
               SpendBar(
-                label: 'A',
+                month: 8,
+                label: '8',
                 longLabel: 'August',
                 minor: 260000,
                 current: true,
+                selected: true,
               ),
             ],
           ),
         ),
       );
       expect(find.text('COST BY MONTH'), findsOneWidget);
+    });
+
+    // The whole point of twelve columns: the card follows the one you tap.
+    testWidgets('tapping a column asks for that month', (tester) async {
+      final total = Fx.total(
+        [Money.vnd(260000)],
+        rate: Fx.bundledUsdVnd,
+        today: today,
+      );
+
+      int? asked;
+      await show(
+        tester,
+        MoneyScreen(
+          view: view(
+            total,
+            bars: const [
+              SpendBar(month: 7, label: '7', longLabel: 'July', minor: 100000),
+              SpendBar(
+                month: 8,
+                label: '8',
+                longLabel: 'August',
+                minor: 260000,
+                current: true,
+                selected: true,
+              ),
+            ],
+          ),
+          onMonth: (month) => asked = month,
+        ),
+      );
+
+      await tester.tap(find.text('7'));
+      expect(asked, 7);
     });
   });
 

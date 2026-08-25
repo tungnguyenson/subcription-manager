@@ -40,7 +40,7 @@ có bộ nào yêu cầu chia sẻ tương tự (copyleft), không bộ nào c�
 
 | Bộ | Giấy phép | Dùng cho |
 |---|---|---|
-| [theSVG](https://thesvg.org) | MIT | 22 hình: Netflix, YouTube, Spotify, HBO, Apple TV, Apple Music, PlayStation, Steam, Claude, ChatGPT, Gemini, GitHub Copilot, Cursor, Perplexity, Figma, Notion, JetBrains, 1Password, Vercel, iCloud, Google Drive, Dropbox, Backblaze |
+| [theSVG](https://thesvg.org) | MIT | 106 hình, phần lớn bộ: Netflix, YouTube, Spotify, HBO, Apple, Apple TV, Apple Music, Google, Google Drive, PlayStation, Steam, Claude, ChatGPT, Gemini, GitHub Copilot, Cursor, Perplexity, Figma, Notion, JetBrains, 1Password, Vercel, iCloud, Dropbox, Backblaze... Danh sách đầy đủ là bảng `BRANDS` trong `tool/gen_service_marks.py`, mỗi dòng ghi thẳng bộ nguồn |
 | [CoreUI Brands](https://github.com/coreui/coreui-icons) | CC0 1.0 | 4 hình: Xbox, Nintendo Switch, Adobe Creative Cloud, Microsoft |
 | [SVG Logos](https://github.com/gilbarbara/logos) của Gil Barbara | CC0 | 1 hình: Midjourney |
 | [Material Design Icons](https://pictogrammers.com/library/mdi/) | Apache 2.0 | 1 hình: OneDrive |
@@ -79,12 +79,18 @@ trong `test/golden/service_marks_golden_test.dart` giữ cả hai điều đó.
 
 | Mức | Số luật | Là những gì |
 |---|---|---|
-| 1. Dấu hiệu riêng của hãng | 138 | 129 hình trong `brandMarks`, vài hình dùng cho nhiều tên (`copilot`, `game pass`) |
-| 2. Hình hạng mục tô màu hãng | 64 | Hãng không phát hành vector: Disney+, VieON, 6 nhà mạng, iQIYI, TV360, Viu, WeTV, Waka... |
+| 1. Dấu hiệu riêng của hãng | 141 | 131 hình trong `brandMarks`, vài hình dùng cho nhiều tên (`copilot`, `game pass`) |
+| 2. Hình hạng mục tô màu hãng | 65 | Hãng không phát hành vector: Disney+, VieON, 6 nhà mạng, iQIYI, TV360, Viu, WeTV, Waka... |
 | 3. Hình hạng mục tô mực xám | 71 | Điện, nước, giấy tờ, bảo hiểm, và các mục chung không có thương hiệu |
 
 Google One dùng dấu hiệu Google Drive, vì Google One chính là dung lượng Drive và Google
 không phát hành dấu hiệu riêng cho nó.
+
+Hai dấu hiệu `apple` và `google` là của chính hãng làm ra, không của một sản phẩm cụ thể.
+Chúng đứng **cuối cùng** trong `_rules`, sau tất cả luật `apple ...` và `google ...`, nên
+chỉ bắt những cái tên mà không luật nào khác nhận: Apple Developer, Apple One, một khoản
+trừ tiền qua App Store, Google Fi, một hoá đơn Google Cloud. Viết luật `apple` cao hơn một
+dòng là nó nuốt luôn `apple music` trước khi luật đó kịp chạy.
 
 ### Hai luật hạ mức, đều đo được chứ không cảm tính
 

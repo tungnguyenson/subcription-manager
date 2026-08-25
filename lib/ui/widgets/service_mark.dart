@@ -444,6 +444,16 @@ abstract final class SubdockMarks {
     ('viu', GlyphSpec(CategoryGlyph.streaming, brandColour: 0xFFFFBF00)),
     ('max', BrandSpec('hbo')),
     ('v0', BrandSpec('v0')),
+
+    // -- the makers, last of all -------------------------------------------
+    // Apple and Google each sell a dozen things that carry no mark of their
+    // own: Apple Developer, Apple One, an App Store charge, Google Fi, a Cloud
+    // bill. These two catch what every apple-* and google-* rule above has
+    // already had its chance at, which is why they sit at the very bottom -- a
+    // rule for `apple` written any higher would eat `apple music` before that
+    // rule was ever tested.
+    ('apple', BrandSpec('apple')),
+    ('google', BrandSpec('google')),
   ];
 
   /// The category shapes, in the order the gallery shows them.
@@ -461,6 +471,48 @@ abstract final class SubdockMarks {
 
   /// Both groups, for anything that only needs to know a key is offerable.
   static List<String> get pickable => [...pickableGlyphs, ...pickableBrands];
+
+  /// Everything a key can be found by in the gallery's search field.
+  ///
+  /// Two sources, and the second is the one that earns its keep: the key
+  /// itself (`apple-tv` -> `apple tv`, `identityCard` -> `identity card`),
+  /// plus every keyword in [_rules] that resolves to that key. The aliases are
+  /// already written down for [detect], so a search that ignored them would
+  /// know less about the icons than the detector does -- `disney` would fail
+  /// to find the streaming glyph and `max` would fail to find the HBO mark,
+  /// even though typing those two words into the name field finds them both.
+  static final Map<String, String> _haystacks = _buildHaystacks();
+
+  static Map<String, String> _buildHaystacks() {
+    final out = <String, String>{for (final key in pickable) key: _words(key)};
+    for (final (keyword, spec) in _rules) {
+      final key = switch (spec) {
+        BrandSpec(:final key) => key,
+        GlyphSpec(:final glyph) => glyph.name,
+      };
+      final current = out[key];
+      // A key with no entry is a rule pointing at a mark the gallery does not
+      // offer; nothing to search for it by.
+      if (current == null || current.contains(keyword)) continue;
+      out[key] = '$current $keyword';
+    }
+    return out;
+  }
+
+  /// `apple-tv` and `identityCard` both become `apple tv`-shaped: the words a
+  /// person would actually type, separated the way they would type them.
+  static String _words(String key) => key
+      .replaceAll('-', ' ')
+      .replaceAllMapped(RegExp('[A-Z]'), (m) => ' ${m[0]!.toLowerCase()}')
+      .trim();
+
+  /// Does [key] answer to what the user typed? An empty query matches
+  /// everything, so the gallery can filter unconditionally.
+  static bool matches(String key, String query) {
+    final needle = query.trim().toLowerCase();
+    if (needle.isEmpty) return true;
+    return _haystacks[key]?.contains(needle) ?? false;
+  }
 
   /// The key [detect] would store for this name, for the gallery to show as
   /// already selected. Null where the name suggests nothing.

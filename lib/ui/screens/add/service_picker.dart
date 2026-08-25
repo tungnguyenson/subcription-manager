@@ -5,6 +5,7 @@ import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/ui/widgets/search_field.dart';
 
 /// Step one of adding an item: which service is this?
 ///
@@ -146,7 +147,11 @@ class _ServicePickerState extends State<ServicePicker> {
                 ],
               ),
               const SizedBox(height: 16),
-              _SearchField(controller: _query, onSubmitted: _useTyped),
+              SearchField(
+                controller: _query,
+                hint: 'Search services',
+                onSubmitted: _useTyped,
+              ),
             ],
           ),
         ),
@@ -212,63 +217,6 @@ class _ServicePickerState extends State<ServicePicker> {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _SearchField extends StatelessWidget {
-  final TextEditingController controller;
-
-  /// The keyboard's submit key. See `_useTyped`.
-  final VoidCallback onSubmitted;
-
-  const _SearchField({required this.controller, required this.onSubmitted});
-
-  @override
-  Widget build(BuildContext context) {
-    return FieldBox(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.search_rounded,
-            size: 20,
-            color: SubdockColors.inkMuted,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              controller: controller,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (_) => onSubmitted(),
-              style: SubdockText.fieldValue,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 12),
-                hintText: 'Search services',
-                hintStyle: TextStyle(
-                  fontFamily: SubdockText.family,
-                  fontSize: 16,
-                  color: SubdockColors.inkMuted,
-                ),
-              ),
-            ),
-          ),
-          if (controller.text.isNotEmpty)
-            InkWell(
-              onTap: controller.clear,
-              child: const Padding(
-                padding: EdgeInsets.all(4),
-                child: Icon(
-                  Icons.close_rounded,
-                  size: 18,
-                  color: SubdockColors.inkMuted,
-                ),
-              ),
-            ),
-        ],
-      ),
     );
   }
 }

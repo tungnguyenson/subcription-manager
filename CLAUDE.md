@@ -86,7 +86,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Hai mươi mốt cái bẫy đã vấp, đừng vấp lại
+## Hai mươi hai cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -217,6 +217,18 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     như app biết đường mà thực ra không biết thì tệ hơn không có nút. Thứ tự tin cậy nằm ở
     `SavingsPresenter.cancelTarget`: nơi mua thắng trang của hãng, vì gói mua qua App
     Store không hiện trên trang của hãng.
+
+22. **Chart trên màn Money suy ra từ chu kỳ, không đọc lịch sử đã trả.** Mỗi mục đi từ
+    `anchorDate` theo `cycle`, kỳ nào rơi vào tháng nào thì cộng vào tháng đó, và không
+    bao giờ tính ngược trước `anchorDate`. Trước đây chart đọc `HandledEvent`, nên máy
+    vừa cài xong là chart biến mất hẳn dù danh sách đã đủ tiền, ngày và chu kỳ.
+    Hệ quả phải nhớ: mục vừa nhập có `anchorDate` bằng đúng ngày đến hạn kế tiếp, tức là
+    nằm ở tương lai, nên các tháng trước nó trống. Đó là đúng với những gì app biết, không
+    phải lỗi. Chart đầy dần theo thời gian vì `anchorDate` không bao giờ bị sửa.
+    Cột của tháng chưa tới vẽ nhạt hơn, vì đó là số tính trước chứ không phải việc đã xảy
+    ra, và dòng dưới tổng nói thẳng điều đó khi người dùng chọn một tháng như vậy.
+    Cùng một phép tính lo cả ba thứ trên card: cột chart, con số lớn, và danh sách By item.
+    Thêm điều kiện lọc mới thì sửa ở `_chargesByMonth`, đừng sửa riêng chỗ nào.
 
 ## Viết tài liệu
 

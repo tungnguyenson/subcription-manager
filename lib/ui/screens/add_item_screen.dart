@@ -1222,6 +1222,14 @@ class _AddItemScreenState extends State<AddItemScreen> {
       context: context,
       backgroundColor: SubdockColors.canvas,
       showDragHandle: true,
+      // Nearly full height, and the gallery fills whatever it is given. A
+      // half-height sheet showed four rows of a hundred and fifty marks, so
+      // the search box below was reached by scrolling past the answer.
+      isScrollControlled: true,
+      constraints: BoxConstraints(
+        maxHeight:
+            MediaQuery.sizeOf(context).height * IconGallery.maxHeightFraction,
+      ),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(SubdockRadius.placard),
