@@ -711,6 +711,85 @@ void main() {
       expect(saved?.paymentSourceId, 'src1');
     });
 
+    // What someone typed into the picker's search box is an answer, not a
+    // failed query. The catalogue holding 223 rows out of a world that has
+    // more means a miss says nothing about the name -- so the name has to
+    // survive the trip to step two, by either exit out of the picker.
+    group('a name the catalogue does not have', () {
+      testWidgets('the submit key carries the typed name into the form', (
+        tester,
+      ) async {
+        DraftItem? saved;
+        await show(
+          tester,
+          AddItemScreen(
+            catalog: catalog,
+            categories: CategoryBook.shipped,
+            today: today,
+            onSave: (draft) => saved = draft,
+          ),
+        );
+
+        await tester.enterText(find.byType(TextField).first, 'Gym Hoang Cau');
+        await tester.pumpAndSettle();
+        expect(find.textContaining('Nothing matches'), findsOneWidget);
+
+        await tester.testTextInput.receiveAction(TextInputAction.search);
+        await tester.pumpAndSettle();
+
+        // Step two, with the name already written.
+        expect(find.text('Save item'), findsOneWidget);
+        expect(find.text('Gym Hoang Cau'), findsWidgets);
+
+        await tester.ensureVisible(find.text('+30'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('+30'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Save item'));
+        await tester.pumpAndSettle();
+        expect(saved?.name, 'Gym Hoang Cau');
+      });
+
+      testWidgets('so does the manual button', (tester) async {
+        await show(
+          tester,
+          AddItemScreen(
+            catalog: catalog,
+            categories: CategoryBook.shipped,
+            today: today,
+          ),
+        );
+
+        await tester.enterText(find.byType(TextField).first, 'Bao Tuoi Tre');
+        await tester.pumpAndSettle();
+        await tester.ensureVisible(find.text('Enter manually'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Enter manually'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Bao Tuoi Tre'), findsWidgets);
+      });
+
+      // The submit key on an empty box is a stray tap on the keyboard, not a
+      // request to name an item nothing. Leaving the picker there would take
+      // the browser away from someone who had not asked for that.
+      testWidgets('an empty box stays on the picker', (tester) async {
+        await show(
+          tester,
+          AddItemScreen(
+            catalog: catalog,
+            categories: CategoryBook.shipped,
+            today: today,
+          ),
+        );
+
+        await tester.testTextInput.receiveAction(TextInputAction.search);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Step 1 of 2 · pick a service'), findsOneWidget);
+      });
+    });
+
     // The date is the only thing that gates the button. A missing name is not
     // a reason to refuse a save -- it becomes `Untitled item`, which the user
     // fixes in one tap, where refusing would lose the date they just set.

@@ -283,8 +283,20 @@ class _AddItemScreenState extends State<AddItemScreen> {
         catalog: widget.catalog,
         categories: widget.categories,
         onPick: _pickFromCatalog,
-        onManual: () => setState(() {
+        onManual: (typed) => setState(() {
           _picking = false;
+          // What they typed into the search box is the name they want. The
+          // catalogue not carrying it says nothing about the name, so the form
+          // opens with it already written rather than asking for it twice.
+          if (typed.isNotEmpty) {
+            _name.text = typed;
+            // Setting `text` leaves the caret at offset -1, which reads as no
+            // caret at all in a field that autofocuses. Park it after the last
+            // letter, where someone about to fix a typo would put it.
+            _name.selection = TextSelection.collapsed(offset: typed.length);
+          }
+          // Not a suggestion to second-guess: they came out of a full-screen
+          // browser of the same catalogue the suggester reads from.
           _nameSettled = true;
         }),
         onCancel: widget.onCancel,

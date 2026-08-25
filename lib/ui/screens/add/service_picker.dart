@@ -33,7 +33,12 @@ class ServicePicker extends StatefulWidget {
   /// answer, and it has to stay one tap away: the catalogue has 223 entries and
   /// the world has more, and a picker with no exit traps anyone paying for
   /// something local.
-  final VoidCallback? onManual;
+  ///
+  /// Carries whatever is in the search box, trimmed and possibly empty. Someone
+  /// who typed a name the catalogue does not have has already written the name
+  /// they want; making them type it a second time on the next screen is the
+  /// app throwing away an answer it was given.
+  final void Function(String typedName)? onManual;
 
   final VoidCallback? onCancel;
 
@@ -72,6 +77,17 @@ class _ServicePickerState extends State<ServicePicker> {
   }
 
   bool get _searching => _query.text.trim().isNotEmpty;
+
+  /// Leaves the catalogue with the typed name in hand.
+  ///
+  /// The submit key means "this is the name", so it does not try to guess a
+  /// row: picking the first hit off a partial word would put a service on the
+  /// list that the user never chose, and the rows are one tap away anyway.
+  void _useTyped() {
+    final typed = _query.text.trim();
+    if (typed.isEmpty) return;
+    widget.onManual?.call(typed);
+  }
 
   /// A search hit list, or the current shelf.
   ///
@@ -130,7 +146,7 @@ class _ServicePickerState extends State<ServicePicker> {
                 ],
               ),
               const SizedBox(height: 16),
-              _SearchField(controller: _query),
+              _SearchField(controller: _query, onSubmitted: _useTyped),
             ],
           ),
         ),
@@ -168,10 +184,13 @@ class _ServicePickerState extends State<ServicePicker> {
                 ),
               ],
               if (rows.isEmpty)
-                const Padding(
-                  padding: EdgeInsets.only(top: 6),
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    'Nothing matches that. Add it yourself below.',
+                    // Names the way out and says what it keeps. The old line
+                    // sent the user to a button without telling them the name
+                    // they had just typed would survive the trip.
+                    'Nothing matches that. Add it under the name you typed.',
                     style: SubdockText.summary,
                   ),
                 ),
@@ -187,7 +206,7 @@ class _ServicePickerState extends State<ServicePicker> {
               SecondaryButton(
                 'Enter manually',
                 accent: true,
-                onPressed: widget.onManual,
+                onPressed: () => widget.onManual?.call(_query.text.trim()),
               ),
             ],
           ),
@@ -200,7 +219,10 @@ class _ServicePickerState extends State<ServicePicker> {
 class _SearchField extends StatelessWidget {
   final TextEditingController controller;
 
-  const _SearchField({required this.controller});
+  /// The keyboard's submit key. See `_useTyped`.
+  final VoidCallback onSubmitted;
+
+  const _SearchField({required this.controller, required this.onSubmitted});
 
   @override
   Widget build(BuildContext context) {
@@ -218,6 +240,7 @@ class _SearchField extends StatelessWidget {
             child: TextField(
               controller: controller,
               textInputAction: TextInputAction.search,
+              onSubmitted: (_) => onSubmitted(),
               style: SubdockText.fieldValue,
               decoration: const InputDecoration(
                 border: InputBorder.none,
