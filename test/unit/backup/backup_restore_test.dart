@@ -27,7 +27,7 @@ void main() {
       TrackedItem(
         id: 'hsd',
         name: 'Hạn số',
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         expiresOn: d('2027-02-01'),
         actByOffsetDays: 7,
         anchorDate: d('2027-02-01'),
@@ -37,7 +37,7 @@ void main() {
       TrackedItem(
         id: 'netflix',
         name: 'Netflix',
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         expiresOn: d('2026-09-01'),
         anchorDate: d('2026-01-01'),
         cycle: Cycle.monthly,
@@ -48,7 +48,7 @@ void main() {
       TrackedItem(
         id: 'claude',
         name: 'Claude',
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         expiresOn: d('2026-09-05'),
         anchorDate: d('2026-02-05'),
         cycle: Cycle.monthly,

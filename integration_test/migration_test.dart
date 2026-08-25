@@ -10,6 +10,7 @@ import 'package:subdock/app.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/connection.dart';
 import 'package:subdock/data/item_repository.dart';
+import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/data/settings_store.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
 
@@ -75,6 +76,7 @@ void main() {
       SubdockApp(
         repository: repo,
         settings: SettingsStore(db),
+        filters: FilterStore(db),
         scheduler: NotificationScheduler(),
         catalog: ServiceCatalog(const []),
       ),

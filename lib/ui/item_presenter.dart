@@ -16,9 +16,9 @@ abstract final class ItemPresenter {
   /// soon, exactly when, how much. The relative phrase leads because that is
   /// what the user opened the screen to find out; the calendar date follows so
   /// they can check it against wherever the real record lives.
-  static String summary(TrackedItem item, LocalDate today) {
+  static String summary(TrackedItem item, Category category, LocalDate today) {
     final parts = <String>[
-      when(item, today),
+      when(item, category, today),
       MoneyFormat.shortDate(item.expiresOn),
     ];
 
@@ -29,12 +29,14 @@ abstract final class ItemPresenter {
 
   /// The relative half of the summary line.
   ///
-  /// A document *expires*; everything else is *due*. The extra branch earns
-  /// its keep: "Due tomorrow" on a passport reads as a bill, and a passport is
-  /// not something the user can settle by tapping Pay.
-  static String when(TrackedItem item, LocalDate today) {
+  /// The shelf decides whether this reads as *expires* or as *due*, and the
+  /// distinction earns its keep both ways: "Due tomorrow" on a passport reads
+  /// as a bill the user could settle by tapping Pay, and "Due in 4 days" on a
+  /// prepaid SIM reads as something they could pay late without losing
+  /// anything, when losing the number is exactly what happens.
+  static String when(TrackedItem item, Category category, LocalDate today) {
     final days = today.daysUntil(item.expiresOn);
-    final expiring = item.category == Category.document;
+    final expiring = category.wording == CategoryWording.expires;
 
     if (days < 0) {
       final late = -days;
@@ -75,14 +77,6 @@ abstract final class ItemPresenter {
     }
     return parts.join(' · ');
   }
-
-  static String categoryLabel(Category category) => switch (category) {
-    Category.subscription => 'Subscription',
-    Category.bill => 'Bill',
-    Category.insurance => 'Insurance',
-    Category.document => 'Document',
-    Category.other => 'Other',
-  };
 
   static String cycleLabel(Cycle? cycle) {
     if (cycle == null) return 'Once';
@@ -165,6 +159,6 @@ abstract final class ItemPresenter {
     final reminders = reminderCount == 0
         ? 'No reminders are pending.'
         : 'Removes $reminderCount pending ${reminderCount == 1 ? "reminder" : "reminders"}.';
-    return '$reminders What you have already paid stays under Money.';
+    return '$reminders What you have already paid stays under Spending.';
   }
 }

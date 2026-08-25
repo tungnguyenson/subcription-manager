@@ -11,11 +11,12 @@ File đã có sẵn stub cho mọi dịch vụ thuộc batch của bạn. Với 
    trên điện thoại. Ví dụ Netflix → `["netflix"]`; ELSA Speak → `["elsa", "elsa speak"]`;
    Thẻ tập gym → `["gym", "the tap gym", "phong tap"]`. App tự bỏ dấu khi tìm, nhưng cứ
    thêm cả bản không dấu cho chắc.
-2. Xác nhận `category` (ngữ nghĩa thanh toán, khác `sector`):
-   - `SUBSCRIPTION` — tự gia hạn tới khi huỷ. Gần như mọi mục trong danh sách.
-   - `BILL` — khoản phải trả theo kỳ, số tiền thay đổi (học phí, điện, khoản vay).
-   - `INSURANCE`, `DOCUMENT` — chỉ dùng cho bảo hiểm và giấy tờ.
-   - `OTHER` — **cấm dùng**. Validator sẽ chặn.
+2. Xác nhận `category` — nhóm dịch vụ, một trong 21 mã ở `dataset-plan.md`:
+   `AI` `STREAMING` `MUSIC` `GAMING` `PRODUCTIVITY` `SOCIAL` `NEWS` `FOOD` `FITNESS`
+   `FINANCE` `EDUCATION` `SECURITY` `ENTERTAINMENT` `TRAVEL` `DATING` `STORAGE` `PHONE`
+   `UTILITIES` `HOUSING` `DOCUMENTS` `INSURANCE`.
+   - `OTHER` — **cấm dùng**. Validator sẽ chặn: nếu danh mục đã biết dịch vụ mà vẫn bắt
+     người dùng tự phân loại thì mục đó không đáng có trong danh mục.
 3. Điền `plans` theo luật giá bên dưới.
 4. Điền `defaultPlan` = `tier` của gói phổ biến nhất (chỉ khi `plans` không rỗng).
 5. `cancelUrl`: link tới **trang huỷ thật**, không phải trang chủ. Không tìm thấy thì để
@@ -77,8 +78,7 @@ Mục được đánh dấu `MỤC CHUNG` trong `_hint` ("Thẻ tập gym", "H�
   "id": "netflix",
   "name": "Netflix",
   "aliases": ["netflix"],
-  "sector": "STREAMING",
-  "category": "SUBSCRIPTION",
+  "category": "STREAMING",
   "defaultCycle": "MONTHLY",
   "cancelUrl": "https://www.netflix.com/cancelplan",
   "manageUrl": "https://www.netflix.com/account",
@@ -121,6 +121,6 @@ Ngắn gọn, dạng văn xuôi, gồm đúng bốn ý:
 2. Số mục có giá, số mục có cả gói năm.
 3. Danh sách mục **không** tra được giá, kèm lý do một dòng mỗi mục.
 4. Bất cứ thứ gì bạn thấy sai trong stub: dịch vụ đã ngừng hoạt động, đổi tên, không còn
-   bán ở VN, hoặc phân loại `sector` đặt sai.
+   bán ở VN, hoặc `category` đặt sai.
 
 Không tóm tắt lại brief này trong báo cáo.

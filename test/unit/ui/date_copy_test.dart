@@ -37,17 +37,28 @@ void main() {
 
       expect(resolved['Today'], d('2026-08-15'));
       expect(resolved['Tomorrow'], d('2026-08-16'));
-      expect(resolved['In 7 days'], d('2026-08-22'));
-      expect(resolved['In 1 month'], d('2026-09-15'));
+      expect(resolved['+7'], d('2026-08-22'));
+      expect(resolved['+14'], d('2026-08-29'));
+      expect(resolved['+30'], d('2026-09-14'));
     });
 
-    // Month arithmetic clamps rather than rolling over, so "In 1 month" from
-    // 31 January is 28 February and not 3 March.
-    test('a month from the 31st clamps to the end of the short month', () {
-      final shortcut = DateCopy.shortcuts.firstWhere(
-        (s) => s.label == 'In 1 month',
-      );
-      expect(shortcut.resolve(d('2026-01-31')), d('2026-02-28'));
+    // Five short chips, so the rail never scrolls. A rail that scrolls is a
+    // rail whose last shortcuts nobody sees.
+    test('there are five of them, in the build file order', () {
+      expect(DateCopy.shortcuts.map((s) => s.label), [
+        'Today',
+        'Tomorrow',
+        '+7',
+        '+14',
+        '+30',
+      ]);
+    });
+
+    // Days, not months: `+30` from 31 January is 2 March, and it says so
+    // rather than clamping the way a month step would.
+    test('the offsets are whole days and never clamp', () {
+      final shortcut = DateCopy.shortcuts.firstWhere((s) => s.label == '+30');
+      expect(shortcut.resolve(d('2026-01-31')), d('2026-03-02'));
     });
   });
 

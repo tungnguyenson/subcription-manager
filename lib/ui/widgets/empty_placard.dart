@@ -154,7 +154,7 @@ class _AddMark extends StatelessWidget {
           fontFamily: SubdockText.family,
           fontSize: diameter * 0.52,
           height: 1,
-          fontWeight: FontWeight.w400,
+          fontWeight: SubdockWeight.regular,
           color: SubdockColors.card,
         ),
       ),

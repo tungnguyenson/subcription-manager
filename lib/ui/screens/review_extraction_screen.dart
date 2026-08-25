@@ -242,7 +242,7 @@ class _ReadRow extends StatelessWidget {
                 color: confidence == _FieldConfidence.unsupported
                     ? SubdockColors.danger
                     : SubdockColors.inkMuted,
-                fontWeight: FontWeight.w500,
+                fontWeight: SubdockWeight.medium,
               ),
             ),
           ],

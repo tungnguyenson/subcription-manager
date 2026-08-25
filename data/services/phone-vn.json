@@ -15,12 +15,11 @@
         "viettel",
         "sim viettel"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "5g150",
       "cancelUrl": null,
       "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
-      "defaultPlan": "5g150",
       "plans": [
         {
           "tier": "5g150",
@@ -43,12 +42,11 @@
         "vina",
         "sim vinaphone"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "5g150",
       "cancelUrl": null,
       "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
-      "defaultPlan": "5g150",
       "plans": [
         {
           "tier": "5g150",
@@ -71,12 +69,11 @@
         "mobi",
         "sim mobifone"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "hd70",
       "cancelUrl": null,
       "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
-      "defaultPlan": "hd70",
       "plans": [
         {
           "tier": "hd70",
@@ -99,12 +96,11 @@
         "vnmb",
         "sim vietnamobile"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "d50",
       "cancelUrl": null,
       "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
-      "defaultPlan": "d50",
       "plans": [
         {
           "tier": "d50",
@@ -126,12 +122,11 @@
         "itel",
         "sim itel"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "itel99",
       "cancelUrl": null,
       "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
-      "defaultPlan": "itel99",
       "plans": [
         {
           "tier": "itel99",
@@ -154,12 +149,11 @@
         "reddi",
         "sim wintel"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": null,
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao. Trình duyệt thật mở được wintel.vn (không còn bị 403), nhưng trang /goi-cuoc là công cụ tự thiết kế gói cước (\"Gói cước tự do trải nghiệm\" - tự chọn data/phút gọi/SMS), không phải bảng giá cố định theo tier, nên không có một mức giá phổ biến để ghi.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -172,12 +166,11 @@
         "5g",
         "goi data"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Mục chung cho gói data không thuộc nhà mạng cụ thể trong danh sách trên; giá rất khác nhau theo nhà mạng và dung lượng nên không đặt giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -189,12 +182,11 @@
         "wifi fpt",
         "mang fpt"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "giga-f1",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "giga-f1",
       "plans": [
         {
           "tier": "giga-f1",
@@ -218,12 +210,11 @@
         "mang viettel",
         "cap quang viettel"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "meshvt1-t",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "meshvt1-t",
       "plans": [
         {
           "tier": "meshvt1-t",
@@ -247,12 +238,11 @@
         "mang vnpt",
         "cap quang vnpt"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "home-1",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "home-1",
       "plans": [
         {
           "tier": "home-1",
@@ -275,12 +265,11 @@
         "cap",
         "truyen hinh cap"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Mục chung cho các gói truyền hình cáp/K+ theo từng nhà cung cấp và combo khác nhau nên không đặt giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -292,12 +281,11 @@
         "tien dien",
         "hoa don dien"
       ],
-      "sector": "UTILITIES",
-      "category": "BILL",
+      "category": "UTILITIES",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Số tiền thay đổi theo sản lượng tiêu thụ mỗi kỳ nên không đặt giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -308,12 +296,11 @@
         "tien nuoc",
         "hoa don nuoc"
       ],
-      "sector": "UTILITIES",
-      "category": "BILL",
+      "category": "UTILITIES",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Số tiền thay đổi theo sản lượng tiêu thụ mỗi kỳ nên không đặt giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -325,12 +312,11 @@
         "phi quan ly",
         "phi dich vu chung cu"
       ],
-      "sector": "HOUSING",
-      "category": "BILL",
+      "category": "HOUSING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Mức phí do từng ban quản lý toà nhà quy định nên không đặt giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -342,12 +328,11 @@
         "phi rac",
         "tien rac"
       ],
-      "sector": "HOUSING",
-      "category": "BILL",
+      "category": "HOUSING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Mức phí do từng địa phương/đơn vị thu gom quy định nên không đặt giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -359,12 +344,11 @@
         "phi gui xe",
         "ve xe"
       ],
-      "sector": "HOUSING",
-      "category": "BILL",
+      "category": "HOUSING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Mức phí do từng toà nhà/bãi xe quy định nên không đặt giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -375,12 +359,11 @@
         "tien gas",
         "binh gas"
       ],
-      "sector": "UTILITIES",
-      "category": "BILL",
+      "category": "UTILITIES",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Số tiền thay đổi theo lượng dùng và giá thị trường mỗi kỳ nên không đặt giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -392,12 +375,11 @@
         "bao hiem y te",
         "bao hiem y te ho gia dinh"
       ],
-      "sector": "INSURANCE",
       "category": "INSURANCE",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "ho-gia-dinh-nguoi-1",
       "cancelUrl": null,
       "noteVi": "Giá là mức đóng của người thứ nhất trong hộ; từ người thứ hai trở đi được giảm dần còn 70%/60%/50%/40% mức này.",
-      "defaultPlan": "ho-gia-dinh-nguoi-1",
       "plans": [
         {
           "tier": "ho-gia-dinh-nguoi-1",
@@ -419,12 +401,11 @@
         "nhan tho",
         "bao hiem nhan tho"
       ],
-      "sector": "INSURANCE",
       "category": "INSURANCE",
       "defaultCycle": "YEARLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Phí đóng tuỳ hợp đồng và gói bảo hiểm của từng khách hàng nên không có giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -434,12 +415,11 @@
         "bao hiem xe",
         "tnds"
       ],
-      "sector": "INSURANCE",
       "category": "INSURANCE",
       "defaultCycle": "YEARLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Phí khác nhau theo loại xe, hãng bảo hiểm và có/không kèm bảo hiểm vật chất nên không có giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -449,12 +429,11 @@
         "suc khoe",
         "bao hiem suc khoe"
       ],
-      "sector": "INSURANCE",
       "category": "INSURANCE",
       "defaultCycle": "YEARLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Phí đóng tuỳ gói và độ tuổi người được bảo hiểm nên không có giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -465,12 +444,11 @@
         "travel",
         "bao hiem du lich"
       ],
-      "sector": "INSURANCE",
       "category": "INSURANCE",
       "defaultCycle": null,
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Phí đóng tuỳ chuyến đi, thời gian và hãng bảo hiểm nên không có giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -480,12 +458,11 @@
         "ho chieu",
         "passport"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "defaultCycle": null,
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Hộ chiếu có giá trị 10 năm kể từ ngày cấp với người từ đủ 14 tuổi trở lên (5 năm với trẻ dưới 14 tuổi). Nhiều nước yêu cầu hộ chiếu còn hạn ít nhất 6 tháng khi nhập cảnh, nên đặt ngày phải làm sớm.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -497,12 +474,11 @@
         "cmnd",
         "the can cuoc"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "defaultCycle": null,
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Theo Luật Căn cước 2023, phải làm thủ tục cấp đổi thẻ khi đủ 14, 25, 40 và 60 tuổi; thẻ cấp trong vòng 2 năm trước mốc tuổi đó có giá trị đến mốc tuổi tiếp theo, thẻ cấp từ 58-60 tuổi trở lên có giá trị vô thời hạn.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -514,12 +490,11 @@
         "lai xe",
         "bang lai xe"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "defaultCycle": null,
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Từ 1/1/2025, GPLX hạng B (gộp B1, B2 cũ) và C1 có thời hạn 10 năm kể từ ngày cấp; các hạng còn lại (C, D1, D2, D, BE, C1E, CE, D1E, D2E, DE) có thời hạn 5 năm.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -530,12 +505,11 @@
         "kiem dinh",
         "dang kiem xe"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "defaultCycle": null,
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Xe con dưới 9 chỗ không kinh doanh vận tải: chu kỳ đăng kiểm lần đầu 36 tháng, các chu kỳ sau rút ngắn còn 24 hoặc 12 tháng tuỳ tuổi xe. Phải đi đăng kiểm trước ngày hết hạn tem, nên đặt ngày phải làm sớm.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -545,12 +519,11 @@
         "visa",
         "thi thuc"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "defaultCycle": null,
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Thời hạn khác nhau theo loại visa và nước cấp nên không có giá chuẩn hay thời hạn cố định.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -560,12 +533,11 @@
         "tam tru",
         "the tam tru"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "defaultCycle": null,
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Thời hạn khác nhau theo diện tạm trú và cơ quan cấp nên không có thời hạn cố định.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -576,12 +548,11 @@
         "kinh doanh",
         "giay phep kinh doanh"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "defaultCycle": null,
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Thời hạn hiệu lực do từng cơ quan cấp phép quy định theo ngành nghề nên không có thời hạn cố định.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -591,12 +562,11 @@
         "chung chi",
         "chung chi hanh nghe"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "defaultCycle": null,
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Thời hạn hiệu lực khác nhau theo ngành nghề và hội nghề nghiệp cấp chứng chỉ nên không có thời hạn cố định.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -606,12 +576,11 @@
         "vnsky",
         "sim vnsky"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "sky69d",
       "cancelUrl": null,
       "noteVi": "Nhà mạng ảo (Mobicast) thuộc hệ sinh thái VNPAY. Hết hạn mà không nạp thì mất số.",
-      "defaultPlan": "sky69d",
       "plans": [
         {
           "tier": "sky69d",
@@ -634,12 +603,11 @@
         "goi tra sau",
         "postpaid"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Mục chung cho gói cước trả sau, giá khác nhau theo nhà mạng và gói cụ thể nên không đặt giá chuẩn.",
-      "defaultPlan": null,
       "plans": []
     }
   ]

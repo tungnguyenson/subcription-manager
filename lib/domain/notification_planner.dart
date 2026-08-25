@@ -1,8 +1,8 @@
 import 'package:meta/meta.dart';
 
+import 'category_book.dart';
 import 'local_date.dart';
 import 'model.dart';
-import 'reminders.dart';
 
 enum AlertReason {
   /// Scheduled ahead of the act-by date.
@@ -29,6 +29,15 @@ class PlannedAlert {
   final AlertReason reason;
   final bool timeSensitive;
 
+  /// A clause appended to the notification body, or null.
+  ///
+  /// Deliberately a rider on an existing alert rather than an alert of its own.
+  /// The user asking to be reminded that a plan is cheaper yearly wants to hear
+  /// it *when the renewal comes up*, which is a notification they were already
+  /// getting — and the budget in this class is 50 slots for the whole app, so
+  /// spending a second one to say one more sentence is the wrong trade.
+  final String? note;
+
   const PlannedAlert({
     required this.itemId,
     required this.itemName,
@@ -37,7 +46,11 @@ class PlannedAlert {
     required this.leadDays,
     required this.reason,
     required this.timeSensitive,
+    this.note,
   });
+
+  /// What the notification says under its title.
+  String get body => note == null ? itemName : '$itemName · $note';
 
   /// Stable across re-planning runs so iOS de-duplicates rather than stacking.
   /// The planner cancels everything and re-adds on each run, but a stable id
@@ -104,6 +117,7 @@ abstract final class NotificationPlanner {
 
   static NotificationPlan plan(
     List<TrackedItem> items,
+    CategoryBook categories,
     LocalDate today, {
     int budget = NotificationPlanner.budget,
     int horizonDays = NotificationPlanner.horizonDays,
@@ -112,7 +126,12 @@ abstract final class NotificationPlanner {
 
     final candidates = <PlannedAlert>[
       for (final item in items)
-        if (item.state == ItemState.active) ..._alertsFor(item, today, horizon),
+        // `isLive` and not a bare state check: an item the user switched off
+        // on the service list is still ACTIVE, and the whole promise of that
+        // switch is that it stops sending reminders. One predicate for the
+        // list and the planner, so they can never disagree about it.
+        if (item.isLive && item.state == ItemState.active)
+          ..._alertsFor(item, categories[item.categoryId], today, horizon),
     ]..sort(_ranking);
 
     return NotificationPlan(
@@ -143,16 +162,26 @@ abstract final class NotificationPlanner {
 
   static List<PlannedAlert> _alertsFor(
     TrackedItem item,
+    Category category,
     LocalDate today,
     LocalDate horizon,
   ) {
     final out = <PlannedAlert>[];
     final actBy = item.actBy;
 
+    // The rider the user asked for on the Savings screen. It rides on the
+    // lead reminders only: a nag fires *after* the money has gone, and telling
+    // someone the yearly plan is cheaper at that point is worse than silence.
+    final note = item.yearlyChoice == YearlyChoice.remind
+        ? 'Yearly costs less'
+        : null;
+
     for (final lead in item.leadDays) {
       final fireOn = actBy.minusDays(lead);
       if (fireOn.isBetween(today, horizon)) {
-        out.add(_alert(item, fireOn, lead, AlertReason.lead));
+        out.add(
+          _alert(item, category, fireOn, lead, AlertReason.lead, note: note),
+        );
       }
     }
 
@@ -160,12 +189,12 @@ abstract final class NotificationPlanner {
     // when the ladder for this item is empty.
     final snoozed = item.snoozedUntil;
     if (snoozed != null && snoozed.isBetween(today, horizon)) {
-      out.add(_alert(item, snoozed, 0, AlertReason.snoozed));
+      out.add(_alert(item, category, snoozed, 0, AlertReason.snoozed));
     }
 
-    out.addAll(_nagAlerts(item, actBy, today, horizon));
+    out.addAll(_nagAlerts(item, category, actBy, today, horizon));
 
-    final verify = _verifyAlert(item, today, horizon);
+    final verify = _verifyAlert(item, category, today, horizon);
     if (verify != null) out.add(verify);
 
     return out;
@@ -180,6 +209,7 @@ abstract final class NotificationPlanner {
   /// cancelled for one occurrence only.
   static List<PlannedAlert> _nagAlerts(
     TrackedItem item,
+    Category category,
     LocalDate actBy,
     LocalDate today,
     LocalDate horizon,
@@ -194,7 +224,7 @@ abstract final class NotificationPlanner {
     final out = <PlannedAlert>[];
     var at = LocalDate.max(actBy.plusDays(stepDays), today);
     while (at <= horizon) {
-      out.add(_alert(item, at, 0, AlertReason.nag));
+      out.add(_alert(item, category, at, 0, AlertReason.nag));
       at = at.plusDays(stepDays);
     }
     return out;
@@ -205,6 +235,7 @@ abstract final class NotificationPlanner {
   /// the app has no way to notice. See spec section 7.5.
   static PlannedAlert? _verifyAlert(
     TrackedItem item,
+    Category category,
     LocalDate today,
     LocalDate horizon,
   ) {
@@ -215,22 +246,25 @@ abstract final class NotificationPlanner {
     final due = since.plusDays(every);
     final fireOn = LocalDate.max(due, today);
     return fireOn <= horizon
-        ? _alert(item, fireOn, 0, AlertReason.verify)
+        ? _alert(item, category, fireOn, 0, AlertReason.verify)
         : null;
   }
 
   static PlannedAlert _alert(
     TrackedItem item,
+    Category category,
     LocalDate date,
     int lead,
-    AlertReason reason,
-  ) => PlannedAlert(
+    AlertReason reason, {
+    String? note,
+  }) => PlannedAlert(
     itemId: item.id,
     itemName: item.name,
     date: date,
     time: item.remindAt,
     leadDays: lead,
     reason: reason,
-    timeSensitive: Reminders.isTimeSensitive(item.category),
+    timeSensitive: category.isTimeSensitive,
+    note: note,
   );
 }

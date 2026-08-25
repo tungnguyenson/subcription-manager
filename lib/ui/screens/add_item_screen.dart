@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:subdock/catalog/service_catalog.dart';
+import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/fx.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
@@ -13,6 +13,13 @@ import 'package:subdock/ui/item_draft.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/theme.dart';
+import 'package:subdock/ui/screens/add/cost_field.dart';
+import 'package:subdock/ui/screens/add/option_sheets.dart';
+import 'package:subdock/ui/screens/add/plan_grid.dart';
+import 'package:subdock/ui/screens/add/service_picker.dart';
+import 'package:subdock/ui/screens/add/source_field.dart';
+import 'package:subdock/ui/screens/add/summary_block.dart';
+import 'package:subdock/ui/screens/add/trial_field.dart';
 import 'package:subdock/ui/widgets/icon_gallery.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 
@@ -25,6 +32,11 @@ export 'package:subdock/ui/item_draft.dart';
 /// not; the screen itself never writes to storage either way.
 class AddItemScreen extends StatefulWidget {
   final ServiceCatalog catalog;
+
+  /// The shelves the user keeps, for the category rail and for the reminder
+  /// defaults a new item takes.
+  final CategoryBook categories;
+
   final LocalDate today;
 
   /// The item being edited, already reduced to what this form asks for. Null
@@ -38,15 +50,34 @@ class AddItemScreen extends StatefulWidget {
   /// Opens the calendar, seeded with the date the form is holding.
   final Future<LocalDate?> Function(LocalDate? from)? onPickDate;
 
+  /// The sources the user has named, for the "pays from" chips.
+  final List<PaymentSource> sources;
+
+  /// Creates a source from inside the form and hands back its id.
+  final Future<String?> Function(String name, SourceGlyph glyph)?
+  onCreateSource;
+
+  /// Which source to preselect on a new item.
+  ///
+  /// The last one used, supplied by the caller. Most people pay for nearly
+  /// everything from one card, so defaulting to it turns the commonest answer
+  /// into no taps at all — and it is still a chip they can change, not a
+  /// hidden assumption.
+  final String? defaultSourceId;
+
   const AddItemScreen({
     super.key,
     required this.catalog,
+    required this.categories,
     required this.today,
     this.initial,
     this.onCancel,
     this.onSave,
     this.onScan,
     this.onPickDate,
+    this.sources = const [],
+    this.onCreateSource,
+    this.defaultSourceId,
   });
 
   @override
@@ -61,12 +92,24 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   CatalogEntry? _matched;
   LocalDate? _expiresOn;
-  Category _category = Category.subscription;
+  late Category _category = widget.categories.fallback;
   String? _iconName;
   Cycle? _cycle = Cycle.monthly;
   int? _repeatCount;
   String _currency = 'VND';
   int _lead = Reminders.defaultLead;
+
+  /// Which of the two steps a *new* item is on. An edit never sees step one:
+  /// the item already has a name, and offering to replace it with a catalogue
+  /// row would be offering to undo the thing the user came here to change.
+  bool _picking = true;
+
+  /// The catalogue tier whose price is in the cost field, or null once the user
+  /// has typed their own amount. Only ever set alongside [_matched].
+  String? _planTier;
+
+  TrialDraft _trial = TrialDraft.off;
+  String? _sourceId;
 
   /// True once the user has picked a suggestion or explicitly declined one.
   /// Until then the suggestion list stays open, because tapping a known service
@@ -76,13 +119,61 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   bool get _isEdit => widget.initial != null;
 
+  /// Whether the cost field is on screen while a plan grid is also on screen.
+  ///
+  /// Only ever set, never cleared: a user who has opened it has typed, or is
+  /// about to, and folding the field away under them would take the number
+  /// with it. Picking a plan tile afterwards overwrites the amount, which is
+  /// the same thing the field itself would do.
+  bool _costOpen = false;
+
+  /// Which of the card's two modes is showing. Display only: both modes end up
+  /// in [_repeatCount].
+  bool _endsOnDate = false;
+
+  /// The date the user picked in `On a date` mode, kept so the field can read
+  /// it back. The count is what is saved.
+  LocalDate? _endsOn;
+
+  final TextEditingController _count = TextEditingController();
+  final FocusNode _countFocus = FocusNode();
+
+  /// The interval behind `Custom…`, as typed and as chosen.
+  ///
+  /// Held here rather than read back off [_cycle] on every frame, because a
+  /// half-typed number is not a cycle: the field can hold `''` for a keystroke
+  /// while [_cycle] keeps the last whole interval, and reading the unit off a
+  /// cycle would flip the lit chip from `weeks` to `days` the moment 2 weeks
+  /// became 14 days internally.
+  final TextEditingController _every = TextEditingController();
+  final FocusNode _everyFocus = FocusNode();
+  CycleField _everyUnit = CycleField.month;
+
+  /// The item's name as it was when the form opened.
+  ///
+  /// Read off `initial` rather than off the live text field: the line is there
+  /// to say which item is on screen, and a heading that rewrites itself as the
+  /// user types stops answering that halfway through the first keystroke.
+  String get _editingName => widget.initial?.name ?? '';
+
   @override
   void initState() {
     super.initState();
     _seed(widget.initial);
 
     _name.addListener(() => setState(() {}));
-    _amount.addListener(() => setState(() {}));
+    // Typing an amount unlatches the plan tile. The grid says "this is the
+    // listed price of that tier", and leaving a tile lit beside a number the
+    // user overwrote would make it say something false.
+    //
+    // Only *typing*, though. `_pickPlan` writes the tier's price into this
+    // same field, and a bare listener cannot tell the two apart — it fires
+    // synchronously on the assignment and clears the tier the tap just set,
+    // so no tile would ever stay lit. [_written] is what the app put there.
+    _amount.addListener(() {
+      if (_amount.text == _written) return;
+      setState(() => _planTier = null);
+    });
     _nameFocus.addListener(() => setState(() {}));
     // Grouping commas are settled when the field is left, not while it is
     // being typed into: re-formatting under the cursor moves the caret away
@@ -94,7 +185,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
   }
 
   void _seed(DraftItem? initial) {
-    if (initial == null) return;
+    if (initial == null) {
+      _sourceId = widget.defaultSourceId;
+      return;
+    }
+
+    _picking = false;
 
     _name.text = initial.name;
     _expiresOn = initial.expiresOn;
@@ -102,6 +198,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
     _iconName = initial.iconName;
     _cycle = initial.cycle;
     _repeatCount = initial.repeatCount;
+    _count.text = initial.repeatCount == null ? '' : '${initial.repeatCount}';
+    final cycle = initial.cycle;
+    if (cycle != null && !cycle.isPreset) {
+      final (count, field) = cycle.inLargestField;
+      _every.text = '$count';
+      _everyUnit = field;
+    }
     _lead = initial.leadDays.isEmpty
         ? Reminders.defaultLead
         : initial.leadDays.first;
@@ -110,6 +213,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (minor != null) {
       _currency = initial.currency ?? _currency;
       _amount.text = MoneyFormat.majorInput(minor, _currency);
+    }
+
+    _sourceId = initial.paymentSourceId;
+    final trialStart = initial.trialStart;
+    if (trialStart != null) {
+      _trial = TrialDraft(start: trialStart, firstCharge: initial.expiresOn);
     }
 
     // The name is already what the user meant. Offering to replace it with a
@@ -121,27 +230,69 @@ class _AddItemScreenState extends State<AddItemScreen> {
   void dispose() {
     _name.dispose();
     _amount.dispose();
+    _count.dispose();
+    _every.dispose();
     _nameFocus.dispose();
     _amountFocus.dispose();
+    _countFocus.dispose();
+    _everyFocus.dispose();
     super.dispose();
   }
 
   List<CatalogEntry> get _suggestions =>
       _nameSettled ? const [] : widget.catalog.search(_name.text);
 
-  bool get _canSave => _name.text.trim().isNotEmpty && _expiresOn != null;
-
-  /// The three repeats almost every item uses.
+  /// The item's due date: a trial's first charge, or the date field.
   ///
-  /// Three, not the whole space of intervals. A form that lists every cycle it
-  /// supports takes longer to fill in than the item is worth. Everything else
-  /// — the other presets, and any interval the user types — lives behind the
-  /// fourth segment, which shows the chosen value once there is one.
-  static const List<Cycle?> _quickRepeats = [Cycle.monthly, Cycle.yearly, null];
+  /// One value, resolved in one place. A trial's free period ending *is* the
+  /// charge landing, so letting the two fields hold different dates would let
+  /// the reminder fire against one and the row display the other.
+  LocalDate? get _dueDate => _trial.on ? _trial.firstCharge : _expiresOn;
+
+  /// The name as it will be stored: what was typed, or a stand-in.
+  ///
+  /// An empty name does not block the save. The spec is explicit that it
+  /// becomes `Untitled item`, and it is right: someone who set a date and an
+  /// amount and then tapped Save has told the app the two things it needs, and
+  /// refusing them over a label they can fix in one tap loses the date.
+  ///
+  /// The date is the one thing that still gates the button. `expiresOn` is
+  /// non-null all the way down to the table, so there is nowhere to put an
+  /// item without one — see the note on [_save].
+  String get _savedName {
+    final typed = _name.text.trim();
+    return typed.isEmpty ? 'Untitled item' : typed;
+  }
+
+  bool get _canSave => _dueDate != null;
+
+  /// True while the cycle is an interval the app has no name for.
+  bool get _isCustomCycle => _cycle != null && !_cycle!.isPreset;
+
+  /// The cost field as money, or null while it is empty or unparseable.
+  Money? get _parsedAmount {
+    final minor = MoneyFormat.parseMajor(_amount.text, _currency);
+    return minor == null ? null : Money(minor, _currency);
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Step one, for a new item only.
+    if (_picking) {
+      return ServicePicker(
+        catalog: widget.catalog,
+        categories: widget.categories,
+        onPick: _pickFromCatalog,
+        onManual: () => setState(() {
+          _picking = false;
+          _nameSettled = true;
+        }),
+        onCancel: widget.onCancel,
+      );
+    }
+
     final showSuggestions = _suggestions.isNotEmpty && _nameFocus.hasFocus;
+    final plans = _planOptions;
 
     return Column(
       children: [
@@ -158,31 +309,144 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 const SizedBox(height: 12),
                 _gutter(_suggestionList()),
               ],
-              // Date before category: it is the one field every item has to
-              // answer, and the one the user came here to type.
-              const SizedBox(height: SubdockSpacing.formBlock),
-              Field(label: 'Date', bleed: true, child: _dateField()),
-              const SizedBox(height: SubdockSpacing.formBlock),
-              Field(label: 'Category', bleed: true, child: _categoryRail()),
-              const SizedBox(height: SubdockSpacing.formBlock),
-              _gutter(Field(label: 'Repeat', child: _repeatRow())),
-              if (_cycle != null) ...[
+              // Part of the name block, not a block of its own: the chips are
+              // eight pixels under the field rather than twenty-six, because
+              // what a thing is called and what kind of thing it is are one
+              // answer given twice.
+              const SizedBox(height: 9),
+              Field(
+                label: _isEdit ? 'Category' : null,
+                bleed: true,
+                child: _categoryRail(),
+              ),
+              // The plans of the chosen service. Above the cost field, and
+              // above the cycle: picking a tile fills both of them, so a user
+              // who recognises their plan never reads the two blocks below.
+              if (plans.isNotEmpty) ...[
                 const SizedBox(height: SubdockSpacing.formBlock),
                 _gutter(
                   Field(
-                    label: 'How many times',
-                    child: PickerField(
-                      value: _repeatCountLabel,
-                      onTap: _pickRepeatCount,
+                    label: 'Plan',
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        PlanGrid(
+                          options: plans,
+                          selected: _planTier,
+                          onSelect: _pickPlan,
+                        ),
+                        const SizedBox(height: 8),
+                        // Kept, though the build file has no line here. A
+                        // price with no page and no date behind it is a
+                        // rumour, and this grid is the one place in the app
+                        // that shows figures the user did not type.
+                        Text(
+                          _planProvenance(plans),
+                          style: SubdockText.caption,
+                        ),
+                        // The way past the grid, and the reason the cost
+                        // field below is folded away: a user who recognises
+                        // their plan on a tile never needs a number pad, and
+                        // a field standing open under the tiles asks them to
+                        // check whether the tile they just tapped was right.
+                        if (!_costOpen) ...[
+                          const SizedBox(height: 10),
+                          Row(
+                            children: [
+                              // Flexible, because the sentence and the link
+                              // have to share one line at any text scale.
+                              const Flexible(
+                                child: Text(
+                                  'Paying a different amount?',
+                                  style: SubdockText.summary,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              InkWell(
+                                onTap: () => setState(() => _costOpen = true),
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 4),
+                                  child: Text(
+                                    'Enter it',
+                                    style: SubdockText.quietAction,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
               ],
+              if (plans.isEmpty || _costOpen) ...[
+                const SizedBox(height: SubdockSpacing.formBlock),
+                _costBlock(),
+              ],
               const SizedBox(height: SubdockSpacing.formBlock),
               _gutter(
                 Field(
-                  label: _amount.text.isEmpty ? 'Cost (optional)' : 'Cost',
-                  child: _costField(),
+                  // `Repeats` when editing an item that already does,
+                  // `Billing cycle` when setting one up. The hand-off words
+                  // them differently and both readings are right: one is a
+                  // fact about the item, the other is a choice being made.
+                  label: _isEdit ? 'Repeats' : 'Billing cycle',
+                  child: PickerField(
+                    value: _cycleLabel(_cycle),
+                    onTap: _pickCycle,
+                  ),
+                ),
+              ),
+              // The interval nothing on the list covers, typed out. A sub-block
+              // of the dropdown above rather than a block of its own: it is the
+              // second half of one answer.
+              if (_isCustomCycle) ...[
+                const SizedBox(height: 9),
+                _gutter(_everyRow()),
+              ],
+              // The date field only appears when there is no trial. With one on,
+              // the first charge date *is* the due date, and a second date
+              // field beside it is a second answer to the same question.
+              if (!_trial.on) ...[
+                const SizedBox(height: SubdockSpacing.formBlock),
+                Field(
+                  // No heading on a new item. The field itself reads `Choose a
+                  // date`, so a `NEXT PAYMENT` label over it is the screen
+                  // asking the same question twice. An edit gets one, because
+                  // there the field holds a date rather than a prompt.
+                  label: _isEdit ? 'Next date' : null,
+                  bleed: true,
+                  child: _dateField(),
+                ),
+              ],
+              // Hidden for a one-off. There is no series to end, and a
+              // `Repeats forever` toggle over a payment that happens once is
+              // a question with no true answer.
+              if (_cycle != null) ...[
+                const SizedBox(height: SubdockSpacing.formBlock),
+                _gutter(_repeatsBlock()),
+              ],
+              const SizedBox(height: SubdockSpacing.formBlock),
+              _gutter(
+                Field(
+                  label: _isEdit ? 'Free trial' : null,
+                  child: TrialField(
+                    value: _trial,
+                    today: widget.today,
+                    leadDays: _lead,
+                    onChanged: (next) => setState(() => _trial = next),
+                    onPickDate: widget.onPickDate,
+                  ),
+                ),
+              ),
+              const SizedBox(height: SubdockSpacing.formBlock),
+              _gutter(
+                SourceField(
+                  sources: widget.sources,
+                  selected: _sourceId,
+                  onSelect: (id) => setState(() => _sourceId = id),
+                  onCreate: widget.onCreateSource,
                 ),
               ),
               // Editing does not show the reminder ladder. An item can hold
@@ -194,6 +458,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 const SizedBox(height: SubdockSpacing.formBlock),
                 Field(label: 'Remind me', bleed: true, child: _leadRail()),
               ],
+              const SizedBox(height: SubdockSpacing.formBlock),
+              _gutter(
+                SummaryBlock(
+                  due: _dueDate,
+                  amount: _parsedAmount,
+                  trial: _trial.on,
+                  leadDays: _lead,
+                ),
+              ),
             ],
           ),
         ),
@@ -205,12 +478,83 @@ class _AddItemScreenState extends State<AddItemScreen> {
             12,
           ),
           child: PrimaryButton(
-            _isEdit ? 'Save changes' : 'Save',
+            _isEdit ? 'Save changes' : 'Save item',
             onPressed: _canSave ? _save : null,
           ),
         ),
       ],
     );
+  }
+
+  /// The chosen service's tiers at the cycle currently selected.
+  ///
+  /// Empty for a manually entered item, and empty for a service the catalogue
+  /// has no priced plans for — which is two thirds of it. An empty grid is not
+  /// a failure state, it is the normal one, so the block simply does not appear.
+  List<PlanOption> get _planOptions {
+    final entry = _matched;
+    final cycle = _cycle;
+    if (entry == null || cycle == null) return const [];
+    return PlanGrid.optionsFor(entry, cycle);
+  }
+
+  /// Where the prices in the grid came from, and when.
+  ///
+  /// Never omitted. A grid of amounts with no provenance reads as the app
+  /// knowing what the user pays, and it does not — these are the vendor's list
+  /// prices, and a promotion, a legacy tier or a family plan split four ways all
+  /// make them wrong for this particular person.
+  String _planProvenance(List<PlanOption> plans) {
+    final checked = plans
+        .map((p) => p.checkedAt)
+        .reduce(
+          // The oldest of them: the block is only as fresh as its weakest row, and
+          // quoting the newest would overstate how current it is.
+          (a, b) => a.compareTo(b) <= 0 ? a : b,
+        );
+    final date = LocalDate.tryParse(checked);
+    return date == null
+        ? 'Listed prices from the vendor. Yours may differ.'
+        : 'Listed prices, checked ${DateCopy.listedDate(date)}. '
+              'Yours may differ.';
+  }
+
+  /// The last amount the app wrote into the cost field, as opposed to typed.
+  ///
+  /// Null once the user has touched it. See the listener in [initState].
+  String? _written;
+
+  void _pickPlan(PlanOption plan) {
+    setState(() {
+      _planTier = plan.tier;
+      _currency = plan.price.currency;
+      _fillAmount(plan.price.minor);
+    });
+  }
+
+  /// Puts a catalogue price in the cost field without unlatching the tile.
+  void _fillAmount(int minor) {
+    _written = MoneyFormat.majorInput(minor, _currency);
+    _amount.text = _written!;
+  }
+
+  /// Step one handing over to step two.
+  void _pickFromCatalog(CatalogEntry entry) {
+    _pick(entry);
+    setState(() {
+      _picking = false;
+      // Preselect the vendor's own default tier, so the commonest plan is
+      // already lit and its price already in the cost field.
+      _planTier = entry.defaultPlan;
+      final cycle = _cycle;
+      if (cycle == null) return;
+      final plans = PlanGrid.optionsFor(entry, cycle);
+      final pick = plans.where((p) => p.tier == entry.defaultPlan).firstOrNull;
+      if (pick != null) {
+        _currency = pick.price.currency;
+        _fillAmount(pick.price.minor);
+      }
+    });
   }
 
   Widget _gutter(Widget child) => Padding(
@@ -220,11 +564,38 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   Widget _header() {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
-          child: Text(
-            _isEdit ? 'Edit item' : 'New item',
-            style: SubdockText.editorTitle,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Back to step one, and only when there is a step one to go back
+              // to. An edit has no picker behind it, and a back link that
+              // dropped the user into a service browser would look like the
+              // app had lost the item they were editing.
+              if (!_isEdit)
+                InkWell(
+                  onTap: () => setState(() => _picking = true),
+                  child: const Padding(
+                    padding: EdgeInsets.only(bottom: 10),
+                    child: Text('‹ Back', style: SubdockText.quietAction),
+                  ),
+                ),
+              Text(
+                _isEdit ? 'Edit item' : (_matched?.name ?? 'New item'),
+                style: SubdockText.editorTitle,
+              ),
+              // Only the editor carries a mono line under the title, and it
+              // names the item, because `Edit item` alone does not say which
+              // of forty was opened. The add form's title is already the
+              // service's own name, so a `Step 2 of 2` under it counts steps
+              // at the reader instead of telling them anything.
+              if (_isEdit) ...[
+                const SizedBox(height: 6),
+                Text('Editing $_editingName', style: SubdockText.monoInline),
+              ],
+            ],
           ),
         ),
         if (widget.onScan != null) ...[
@@ -247,6 +618,136 @@ class _AddItemScreenState extends State<AddItemScreen> {
       ],
     );
   }
+
+  /// When the series stops, in the two ways a person says it.
+  ///
+  /// Only on screen once `Forever` is unticked, which is what makes the whole
+  /// block affordable: the common answer is "it just runs", and that answer is
+  /// a checkbox rather than a card.
+  ///
+  /// Two modes rather than a mixed list of chips, because "after six payments"
+  /// and "until March" are different questions and a chip rail that offers
+  /// both makes the reader work out which one they are answering. The date
+  /// mode still stores a count -- two ways of saying when a series stops are
+  /// two things that can disagree, and the count is the one the reminder
+  /// planner already understands.
+  Widget _endsBlock() {
+    const quick = [3, 6, 12];
+    final count = _repeatCount ?? _defaultRepeatCount;
+
+    return Container(
+      decoration: SubdockSurface.card(),
+      padding: const EdgeInsets.all(13),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SegmentedRow(
+            weighted: true,
+            labels: const ['After a number of payments', 'On a date'],
+            selected: _endsOnDate ? 1 : 0,
+            onSelect: (i) {
+              if (i == 1) {
+                _pickRepeatUntil();
+                return;
+              }
+              setState(() => _endsOnDate = false);
+            },
+          ),
+          const SizedBox(height: 13),
+          if (_endsOnDate)
+            Field(
+              label: 'Last payment on',
+              child: PickerField(
+                value: _endsOn == null
+                    ? 'Choose a date'
+                    : DateCopy.longDate(_endsOn!),
+                placeholder: _endsOn == null,
+                hint: _endsOn == null ? 'Tap to open the calendar' : null,
+                onTap: _pickRepeatUntil,
+              ),
+            )
+          else ...[
+            Row(
+              children: [
+                // Both words give way before the field between them does: the
+                // number is the part being read, and at a large text size a
+                // rigid row would push it off the card instead.
+                const Flexible(
+                  child: Text(
+                    'Stops after',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: SubdockText.rowLabel,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                SizedBox(
+                  width: 76,
+                  child: _numberBox(
+                    controller: _count,
+                    focusNode: _countFocus,
+                    onChanged: (n) {
+                      if (n < 1) return;
+                      setState(() => _repeatCount = n.clamp(1, 600));
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                const Flexible(
+                  child: Text(
+                    'payments',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: SubdockText.rowLabel,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 11),
+            // The three counts people actually pick, as flat chips: this is a
+            // shortcut to the field above, not a second control that can
+            // disagree with it.
+            // Wrapped, not a Row: three chips fit one line at this width and
+            // stop fitting the moment the reader turns the text size up.
+            Wrap(
+              spacing: 4,
+              runSpacing: 4,
+              children: [
+                for (final n in quick)
+                  FlatChip(
+                    label: '$n payments',
+                    selected: count == n,
+                    onTap: () => _setRepeatCount(n),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  void _setRepeatCount(int n) {
+    setState(() {
+      _repeatCount = n;
+      _endsOnDate = false;
+      _endsOn = null;
+    });
+    _count.text = '$n';
+  }
+
+  Widget _costBlock() => _gutter(
+    Field(
+      label: _amount.text.isEmpty ? 'Cost (optional)' : 'Cost',
+      child: CostField(
+        controller: _amount,
+        focusNode: _amountFocus,
+        currency: _currency,
+        onCurrency: _setCurrency,
+        convertedLine: _convertedLine,
+      ),
+    ),
+  );
 
   Widget _nameField() {
     return FieldBox(
@@ -297,12 +798,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
     return GroupedCard(
       children: [
         for (final entry in _suggestions)
-          _SuggestionRow(
+          SuggestionRow(
             name: entry.name,
             detail: _catalogDetail(entry),
             onTap: () => _pick(entry),
           ),
-        _SuggestionRow(
+        SuggestionRow(
           name: 'Use "${_name.text.trim()}" as a custom name',
           muted: true,
           onTap: _keepTyped,
@@ -314,10 +815,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
   Widget _categoryRail() {
     return ChipRail(
       children: [
-        for (final category in Category.values)
+        for (final category in widget.categories.all)
           ChoiceChipPill(
-            ItemPresenter.categoryLabel(category),
-            selected: _category == category,
+            category.label,
+            selected: _category.id == category.id,
             onTap: () => setState(() => _category = category),
           ),
       ],
@@ -340,9 +841,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
         _gutter(
           PickerField(
             value: expiresOn == null
-                ? 'Pick a date'
+                ? 'Choose a date'
                 : DateCopy.longDate(expiresOn),
             placeholder: expiresOn == null,
+            // Only while the field is still a prompt. Once it holds a date the
+            // second line would be explaining a control the user has used.
+            hint: expiresOn == null ? 'Tap to open the calendar' : null,
             onTap: _pickDate,
           ),
         ),
@@ -364,68 +868,214 @@ class _AddItemScreenState extends State<AddItemScreen> {
     );
   }
 
-  Widget _repeatRow() {
-    final cycle = _cycle;
-    final isCustom = cycle != null && !_quickRepeats.contains(cycle);
-
-    return SegmentedRow(
-      labels: [
-        for (final option in _quickRepeats) _repeatLabel(option),
-        // The fourth segment is a value and a door at once: it says what was
-        // chosen when the choice is not one of the three, and opens the full
-        // list either way.
-        isCustom ? _repeatLabel(cycle) : 'Other…',
+  /// `Repeats forever`, and the card behind it.
+  ///
+  /// A toggle rather than a checkbox on the cycle row: this is a statement
+  /// about the item ("it just runs"), the same shape of question as `In a free
+  /// trial now` two blocks down, and the two read as one kind of control only
+  /// if they are drawn as one. It is also the answer most of the time — a
+  /// subscription runs until it is stopped — so it is on by default and the
+  /// count card does not exist until the user says otherwise.
+  ///
+  /// Turning it off sets twelve payments, which is the spec's own default: a
+  /// count control that opens on nothing makes the user answer a question they
+  /// have not been asked yet.
+  Widget _repeatsBlock() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        GroupedCard(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+          children: [
+            InkWell(
+              onTap: _toggleForever,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Repeats forever',
+                        style: SubdockText.rowLink,
+                      ),
+                    ),
+                    AppToggle(
+                      value: _repeatCount == null,
+                      onChanged: (_) => _toggleForever(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (_repeatCount != null) ...[const SizedBox(height: 9), _endsBlock()],
       ],
-      selected: isCustom ? _quickRepeats.length : _quickRepeats.indexOf(cycle),
-      onSelect: (i) {
-        if (i == _quickRepeats.length) {
-          _pickCycle();
-          return;
-        }
-        setState(() {
-          _cycle = _quickRepeats[i];
-          // "Once" and "how many times" cannot both be true.
-          if (_cycle == null) _repeatCount = null;
-        });
-      },
     );
   }
 
-  /// The segment labels. Shorter than [ItemPresenter.cycleLabel] because four
-  /// of these have to share the width of a phone: "Twice a year" does not fit
-  /// beside three siblings, "6 months" does, and a typed interval shrinks all
-  /// the way to "5 mo".
-  static String _repeatLabel(Cycle? cycle) {
-    if (cycle == null) return 'Once';
-    return switch ((cycle.unit, cycle.step)) {
-      (CycleUnit.day, 7) => 'Weekly',
-      (CycleUnit.month, 1) => 'Monthly',
-      (CycleUnit.month, 3) => '3 months',
-      (CycleUnit.month, 6) => '6 months',
-      (CycleUnit.month, 12) => 'Yearly',
-      _ => ItemPresenter.cycleEveryShort(cycle),
-    };
+  /// `Every [n] months`, for the interval the preset list has no name for.
+  ///
+  /// Inline rather than in a sheet. A sheet was one tap further away and, worse,
+  /// hid the answer: the dropdown above reads `Every 2 months` afterwards, and
+  /// a user who wants to make it three has to reopen a modal to find out what
+  /// the current number even is.
+  ///
+  /// Four units, where the spec names three. Days stay because a prepaid SIM's
+  /// validity is sold in days — `30 days`, `180 days` — and that is the one
+  /// item in this app whose lapse cannot be undone.
+  Widget _everyRow() {
+    const units = [
+      (CycleField.day, 'Days'),
+      (CycleField.week, 'Weeks'),
+      (CycleField.month, 'Months'),
+      (CycleField.year, 'Years'),
+    ];
+
+    return Container(
+      decoration: SubdockSurface.card(),
+      padding: const EdgeInsets.all(13),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Flexible(
+                child: Text(
+                  'Every',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: SubdockText.rowLabel,
+                ),
+              ),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 76,
+                child: _numberBox(
+                  controller: _every,
+                  focusNode: _everyFocus,
+                  onChanged: (n) => _setCustomCycle(n, _everyUnit),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 11),
+          Wrap(
+            spacing: 4,
+            runSpacing: 4,
+            children: [
+              for (final (field, label) in units)
+                FlatChip(
+                  label: label,
+                  selected: _everyUnit == field,
+                  onTap: () => _setCustomCycle(
+                    int.tryParse(_every.text.trim()) ?? 1,
+                    field,
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
-  /// The full list behind the fourth segment: every preset, one-off, and the
-  /// way out to an interval the app does not have a name for.
+  /// Rebuilds the custom cycle from the number and the unit.
+  ///
+  /// Out-of-range numbers are dropped rather than clamped: the user is still
+  /// typing, and rewriting `4` to `480` under the cursor because they were on
+  /// their way to `45` is worse than waiting.
+  void _setCustomCycle(int count, CycleField field) {
+    if (count < 1 || count > Cycle.maxStep) return;
+    setState(() {
+      _everyUnit = field;
+      _cycle = Cycle.every(count, field);
+    });
+    if (_every.text.trim() != '$count') _every.text = '$count';
+  }
+
+  /// The small centred number field the two count rows share.
+  Widget _numberBox({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required void Function(int value) onChanged,
+  }) {
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      keyboardType: TextInputType.number,
+      textAlign: TextAlign.center,
+      style: SubdockText.rowValue,
+      cursorColor: SubdockColors.accent,
+      onChanged: (text) {
+        final n = int.tryParse(text.trim());
+        if (n == null) return;
+        onChanged(n);
+      },
+      decoration: InputDecoration(
+        isDense: true,
+        filled: true,
+        fillColor: SubdockColors.hairline,
+        contentPadding: const EdgeInsets.symmetric(vertical: 11),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(SubdockRadius.chip),
+          borderSide: BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  /// Twelve, from the spec. A year of a monthly plan.
+  static const int _defaultRepeatCount = 12;
+
+  void _toggleForever() {
+    if (_repeatCount != null) {
+      setState(() {
+        _repeatCount = null;
+        _endsOnDate = false;
+        _endsOn = null;
+      });
+      return;
+    }
+    _setRepeatCount(_defaultRepeatCount);
+  }
+
+  /// The name of a cycle as the dropdown shows it.
+  ///
+  /// [ItemPresenter.cycleLabel] with one word changed: `One-off` rather than
+  /// `Once`, because this field is a list of billing cycles and `Once` beside
+  /// `Monthly` reads like a frequency where `One-off` reads like a kind of
+  /// payment. Everything else, custom intervals included, is the presenter's
+  /// wording — the field is full width, so `Every 2 months` fits.
+  static String _cycleLabel(Cycle? cycle) =>
+      cycle == null ? 'One-off' : ItemPresenter.cycleLabel(cycle);
+
+  /// The list behind the dropdown: every preset, the one-off, and the way out
+  /// to an interval the app does not have a name for.
+  ///
+  /// `Custom…` does not open a second modal. It sets an interval and reveals
+  /// the `Every n …` row underneath, which is where the number is then edited
+  /// in place — a real contract renews on a schedule somebody else chose, and
+  /// "my plan runs 5 months" must not turn into "make it a one-off and re-date
+  /// it by hand five times a year".
   Future<void> _pickCycle() async {
     const once = 'ONCE';
     const custom = 'CUSTOM';
 
     final cycle = _cycle;
-    final isCustom = cycle != null && !cycle.isPreset;
+    final isCustom = _isCustomCycle;
 
-    final picked = await _choose<String>(
-      title: 'Repeat',
+    final picked = await chooseOption<String>(
+      context,
+      title: 'Billing cycle',
       options: [
         for (final preset in Cycle.values)
           (preset.wireName, ItemPresenter.cycleLabel(preset)),
-        (once, 'Once'),
+        (once, 'One-off'),
         (
           custom,
           isCustom
-              ? 'Every ${ItemPresenter.cycleEvery(cycle)}…'
+              ? 'Every ${ItemPresenter.cycleEvery(cycle!)}…'
               : 'Every N days, weeks, months…',
         ),
       ],
@@ -434,7 +1084,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (picked == null || !mounted) return;
 
     if (picked == custom) {
-      await _pickCustomCycle();
+      // Two months, not one: one month is already on the list above, so a user
+      // who came this far means something else. An interval already custom is
+      // left alone — reopening the list to check what it says must not reset it.
+      if (!isCustom) _setCustomCycle(2, CycleField.month);
       return;
     }
 
@@ -442,97 +1095,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
       _cycle = picked == once ? null : CycleWire.fromWire(picked);
       if (_cycle == null) _repeatCount = null;
     });
-  }
-
-  /// The interval nothing on the list covers: every 5 months, every 45 days.
-  ///
-  /// A real contract renews on a schedule somebody else chose, and the answer
-  /// to "my plan runs 5 months" cannot be "then make it a one-off and re-date
-  /// it by hand five times a year".
-  Future<void> _pickCustomCycle() async {
-    final picked = await showModalBottomSheet<Cycle>(
-      context: context,
-      backgroundColor: SubdockColors.canvas,
-      showDragHandle: true,
-      // The sheet holds a keyboard-bound field, so it has to be free to give
-      // up height to the keyboard rather than sit under it.
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(SubdockRadius.placard),
-        ),
-      ),
-      builder: (sheet) => _CustomCycleSheet(initial: _cycle),
-    );
-    if (picked != null && mounted) setState(() => _cycle = picked);
-  }
-
-  Widget _costField() {
-    // VND has no minor unit, so its field has no decimal point to offer and
-    // no decimal key to put on the keyboard.
-    final exponent = Currencies.exponentOf(_currency);
-    final converted = _convertedLine;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FieldBox(
-          focused: _amountFocus.hasFocus,
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _amount,
-                  focusNode: _amountFocus,
-                  keyboardType: TextInputType.numberWithOptions(
-                    decimal: exponent > 0,
-                  ),
-                  // The amount is typed the way it is written — 20.50, not
-                  // 2050 — so the separators it is written with have to be
-                  // typeable. Everything else is filtered out here rather than
-                  // rejected on save.
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(
-                      exponent > 0 ? RegExp(r'[0-9.,]') : RegExp(r'[0-9,]'),
-                    ),
-                  ],
-                  style: SubdockText.monoValue,
-                  cursorColor: SubdockColors.accent,
-                  decoration: InputDecoration(
-                    isDense: true,
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                    hintText: '0',
-                    hintStyle: SubdockText.fieldValue.copyWith(
-                      color: SubdockColors.inkMuted,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              ChoiceChipPill(
-                '₫',
-                selected: _currency == 'VND',
-                onField: true,
-                onTap: () => _setCurrency('VND'),
-              ),
-              const SizedBox(width: 5),
-              ChoiceChipPill(
-                r'$',
-                selected: _currency == 'USD',
-                onField: true,
-                onTap: () => _setCurrency('USD'),
-              ),
-            ],
-          ),
-        ),
-        if (converted != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 5),
-            child: Text(converted, style: SubdockText.monoInline),
-          ),
-      ],
-    );
   }
 
   /// The same figure in the other currency.
@@ -599,23 +1161,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
     );
   }
 
-  String get _repeatCountLabel {
-    final count = _repeatCount;
-    if (count == null) return 'Forever';
-    final cycle = _cycle;
-    if (cycle == null) return '$count times';
-
-    // A count the user set through "Until a date" is still stored as a count,
-    // so the field says both: the number is what the app will act on, and the
-    // date is what the user was actually thinking about.
-    final last = Recurrence.occurrenceAfter(
-      _expiresOn ?? widget.today,
-      cycle,
-      count - 1,
-    );
-    return '$count times · to ${MoneyFormat.shortDate(last)}';
-  }
-
   String _catalogDetail(CatalogEntry entry) {
     final parts = <String>[ItemPresenter.cycleLabel(entry.defaultCycle)];
     final minor = entry.typicalAmountMinor;
@@ -631,7 +1176,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       _matched = entry;
       _name.text = entry.name;
       _nameSettled = true;
-      _category = entry.category;
+      _category = widget.categories[entry.categoryId];
       _cycle = entry.defaultCycle;
       if (_cycle == null) _repeatCount = null;
       final minor = entry.typicalAmountMinor;
@@ -678,46 +1223,37 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (picked != null && mounted) setState(() => _iconName = picked);
   }
 
-  Future<void> _pickRepeatCount() async {
-    const untilADate = -1;
-
-    final picked = await _choose<int>(
-      title: 'How many times',
-      options: const [
-        (0, 'Forever'),
-        (3, '3 times'),
-        (6, '6 times'),
-        (12, '12 times'),
-        (untilADate, 'Until a date…'),
-      ],
-      selected: _repeatCount ?? 0,
-    );
-    if (picked == null || !mounted) return;
-
-    if (picked != untilADate) {
-      setState(() => _repeatCount = picked == 0 ? null : picked);
-      return;
-    }
-
-    // "Until a date" is stored as a count, not as a second end-date field.
-    // Two ways of saying when a series stops is two things that can disagree,
-    // and the count is the one the reminder planner already understands.
-    final end = await widget.onPickDate?.call(_expiresOn);
+  /// The calendar behind `On a date`.
+  ///
+  /// The date is turned into a count straight away and the count is what gets
+  /// saved; the date is kept only so the field can read it back. Two ways of
+  /// saying when a series stops are two things that can disagree, and the count
+  /// is the one the reminder planner already understands.
+  ///
+  /// A date before the next payment is pulled forward to it. The spec requires
+  /// `>= next payment`, and the honest reading of "last payment on a day before
+  /// the first" is one payment, not none — a series with zero payments is an
+  /// item that does nothing, which is not what anyone meant by picking a date.
+  Future<void> _pickRepeatUntil() async {
+    final picked = await widget.onPickDate?.call(_endsOn ?? _expiresOn);
     final cycle = _cycle;
-    if (end == null || cycle == null || !mounted) return;
+    if (picked == null || cycle == null || !mounted) return;
+
+    final first = _expiresOn ?? widget.today;
+    final end = picked < first ? first : picked;
+
     setState(() {
+      _endsOnDate = true;
+      _endsOn = end;
       _repeatCount =
-          Recurrence.cyclesElapsed(
-            _expiresOn ?? widget.today,
-            cycle,
-            end,
-          ).clamp(0, 600) +
-          1;
+          Recurrence.cyclesElapsed(first, cycle, end).clamp(0, 600) + 1;
     });
+    _count.text = '$_repeatCount';
   }
 
   Future<void> _pickLead() async {
-    final picked = await _choose<int>(
+    final picked = await chooseOption<int>(
+      context,
       title: 'Remind me',
       options: [
         for (final lead in const [0, 1, 2, 3, 5, 7, 14, 30, 60])
@@ -728,69 +1264,21 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (picked != null && mounted) setState(() => _lead = picked);
   }
 
-  /// One sheet for every list-of-options field on this form.
+  /// Hands the form's answers back to the caller.
   ///
-  /// A sheet rather than a Material dropdown: the dropdown paints its own menu
-  /// surface with its own radius and elevation, and there is no way to make
-  /// that surface agree with the rest of this design.
-  Future<T?> _choose<T>({
-    required String title,
-    required List<(T, String)> options,
-    T? selected,
-  }) {
-    return showModalBottomSheet<T>(
-      context: context,
-      backgroundColor: SubdockColors.canvas,
-      showDragHandle: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(SubdockRadius.placard),
-        ),
-      ),
-      builder: (sheet) => SafeArea(
-        top: false,
-        child: ListView(
-          shrinkWrap: true,
-          padding: const EdgeInsets.fromLTRB(
-            SubdockSpacing.screenH,
-            0,
-            SubdockSpacing.screenH,
-            20,
-          ),
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Text(title.toUpperCase(), style: SubdockText.sectionLabel),
-            ),
-            GroupedCard(
-              children: [
-                for (final (value, label) in options)
-                  DetailRow(
-                    // The tick is set in mono because that is the family that
-                    // carries the glyph; Be Vietnam Pro has no U+2713 and
-                    // would fall back to whatever the platform supplies.
-                    label: label,
-                    value: value == selected ? '✓' : null,
-                    monoValue: true,
-                    valueColor: SubdockColors.accent,
-                    onTap: () => Navigator.of(sheet).pop(value),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
+  /// The spec also asks for a save with no date at all — the item joins the
+  /// list and simply gets no reminder. That is not done here, and it is not a
+  /// layout change: `DraftItem.expiresOn`, `itemRow.expiresOn` and every
+  /// reminder query below them are non-null, so a dateless item needs a
+  /// migration and a nullable column, not a different button state.
   void _save() {
     final amount = MoneyFormat.parseMajor(_amount.text, _currency);
     final initial = widget.initial;
 
     widget.onSave?.call(
       DraftItem(
-        name: _name.text.trim(),
-        expiresOn: _expiresOn!,
+        name: _savedName,
+        expiresOn: _dueDate!,
         category: _category,
         iconName: _iconName,
         cycle: _cycle,
@@ -801,198 +1289,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
         // show it, so it has nothing to say about it.
         leadDays: initial?.leadDays ?? [_lead],
         matched: _matched,
-      ),
-    );
-  }
-}
-
-/// The sheet behind "Every N days, weeks, months…".
-///
-/// Its own widget, and its own state, because the number is only a cycle once
-/// it is a whole number in range: the form outside must never hold a half-typed
-/// interval, and the sheet must be able to say why the button is off.
-class _CustomCycleSheet extends StatefulWidget {
-  /// The interval the form is holding, so the sheet opens on it rather than on
-  /// a default the user then has to undo.
-  final Cycle? initial;
-
-  const _CustomCycleSheet({this.initial});
-
-  @override
-  State<_CustomCycleSheet> createState() => _CustomCycleSheetState();
-}
-
-class _CustomCycleSheetState extends State<_CustomCycleSheet> {
-  static const List<CycleField> _fields = [
-    CycleField.day,
-    CycleField.week,
-    CycleField.month,
-    CycleField.year,
-  ];
-
-  final _count = TextEditingController();
-  late CycleField _field;
-
-  @override
-  void initState() {
-    super.initState();
-    // Two months rather than one: one month is already a segment on the form,
-    // so a user who got this far means something else.
-    final (count, field) =
-        widget.initial?.inLargestField ?? (2, CycleField.month);
-    _count.text = count.toString();
-    _field = field;
-    _count.addListener(() => setState(() {}));
-  }
-
-  @override
-  void dispose() {
-    _count.dispose();
-    super.dispose();
-  }
-
-  /// The cycle the sheet currently describes, or null while it describes
-  /// nothing valid.
-  Cycle? get _cycle {
-    final count = int.tryParse(_count.text.trim());
-    if (count == null || count < 1) return null;
-    try {
-      return Cycle.every(count, _field);
-    } on ArgumentError {
-      return null;
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final cycle = _cycle;
-
-    return Padding(
-      // The sheet gives up height to the keyboard rather than letting it cover
-      // the field it belongs to.
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(
-            SubdockSpacing.screenH,
-            0,
-            SubdockSpacing.screenH,
-            20,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(bottom: 12),
-                child: Text('REPEAT EVERY', style: SubdockText.sectionLabel),
-              ),
-              Row(
-                children: [
-                  SizedBox(
-                    width: 84,
-                    child: FieldBox(
-                      child: TextField(
-                        controller: _count,
-                        autofocus: true,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                          LengthLimitingTextInputFormatter(3),
-                        ],
-                        textAlign: TextAlign.center,
-                        style: SubdockText.monoValue,
-                        cursorColor: SubdockColors.accent,
-                        decoration: const InputDecoration(
-                          isDense: true,
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.zero,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: SegmentedRow(
-                      labels: [for (final field in _fields) _fieldLabel(field)],
-                      selected: _fields.indexOf(_field),
-                      onSelect: (i) => setState(() => _field = _fields[i]),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Text(
-                cycle == null
-                    ? 'A whole number of at most ${Cycle.maxStep} days or months.'
-                    : 'Repeats every ${ItemPresenter.cycleEvery(cycle)}.',
-                style: SubdockText.footnote,
-              ),
-              const SizedBox(height: 16),
-              PrimaryButton(
-                'Done',
-                onPressed: cycle == null
-                    ? null
-                    : () => Navigator.of(context).pop(cycle),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  static String _fieldLabel(CycleField field) => switch (field) {
-    CycleField.day => 'Days',
-    CycleField.week => 'Weeks',
-    CycleField.month => 'Months',
-    CycleField.year => 'Years',
-  };
-}
-
-class _SuggestionRow extends StatelessWidget {
-  final String name;
-  final String? detail;
-  final bool muted;
-  final VoidCallback onTap;
-
-  const _SuggestionRow({
-    required this.name,
-    this.detail,
-    this.muted = false,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-        child: Row(
-          children: [
-            ServiceTile(
-              name,
-              size: 30,
-              radius: SubdockRadius.tile,
-              fontSize: 12,
-            ),
-            const SizedBox(width: 11),
-            Expanded(
-              child: Text(
-                name,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: muted ? SubdockText.rowLabel : SubdockText.fieldValue,
-              ),
-            ),
-            if (detail != null) ...[
-              const SizedBox(width: 10),
-              Text(detail!, style: SubdockText.rowLabel.copyWith(fontSize: 13)),
-            ],
-          ],
-        ),
+        trialStart: _trial.on ? _trial.start : null,
+        paymentSourceId: _sourceId,
       ),
     );
   }

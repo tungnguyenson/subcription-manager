@@ -14,7 +14,7 @@ from collections import defaultdict
 CATALOG = "assets/services.json"
 MARKS = "lib/ui/widgets/service_mark.dart"
 
-SECTOR_VI = {
+CATEGORY_VI = {
     "AI": "AI", "STREAMING": "Xem phim", "MUSIC": "Nghe nhạc",
     "GAMING": "Game", "PRODUCTIVITY": "Làm việc", "SOCIAL": "Mạng xã hội",
     "NEWS": "Báo chí", "FOOD": "Đồ ăn", "FITNESS": "Sức khoẻ",
@@ -54,9 +54,9 @@ def main():
     entries = json.load(open(CATALOG, encoding="utf-8"))["entries"]
     rules = icon_rules()
 
-    by_sector = defaultdict(list)
+    by_category = defaultdict(list)
     for entry in entries:
-        by_sector[entry["sector"]].append(entry)
+        by_category[entry["category"]].append(entry)
 
     priced = sum(1 for e in entries if e.get("plans"))
     both = sum(
@@ -80,15 +80,15 @@ def main():
     w("cho mục không có giá.")
     w("")
 
-    for sector in sorted(by_sector, key=lambda s: -len(by_sector[s])):
-        rows = sorted(by_sector[sector], key=lambda e: e["name"].lower())
+    for category in sorted(by_category, key=lambda s: -len(by_category[s])):
+        rows = sorted(by_category[category], key=lambda e: e["name"].lower())
         n_priced = sum(1 for e in rows if e.get("plans"))
         n_both = sum(
             1
             for e in rows
             if {p["cycle"] for p in e.get("plans", [])} >= {"MONTHLY", "YEARLY"}
         )
-        w(f"## {SECTOR_VI.get(sector, sector)} ({sector})")
+        w(f"## {CATEGORY_VI.get(category, category)} ({category})")
         w("")
         w(f"{len(rows)} mục, {n_priced} có giá, {n_both} so được gói năm.")
         w("")

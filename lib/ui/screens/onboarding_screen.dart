@@ -132,7 +132,7 @@ class _Feature extends StatelessWidget {
                           fontFamily: SubdockText.family,
                           fontSize: 14,
                           height: 1.35,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: SubdockWeight.medium,
                           letterSpacing: -0.14,
                           color: SubdockColors.ink,
                         ),

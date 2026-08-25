@@ -4,6 +4,8 @@ import 'package:subdock/app.dart';
 import 'package:subdock/catalog/bundled_data.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/connection.dart';
+import 'package:subdock/data/database.dart';
+import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/data/item_repository.dart';
 import 'package:subdock/data/settings_store.dart';
 import 'package:subdock/domain/item_actions.dart';
@@ -26,15 +28,24 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  final database = await openDatabase();
-  final repository = ItemRepository(database);
-  final settings = SettingsStore(database);
-
+  // The catalogue is loaded before the database is opened, not after, because
+  // the migration that turns the old classification into a shelf needs it: it
+  // is the only thing that knows Netflix is streaming. Everything else about
+  // the order is unchanged.
   final catalog = ServiceCatalog(
     BundledData.parseCatalog(
       await rootBundle.loadString('assets/services.json'),
     ).entries,
   );
+
+  final database = await openDatabase(
+    reshelve: (name, legacy) =>
+        catalog.matchByName(name)?.categoryId ??
+        legacyCategoryByCode(name, legacy),
+  );
+  final repository = ItemRepository(database);
+  final settings = SettingsStore(database);
+  final filters = FilterStore(database);
 
   final scheduler = NotificationScheduler();
   // Categories must be registered before any alert is scheduled: iOS binds a
@@ -54,6 +65,7 @@ Future<void> main() async {
     SubdockApp(
       repository: repository,
       settings: settings,
+      filters: filters,
       scheduler: scheduler,
       catalog: catalog,
     ),

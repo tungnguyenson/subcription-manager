@@ -6,6 +6,7 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/money.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/ui/app_shell.dart';
+import 'package:subdock/ui/money_presenter.dart';
 import 'package:subdock/ui/screens/money_screen.dart';
 import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
@@ -32,7 +33,7 @@ void main() {
   TrackedItem item(
     String name, {
     required String expiresOn,
-    Category category = Category.subscription,
+    String categoryId = 'STREAMING',
     int? amountMinor,
     String? currency,
     Cycle? cycle,
@@ -41,7 +42,7 @@ void main() {
   }) => TrackedItem(
     id: name,
     name: name,
-    category: category,
+    categoryId: categoryId,
     expiresOn: d(expiresOn),
     anchorDate: d(anchorDate ?? expiresOn),
     cycle: cycle,
@@ -54,12 +55,12 @@ void main() {
     item(
       'SIM Viettel 0912 345 678',
       expiresOn: '2026-08-11',
-      category: Category.subscription,
+      categoryId: 'STREAMING',
     ),
     item(
       'Claude Pro',
       expiresOn: '2026-08-17',
-      category: Category.subscription,
+      categoryId: 'STREAMING',
       amountMinor: 2000,
       currency: 'USD',
     ),
@@ -69,7 +70,7 @@ void main() {
       amountMinor: 260000,
       currency: 'VND',
     ),
-    item('Passport', expiresOn: '2027-03-01', category: Category.document),
+    item('Passport', expiresOn: '2027-03-01', categoryId: 'DOCUMENTS'),
   ];
 
   group('Upcoming', () {
@@ -80,8 +81,10 @@ void main() {
       );
 
       expect(find.text('Upcoming'), findsOneWidget);
-      expect(find.text('OVERDUE'), findsOneWidget);
-      expect(find.text('NEXT 7 DAYS'), findsOneWidget);
+      // The heading carries its count in the same span, so match on the words
+      // rather than on the whole string: `OVERDUE  1`.
+      expect(find.textContaining('OVERDUE'), findsOneWidget);
+      expect(find.textContaining('NEXT 7 DAYS'), findsOneWidget);
       expect(find.text('SIM Viettel 0912 345 678'), findsOneWidget);
       expect(find.text('Netflix Premium'), findsOneWidget);
     });
@@ -94,12 +97,21 @@ void main() {
         UpcomingScreen(view: UpcomingPresenter.build(sample, today)),
       );
 
-      final overdue = tester.widget<Text>(find.text('Overdue').last);
-      expect(overdue.style?.color, SubdockColors.danger);
+      // `Late` in a filled danger pill, so the colour to check is the fill
+      // rather than the type: white words on red, not red words on glass.
+      final pill = tester.widget<Container>(
+        find
+            .ancestor(of: find.text('Late'), matching: find.byType(Container))
+            .first,
+      );
+      expect((pill.decoration as BoxDecoration).color, SubdockColors.danger);
     });
 
-    // Things a year out are real but must not compete with this week.
-    testWidgets('a distant bucket starts folded and opens on tap', (
+    // Every bucket on this screen is open. A section that arrives folded hides
+    // items behind a tap the user has no reason to expect, and the hand-off
+    // draws none of them that way. Distance is expressed by scroll position,
+    // not by a summary row.
+    testWidgets('a distant bucket is a section like any other, not a fold', (
       tester,
     ) async {
       await show(
@@ -107,14 +119,47 @@ void main() {
         UpcomingScreen(view: UpcomingPresenter.build(sample, today)),
       );
 
-      expect(find.text('Passport'), findsNothing);
-      // The count is on the closed row, so the user knows there is something
-      // in there before opening it.
-      expect(find.textContaining('1 item'), findsOneWidget);
-
-      await tester.tap(find.text('Later'));
-      await tester.pumpAndSettle();
+      expect(find.textContaining('LATER'), findsOneWidget);
       expect(find.text('Passport'), findsOneWidget);
+      // Nothing to tap open, so nothing offering to be tapped open.
+      expect(find.textContaining('1 item'), findsNothing);
+    });
+
+    // The tab bar is drawn *over* the list, not above it, so a screen padded
+    // by `contentBottom` alone leaves its last row underneath the bar where no
+    // tap reaches it. This is how `Delete this item` became unreachable.
+    testWidgets('the last row clears the tab bar rather than hiding under it', (
+      tester,
+    ) async {
+      tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+      tester.view.devicePixelRatio = 3;
+      // A home indicator, which is what makes the bar tall enough on a real
+      // phone to swallow a row.
+      tester.view.padding = const FakeViewPadding(bottom: 34 * 3);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildSubdockTheme(),
+          home: AppShell(
+            current: ShellTab.settings,
+            onSelect: (_) {},
+            child: const SettingsScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Scroll to the very bottom, the way a user reaching for the last row
+      // would.
+      await tester.drag(find.byType(ListView), const Offset(0, -2000));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.getRect(find.text('About')).bottom,
+        lessThan(tester.getRect(find.byType(TabMark).first).top),
+        reason: 'the last row sits under the tab bar and cannot be tapped',
+      );
     });
 
     // An empty list in a reminder app is ambiguous: nothing due, or the app
@@ -165,7 +210,7 @@ void main() {
               'Course instalment',
               anchorDate: '2026-05-21',
               expiresOn: '2026-08-21',
-              category: Category.bill,
+              categoryId: 'UTILITIES',
               cycle: Cycle.monthly,
               repeatCount: 6,
               amountMinor: 1200000,
@@ -180,6 +225,28 @@ void main() {
   });
 
   group('Money', () {
+    /// The month view, with a total the caller controls.
+    ///
+    /// Reconstructed after the screen moved from loose parameters to a single
+    /// [MoneyView]; the assertions below are unchanged in what they check.
+    MoneyView view(
+      MixedTotal total, {
+      String subtitle = '1 item counted',
+      List<ItemSpend> items = const [],
+      List<SpendBar> bars = const [],
+    }) => MoneyView(
+      span: MoneySpan.month,
+      label: 'This month',
+      total: total,
+      subtitle: subtitle,
+      // Derived the way the real presenter derives it rather than hand-built:
+      // the point of the line is that it is the headline converted, and a
+      // fixture that makes up a figure cannot check that.
+      alternateTotal: MoneyPresenter.alternateTotal(total),
+      items: items,
+      bars: bars,
+    );
+
     testWidgets('shows the approximation and the exact subtotals under it', (
       tester,
     ) async {
@@ -188,12 +255,20 @@ void main() {
         rate: Fx.bundledUsdVnd,
         today: today,
       );
-      await show(tester, MoneyScreen(thisMonth: total));
+      await show(tester, MoneyScreen(view: view(total)));
 
+      // `Money` on the screen, `Spending` on the tab that opens it. See the
+      // comment on the title in MoneyScreen.
       expect(find.text('Money'), findsOneWidget);
       expect(find.textContaining('≈'), findsWidgets);
       expect(find.textContaining('618,000 ₫'), findsWidgets);
       expect(find.textContaining(r'$20.00'), findsWidgets);
+      // The same total in the other currency, quietly, under the headline.
+      // Three groups of figures on this card was the bug; one restatement is
+      // what a second currency actually needs.
+      expect(find.text('EXACT AMOUNTS'), findsNothing);
+      // The dollar line carries its own conversion, so the sum is followable.
+      expect(find.textContaining('520,920 ₫'), findsOneWidget);
     });
 
     // A converted figure with no rate date silently rewrites itself.
@@ -205,7 +280,7 @@ void main() {
         rate: Fx.bundledUsdVnd,
         today: today,
       );
-      await show(tester, MoneyScreen(thisMonth: total));
+      await show(tester, MoneyScreen(view: view(total)));
 
       expect(find.textContaining('26,046'), findsOneWidget);
       expect(find.textContaining('14/08/2026'), findsOneWidget);
@@ -219,7 +294,7 @@ void main() {
         rate: Fx.bundledUsdVnd,
         today: LocalDate.parse('2026-12-01'),
       );
-      await show(tester, MoneyScreen(thisMonth: total));
+      await show(tester, MoneyScreen(view: view(total)));
 
       expect(find.text('—'), findsWidgets);
       expect(find.textContaining('left unconverted'), findsOneWidget);
@@ -231,21 +306,58 @@ void main() {
       await show(
         tester,
         MoneyScreen(
-          thisMonth: Fx.total(
-            [Money.vnd(260000), Money.vnd(842000)],
-            rate: Fx.bundledUsdVnd,
-            today: today,
+          view: view(
+            Fx.total(
+              [Money.vnd(260000), Money.vnd(842000)],
+              rate: Fx.bundledUsdVnd,
+              today: today,
+            ),
+            subtitle: '2 items counted',
+            items: [
+              ItemSpend(name: 'Electricity bill', total: Money.vnd(842000)),
+              ItemSpend(name: 'Netflix Premium', total: Money.vnd(260000)),
+            ],
           ),
-          items: [
-            ItemSpend(name: 'Electricity bill', total: Money.vnd(842000)),
-            ItemSpend(name: 'Netflix Premium', total: Money.vnd(260000)),
-          ],
         ),
       );
 
       expect(find.text('BY ITEM'), findsOneWidget);
       expect(find.text('842,000 ₫'), findsOneWidget);
-      expect(find.text('2 items'), findsOneWidget);
+      expect(find.text('2 items counted'), findsOneWidget);
+    });
+
+    // Six zeroed columns claim "you spent nothing"; no chart at all says "no
+    // record yet", which is the truth about a database with no history in it.
+    testWidgets('the chart is absent until something has been paid', (
+      tester,
+    ) async {
+      final total = Fx.total(
+        [Money.vnd(260000)],
+        rate: Fx.bundledUsdVnd,
+        today: today,
+      );
+
+      await show(tester, MoneyScreen(view: view(total)));
+      expect(find.text('PAID, LAST 6 MONTHS'), findsNothing);
+
+      await show(
+        tester,
+        MoneyScreen(
+          view: view(
+            total,
+            bars: const [
+              SpendBar(label: 'J', longLabel: 'July', minor: 100000),
+              SpendBar(
+                label: 'A',
+                longLabel: 'August',
+                minor: 260000,
+                current: true,
+              ),
+            ],
+          ),
+        ),
+      );
+      expect(find.text('PAID, LAST 6 MONTHS'), findsOneWidget);
     });
   });
 
@@ -268,80 +380,115 @@ void main() {
       expect(find.byType(AlertBanner), findsNothing);
     });
 
-    // A chevron promises a picker. Currency and language have neither, so
-    // neither gets one.
+    // A chevron promises a picker. Currency, language and the widget row have
+    // none, so none of them gets one.
     testWidgets('value rows do not pretend to lead anywhere', (tester) async {
       await show(tester, const SettingsScreen());
 
       expect(find.text('VND'), findsOneWidget);
       expect(find.text('English'), findsOneWidget);
-      expect(find.text('›'), findsNWidgets(4));
+      expect(find.text('Not yet'), findsOneWidget);
+      expect(find.text('›'), findsNWidgets(6));
+    });
+
+    // A value sitting at the end of its own half of the row reads as a second
+    // column of labels. It belongs against the card's right edge.
+    testWidgets('a value is flush right, not stranded mid-row', (tester) async {
+      await show(tester, const SettingsScreen());
+
+      // Two values of different widths share a right edge only when both are
+      // flush right. Stranded at the end of their own half of the row, they
+      // would each stop wherever their own text happened to end.
+      expect(
+        tester.getRect(find.text('VND')).right,
+        closeTo(tester.getRect(find.text('English')).right, 0.5),
+      );
+      expect(
+        tester.getRect(find.text('VND')).right,
+        greaterThan(tester.getRect(find.text('Currency')).right),
+      );
     });
   });
 
   group('Shell', () {
-    testWidgets('has three destinations plus the add button', (tester) async {
-      ShellTab? picked;
-      var added = false;
-
+    Future<void> shell(
+      WidgetTester tester, {
+      ShellTab current = ShellTab.upcoming,
+      ValueChanged<ShellTab>? onSelect,
+      VoidCallback? onAdd,
+    }) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: buildSubdockTheme(),
           home: AppShell(
-            current: ShellTab.upcoming,
-            onSelect: (tab) => picked = tab,
-            onAdd: () => added = true,
+            current: current,
+            onSelect: onSelect ?? (_) {},
+            onAdd: onAdd,
             child: const SizedBox(),
           ),
         ),
       );
       await tester.pumpAndSettle();
+    }
+
+    testWidgets('has four destinations plus the add button', (tester) async {
+      ShellTab? picked;
+      var added = false;
+
+      await shell(
+        tester,
+        onSelect: (tab) => picked = tab,
+        onAdd: () => added = true,
+      );
 
       expect(find.text('Upcoming'), findsOneWidget);
-      expect(find.text('Money'), findsOneWidget);
+      expect(find.text('Spending'), findsOneWidget);
+      expect(find.text('Savings'), findsOneWidget);
       expect(find.text('Settings'), findsOneWidget);
 
-      await tester.tap(find.text('Money'));
+      await tester.tap(find.text('Spending'));
       expect(picked, ShellTab.money);
 
       await tester.tap(find.byTooltip('Add an item'));
       expect(added, isTrue);
     });
 
-    // Which tab you are on has to be answerable without comparing three
-    // labels against each other, so the selected one differs in colour,
-    // weight and background at once rather than in any single one of them.
-    testWidgets('the selected destination is marked three ways', (
-      tester,
-    ) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: buildSubdockTheme(),
-          home: AppShell(
-            current: ShellTab.money,
-            onSelect: (_) {},
-            child: const SizedBox(),
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
+    // Which tab you are on has to be answerable without comparing four labels
+    // against each other, so the selected one differs in colour *and* in the
+    // mark being filled rather than outlined. Colour is the one signal that
+    // fails in sunlight and for a red-green deficiency.
+    testWidgets('the selected destination is marked two ways', (tester) async {
+      await shell(tester, current: ShellTab.money);
 
-      final selected = tester.widget<Text>(find.text('Money'));
+      final selected = tester.widget<Text>(find.text('Spending'));
       expect(selected.style?.color, SubdockColors.accent);
-      expect(selected.style?.fontWeight, FontWeight.w600);
 
       final other = tester.widget<Text>(find.text('Settings'));
       expect(other.style?.color, SubdockColors.inkMuted);
 
-      // Filled versus outlined, not colour alone: colour is the one signal
-      // that fails in sunlight and for a red-green deficiency.
       final marks = tester.widgetList<TabMark>(find.byType(TabMark)).toList();
       expect(marks.where((mark) => mark.active), hasLength(1));
-      expect(marks.where((mark) => !mark.active), hasLength(2));
-      expect(
-        tester.widget<Icon>(find.byType(Icon).at(1)).icon,
-        TabGlyph.money.filled,
-      );
+      expect(marks.where((mark) => !mark.active), hasLength(3));
+    });
+
+    // The savings *screen* is green; the bar is not part of any one screen. A
+    // row of four where one is a different hue reads as that tab being in a
+    // different state.
+    testWidgets('every selected tab takes the same accent', (tester) async {
+      for (final tab in ShellTab.values) {
+        await shell(tester, current: tab);
+        final label = switch (tab) {
+          ShellTab.upcoming => 'Upcoming',
+          ShellTab.money => 'Spending',
+          ShellTab.savings => 'Savings',
+          ShellTab.settings => 'Settings',
+        };
+        expect(
+          tester.widget<Text>(find.text(label)).style?.color,
+          SubdockColors.accent,
+          reason: '$tab is not in the accent',
+        );
+      }
     });
   });
 }

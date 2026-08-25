@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/notification_planner.dart';
-import 'package:subdock/domain/reminders.dart';
 
 void main() {
   final today = LocalDate.parse('2026-08-15');
@@ -23,31 +23,35 @@ void main() {
     return TrackedItem(
       id: id,
       name: name ?? id,
-      category: category,
+      categoryId: category.id,
       expiresOn: d(expiresOn),
       actByOffsetDays: actByOffsetDays,
       anchorDate: d(expiresOn),
-      leadDays: leadDays ?? Reminders.defaultLeadDays(category),
-      nagAfterDue: nag ?? Reminders.defaultNagPolicy(category),
-      // Explicit so an unspecified verify interval means "none", not the
-      // per-category default. Verify alerts are exercised in their own tests.
+      leadDays: leadDays ?? category.leadDays,
+      nagAfterDue: nag ?? category.nag,
+      // Left unset unless a test asks for one, so an unspecified verify
+      // interval means "none" rather than the shelf's default. Verify alerts
+      // are exercised in their own tests.
       verifyEveryDays: verifyEveryDays,
-      verifyEveryDaysIsExplicit: true,
       lastVerifiedAt: lastVerifiedAt == null ? null : d(lastVerifiedAt),
       state: state,
     );
   }
 
   test('lead alerts land the right number of days before the act-by date', () {
-    final plan = NotificationPlanner.plan([
-      item(
-        't',
-        Category.subscription,
-        expiresOn: '2026-08-20',
-        leadDays: [3, 1, 0],
-        nag: NagPolicy.none,
-      ),
-    ], today);
+    final plan = NotificationPlanner.plan(
+      [
+        item(
+          't',
+          CategoryBook.shipped['STREAMING'],
+          expiresOn: '2026-08-20',
+          leadDays: [3, 1, 0],
+          nag: NagPolicy.none,
+        ),
+      ],
+      CategoryBook.shipped,
+      today,
+    );
 
     final leads =
         plan.alerts
@@ -62,49 +66,63 @@ void main() {
   // The act-by offset is what makes an item actionable rather than
   // merely alarming: you must cancel before the charge, not on the day of it.
   test('lead alerts anchor on act-by, not on expiry', () {
-    final plan = NotificationPlanner.plan([
-      item(
-        'sim',
-        Category.subscription,
-        expiresOn: '2026-09-14',
-        actByOffsetDays: 7,
-        leadDays: [0],
-        nag: NagPolicy.none,
-      ),
-    ], today);
+    final plan = NotificationPlanner.plan(
+      [
+        item(
+          'sim',
+          CategoryBook.shipped['STREAMING'],
+          expiresOn: '2026-09-14',
+          actByOffsetDays: 7,
+          leadDays: [0],
+          nag: NagPolicy.none,
+        ),
+      ],
+      CategoryBook.shipped,
+      today,
+    );
     // act-by is 7 days before 14 Sep.
     expect(plan.alerts.map((a) => a.date), [d('2026-09-07')]);
   });
 
   test('alerts in the past are not scheduled', () {
-    final plan = NotificationPlanner.plan([
-      item(
-        'old',
-        Category.subscription,
-        expiresOn: '2026-08-16',
-        leadDays: [30, 1],
-        nag: NagPolicy.none,
-      ),
-    ], today);
+    final plan = NotificationPlanner.plan(
+      [
+        item(
+          'old',
+          CategoryBook.shipped['STREAMING'],
+          expiresOn: '2026-08-16',
+          leadDays: [30, 1],
+          nag: NagPolicy.none,
+        ),
+      ],
+      CategoryBook.shipped,
+      today,
+    );
     expect(plan.alerts.every((a) => a.date >= today), isTrue);
   });
 
   test('alerts past the horizon are not scheduled', () {
-    final plan = NotificationPlanner.plan([
-      item('far', Category.document, expiresOn: '2027-06-01'),
-    ], today);
+    final plan = NotificationPlanner.plan(
+      [item('far', CategoryBook.shipped['DOCUMENTS'], expiresOn: '2027-06-01')],
+      CategoryBook.shipped,
+      today,
+    );
     expect(plan.alerts, isEmpty, reason: 'nothing within 60 days');
   });
 
   test('archived items are skipped', () {
-    final plan = NotificationPlanner.plan([
-      item(
-        'gone',
-        Category.subscription,
-        expiresOn: '2026-08-20',
-        state: ItemState.archived,
-      ),
-    ], today);
+    final plan = NotificationPlanner.plan(
+      [
+        item(
+          'gone',
+          CategoryBook.shipped['STREAMING'],
+          expiresOn: '2026-08-20',
+          state: ItemState.archived,
+        ),
+      ],
+      CategoryBook.shipped,
+      today,
+    );
     expect(plan.alerts, isEmpty);
   });
 
@@ -113,12 +131,13 @@ void main() {
       [
         item(
           'bill',
-          Category.bill,
+          CategoryBook.shipped['UTILITIES'],
           expiresOn: '2026-08-18',
           leadDays: const [],
           nag: NagPolicy.daily,
         ),
       ],
+      CategoryBook.shipped,
       today,
       horizonDays: 5,
     );
@@ -134,29 +153,37 @@ void main() {
   });
 
   test('no nag when the policy says none', () {
-    final plan = NotificationPlanner.plan([
-      item(
-        'nf',
-        Category.subscription,
-        expiresOn: '2026-08-18',
-        nag: NagPolicy.none,
-      ),
-    ], today);
+    final plan = NotificationPlanner.plan(
+      [
+        item(
+          'nf',
+          CategoryBook.shipped['STREAMING'],
+          expiresOn: '2026-08-18',
+          nag: NagPolicy.none,
+        ),
+      ],
+      CategoryBook.shipped,
+      today,
+    );
     expect(plan.alerts.any((a) => a.reason == AlertReason.nag), isFalse);
   });
 
   test('verify alert fires once the re-check interval has elapsed', () {
-    final plan = NotificationPlanner.plan([
-      item(
-        'sim',
-        Category.subscription,
-        expiresOn: '2027-01-01',
-        leadDays: const [],
-        nag: NagPolicy.none,
-        verifyEveryDays: 60,
-        lastVerifiedAt: '2026-07-01',
-      ),
-    ], today);
+    final plan = NotificationPlanner.plan(
+      [
+        item(
+          'sim',
+          CategoryBook.shipped['STREAMING'],
+          expiresOn: '2027-01-01',
+          leadDays: const [],
+          nag: NagPolicy.none,
+          verifyEveryDays: 60,
+          lastVerifiedAt: '2026-07-01',
+        ),
+      ],
+      CategoryBook.shipped,
+      today,
+    );
     // 1 Jul + 60 days = 30 Aug.
     expect(
       plan.alerts
@@ -167,17 +194,21 @@ void main() {
   });
 
   test('an overdue verify alert fires today rather than in the past', () {
-    final plan = NotificationPlanner.plan([
-      item(
-        'sim',
-        Category.subscription,
-        expiresOn: '2027-01-01',
-        leadDays: const [],
-        nag: NagPolicy.none,
-        verifyEveryDays: 60,
-        lastVerifiedAt: '2026-01-01',
-      ),
-    ], today);
+    final plan = NotificationPlanner.plan(
+      [
+        item(
+          'sim',
+          CategoryBook.shipped['STREAMING'],
+          expiresOn: '2027-01-01',
+          leadDays: const [],
+          nag: NagPolicy.none,
+          verifyEveryDays: 60,
+          lastVerifiedAt: '2026-01-01',
+        ),
+      ],
+      CategoryBook.shipped,
+      today,
+    );
     expect(
       plan.alerts
           .where((a) => a.reason == AlertReason.verify)
@@ -192,20 +223,25 @@ void main() {
   test('the budget goes to the alerts that fire soonest', () {
     final sim = item(
       'sim',
-      Category.subscription,
+      CategoryBook.shipped['STREAMING'],
       expiresOn: '2026-09-10',
       leadDays: [20, 15, 10],
       nag: NagPolicy.none,
     );
     final netflix = item(
       'netflix',
-      Category.subscription,
+      CategoryBook.shipped['STREAMING'],
       expiresOn: '2026-08-16',
       leadDays: [1],
       nag: NagPolicy.none,
     );
 
-    final plan = NotificationPlanner.plan([netflix, sim], today, budget: 2);
+    final plan = NotificationPlanner.plan(
+      [netflix, sim],
+      CategoryBook.shipped,
+      today,
+      budget: 2,
+    );
 
     // 15/08 (netflix, lead 1) and 21/08 (sim, lead 20) come first.
     expect(plan.alerts.map((a) => a.itemId), ['netflix', 'sim']);
@@ -215,20 +251,25 @@ void main() {
   test('the soonest wins', () {
     final a = item(
       'a',
-      Category.subscription,
+      CategoryBook.shipped['STREAMING'],
       expiresOn: '2026-09-01',
       leadDays: [0],
       nag: NagPolicy.none,
     );
     final b = item(
       'b',
-      Category.subscription,
+      CategoryBook.shipped['STREAMING'],
       expiresOn: '2026-08-20',
       leadDays: [0],
       nag: NagPolicy.none,
     );
 
-    final plan = NotificationPlanner.plan([a, b], today, budget: 1);
+    final plan = NotificationPlanner.plan(
+      [a, b],
+      CategoryBook.shipped,
+      today,
+      budget: 1,
+    );
     expect(plan.alerts.map((e) => e.itemId), ['b']);
   });
 
@@ -237,12 +278,12 @@ void main() {
       for (var i = 1; i <= 40; i++)
         item(
           'i$i',
-          Category.subscription,
+          CategoryBook.shipped['STREAMING'],
           expiresOn: '2026-09-01',
           nag: NagPolicy.daily,
         ),
     ];
-    final plan = NotificationPlanner.plan(many, today);
+    final plan = NotificationPlanner.plan(many, CategoryBook.shipped, today);
     expect(plan.alerts.length, lessThanOrEqualTo(NotificationPlanner.budget));
   });
 
@@ -253,45 +294,53 @@ void main() {
       for (var i = 1; i <= 40; i++)
         item(
           'i$i',
-          Category.subscription,
+          CategoryBook.shipped['STREAMING'],
           expiresOn: '2026-09-01',
           nag: NagPolicy.daily,
         ),
     ];
-    final plan = NotificationPlanner.plan(many, today);
+    final plan = NotificationPlanner.plan(many, CategoryBook.shipped, today);
     expect(plan.isTruncated, isTrue);
     expect(plan.dropped, isNotEmpty);
   });
 
   test('a small plan is not marked truncated', () {
-    final plan = NotificationPlanner.plan([
-      item(
-        'one',
-        Category.subscription,
-        expiresOn: '2026-08-20',
-        nag: NagPolicy.none,
-      ),
-    ], today);
+    final plan = NotificationPlanner.plan(
+      [
+        item(
+          'one',
+          CategoryBook.shipped['STREAMING'],
+          expiresOn: '2026-08-20',
+          nag: NagPolicy.none,
+        ),
+      ],
+      CategoryBook.shipped,
+      today,
+    );
     expect(plan.isTruncated, isFalse);
   });
 
   // A subscription renewing is news; everything else on this list is a
   // deadline with a consequence.
   test('interruption level follows the category', () {
-    final plan = NotificationPlanner.plan([
-      item(
-        'power',
-        Category.bill,
-        expiresOn: '2026-08-20',
-        nag: NagPolicy.none,
-      ),
-      item(
-        'nf',
-        Category.subscription,
-        expiresOn: '2026-08-20',
-        nag: NagPolicy.none,
-      ),
-    ], today);
+    final plan = NotificationPlanner.plan(
+      [
+        item(
+          'power',
+          CategoryBook.shipped['UTILITIES'],
+          expiresOn: '2026-08-20',
+          nag: NagPolicy.none,
+        ),
+        item(
+          'nf',
+          CategoryBook.shipped['STREAMING'],
+          expiresOn: '2026-08-20',
+          nag: NagPolicy.none,
+        ),
+      ],
+      CategoryBook.shipped,
+      today,
+    );
     expect(
       plan.alerts
           .where((a) => a.itemId == 'power')
@@ -308,14 +357,14 @@ void main() {
     final items = [
       item(
         'sim',
-        Category.subscription,
+        CategoryBook.shipped['STREAMING'],
         expiresOn: '2026-09-01',
         verifyEveryDays: 60,
       ),
-      item('bill', Category.bill, expiresOn: '2026-08-25'),
+      item('bill', CategoryBook.shipped['UTILITIES'], expiresOn: '2026-08-25'),
     ];
-    final first = NotificationPlanner.plan(items, today);
-    final second = NotificationPlanner.plan(items, today);
+    final first = NotificationPlanner.plan(items, CategoryBook.shipped, today);
+    final second = NotificationPlanner.plan(items, CategoryBook.shipped, today);
 
     expect(
       first.alerts.map((a) => a.identifier),
@@ -336,13 +385,17 @@ void main() {
       final items = [
         item(
           'sim',
-          Category.subscription,
+          CategoryBook.shipped['STREAMING'],
           expiresOn: '2026-09-01',
           verifyEveryDays: 60,
         ),
-        item('bill', Category.bill, expiresOn: '2026-08-25'),
+        item(
+          'bill',
+          CategoryBook.shipped['UTILITIES'],
+          expiresOn: '2026-08-25',
+        ),
       ];
-      final plan = NotificationPlanner.plan(items, today);
+      final plan = NotificationPlanner.plan(items, CategoryBook.shipped, today);
 
       expect(plan.alerts.every((a) => a.numericId > 0), isTrue);
       expect(
@@ -367,40 +420,54 @@ void main() {
     },
   );
 
-  test('only a subscription is allowed to arrive quietly', () {
-    expect(Reminders.isTimeSensitive(Category.subscription), isFalse);
-    for (final category in Category.values.where(
-      (c) => c != Category.subscription,
-    )) {
+  test('a shelf that nags is a shelf that gets past Focus', () {
+    // The two are one setting read twice, and the point of reading it twice is
+    // that they cannot drift apart: a shelf set to keep asking after the date
+    // is a shelf with a consequence, and a consequence delivered silently
+    // during Focus was not delivered.
+    for (final category in CategoryBook.shipped.all) {
       expect(
-        Reminders.isTimeSensitive(category),
-        isTrue,
-        reason: category.name,
+        category.isTimeSensitive,
+        category.nag != NagPolicy.none,
+        reason: category.id,
       );
     }
+  });
+
+  test('the shipped shelves let subscriptions arrive quietly', () {
+    expect(CategoryBook.shipped['STREAMING'].isTimeSensitive, isFalse);
+    expect(CategoryBook.shipped['UTILITIES'].isTimeSensitive, isTrue);
+    expect(CategoryBook.shipped['PHONE'].isTimeSensitive, isTrue);
+    expect(CategoryBook.shipped['DOCUMENTS'].isTimeSensitive, isTrue);
   });
 
   test('documents stay out of spend totals even when they cost money', () {
     final passport = TrackedItem(
       id: 'p',
       name: 'Hộ chiếu',
-      category: Category.document,
+      categoryId: 'DOCUMENTS',
       expiresOn: d('2027-01-01'),
       anchorDate: d('2027-01-01'),
       amountMinor: 200000,
       currency: 'VND',
     );
-    expect(passport.countsTowardSpend, isFalse);
+    expect(
+      passport.countsTowardSpend(CategoryBook.shipped[passport.categoryId]),
+      isFalse,
+    );
 
     final netflix = TrackedItem(
       id: 'n',
       name: 'Netflix',
-      category: Category.subscription,
+      categoryId: 'STREAMING',
       expiresOn: d('2026-09-01'),
       anchorDate: d('2026-09-01'),
       amountMinor: 260000,
       currency: 'VND',
     );
-    expect(netflix.countsTowardSpend, isTrue);
+    expect(
+      netflix.countsTowardSpend(CategoryBook.shipped[netflix.categoryId]),
+      isTrue,
+    );
   });
 }

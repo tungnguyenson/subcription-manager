@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/item_actions.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
@@ -15,22 +16,33 @@ void main() {
     Cycle? cycle = Cycle.monthly,
     int? repeatCount,
     String? snoozedUntil,
-  }) => TrackedItem(
+    String? trialStart,
+    bool paused = false,
+    YearlyChoice yearlyChoice = YearlyChoice.undecided,
+    // `.on` rather than the plain constructor, so the item picks up the
+    // shelf's nag policy the way a real one does. Utilities nags daily, which
+    // is what the nag tests below need.
+  }) => TrackedItem.on(
+    CategoryBook.shipped['UTILITIES'],
     id: 'x',
     name: 'Course',
-    category: Category.bill,
     expiresOn: d(expiresOn),
     anchorDate: d(anchorDate ?? expiresOn),
     cycle: cycle,
     repeatCount: repeatCount,
     snoozedUntil: snoozedUntil == null ? null : d(snoozedUntil),
+    trialStart: trialStart == null ? null : d(trialStart),
+    paused: paused,
+    yearlyChoice: yearlyChoice,
   );
 
   group('snooze', () {
     test('the postponed date is what gets scheduled', () {
-      final plan = NotificationPlanner.plan([
-        item(snoozedUntil: '2026-08-18'),
-      ], today);
+      final plan = NotificationPlanner.plan(
+        [item(snoozedUntil: '2026-08-18')],
+        CategoryBook.shipped,
+        today,
+      );
 
       final snoozed = plan.alerts.where((a) => a.reason == AlertReason.snoozed);
       expect(snoozed, hasLength(1));
@@ -40,9 +52,11 @@ void main() {
     // A snooze in the past is a snooze that already fired. Scheduling it would
     // ask iOS for a notification with a date behind it.
     test('a snooze that has already passed is not scheduled', () {
-      final plan = NotificationPlanner.plan([
-        item(snoozedUntil: '2026-08-01'),
-      ], today);
+      final plan = NotificationPlanner.plan(
+        [item(snoozedUntil: '2026-08-01')],
+        CategoryBook.shipped,
+        today,
+      );
 
       expect(
         plan.alerts.where((a) => a.reason == AlertReason.snoozed),
@@ -107,6 +121,146 @@ void main() {
 
     test('an open-ended item is cancelled but still runs its period', () {
       expect(ItemActions.stopped(item()).state, ItemState.cancelledStillActive);
+    });
+  });
+
+  group('a free trial', () {
+    test('is a trial exactly while it has a start date', () {
+      expect(item().isTrial, isFalse);
+      expect(item(trialStart: '2026-08-07').isTrial, isTrue);
+    });
+
+    // The end of the free period *is* expiresOn. Storing both would let them
+    // disagree, and every reminder already fires ahead of expiresOn — which is
+    // the promise a trial reminder makes.
+    test('its length is the distance to the first charge', () {
+      expect(
+        item(expiresOn: '2026-08-21', trialStart: '2026-08-07').trialLengthDays,
+        14,
+      );
+    });
+
+    // The amount on a trial is what the user *will* pay. A figure nobody has
+    // been charged has no business in a spending total.
+    test('does not count toward spend', () {
+      final trial = TrackedItem(
+        id: 'x',
+        name: 'Claude Pro',
+        categoryId: 'STREAMING',
+        expiresOn: d('2026-08-21'),
+        anchorDate: d('2026-08-21'),
+        cycle: Cycle.monthly,
+        amountMinor: 520000,
+        currency: 'VND',
+        trialStart: d('2026-08-07'),
+      );
+
+      expect(
+        trial.countsTowardSpend(CategoryBook.shipped[trial.categoryId]),
+        isFalse,
+      );
+      expect(
+        trial
+            .copyWith(trialStart: () => null)
+            .countsTowardSpend(CategoryBook.shipped[trial.categoryId]),
+        isTrue,
+      );
+    });
+
+    // The occurrence that just closed *was* the first charge, so the trial is
+    // over. Leaving the start date on would keep a paid subscription out of the
+    // spending total forever and keep labelling it free.
+    test('is over once the first charge is recorded', () {
+      final advanced = ItemActions.advanced(
+        item(expiresOn: '2026-08-21', trialStart: '2026-08-07'),
+      );
+
+      expect(advanced.isTrial, isFalse);
+      expect(advanced.expiresOn, d('2026-09-21'));
+    });
+  });
+
+  group('paused', () {
+    // One predicate for the list and the planner, so they can never disagree
+    // about what the user switched off.
+    test('is not live, and neither is archived', () {
+      expect(item().isLive, isTrue);
+      expect(item(paused: true).isLive, isFalse);
+      expect(item().copyWith(state: ItemState.archived).isLive, isFalse);
+    });
+
+    // A cancelled-but-still-running subscription can also be paused, which is
+    // why this is a flag rather than a fourth ItemState.
+    test('is orthogonal to the item state', () {
+      final both = item(paused: true)
+          .copyWith(state: ItemState.cancelledStillActive);
+
+      expect(both.paused, isTrue);
+      expect(both.state, ItemState.cancelledStillActive);
+    });
+
+    test('schedules nothing', () {
+      final plan = NotificationPlanner.plan(
+        [item(paused: true)],
+        CategoryBook.shipped,
+        today,
+      );
+      expect(plan.alerts, isEmpty);
+
+      final on = NotificationPlanner.plan(
+        [item()],
+        CategoryBook.shipped,
+        today,
+      );
+      expect(on.alerts, isNotEmpty);
+    });
+  });
+
+  group('the yearly nudge', () {
+    // A rider on an existing alert, not an alert of its own. The budget here is
+    // 50 slots for the whole app, so spending a second one to say one more
+    // sentence is the wrong trade.
+    test('rides on the lead reminders without costing a slot', () {
+      final plain = NotificationPlanner.plan(
+        [item()],
+        CategoryBook.shipped,
+        today,
+      );
+      final nudged = NotificationPlanner.plan(
+        [item(yearlyChoice: YearlyChoice.remind)],
+        CategoryBook.shipped,
+        today,
+      );
+
+      expect(nudged.alerts, hasLength(plain.alerts.length));
+      expect(
+        nudged.alerts.where((a) => a.reason == AlertReason.lead).first.body,
+        'Course · Yearly costs less',
+      );
+    });
+
+    // A nag fires *after* the money has gone. Telling someone the yearly plan
+    // is cheaper at that point is worse than silence.
+    test('never rides on a nag', () {
+      final nudged = NotificationPlanner.plan(
+        [item(expiresOn: '2026-08-10', yearlyChoice: YearlyChoice.remind)],
+        CategoryBook.shipped,
+        today,
+      );
+
+      final nags = nudged.alerts.where((a) => a.reason == AlertReason.nag);
+      expect(nags, isNotEmpty);
+      expect(nags.every((a) => a.note == null), isTrue);
+    });
+
+    test('says nothing extra when the user has not asked', () {
+      final plain = NotificationPlanner.plan(
+        [item()],
+        CategoryBook.shipped,
+        today,
+      );
+      expect(plain.alerts.every((a) => a.note == null), isTrue);
+      expect(plain.alerts.first.body, 'Course');
     });
   });
 }

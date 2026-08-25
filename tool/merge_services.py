@@ -100,24 +100,24 @@ def main(argv):
                 clean["defaultCycle"] = cycle
             entries.append(clean)
 
-    entries.sort(key=lambda e: (e["sector"], e["id"]))
+    entries.sort(key=lambda e: (e["category"], e["id"]))
 
-    # A price three times off its sector's median is usually a tier mix-up
+    # A price three times off its category's median is usually a tier mix-up
     # (the family plan recorded as the individual one), not a real outlier.
-    by_sector = {}
+    by_category = {}
     for e in entries:
         for p in e["plans"]:
             if p["cycle"] != "MONTHLY":
                 continue
-            by_sector.setdefault((e["sector"], p["currency"]), []).append(
+            by_category.setdefault((e["category"], p["currency"]), []).append(
                 (p["amountMinor"], e["id"]))
-    for (sector, cur), rows in sorted(by_sector.items()):
+    for (category, cur), rows in sorted(by_category.items()):
         if len(rows) < 5:
             continue
         median = statistics.median(a for a, _ in rows)
         for amount, eid in rows:
             if amount > median * 3 or amount * 3 < median:
-                print(f"  check  {eid}: {amount} {cur}/tháng vs {sector} "
+                print(f"  check  {eid}: {amount} {cur}/tháng vs {category} "
                       f"median {median:.0f}")
 
     priced = sum(1 for e in entries if e["plans"])

@@ -30,8 +30,7 @@ một tier**. Netflix có 4 tier × 2 chu kỳ × 2 vùng giá.
   "id": "netflix",
   "name": "Netflix",
   "aliases": ["netflix"],
-  "sector": "STREAMING",
-  "category": "SUBSCRIPTION",
+  "category": "STREAMING",
   "defaultCycle": "MONTHLY",
   "cancelUrl": "https://www.netflix.com/cancelplan",
   "noteVi": null,
@@ -66,11 +65,12 @@ một tier**. Netflix có 4 tier × 2 chu kỳ × 2 vùng giá.
   `defaultPlan` (ưu tiên plan `region: VN`, cycle `MONTHLY`), nên
   [add_item_screen.dart:620](../../lib/ui/screens/add_item_screen.dart#L620) và toàn bộ
   test hiện có không phải sửa ở bước này.
-- **`sector` là trường mới, `category` giữ nguyên.** Đúng như đã bàn: `sector` là lĩnh vực
-  (17 nhóm), `category` là ngữ nghĩa thanh toán (5 giá trị trong
-  [model.dart:39](../../lib/domain/model.dart#L39)). Cả hai cùng tồn tại.
+- **`category` là nhóm dịch vụ, chỉ một trường.** Đợt dựng danh mục có hai trường: `sector`
+  cho lĩnh vực và `category` cho ngữ nghĩa thanh toán. Nay là một, tên `category`, mang
+  giá trị của `sector` cũ. Phân loại năm giá trị đã bỏ; hành vi nó từng lái là cột của
+  chính nhóm, xem `lib/domain/default_categories.dart`.
 
-### Danh sách `sector`
+### Danh sách `category`
 
 17 nhóm của bạn: `AI` `STREAMING` `MUSIC` `GAMING` `PRODUCTIVITY` `SOCIAL` `NEWS`
 `FOOD` `FITNESS` `FINANCE` `EDUCATION` `SECURITY` `ENTERTAINMENT` `TRAVEL` `DATING`
@@ -79,8 +79,9 @@ một tier**. Netflix có 4 tier × 2 chu kỳ × 2 vùng giá.
 Cộng 4 nhóm cho phần VN mà 17 nhóm trên không phủ (điện, nước, chung cư, khoản vay,
 giấy tờ, bảo hiểm): `UTILITIES` `HOUSING` `DOCUMENTS` `INSURANCE`
 
-→ 21 sector. Không có `OTHER`: mục nào không xếp được thì phải xem lại có nên vào catalog
-không.
+→ 21 nhóm trong danh mục. Không có `OTHER` ở đây: mục nào không xếp được thì phải xem lại
+có nên vào catalog không. App thì có thêm nhóm `OTHER` cho mục người dùng tự gõ, và người
+dùng thêm được nhóm của riêng họ.
 
 ---
 
@@ -89,7 +90,7 @@ không.
 | Pha | Việc | Ai làm | Đầu ra |
 |---|---|---|---|
 | A | Chốt schema + viết validator + viết script merge | mình | `tool/validate_services.py`, `tool/merge_services.py` |
-| B | Thu thập, chia theo sector | ~10 agent song song | `data/services/<sector>.json` |
+| B | Thu thập, chia theo nhóm | ~10 agent song song | `data/services/<nhóm>.json` |
 | C | Đối chiếu giá, mục có giá trị cao | ~4 agent | báo cáo sai lệch |
 | D | Merge + validate + test | mình | `assets/services.json` v3 |
 | E | Icon: dò độ phủ, phân tier 1/2/3 | 2 agent + mình | cập nhật `BRANDS`, `_rules`, golden |
@@ -102,10 +103,10 @@ cần **danh sách tên**, không cần giá.
 
 ## 2. Pha B — chia việc cho agent
 
-Chia theo sector, mỗi agent 1–3 sector, khoảng 15–25 dịch vụ. Mỗi agent ghi đúng một file,
+Chia theo nhóm, mỗi agent 1–3 nhóm, khoảng 15–25 dịch vụ. Mỗi agent ghi đúng một file,
 không đụng file của agent khác, nên chạy song song không tranh chấp.
 
-| # | Agent | Sector | Ước lượng số mục |
+| # | Agent | Nhóm | Ước lượng số mục |
 |---|---|---|---|
 | 1 | ai | AI | 19 |
 | 2 | streaming | STREAMING | 18 |
@@ -118,7 +119,7 @@ không đụng file của agent khác, nên chạy song song không tranh chấp
 | 9 | ent-travel-dating | ENTERTAINMENT, TRAVEL, DATING | 26 |
 | 10 | phone-vn | PHONE, UTILITIES, HOUSING, DOCUMENTS, INSURANCE | 30 (đa số đã có sẵn) |
 
-Brief cho mỗi agent, viết một lần rồi thay phần sector:
+Brief cho mỗi agent, viết một lần rồi thay phần nhóm:
 
 1. Đọc `docs/research/dataset-plan.md` (file này) để lấy schema. Không tự chế trường mới.
 2. Với mỗi dịch vụ: mở **trang giá chính thức của hãng** bằng WebFetch. Trang giá bên thứ
@@ -147,7 +148,7 @@ Không đối chiếu hết 200 mục. Chỉ đối chiếu:
 
 - Mọi mục có `region: VN` (giá VN hay đổi, và là giá người dùng thật sự nhìn thấy)
 - Top ~40 dịch vụ phổ biến nhất
-- Mọi mục có giá trông bất thường (validator tự gắn cờ: lệch >3× so với trung vị sector)
+- Mọi mục có giá trông bất thường (validator tự gắn cờ: lệch >3× so với trung vị của nhóm)
 
 Agent đối chiếu **không được xem giá cũ trước khi tra**; tra độc lập rồi mới so. Lệch thì
 báo, không tự sửa.

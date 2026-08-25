@@ -3,21 +3,31 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:subdock/catalog/service_catalog.dart';
+import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/data/item_repository.dart';
 import 'package:subdock/data/settings_store.dart';
-import 'package:subdock/domain/fx.dart';
+import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/item_actions.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/notification_planner.dart';
+import 'package:subdock/domain/upcoming_filter.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
 import 'package:subdock/ui/app_shell.dart';
+import 'package:subdock/ui/filter_presenter.dart';
+import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/manage_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/screens/add_item_screen.dart';
 import 'package:subdock/ui/screens/history_screen.dart';
 import 'package:subdock/ui/screens/item_detail_screen.dart';
+import 'package:subdock/ui/money_presenter.dart';
+import 'package:subdock/ui/savings_presenter.dart';
+import 'package:subdock/ui/services_presenter.dart';
 import 'package:subdock/ui/screens/money_screen.dart';
+import 'package:subdock/ui/screens/savings_screen.dart';
+import 'package:subdock/ui/screens/services_screen.dart';
+import 'package:subdock/ui/screens/sources_screen.dart';
 import 'package:subdock/ui/screens/onboarding_screen.dart';
 import 'package:subdock/ui/screens/reminder_rules_screen.dart';
 import 'package:subdock/ui/screens/reminders_screen.dart';
@@ -25,12 +35,16 @@ import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
+import 'package:subdock/ui/widgets/filter_sheet.dart';
+import 'package:subdock/ui/widgets/glass.dart';
 import 'package:subdock/ui/widgets/item_row.dart';
+import 'package:subdock/ui/widgets/notification_ask.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SubdockApp extends StatelessWidget {
   final ItemRepository repository;
   final SettingsStore settings;
+  final FilterStore filters;
   final NotificationScheduler scheduler;
   final ServiceCatalog catalog;
 
@@ -38,6 +52,7 @@ class SubdockApp extends StatelessWidget {
     super.key,
     required this.repository,
     required this.settings,
+    required this.filters,
     required this.scheduler,
     required this.catalog,
   });
@@ -51,6 +66,7 @@ class SubdockApp extends StatelessWidget {
       home: HomePage(
         repository: repository,
         settings: settings,
+        filters: filters,
         scheduler: scheduler,
         catalog: catalog,
       ),
@@ -61,6 +77,7 @@ class SubdockApp extends StatelessWidget {
 class HomePage extends StatefulWidget {
   final ItemRepository repository;
   final SettingsStore settings;
+  final FilterStore filters;
   final NotificationScheduler scheduler;
   final ServiceCatalog catalog;
 
@@ -68,6 +85,7 @@ class HomePage extends StatefulWidget {
     super.key,
     required this.repository,
     required this.settings,
+    required this.filters,
     required this.scheduler,
     required this.catalog,
   });
@@ -80,11 +98,31 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   ShellTab _tab = ShellTab.upcoming;
 
   List<TrackedItem> _items = const [];
+
+  /// The user's shelves, read from storage like everything else.
+  ///
+  /// Seeded with the shipped list so the first frame has labels rather than
+  /// blanks; the stream replaces it as soon as the read comes back, and every
+  /// screen that needs a shelf is handed this rather than reaching for the
+  /// defaults itself.
+  CategoryBook _categories = CategoryBook.shipped;
+
   List<HandledEvent> _history = const [];
+  List<PaymentSource> _sources = const [];
   AppSettings _settings = const AppSettings();
   NotificationPlan _plan = const NotificationPlan(alerts: [], dropped: []);
 
+  /// Which span the Spending screen is on. Held here rather than in the screen
+  /// so it survives the rebuild every data change causes.
+  MoneySpan _span = MoneySpan.month;
+
+  /// What Upcoming is narrowed to. Held here for the same reason as [_span],
+  /// and written to storage as well, so it also survives the app being killed.
+  UpcomingFilter _filter = UpcomingFilter.none;
+
+  StreamSubscription<List<PaymentSource>>? _sourceSubscription;
   StreamSubscription<List<TrackedItem>>? _itemSubscription;
+  StreamSubscription<List<Category>>? _categorySubscription;
   StreamSubscription<List<HandledEvent>>? _historySubscription;
   StreamSubscription<AppSettings>? _settingsSubscription;
 
@@ -110,6 +148,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// app knows about dates is what someone typed from memory.
   String? _openedProviderPageFor;
 
+  /// How many items the user has saved this run, and where they last declined
+  /// the notification prompt.
+  ///
+  /// The prompt fires on the first save and then not again until two more items
+  /// have gone in. iOS asks the system question exactly once — a decline there
+  /// is permanent — so the app's own sheet has to be shown at the moment the
+  /// answer is most likely to be yes, and never so often that it trains the
+  /// user to dismiss it.
+  int _saves = 0;
+  int? _declinedAtSave;
+
   /// Items already asked about after such a trip. Held for this run only, and
   /// deliberately not persisted: the rule is "do not ask twice in a row", not
   /// "never ask again", and a stored flag would silently close the door on a
@@ -124,12 +173,31 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // Subscribed here rather than through a StreamBuilder because re-planning
     // notifications is a side effect, and a side effect inside build() runs on
     // every rebuild, including ones caused by switching tabs.
+    // Ahead of the items, because the plan an item change triggers reads a
+    // shelf's nag policy. A first frame planned against the shipped defaults
+    // would re-plan a moment later anyway; this way it usually does not have
+    // to.
+    _categorySubscription = widget.repository.observeCategories().listen((
+      categories,
+    ) {
+      if (!mounted) return;
+      setState(() {
+        _categories = CategoryBook(categories);
+        _plan = NotificationPlanner.plan(
+          _items,
+          _categories,
+          LocalDate.today(),
+        );
+      });
+      unawaited(_applyPlan());
+    });
+
     _itemSubscription = widget.repository.observeAll().listen((items) {
       if (!mounted) return;
       setState(() {
         _items = items;
         _loaded = true;
-        _plan = NotificationPlanner.plan(items, LocalDate.today());
+        _plan = NotificationPlanner.plan(items, _categories, LocalDate.today());
       });
       unawaited(_applyPlan());
     });
@@ -141,18 +209,69 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           setState(() => _history = events);
         });
 
+    _sourceSubscription = widget.repository.observeSources().listen((sources) {
+      if (!mounted) return;
+      setState(() => _sources = sources);
+      // Deleting a source in Settings must not leave Upcoming filtered by an
+      // id nothing can match. Done here rather than at the read, because the
+      // read can land before the sources do -- pruning against a list that has
+      // not arrived yet would throw away a filter that was perfectly valid.
+      _setFilter(_filter.prunedTo({for (final source in sources) source.id}));
+    });
+
     _settingsSubscription = widget.settings.observe().listen((settings) {
       if (!mounted) return;
       setState(() => _settings = settings);
     });
 
     unawaited(_refreshPermission());
+    unawaited(_restoreFilter());
+  }
+
+  /// Puts back the filter the last session left on Upcoming.
+  ///
+  /// Skipped if the user has already touched the sheet -- the read is one
+  /// round trip to sqlite and they cannot realistically win the race, but
+  /// losing it would mean the app overwriting a tap they just made.
+  Future<void> _restoreFilter() async {
+    final stored = await widget.filters.read();
+    if (!mounted || stored.isEmpty || _filter.isNotEmpty) return;
+    setState(() => _filter = stored);
+  }
+
+  /// The one way the filter changes, so it can never be written to the screen
+  /// without also being written down.
+  void _setFilter(UpcomingFilter next) {
+    if (next == _filter) return;
+    setState(() => _filter = next);
+    unawaited(widget.filters.save(next));
+  }
+
+  /// The chips the sheet offers, rebuilt from the current data every time it
+  /// opens. A shelf the user emptied yesterday should not still have a chip.
+  FilterOptions get _filterOptions =>
+      FilterPresenter.options(_items, _categories, sources: _sources);
+
+  void _openFilter() {
+    unawaited(
+      FilterSheet.show(
+        context,
+        filter: _filter,
+        options: _filterOptions,
+        // Counted over items rather than read off the view, so the number on
+        // the button is the same one the summary line will show.
+        countFor: (filter) => filter.apply(_items).length,
+        onChanged: _setFilter,
+      ),
+    );
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _itemSubscription?.cancel();
+    _categorySubscription?.cancel();
+    _sourceSubscription?.cancel();
     _historySubscription?.cancel();
     _settingsSubscription?.cancel();
     super.dispose();
@@ -213,13 +332,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     if (_showOnboarding) {
-      return Scaffold(
-        backgroundColor: SubdockColors.canvas,
-        body: SafeArea(
-          child: OnboardingScreen(
-            notificationsGranted: _notificationsGranted,
-            onAllowNotifications: _requestNotifications,
-            onStart: () => setState(() => _onboardingDismissed = true),
+      // The gradient, not the flat mid-tone. Onboarding is the first thing the
+      // user sees and it is where the look has to land; `canvas` here painted
+      // the whole screen the colour that is only meant to stand in where a
+      // gradient cannot go.
+      return GlassBackground(
+        child: Scaffold(
+          backgroundColor: const Color(0x00000000),
+          body: SafeArea(
+            child: OnboardingScreen(
+              notificationsGranted: _notificationsGranted,
+              onAllowNotifications: _requestNotifications,
+              onStart: () => setState(() => _onboardingDismissed = true),
+            ),
           ),
         ),
       );
@@ -236,24 +361,73 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Widget _screenFor(LocalDate today) {
     switch (_tab) {
       case ShellTab.upcoming:
+        final upcoming = UpcomingPresenter.build(
+          _items,
+          today,
+          sources: _sourcesById,
+          filter: _filter,
+        );
         return UpcomingScreen(
-          view: UpcomingPresenter.build(_items, today),
+          view: upcoming,
+          filterSummary: _filter.isEmpty
+              ? null
+              : FilterPresenter.summary(
+                  _filter,
+                  _filterOptions,
+                  shown: upcoming.shown,
+                  total: upcoming.total,
+                ),
+          onOpenFilter: _openFilter,
+          onClearFilter: () => _setFilter(UpcomingFilter.none),
           banner: _notificationsGranted
               ? null
               : AlertBanner(
                   title: 'Notifications are off',
-                  body: 'The list works, but nothing will remind you.',
+                  body: 'Nothing will remind you.',
                   actionLabel: 'On',
                   onAction: _requestNotifications,
                 ),
           onAdd: _openAdd,
           onOpen: _openEntry,
+          onOpenServices: _openServices,
         );
 
       case ShellTab.money:
+        final savings = _savings(today);
         return MoneyScreen(
-          thisMonth: _monthTotal(today),
-          items: _monthItems(today),
+          view: MoneyPresenter.build(
+            items: _items,
+            categories: _categories,
+            today: today,
+            span: _span,
+            history: _history,
+          ),
+          onSpan: (span) => setState(() => _span = span),
+          // The teaser only appears when there is something behind it. A card
+          // saying "cut 0 ₫ a year" is worse than no card: it teaches the user
+          // that the savings screen has nothing on it.
+          savings: savings.hasYearly
+              ? SavingsTeaser(
+                  headline: 'Cut ${savings.total} a year',
+                  line:
+                      '${savings.yearly.length} '
+                      '${savings.yearly.length == 1 ? "plan" : "plans"} '
+                      'cost less yearly · cancelling saves more',
+                )
+              : null,
+          onOpenSavings: () => setState(() => _tab = ShellTab.savings),
+          onOpenHistory: _openHistory,
+        );
+
+      case ShellTab.savings:
+        return SavingsScreen(
+          view: _savings(today),
+          monthlyCount: SavingsPresenter.monthlyCount(_items, _categories),
+          onChoose: _setYearlyChoice,
+          onUnskip: () => unawaited(widget.repository.clearSkippedYearly()),
+          onOpenItem: _openItemById,
+          onOpenCancel: _openCancelPage,
+          onRemove: _deleteById,
         );
 
       case ShellTab.settings:
@@ -265,11 +439,48 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               .map((alert) => alert.itemName)
               .toSet()
               .toList(),
+          servicesLine: _servicesLine,
+          sourcesLine: _sources.isEmpty ? 'None' : '${_sources.length}',
+          onOpenServices: _openServices,
+          onOpenSources: _openSources,
           onOpenReminders: _openReminderRules,
           onOpenHistory: _openHistory,
         );
     }
   }
+
+  Map<String, PaymentSource> get _sourcesById => {
+    for (final source in _sources) source.id: source,
+  };
+
+  /// The last source the user chose, for the add form's default.
+  ///
+  /// Read off the items rather than stored as a preference: whatever most of
+  /// their subscriptions already pay from is a better guess than the one they
+  /// happened to pick last, and it needs no extra state to be right.
+  String? get _lastUsedSourceId {
+    final counts = <String, int>{};
+    for (final item in _items) {
+      final id = item.paymentSourceId;
+      if (id != null) counts.update(id, (n) => n + 1, ifAbsent: () => 1);
+    }
+    if (counts.isEmpty) return null;
+    return counts.entries.reduce((a, b) => a.value >= b.value ? a : b).key;
+  }
+
+  String get _servicesLine {
+    final live = _items.where((i) => i.state != ItemState.archived).length;
+    final off = _items.where((i) => i.paused).length;
+    return off == 0 ? '$live' : '$live · $off off';
+  }
+
+  SavingsView _savings(LocalDate today) => SavingsPresenter.build(
+    items: _items,
+    catalog: widget.catalog,
+    categories: _categories,
+    today: today,
+    defaultLeadDays: _settings.defaultLeadDays,
+  );
 
   Future<void> _requestNotifications() async {
     await widget.scheduler.requestPermission();
@@ -295,6 +506,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _push(
       ItemDetailScreen(
         item: item,
+        category: _categories[item.categoryId],
         today: LocalDate.today(),
         history: _history.where((e) => e.itemId == item.id).toList(),
         scheduledCount: held,
@@ -308,6 +520,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         // catalogue grows between releases, so an item added before its
         // service had a price picks one up on the next update.
         catalogEntry: widget.catalog.matchByName(item.name),
+        source: _sourcesById[item.paymentSourceId],
         onOpenManage: (action) => _openManage(item, action),
         onEditReminders: () => _push(
           RemindersScreen(
@@ -325,27 +538,34 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   void _openAdd() {
-    _push(
+    _pushForm(
       AddItemScreen(
         catalog: widget.catalog,
+        categories: _categories,
         today: LocalDate.today(),
         onCancel: () => Navigator.of(context).maybePop(),
         onSave: _saveDraft,
         onPickDate: _pickDate,
+        sources: _sources,
+        onCreateSource: _createSource,
+        defaultSourceId: _lastUsedSourceId,
       ),
     );
   }
 
   /// Opens the same form on an item that already exists.
   void _openEdit(TrackedItem item) {
-    _push(
+    _pushForm(
       AddItemScreen(
         catalog: widget.catalog,
+        categories: _categories,
         today: LocalDate.today(),
-        initial: DraftItem.of(item),
+        initial: DraftItem.of(item, _categories),
         onCancel: () => Navigator.of(context).maybePop(),
         onSave: (draft) => _saveEdit(item, draft),
         onPickDate: _pickDate,
+        sources: _sources,
+        onCreateSource: _createSource,
       ),
     );
   }
@@ -376,7 +596,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       currentYear: LocalDate.today().year,
       done: HistoryFromEvents.build(_history, {
         for (final item in _items) item.id: item,
-      }),
+      }, _categories),
     ),
   );
 
@@ -392,12 +612,139 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     ),
   );
 
+  /// The service list. Pushed rather than a tab: it is the answer to "where did
+  /// my Netflix go", which is a question asked from Upcoming, and a fifth tab
+  /// for it would put a rarely-visited screen in the thumb's way forever.
+  void _openServices() => _push(
+    // Its own stream rather than the snapshot this route was pushed with. The
+    // switch on every row writes to the database, and a pushed route holding a
+    // captured list would show the switch flipping straight back.
+    StreamBuilder<List<TrackedItem>>(
+      initialData: _items,
+      stream: widget.repository.observeAll(),
+      builder: (context, snapshot) {
+        final items = snapshot.data ?? const <TrackedItem>[];
+        return ServicesScreen(
+          groups: ServicesPresenter.groups(
+            items,
+            _categories,
+            LocalDate.today(),
+          ),
+          onOpen: _openItemById,
+          onToggle: (id, on) => unawaited(widget.repository.setPaused(id, !on)),
+          onAdd: () {
+            Navigator.of(context).maybePop();
+            _openAdd();
+          },
+        );
+      },
+    ),
+  );
+
+  void _openSources() => _push(
+    StreamBuilder<List<PaymentSource>>(
+      initialData: _sources,
+      stream: widget.repository.observeSources(),
+      builder: (context, snapshot) {
+        final sources = snapshot.data ?? const <PaymentSource>[];
+        return SourcesScreen(
+          rows: ServicesPresenter.sourceRows(sources, _items),
+          onAdd: (name, glyph) => unawaited(_createSource(name, glyph)),
+          onRemove: (id) => unawaited(widget.repository.deleteSource(id)),
+        );
+      },
+    ),
+  );
+
+  /// Creates a source and returns its id so the form that asked can select it.
+  ///
+  /// The id is the microsecond clock, matching how items are keyed. Two sources
+  /// created in the same microsecond would collide; a user tapping "Add source"
+  /// twice in one microsecond is not a case worth a uuid dependency.
+  Future<String?> _createSource(String name, SourceGlyph glyph) async {
+    final id = 'src${DateTime.now().microsecondsSinceEpoch}';
+    await widget.repository.upsertSource(
+      PaymentSource(id: id, name: name, glyph: glyph),
+      DateTime.now().millisecondsSinceEpoch ~/ 1000,
+    );
+    return id;
+  }
+
+  void _setYearlyChoice(String itemId, YearlyChoice choice) {
+    unawaited(widget.repository.setYearlyChoice(itemId, choice));
+    if (choice == YearlyChoice.remind) {
+      _confirm('The renewal reminder will mention the yearly price.');
+    }
+  }
+
+  void _openItemById(String id) {
+    final item = _items.where((i) => i.id == id).firstOrNull;
+    if (item != null) _openItem(item);
+  }
+
+  void _deleteById(String id) => unawaited(widget.repository.delete(id));
+
+  /// Leaves for the page where a service is actually cancelled.
+  ///
+  /// Routed through the same lifecycle hook as the manage button, so coming
+  /// back from a cancel page also offers to record the date. Someone who
+  /// changed their mind at the last step is exactly the person whose renewal
+  /// date is now visible on screen and about to be forgotten.
+  Future<void> _openCancelPage(String itemId, String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+
+    _openedProviderPageFor = itemId;
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (opened || !mounted) return;
+
+    _openedProviderPageFor = null;
+    _confirm('Could not open that page.');
+  }
+
+  /// A form opened over everything: no tab bar.
+  ///
+  /// Add and edit are the two screens the hand-off draws without the bar, and
+  /// the reason is in their own top-right corner: they say `Cancel`, so they
+  /// are a task with a way out rather than a place. Leaving the bar on would
+  /// offer a second way out that silently discards what was typed.
+  void _pushForm(Widget screen) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => GlassBackground(
+          child: Scaffold(
+            backgroundColor: const Color(0x00000000),
+            body: SafeArea(bottom: false, child: screen),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// A screen opened by tapping a row: the tab bar stays.
+  ///
+  /// The hand-off screenshots settle this. Item detail, All services,
+  /// Reminders and History all still show the bar, so none of them is a place
+  /// the user has been taken *out* of the app to — they are still inside the
+  /// tab they came from, one level down. Only the add and edit forms drop the
+  /// bar, and those say `Cancel` instead of `Back` for the same reason.
+  ///
+  /// Wrapped in a whole [AppShell] rather than only the bar, because the shell
+  /// is also what paints the gradient: a pushed route is a new opaque layer,
+  /// so a screen that does not paint the ground itself lands on nothing.
   void _push(Widget screen) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => Scaffold(
-          backgroundColor: SubdockColors.canvas,
-          body: SafeArea(bottom: false, child: screen),
+        builder: (_) => AppShell(
+          current: _tab,
+          // A tab tapped from one level down means "take me to that tab", not
+          // "put that tab behind this screen". Unwind to the shell first.
+          onSelect: (tab) {
+            Navigator.of(context).popUntil((route) => route.isFirst);
+            setState(() => _tab = tab);
+          },
+          onAdd: _openAdd,
+          child: screen,
         ),
       ),
     );
@@ -435,10 +782,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> _saveDraft(DraftItem draft) async {
     final matched = draft.matched;
 
-    final item = TrackedItem(
+    // `.on` rather than the plain constructor: a new item takes the shelf's
+    // reminder defaults, and the shelf is the only thing that knows them.
+    final item = TrackedItem.on(
+      draft.category,
       id: '${DateTime.now().microsecondsSinceEpoch}',
       name: draft.name,
-      category: draft.category,
       iconName: draft.iconName,
       expiresOn: draft.expiresOn,
       anchorDate: draft.expiresOn,
@@ -461,8 +810,70 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (!mounted) return;
 
     Navigator.of(context).maybePop();
+
+    _saves++;
+    if (_shouldAskForNotifications) {
+      await _askForNotifications(item);
+      return;
+    }
+
     // An item dated a year out lands in a collapsed fold, so saving it looks
     // exactly like saving nothing. Say where it went.
+    _confirm(_savedMessage(item));
+  }
+
+  /// First save, then not until two more have gone in after a decline.
+  bool get _shouldAskForNotifications =>
+      !_notificationsGranted &&
+      (_saves == 1 ||
+          (_declinedAtSave != null && _saves - _declinedAtSave! >= 2));
+
+  /// The sheet, worded with this item's own dates.
+  ///
+  /// The sentence is the whole point: the user has just typed a date they are
+  /// afraid of forgetting, and the prompt reads it back with the reminder date
+  /// and the card that pays for it. A generic "allow notifications?" at this
+  /// moment throws that away.
+  Future<void> _askForNotifications(TrackedItem item) async {
+    final lead = item.leadDays.isEmpty
+        ? 0
+        : item.leadDays.reduce((a, b) => a > b ? a : b);
+    final fireOn = item.actBy.minusDays(lead);
+    final source = _sourcesById[item.paymentSourceId];
+
+    final money = item.money == null
+        ? ''
+        : (item.isTrial
+              ? ' · then ${MoneyFormat.full(item.money!)}'
+              : ' · ${MoneyFormat.full(item.money!)}');
+    final from = source == null ? '' : ' from ${source.name}';
+
+    final line = lead == 0
+        ? 'Notification on ${MoneyFormat.shortDate(fireOn)}, the day it '
+              'happens$money$from.'
+        : 'Notification on ${MoneyFormat.shortDate(fireOn)} — '
+              '${ItemPresenter.leadLabel(lead).toLowerCase()} '
+              '(${MoneyFormat.shortDate(item.actBy)})$money$from.';
+
+    final allowed = await NotificationAsk.show(
+      context,
+      itemName: item.name,
+      iconName: item.iconName,
+      title: item.isTrial
+          ? 'Remind you before the trial ends?'
+          : 'Remind you before ${item.name} charges?',
+      line: line,
+    );
+    if (!mounted) return;
+
+    if (allowed == true) {
+      await _requestNotifications();
+      if (!mounted) return;
+      _confirm('Reminder set for ${MoneyFormat.shortDate(fireOn)}.');
+      return;
+    }
+
+    _declinedAtSave = _saves;
     _confirm(_savedMessage(item));
   }
 
@@ -559,7 +970,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final moved = DraftItem(
       name: item.name,
       expiresOn: picked,
-      category: item.category,
+      category: _categories[item.categoryId],
       iconName: item.iconName,
       cycle: item.cycle,
       repeatCount: item.repeatCount,
@@ -665,45 +1076,5 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> _delete(TrackedItem item) async {
     await widget.repository.delete(item.id);
     if (mounted) Navigator.of(context).maybePop();
-  }
-
-  /// This month's committed spend.
-  ///
-  /// Documents are excluded by [TrackedItem.countsTowardSpend]: a passport
-  /// costs money to renew but is not a subscription, and folding it into a
-  /// monthly figure would make the total answer a question nobody asked.
-  List<TrackedItem> _monthly(LocalDate today) => [
-    for (final item in _items)
-      if (item.countsTowardSpend &&
-          item.state == ItemState.active &&
-          item.expiresOn.month == today.month &&
-          item.expiresOn.year == today.year)
-        item,
-  ];
-
-  MixedTotal _monthTotal(LocalDate today) => Fx.total(
-    [for (final item in _monthly(today)) item.money!],
-    rate: Fx.bundledUsdVnd,
-    today: today,
-  );
-
-  List<ItemSpend> _monthItems(LocalDate today) {
-    final rows = [
-      for (final item in _monthly(today))
-        ItemSpend(
-          name: item.name,
-          total: Fx.total(
-            [item.money!],
-            rate: Fx.bundledUsdVnd,
-            today: today,
-          ).approximateBase!,
-          // The exact foreign figure is kept beside the converted one, because
-          // it is the part that is actually true.
-          foreign: item.currency == Fx.bundledUsdVnd.to ? null : item.money,
-        ),
-    ];
-
-    rows.sort((a, b) => b.total.minor.compareTo(a.total.minor));
-    return rows;
   }
 }

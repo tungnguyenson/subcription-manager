@@ -1,4 +1,5 @@
 import 'package:subdock/catalog/service_catalog.dart';
+import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/recurrence.dart';
@@ -12,6 +13,9 @@ import 'package:subdock/domain/reminders.dart';
 class DraftItem {
   final String name;
   final LocalDate expiresOn;
+
+  /// The shelf the user picked, carried whole rather than by id: the form shows
+  /// its label, and [applyTo] reads its reminder defaults when the shelf moves.
   final Category category;
 
   /// The icon the user picked, or null to let the name decide.
@@ -30,10 +34,20 @@ class DraftItem {
   /// link and the note, neither of which the form asks for.
   final CatalogEntry? matched;
 
+  /// The day a free trial began, or null for an item being paid for.
+  ///
+  /// There is no separate trial-end field, and there must not be: the end of
+  /// the free period is the day the first charge lands, which is [expiresOn].
+  /// Two fields for one date is two things that can disagree.
+  final LocalDate? trialStart;
+
+  /// Which source pays for this, or null for "not said".
+  final String? paymentSourceId;
+
   const DraftItem({
     required this.name,
     required this.expiresOn,
-    this.category = Category.subscription,
+    required this.category,
     this.iconName,
     this.cycle,
     this.repeatCount,
@@ -41,6 +55,8 @@ class DraftItem {
     this.currency,
     this.leadDays = const [Reminders.defaultLead],
     this.matched,
+    this.trialStart,
+    this.paymentSourceId,
   });
 
   /// Seeds the form from an item that already exists.
@@ -48,16 +64,18 @@ class DraftItem {
   /// Deliberately does not carry the catalog match: the link and the note on
   /// the item were settled when it was created, and re-deriving them from the
   /// name would overwrite whatever the user has since put there.
-  factory DraftItem.of(TrackedItem item) => DraftItem(
+  factory DraftItem.of(TrackedItem item, CategoryBook categories) => DraftItem(
     name: item.name,
     expiresOn: item.expiresOn,
-    category: item.category,
+    category: categories[item.categoryId],
     iconName: item.iconName,
     cycle: item.cycle,
     repeatCount: item.repeatCount,
     amountMinor: item.amountMinor,
     currency: item.currency,
     leadDays: item.leadDays,
+    trialStart: item.trialStart,
+    paymentSourceId: item.paymentSourceId,
   );
 
   /// Folds this draft back into the item it was seeded from.
@@ -68,12 +86,12 @@ class DraftItem {
   /// has to come through the edit untouched.
   TrackedItem applyTo(TrackedItem original) {
     final dateChanged = expiresOn != original.expiresOn;
-    final categoryChanged = category != original.category;
+    final categoryChanged = category.id != original.categoryId;
     final entry = matched;
 
     return original.copyWith(
       name: name,
-      category: category,
+      categoryId: category.id,
       iconName: () => iconName,
       expiresOn: expiresOn,
       anchorDate: _anchorFor(original),
@@ -84,20 +102,21 @@ class DraftItem {
       amountMinor: () => amountMinor,
       currency: () => currency,
       leadDays: leadDays,
-      // Both are derived from the category and neither is on the form, so they
-      // are re-derived when the category moves and left alone otherwise.
-      nagAfterDue: categoryChanged
-          ? Reminders.defaultNagPolicy(category)
-          : null,
-      verifyEveryDays: categoryChanged
-          ? () => Reminders.defaultVerifyEveryDaysFor(category)
-          : null,
+      // Both come from the shelf and neither is on the form, so they are taken
+      // again when the shelf moves and left alone otherwise. An item whose
+      // reminders the user tuned by hand keeps them until they file it
+      // somewhere else, which is the one move that says the old defaults were
+      // for a different kind of thing.
+      nagAfterDue: categoryChanged ? category.nag : null,
+      verifyEveryDays: categoryChanged ? () => category.verifyEveryDays : null,
       // A date the user has just retyped is a date from memory again, and a
       // snooze on the books was postponing the occurrence they have moved.
       dateSource: dateChanged ? DateSource.userEstimated : null,
       snoozedUntil: dateChanged ? () => null : null,
       actionUrl: entry == null ? null : () => entry.cancelUrl,
       note: entry == null ? null : () => entry.noteVi,
+      trialStart: () => trialStart,
+      paymentSourceId: () => paymentSourceId,
     );
   }
 

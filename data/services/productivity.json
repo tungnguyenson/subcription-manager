@@ -13,12 +13,11 @@
         "creative cloud",
         "adobe cc"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "pro",
       "cancelUrl": "https://account.adobe.com/plans",
       "noteVi": null,
-      "defaultPlan": "pro",
       "plans": [
         {
           "tier": "pro",
@@ -52,12 +51,12 @@
       "aliases": [
         "figma"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": null,
       "defaultPlan": "professional",
+      "cancelUrl": null,
+      "manageUrl": "https://www.figma.com/settings",
+      "noteVi": null,
       "plans": [
         {
           "tier": "professional",
@@ -83,8 +82,7 @@
           "source": "https://www.figma.com/pricing/",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://www.figma.com/settings"
+      ]
     },
     {
       "id": "notion",
@@ -92,12 +90,11 @@
       "aliases": [
         "notion"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "plus",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "plus",
       "plans": [
         {
           "tier": "plus",
@@ -133,12 +130,12 @@
         "jetbrains",
         "all products pack"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
-      "cancelUrl": null,
-      "noteVi": "Giá năm là giá năm đầu (299 USD); các năm gia hạn tiếp theo rẻ hơn nhờ continuity discount của JetBrains.",
       "defaultPlan": "all-products-pack",
+      "cancelUrl": null,
+      "manageUrl": "https://account.jetbrains.com/licenses",
+      "noteVi": "Giá năm là giá năm đầu (299 USD); các năm gia hạn tiếp theo rẻ hơn nhờ continuity discount của JetBrains.",
       "plans": [
         {
           "tier": "all-products-pack",
@@ -164,8 +161,7 @@
           "source": "https://www.jetbrains.com/store/",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://account.jetbrains.com/licenses"
+      ]
     },
     {
       "id": "microsoft-365",
@@ -176,12 +172,12 @@
         "m365",
         "microsoft 365"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
-      "cancelUrl": null,
-      "noteVi": null,
       "defaultPlan": "personal",
+      "cancelUrl": null,
+      "manageUrl": "https://account.microsoft.com/services",
+      "noteVi": null,
       "plans": [
         {
           "tier": "personal",
@@ -207,8 +203,7 @@
           "source": "https://www.microsoft.com/en-us/microsoft-365/buy/compare-all-microsoft-365-products",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://account.microsoft.com/services"
+      ]
     },
     {
       "id": "domain",
@@ -217,12 +212,11 @@
         "domain",
         "ten mien"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Mục chung, không có brand — phí đăng ký/gia hạn khác nhau theo TLD và nhà cung cấp.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -233,12 +227,11 @@
         "hosting",
         "server"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Mục chung, không có brand — phí VPS/hosting khác nhau theo nhà cung cấp và cấu hình.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -247,12 +240,11 @@
       "aliases": [
         "vercel"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "pro",
       "cancelUrl": null,
       "noteVi": "Vercel Pro chỉ tính phí theo tháng (theo seat), không bán gói trả trước theo năm.",
-      "defaultPlan": "pro",
       "plans": [
         {
           "tier": "pro",
@@ -276,12 +268,11 @@
         "gsuite",
         "g suite"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "business-starter",
       "cancelUrl": null,
       "noteVi": "Chỉ xác nhận được giá cam kết năm (7 USD/user/tháng); trang giá không hiện tĩnh mức phí trả linh hoạt theo tháng.",
-      "defaultPlan": "business-starter",
       "plans": [
         {
           "tier": "business-starter",
@@ -303,12 +294,11 @@
       "aliases": [
         "canva"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "pro",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "pro",
       "plans": [
         {
           "tier": "pro",
@@ -340,12 +330,12 @@
       "aliases": [
         "zoom"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": null,
       "defaultPlan": "pro",
+      "cancelUrl": null,
+      "manageUrl": "https://zoom.us/billing",
+      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -371,8 +361,7 @@
           "source": "https://zoom.us/pricing",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://zoom.us/billing"
+      ]
     },
     {
       "id": "slack",
@@ -380,12 +369,12 @@
       "aliases": [
         "slack"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": null,
       "defaultPlan": "pro",
+      "cancelUrl": null,
+      "manageUrl": "https://slack.com/account/settings",
+      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -411,8 +400,7 @@
           "source": "https://slack.com/pricing",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://slack.com/account/settings"
+      ]
     },
     {
       "id": "grammarly",
@@ -420,12 +408,11 @@
       "aliases": [
         "grammarly"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "pro",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "pro",
       "plans": [
         {
           "tier": "pro",
@@ -459,12 +446,12 @@
       "aliases": [
         "todoist"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": null,
       "defaultPlan": "pro",
+      "cancelUrl": null,
+      "manageUrl": "https://app.todoist.com/app/settings/subscription",
+      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -488,8 +475,7 @@
           "source": "https://www.todoist.com/pricing",
           "checkedAt": "2026-08-24"
         }
-      ],
-      "manageUrl": "https://app.todoist.com/app/settings/subscription"
+      ]
     },
     {
       "id": "evernote",
@@ -497,12 +483,11 @@
       "aliases": [
         "evernote"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Trang evernote.com/compare-plans mở được bằng trình duyệt thật nhưng hiện giá VND với số lẻ tới hàng thập phân (vd 62.766,58đ/tháng) — dấu hiệu quy đổi tỉ giá tự động theo IP chứ không phải bảng giá VND chính thức của hãng, nên không dùng. Danh sách In-App Purchase trên App Store cũng chỉ là các mục cũ chồng chéo (Premium/Plus/Personal, có cả gói trọn đời) không tách được cặp giá tháng/năm hiện hành rõ ràng.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -512,12 +497,11 @@
         "obsidian sync",
         "obsidian"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -551,12 +535,11 @@
       "aliases": [
         "trello"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -590,12 +573,11 @@
       "aliases": [
         "asana"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "starter",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "starter",
       "plans": [
         {
           "tier": "starter",
@@ -629,12 +611,11 @@
       "aliases": [
         "clickup"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "unlimited",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "unlimited",
       "plans": [
         {
           "tier": "unlimited",
@@ -668,12 +649,11 @@
       "aliases": [
         "linear"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "basic",
       "cancelUrl": null,
       "noteVi": "Chỉ xác nhận được giá trả theo năm (10 USD/user/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
-      "defaultPlan": "basic",
       "plans": [
         {
           "tier": "basic",
@@ -695,12 +675,11 @@
       "aliases": [
         "airtable"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "team",
       "cancelUrl": null,
       "noteVi": "Chỉ xác nhận được giá trả theo năm (20 USD/user/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
-      "defaultPlan": "team",
       "plans": [
         {
           "tier": "team",
@@ -722,12 +701,11 @@
       "aliases": [
         "miro"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "starter",
       "cancelUrl": null,
       "noteVi": "Chỉ xác nhận được giá trả theo năm (8 USD/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
-      "defaultPlan": "starter",
       "plans": [
         {
           "tier": "starter",
@@ -749,12 +727,11 @@
       "aliases": [
         "raycast"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "pro",
       "cancelUrl": null,
       "noteVi": "Chỉ xác nhận được giá trả theo năm (8 USD/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
-      "defaultPlan": "pro",
       "plans": [
         {
           "tier": "pro",
@@ -776,12 +753,11 @@
       "aliases": [
         "setapp"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "mac-ios",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "mac-ios",
       "plans": [
         {
           "tier": "mac-ios",
@@ -813,14 +789,13 @@
       "aliases": [
         "github"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": "Xác nhận lại bằng trình duyệt thật trên github.com/pricing: GitHub chỉ còn 3 gói Free, Team (4 USD/user/tháng, tính theo tổ chức chứ không phải cá nhân) và Enterprise (từ 21 USD/user/tháng); không còn gói Pro cho tài khoản cá nhân nên không có tier phù hợp để ghi giá.",
       "defaultPlan": null,
-      "plans": [],
-      "manageUrl": "https://github.com/settings/billing/summary"
+      "cancelUrl": null,
+      "manageUrl": "https://github.com/settings/billing/summary",
+      "noteVi": "Xác nhận lại bằng trình duyệt thật trên github.com/pricing: GitHub chỉ còn 3 gói Free, Team (4 USD/user/tháng, tính theo tổ chức chứ không phải cá nhân) và Enterprise (từ 21 USD/user/tháng); không còn gói Pro cho tài khoản cá nhân nên không có tier phù hợp để ghi giá.",
+      "plans": []
     },
     {
       "id": "cloudflare",
@@ -828,12 +803,11 @@
       "aliases": [
         "cloudflare"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "pro",
       "cancelUrl": null,
       "noteVi": "Giá Pro tính theo 1 website/domain.",
-      "defaultPlan": "pro",
       "plans": [
         {
           "tier": "pro",

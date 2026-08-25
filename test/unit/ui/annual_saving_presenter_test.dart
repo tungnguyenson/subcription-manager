@@ -33,7 +33,7 @@ void main() {
   }) => CatalogEntry(
     id: 'netflix',
     name: 'Netflix',
-    category: Category.subscription,
+    categoryId: 'STREAMING',
     plans: plans,
     defaultPlan: defaultPlan,
   );
@@ -53,7 +53,7 @@ void main() {
   }) => TrackedItem(
     id: 'x',
     name: 'Netflix',
-    category: Category.subscription,
+    categoryId: 'STREAMING',
     expiresOn: d('2026-09-01'),
     anchorDate: d('2026-09-01'),
     cycle: cycle,

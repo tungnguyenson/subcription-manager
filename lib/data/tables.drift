@@ -12,13 +12,84 @@
 -- name comes out of drift's singularisation rules, which would make an
 -- unrelated schema edit rename a type across the whole data layer.
 
+-- A card, wallet or account, named by the user.
+--
+-- Never a card number, and there is nowhere to put one: two text fields, one of
+-- which is a glyph key. The whole feature exists so a reminder can say *which*
+-- card is about to be charged, and a nickname does that. Storing a PAN would
+-- turn an offline, accountless app into something worth stealing.
+CREATE TABLE paymentSourceRow (
+    id          TEXT NOT NULL PRIMARY KEY,
+    name        TEXT NOT NULL,
+
+    -- Which mark to draw: CARD / BANK / WALLET / CONTACTLESS / CASH.
+    glyph       TEXT NOT NULL,
+
+    createdAt   INTEGER NOT NULL
+) AS PaymentSourceRowData;
+
+-- The shelves an item can sit on, and the reminder defaults that come with
+-- each one.
+--
+-- A table rather than an enum because the user adds their own. Everything the
+-- app used to decide by switching on a five-value `Category` is a column here
+-- instead: the app no longer knows any shelf by name, so a shelf someone
+-- invents behaves exactly like a shipped one.
+--
+-- The shipped rows are seeded on create and on upgrade to v6. `builtIn` marks
+-- them so the manager can refuse to delete a shelf the catalogue still points
+-- at, and nothing else reads it.
+CREATE TABLE categoryRow (
+    id                TEXT NOT NULL PRIMARY KEY,
+
+    -- What the user reads. Editable, including on the shipped rows: someone
+    -- who calls it "Phim" should see "Phim".
+    label             TEXT NOT NULL,
+
+    -- The mark to draw beside the label, or NULL to work it out from the
+    -- item's own name the way an uncategorised item already does.
+    iconName          TEXT,
+
+    -- DUE or EXPIRES. Whether a date on this shelf reads as money owed or as
+    -- permission running out. Not derivable: a prepaid SIM is paid for and
+    -- still expires.
+    wording           TEXT NOT NULL,
+
+    -- NONE / WEEKLY / DAILY, after the date has passed. Also decides whether a
+    -- notification is time sensitive: anything that nags is a deadline, and a
+    -- deadline delivered silently during Focus was not delivered.
+    nag               TEXT NOT NULL,
+
+    -- Comma-separated ints, same shape as itemRow.leadDays. The lead times a
+    -- new item on this shelf starts with.
+    leadDays          TEXT NOT NULL,
+
+    -- How often to ask the user to re-check the date, or NULL for never. Only
+    -- for dates the app cannot see drift: a passport office moves an
+    -- appointment and nothing tells the phone.
+    verifyEveryDays   INTEGER,
+
+    -- Whether an amount on this shelf is spending. FALSE for the paperwork
+    -- shelves: a passport fee is real money and still has no business in a
+    -- monthly subscription total, because renewing one is not a recurring cost.
+    countsTowardSpend BOOLEAN NOT NULL DEFAULT TRUE,
+
+    builtIn           BOOLEAN NOT NULL DEFAULT FALSE,
+
+    sortOrder         INTEGER NOT NULL
+) AS CategoryRowData;
+
 CREATE TABLE itemRow (
     id                TEXT NOT NULL PRIMARY KEY,
     name              TEXT NOT NULL,
 
-    -- Subscription / Bill / Insurance / Document / Other. The item's one and
+    -- Which shelf this sits on: an id from categoryRow. The item's one and
     -- only classification; there is no second axis beside it.
-    category          TEXT NOT NULL,
+    --
+    -- No ON DELETE clause because the manager never deletes a shelf out from
+    -- under an item -- it makes the user say where those items go first, and
+    -- moves them in the same transaction.
+    category          TEXT NOT NULL REFERENCES categoryRow(id),
 
     -- The key of a chosen icon. NULL means "work it out from the name", which
     -- is the normal state; a value here is an override the user made.
@@ -56,6 +127,37 @@ CREATE TABLE itemRow (
 
     state             TEXT NOT NULL,
 
+    -- The day a free trial began, or NULL for an item that is being paid for.
+    --
+    -- The trial's *end* is not stored: it is expiresOn, because the day the
+    -- free period ends is the day the first charge lands. Storing both would
+    -- let them disagree, and every reminder in the app already fires ahead of
+    -- expiresOn -- which is exactly the promise a trial reminder makes.
+    trialStart        TEXT,
+
+    -- Which card or account pays for this, or NULL for "not said".
+    --
+    -- ON DELETE SET NULL rather than CASCADE: forgetting which card pays for
+    -- Netflix must never delete Netflix. Requires PRAGMA foreign_keys = ON,
+    -- which beforeOpen sets.
+    paymentSourceId   TEXT REFERENCES paymentSourceRow(id) ON DELETE SET NULL,
+
+    -- Turned off by the user: no reminders, and hidden from Upcoming. Not the
+    -- same as any ItemState value -- a paused item is still tracked and still
+    -- counts in Spending, it has just been told to be quiet. Orthogonal on
+    -- purpose, so a cancelled-but-still-running subscription can also be
+    -- muted.
+    paused            BOOLEAN NOT NULL DEFAULT FALSE,
+
+    -- What the user decided about the "this costs less yearly" suggestion:
+    -- NULL / REMIND / SKIPPED.
+    --
+    -- One column with three states rather than two booleans, because there are
+    -- three answers and only one of them can be true: not asked yet, remind me,
+    -- and stop suggesting it. Two flags would allow a fourth state that means
+    -- nothing.
+    yearlyChoice      TEXT,
+
     -- Where the user bought it: UNKNOWN / WEB / APP_STORE / PLAY_STORE.
     -- Decides which page can actually show them this subscription. Defaults to
     -- UNKNOWN because the app never asks up front; the first tap answers it.
@@ -65,7 +167,9 @@ CREATE TABLE itemRow (
 ) AS ItemRowData;
 
 CREATE INDEX item_expiresOn ON itemRow(expiresOn);
+CREATE INDEX item_paymentSourceId ON itemRow(paymentSourceId);
 CREATE INDEX item_state ON itemRow(state);
+CREATE INDEX item_category ON itemRow(category);
 
 -- Append-only. A row here is a thing that already happened, so nothing in it is
 -- ever updated except actualChargedMinor, which the user types off a bank
@@ -113,6 +217,16 @@ CREATE TABLE settingRow (
     settingKey   TEXT NOT NULL PRIMARY KEY,
     value        TEXT NOT NULL
 ) AS SettingRowData;
+
+-- ---- categories ----
+
+selectAllCategories:
+SELECT * FROM categoryRow ORDER BY sortOrder ASC;
+
+-- ---- payment sources ----
+
+selectAllSources:
+SELECT * FROM paymentSourceRow ORDER BY createdAt ASC;
 
 -- ---- settings ----
 

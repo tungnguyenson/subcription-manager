@@ -15,7 +15,7 @@ void main() {
   }) => TrackedItem(
     id: 'claude',
     name: 'Claude Pro',
-    category: Category.subscription,
+    categoryId: 'STREAMING',
     expiresOn: d(expiresOn),
     actByOffsetDays: actByOffsetDays,
     anchorDate: d(expiresOn),

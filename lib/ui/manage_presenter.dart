@@ -53,7 +53,16 @@ abstract final class ManagePresenter {
   /// and a loan instalment have no vendor billing page and are not in anyone's
   /// App Store subscriptions, so a button here would be a button to a page
   /// that is guaranteed not to hold the answer.
-  static ManageOffer? of({required TrackedItem item, CatalogEntry? entry}) {
+  static ManageOffer? of({
+    required TrackedItem item,
+    required Category category,
+    CatalogEntry? entry,
+  }) {
+    // Only something that renews can be sitting in a store's subscription list.
+    // A shelf that keeps nagging after the date is an obligation -- a bill, a
+    // policy, a passport -- and none of those is cancelled from the App Store.
+    final renews = !category.isObligation;
+
     final vendorUrl = entry?.manageUrl;
     final name = entry?.name ?? item.name;
 
@@ -99,9 +108,7 @@ abstract final class ManagePresenter {
       // No vendor page. The store is still a real answer for something that
       // renews, and no answer at all for anything else.
       PurchaseChannel.unknown =>
-        item.category == Category.subscription
-            ? const ManageOffer(primary: store)
-            : null,
+        renews ? const ManageOffer(primary: store) : null,
     };
   }
 }

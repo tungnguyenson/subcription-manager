@@ -14,6 +14,16 @@ class SettingsScreen extends StatelessWidget {
   final String currencyLabel;
   final String languageLabel;
 
+  /// `8 · 2 off`. Answers "how much is in there" without opening the screen,
+  /// and the `off` half is the only place outside Upcoming that says anything
+  /// has been paused.
+  final String? servicesLine;
+
+  /// `3`, or `None`.
+  final String? sourcesLine;
+
+  final VoidCallback? onOpenServices;
+  final VoidCallback? onOpenSources;
   final VoidCallback? onOpenReminders;
   final VoidCallback? onOpenHistory;
   final VoidCallback? onExport;
@@ -24,6 +34,10 @@ class SettingsScreen extends StatelessWidget {
     this.droppedReminders = const [],
     this.currencyLabel = 'VND',
     this.languageLabel = 'English',
+    this.servicesLine,
+    this.sourcesLine,
+    this.onOpenServices,
+    this.onOpenSources,
     this.onOpenReminders,
     this.onOpenHistory,
     this.onExport,
@@ -33,12 +47,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        SubdockSpacing.screenH,
-        6,
-        SubdockSpacing.screenH,
-        SubdockSpacing.contentBottom,
-      ),
+      padding: SubdockSpacing.screenPadding(context),
       children: [
         const Text('Settings', style: SubdockText.screenTitle),
         if (droppedReminders.isNotEmpty) ...[
@@ -55,7 +64,17 @@ class SettingsScreen extends StatelessWidget {
         const SizedBox(height: 20),
         GroupedCard(
           children: [
+            DetailRow.nav(
+              label: 'All services',
+              value: servicesLine,
+              onTap: onOpenServices,
+            ),
             DetailRow.nav(label: 'Reminders', onTap: onOpenReminders),
+            DetailRow.nav(
+              label: 'Payment sources',
+              value: sourcesLine,
+              onTap: onOpenSources,
+            ),
             DetailRow.nav(label: 'History', onTap: onOpenHistory),
             // Value rows, not destinations. There is one base currency and one
             // language, and a chevron on either would promise a picker that
@@ -67,6 +86,14 @@ class SettingsScreen extends StatelessWidget {
         const SizedBox(height: 14),
         GroupedCard(
           children: [
+            // A value row, not a destination, and for the same reason Currency
+            // and Language above are: there is no home-screen widget in this
+            // build and no screen to configure one, so a chevron here would
+            // promise a place that does not exist. The row is still worth
+            // having — it answers "can this put my next date on the home
+            // screen" without the user hunting for a setting that is not
+            // there.
+            const DetailRow(label: 'Widget', value: 'Not yet'),
             DetailRow.nav(label: 'Export data', onTap: onExport),
             DetailRow.nav(label: 'About', onTap: onAbout),
           ],

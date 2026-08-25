@@ -29,35 +29,170 @@ T enumFromWire<T extends WireNamed>(List<T> values, String? wire, T fallback) {
   return fallback;
 }
 
-/// What this item is. One axis with five values.
+/// Whether a date on a shelf reads as money owed or as permission running out.
 ///
-/// The hand-off's data model gives an item a single `category` and nothing
-/// beside it, so the old pair — a five-value `kind` and an eight-value spend
-/// `categoryId` that mostly restated it — is collapsed to this. Two
-/// classifications the user has to keep aligned is one classification too
-/// many; that is the same mistake the risk axis was removed for.
-enum Category with WireNamed {
-  /// Anything that renews itself until stopped: streaming, software, a phone
-  /// plan, a free trial that is going to convert.
-  subscription('SUBSCRIPTION'),
+/// Not derivable from the item: a prepaid SIM is already paid for and still
+/// expires, and a passport costs nothing on the day it lapses. It is a property
+/// of the shelf, which is why the user picks it when they make one.
+enum CategoryWording with WireNamed {
+  /// "Due 22/08". Something will be taken.
+  due('DUE'),
 
-  /// An amount owed by a date: electricity, an instalment, a top-up.
-  bill('BILL'),
+  /// "Expires 22/08". Something will stop working.
+  expires('EXPIRES');
 
-  /// A policy that lapses if the premium is missed.
-  insurance('INSURANCE'),
-
-  /// Expires and must be renewed; never counted as spend.
-  document('DOCUMENT'),
-
-  /// Everything the other four do not describe. Offered last, never guessed
-  /// into: an item lands here because the user put it here.
-  other('OTHER');
-
-  const Category(this.wireName);
+  const CategoryWording(this.wireName);
 
   @override
   final String wireName;
+}
+
+/// A shelf an item sits on, and the reminder defaults that come with it.
+///
+/// A row the user can edit rather than a value the app knows by name. The old
+/// five-value enum could not answer the question the service list is read for
+/// -- 199 of 223 catalogue entries were `SUBSCRIPTION`, so nearly everything
+/// landed under one heading -- while the catalogue's own 21-way grouping had no
+/// say in how anything behaved. Both are this one type now: the grouping the
+/// user browses *is* the thing that carries the behaviour.
+///
+/// The app knows no shelf by name. Everything it used to decide with a switch
+/// reads a field here instead, so a shelf someone invents on Tuesday behaves
+/// exactly like a shipped one.
+@immutable
+class Category {
+  /// Stable across renames. The shipped rows use the catalogue's own codes
+  /// (`STREAMING`, `PHONE`); a user-made one gets a generated id.
+  final String id;
+
+  /// What the user reads. Editable on shipped rows too.
+  final String label;
+
+  /// The mark to draw, or null to work it out from the item's name the way an
+  /// uncategorised item already does.
+  final String? iconName;
+
+  final CategoryWording wording;
+
+  /// What happens after the date passes. Also decides time sensitivity: see
+  /// [isTimeSensitive].
+  final NagPolicy nag;
+
+  /// The lead times a new item on this shelf starts with.
+  final List<int> leadDays;
+
+  /// How often to ask the user to re-check the date, or null for never.
+  final int? verifyEveryDays;
+
+  /// Whether an amount on this shelf counts as spending.
+  ///
+  /// False for paperwork: a passport fee is real money and still has no
+  /// business in a monthly subscription total, because renewing one is not a
+  /// recurring cost. A flag rather than something inferred from the cycle,
+  /// because a document with a five-year cycle is still not a subscription.
+  final bool countsTowardSpend;
+
+  /// Shipped with the app. Only the manager reads it, to refuse deleting a
+  /// shelf the bundled catalogue still points at.
+  final bool builtIn;
+
+  final int sortOrder;
+
+  const Category({
+    required this.id,
+    required this.label,
+    this.iconName,
+    this.wording = CategoryWording.due,
+    this.nag = NagPolicy.none,
+    this.leadDays = const [Reminders.defaultLead],
+    this.verifyEveryDays,
+    this.countsTowardSpend = true,
+    this.builtIn = false,
+    required this.sortOrder,
+  });
+
+  /// Whether missing the date on this shelf costs something.
+  ///
+  /// Read off [nag] rather than stored beside it. Nagging after the date *is*
+  /// the statement that something is at stake -- a shelf set to keep asking and
+  /// a shelf with a consequence are the same shelf, and a second column would
+  /// let the user set them to disagree.
+  ///
+  /// Two screens read it. Money files these amounts under bills rather than
+  /// subscriptions: a bill is owed whether or not the user wants it, while the
+  /// subscription band is money they could stop paying by cancelling, and
+  /// mixing the two makes that number answer a different question.
+  bool get isObligation => nag != NagPolicy.none;
+
+  /// Whether a notification for this shelf should get past Focus and Do Not
+  /// Disturb, using iOS's Time Sensitive interruption level.
+  ///
+  /// A deadline that arrives silently during Focus is a deadline the app failed
+  /// to deliver; a subscription renewing is news, and news can wait.
+  ///
+  /// Deliberately not Critical Alert: that sounds through silent mode and needs
+  /// a per-app entitlement granted by Apple.
+  bool get isTimeSensitive => isObligation;
+
+  Category copyWith({
+    String? label,
+    String? Function()? iconName,
+    CategoryWording? wording,
+    NagPolicy? nag,
+    List<int>? leadDays,
+    int? Function()? verifyEveryDays,
+    bool? countsTowardSpend,
+    int? sortOrder,
+  }) => Category(
+    id: id,
+    label: label ?? this.label,
+    iconName: iconName == null ? this.iconName : iconName(),
+    wording: wording ?? this.wording,
+    nag: nag ?? this.nag,
+    leadDays: leadDays ?? this.leadDays,
+    verifyEveryDays: verifyEveryDays == null
+        ? this.verifyEveryDays
+        : verifyEveryDays(),
+    countsTowardSpend: countsTowardSpend ?? this.countsTowardSpend,
+    builtIn: builtIn,
+    sortOrder: sortOrder ?? this.sortOrder,
+  );
+
+  @override
+  bool operator ==(Object other) =>
+      other is Category &&
+      other.id == id &&
+      other.label == label &&
+      other.iconName == iconName &&
+      other.wording == wording &&
+      other.nag == nag &&
+      other.verifyEveryDays == verifyEveryDays &&
+      other.countsTowardSpend == countsTowardSpend &&
+      other.builtIn == builtIn &&
+      other.sortOrder == sortOrder &&
+      _sameLeads(other.leadDays, leadDays);
+
+  static bool _sameLeads(List<int> a, List<int> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    label,
+    iconName,
+    wording,
+    nag,
+    verifyEveryDays,
+    countsTowardSpend,
+    builtIn,
+    sortOrder,
+    Object.hashAll(leadDays),
+  );
 }
 
 /// Where the user bought this subscription, which decides where they can go to
@@ -175,11 +310,89 @@ extension CycleWire on Cycle {
   }
 }
 
+/// What the user decided about the "this plan costs less yearly" suggestion.
+///
+/// Three values because there are three answers, and the app must be able to
+/// tell "not asked" from "asked and declined". Without the third, a dismissed
+/// suggestion comes back on the next launch and the Savings screen becomes a
+/// nag the user learns to scroll past.
+enum YearlyChoice with WireNamed {
+  /// Never acted on. The suggestion shows.
+  undecided('UNDECIDED'),
+
+  /// The user wants the renewal reminder to mention it.
+  remind('REMIND'),
+
+  /// Stop suggesting it. Reversible from the "N skipped — show again" line,
+  /// which is why this is stored rather than a permanent opt-out.
+  skipped('SKIPPED');
+
+  const YearlyChoice(this.wireName);
+
+  @override
+  final String wireName;
+}
+
+/// Which mark to draw beside a payment source's name.
+///
+/// Five values, and no more coming. This is not a taxonomy of payment methods
+/// -- it is a small set of shapes that make a list of user-written nicknames
+/// scannable. "VCB 4412" with a card beside it and "Momo" with a wallet beside
+/// it are told apart at a glance; the same two names in plain grey are not.
+enum SourceGlyph with WireNamed {
+  card('CARD'),
+  bank('BANK'),
+  wallet('WALLET'),
+
+  /// Apple Pay, Google Pay -- a phone tapped against a terminal.
+  contactless('CONTACTLESS'),
+
+  cash('CASH');
+
+  const SourceGlyph(this.wireName);
+
+  @override
+  final String wireName;
+}
+
+/// A card, wallet or account, named by the user.
+///
+/// **There is no field for a card number and there must never be one.** The
+/// feature exists so a reminder can say which card is about to be charged, and
+/// a nickname the user recognises does that completely. Subdock is offline and
+/// accountless; a stored PAN would be the one thing in it worth stealing.
+@immutable
+class PaymentSource {
+  final String id;
+  final String name;
+  final SourceGlyph glyph;
+
+  const PaymentSource({
+    required this.id,
+    required this.name,
+    this.glyph = SourceGlyph.card,
+  });
+
+  PaymentSource copyWith({String? name, SourceGlyph? glyph}) => PaymentSource(
+    id: id,
+    name: name ?? this.name,
+    glyph: glyph ?? this.glyph,
+  );
+}
+
 @immutable
 class TrackedItem {
   final String id;
   final String name;
-  final Category category;
+
+  /// Which shelf this sits on: a [Category.id].
+  ///
+  /// The id rather than the [Category] itself, because the shelf is a row the
+  /// user edits: an item holding a copy would keep showing a label that was
+  /// renamed and reminder defaults that were changed. Whoever needs the shelf
+  /// looks it up, the same way an icon is worked out from the name at draw
+  /// time rather than frozen into the row.
+  final String categoryId;
 
   /// The chosen icon's key, or null to let the name decide.
   ///
@@ -235,10 +448,33 @@ class TrackedItem {
   /// Where this one was bought. See [PurchaseChannel].
   final PurchaseChannel purchaseChannel;
 
+  /// The day a free trial began, or null for an item being paid for.
+  ///
+  /// The trial's *end* is [expiresOn]: the day the free period stops is the day
+  /// the first charge lands, and they cannot be allowed to disagree. Every
+  /// reminder in the app already fires ahead of [expiresOn], which is exactly
+  /// the promise a trial reminder makes — warn me while cancelling is still
+  /// free.
+  final LocalDate? trialStart;
+
+  /// Which source pays for this, or null for "not said". See [PaymentSource].
+  final String? paymentSourceId;
+
+  /// Turned off by the user: no reminders, and hidden from Upcoming.
+  ///
+  /// Not a fourth [ItemState]. Pausing says "be quiet about this", and the
+  /// three states say what has happened to the subscription itself, so a
+  /// cancelled-but-still-running item can also be paused. Folding the two
+  /// would make un-pausing an archived item impossible to express.
+  final bool paused;
+
+  /// What the user said about moving this to a yearly plan. See [YearlyChoice].
+  final YearlyChoice yearlyChoice;
+
   TrackedItem({
     required this.id,
     required this.name,
-    required this.category,
+    required this.categoryId,
     this.iconName,
     required this.expiresOn,
     this.actByOffsetDays = 0,
@@ -252,24 +488,90 @@ class TrackedItem {
     this.note,
     List<int>? leadDays,
     this.remindAt = Reminders.defaultRemindAt,
-    NagPolicy? nagAfterDue,
-    int? verifyEveryDays,
     this.lastVerifiedAt,
     this.dateSource = DateSource.userEstimated,
     this.snoozedUntil,
     this.state = ItemState.active,
     this.purchaseChannel = PurchaseChannel.unknown,
-    // Dart cannot express "default to null" and "default to a computed value"
-    // in the same optional parameter, so an explicit null for a
-    // category-defaulted field is passed as a flag instead of guessing.
+    this.trialStart,
+    this.paymentSourceId,
+    this.paused = false,
+    this.yearlyChoice = YearlyChoice.undecided,
+    NagPolicy? nagAfterDue,
+    this.verifyEveryDays,
+  }) : leadDays = List.unmodifiable(leadDays ?? const [Reminders.defaultLead]),
+       nagAfterDue = nagAfterDue ?? NagPolicy.none;
+
+  /// A brand new item on [category], taking that shelf's reminder defaults.
+  ///
+  /// Separate from the constructor because the defaults can only be read off a
+  /// row the caller has already loaded. The constructor used to compute them
+  /// from an enum it could switch on; nothing can switch on a shelf any more,
+  /// which is the point. Anything reading an existing item -- storage, backup,
+  /// a copyWith -- goes through the constructor and carries what was stored.
+  factory TrackedItem.on(
+    Category category, {
+    required String id,
+    required String name,
+    String? iconName,
+    required LocalDate expiresOn,
+    int actByOffsetDays = 0,
+    required LocalDate anchorDate,
+    Cycle? cycle,
+    int? repeatCount,
+    int? amountMinor,
+    String? currency,
+    String? actionUrl,
+    String? actionLabel,
+    String? note,
+    List<int>? leadDays,
+    LocalTime remindAt = Reminders.defaultRemindAt,
+    NagPolicy? nagAfterDue,
+    int? verifyEveryDays,
     bool verifyEveryDaysIsExplicit = false,
-  }) : leadDays = List.unmodifiable(
-         leadDays ?? Reminders.defaultLeadDays(category),
-       ),
-       nagAfterDue = nagAfterDue ?? Reminders.defaultNagPolicy(category),
-       verifyEveryDays = verifyEveryDaysIsExplicit
-           ? verifyEveryDays
-           : (verifyEveryDays ?? Reminders.defaultVerifyEveryDaysFor(category));
+    LocalDate? lastVerifiedAt,
+    DateSource dateSource = DateSource.userEstimated,
+    LocalDate? snoozedUntil,
+    ItemState state = ItemState.active,
+    PurchaseChannel purchaseChannel = PurchaseChannel.unknown,
+    LocalDate? trialStart,
+    String? paymentSourceId,
+    bool paused = false,
+    YearlyChoice yearlyChoice = YearlyChoice.undecided,
+  }) => TrackedItem(
+    id: id,
+    name: name,
+    categoryId: category.id,
+    iconName: iconName,
+    expiresOn: expiresOn,
+    actByOffsetDays: actByOffsetDays,
+    anchorDate: anchorDate,
+    cycle: cycle,
+    repeatCount: repeatCount,
+    amountMinor: amountMinor,
+    currency: currency,
+    actionUrl: actionUrl,
+    actionLabel: actionLabel,
+    note: note,
+    leadDays: leadDays ?? category.leadDays,
+    remindAt: remindAt,
+    nagAfterDue: nagAfterDue ?? category.nag,
+    // Dart cannot express "default to null" and "default to the shelf's value"
+    // in one optional parameter, so an explicit null is passed as a flag
+    // instead of being mistaken for "not said".
+    verifyEveryDays: verifyEveryDaysIsExplicit
+        ? verifyEveryDays
+        : (verifyEveryDays ?? category.verifyEveryDays),
+    lastVerifiedAt: lastVerifiedAt,
+    dateSource: dateSource,
+    snoozedUntil: snoozedUntil,
+    state: state,
+    purchaseChannel: purchaseChannel,
+    trialStart: trialStart,
+    paymentSourceId: paymentSourceId,
+    paused: paused,
+    yearlyChoice: yearlyChoice,
+  );
 
   Money? get money => (amountMinor != null && currency != null)
       ? Money(amountMinor!, currency!)
@@ -279,14 +581,34 @@ class TrackedItem {
   /// lead time.
   LocalDate get actBy => Recurrence.actBy(expiresOn, actByOffsetDays);
 
-  /// A document is renewed, not bought on a cycle; its fee is not a
-  /// subscription and must not land in a monthly spend total.
-  bool get countsTowardSpend => money != null && category != Category.document;
+  /// In a free trial right now.
+  bool get isTrial => trialStart != null;
+
+  /// How many free days the trial runs for, or null when it is not a trial.
+  int? get trialLengthDays => trialStart?.daysUntil(expiresOn);
+
+  /// Whether this belongs in a spend total, given the shelf it sits on.
+  ///
+  /// Takes the shelf because the answer is not a property of the item alone: a
+  /// passport fee is real money that must not land in a monthly subscription
+  /// total, and only the shelf says so.
+  ///
+  /// A trial is excluded for the same reason from the other direction: the
+  /// amount on it is what the user *will* pay, and putting a figure nobody has
+  /// been charged into "this month" makes the total answer a different
+  /// question. The trial is reported separately, as "not counted yet".
+  bool countsTowardSpend(Category category) =>
+      money != null && category.countsTowardSpend && !isTrial;
+
+  /// Whether reminders should be scheduled and whether the item belongs on
+  /// Upcoming. The one predicate for both, so the list and the notifications
+  /// can never disagree about what the user turned off.
+  bool get isLive => !paused && state != ItemState.archived;
 
   TrackedItem copyWith({
     String? id,
     String? name,
-    Category? category,
+    String? categoryId,
     String? Function()? iconName,
     LocalDate? expiresOn,
     int? actByOffsetDays,
@@ -307,11 +629,15 @@ class TrackedItem {
     LocalDate? Function()? snoozedUntil,
     ItemState? state,
     PurchaseChannel? purchaseChannel,
+    LocalDate? Function()? trialStart,
+    String? Function()? paymentSourceId,
+    bool? paused,
+    YearlyChoice? yearlyChoice,
   }) {
     return TrackedItem(
       id: id ?? this.id,
       name: name ?? this.name,
-      category: category ?? this.category,
+      categoryId: categoryId ?? this.categoryId,
       iconName: iconName != null ? iconName() : this.iconName,
       expiresOn: expiresOn ?? this.expiresOn,
       actByOffsetDays: actByOffsetDays ?? this.actByOffsetDays,
@@ -329,7 +655,6 @@ class TrackedItem {
       verifyEveryDays: verifyEveryDays != null
           ? verifyEveryDays()
           : this.verifyEveryDays,
-      verifyEveryDaysIsExplicit: true,
       lastVerifiedAt: lastVerifiedAt != null
           ? lastVerifiedAt()
           : this.lastVerifiedAt,
@@ -337,6 +662,12 @@ class TrackedItem {
       snoozedUntil: snoozedUntil != null ? snoozedUntil() : this.snoozedUntil,
       state: state ?? this.state,
       purchaseChannel: purchaseChannel ?? this.purchaseChannel,
+      trialStart: trialStart != null ? trialStart() : this.trialStart,
+      paymentSourceId: paymentSourceId != null
+          ? paymentSourceId()
+          : this.paymentSourceId,
+      paused: paused ?? this.paused,
+      yearlyChoice: yearlyChoice ?? this.yearlyChoice,
     );
   }
 }

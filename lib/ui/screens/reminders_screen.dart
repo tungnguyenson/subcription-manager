@@ -60,12 +60,7 @@ class RemindersScreen extends StatelessWidget {
       ..sort((a, b) => b.compareTo(a));
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        SubdockSpacing.screenH,
-        6,
-        SubdockSpacing.screenH,
-        SubdockSpacing.contentBottom,
-      ),
+      padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: onBack),
         const Text('Reminders', style: SubdockText.screenTitle),

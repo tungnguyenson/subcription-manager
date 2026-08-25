@@ -6,6 +6,7 @@ import 'package:subdock/app.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/database.dart';
 import 'package:subdock/data/item_repository.dart';
+import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/data/settings_store.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
@@ -31,7 +32,7 @@ void main() {
       TrackedItem(
         id: 'hsd',
         name: 'SIM validity',
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         expiresOn: d('2026-08-12'),
         anchorDate: d('2026-08-12'),
         note: 'Text TK to 191 to check.',
@@ -42,7 +43,7 @@ void main() {
       TrackedItem(
         id: 'passport',
         name: 'Passport',
-        category: Category.document,
+        categoryId: 'DOCUMENTS',
         expiresOn: d('2027-02-02'),
         anchorDate: d('2027-02-02'),
       ),
@@ -52,7 +53,7 @@ void main() {
       TrackedItem(
         id: 'claude',
         name: 'Claude Pro',
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         expiresOn: LocalDate.today().plusDays(2),
         actByOffsetDays: 1,
         anchorDate: LocalDate.today().plusDays(2),
@@ -78,6 +79,7 @@ void main() {
       SubdockApp(
         repository: repo,
         settings: SettingsStore(db),
+        filters: FilterStore(db),
         scheduler: NotificationScheduler(),
         catalog: ServiceCatalog(const []),
       ),

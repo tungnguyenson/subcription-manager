@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/catalog/bundled_data.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/settings_store.dart';
@@ -11,6 +12,7 @@ import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/extract/extraction_review.dart';
 import 'package:subdock/extract/extraction_schema.dart';
+import 'package:subdock/ui/screens/add/plan_grid.dart';
 import 'package:subdock/ui/screens/add_item_screen.dart';
 import 'package:subdock/ui/screens/history_screen.dart';
 import 'package:subdock/ui/screens/item_detail_screen.dart';
@@ -46,7 +48,7 @@ void main() {
   final claude = TrackedItem(
     id: 'claude',
     name: 'Claude Pro',
-    category: Category.subscription,
+    categoryId: 'STREAMING',
     expiresOn: d('2026-08-17'),
     actByOffsetDays: 1,
     anchorDate: d('2026-08-17'),
@@ -62,7 +64,7 @@ void main() {
   final course = TrackedItem(
     id: 'course',
     name: 'Course instalment',
-    category: Category.bill,
+    categoryId: 'UTILITIES',
     expiresOn: d('2026-08-21'),
     anchorDate: d('2026-05-21'),
     cycle: Cycle.monthly,
@@ -77,7 +79,12 @@ void main() {
     ) async {
       await show(
         tester,
-        ItemDetailScreen(item: claude, today: today, scheduledCount: 4),
+        ItemDetailScreen(
+          item: claude,
+          category: CategoryBook.shipped[claude.categoryId],
+          today: today,
+          scheduledCount: 4,
+        ),
       );
 
       expect(find.text('Claude Pro'), findsOneWidget);
@@ -87,7 +94,14 @@ void main() {
     // The app only knows what the user typed. This row is what stops a
     // remembered date from looking like a confirmed one.
     testWidgets('shows where the date came from', (tester) async {
-      await show(tester, ItemDetailScreen(item: claude, today: today));
+      await show(
+        tester,
+        ItemDetailScreen(
+          item: claude,
+          category: CategoryBook.shipped[claude.categoryId],
+          today: today,
+        ),
+      );
       expect(find.text('from memory'), findsOneWidget);
     });
 
@@ -95,7 +109,12 @@ void main() {
     testWidgets('the delete action states both consequences', (tester) async {
       await show(
         tester,
-        ItemDetailScreen(item: claude, today: today, scheduledCount: 4),
+        ItemDetailScreen(
+          item: claude,
+          category: CategoryBook.shipped[claude.categoryId],
+          today: today,
+          scheduledCount: 4,
+        ),
       );
 
       expect(find.text('Delete this item'), findsOneWidget);
@@ -113,6 +132,7 @@ void main() {
         tester,
         ItemDetailScreen(
           item: claude,
+          category: CategoryBook.shipped[claude.categoryId],
           today: today,
           onStop: () => stopped = true,
         ),
@@ -127,6 +147,7 @@ void main() {
         tester,
         ItemDetailScreen(
           item: claude,
+          category: CategoryBook.shipped[claude.categoryId],
           today: today,
           history: [
             HandledEvent(
@@ -149,7 +170,14 @@ void main() {
 
     group('a limited series', () {
       testWidgets('says which payment is due and what is left', (tester) async {
-        await show(tester, ItemDetailScreen(item: course, today: today));
+        await show(
+          tester,
+          ItemDetailScreen(
+            item: course,
+            category: CategoryBook.shipped[course.categoryId],
+            today: today,
+          ),
+        );
 
         expect(find.text('4 of 6'), findsOneWidget);
         expect(find.text('3 paid · this one due · 2 left'), findsOneWidget);
@@ -169,6 +197,7 @@ void main() {
           tester,
           ItemDetailScreen(
             item: course,
+            category: CategoryBook.shipped[course.categoryId],
             today: today,
             onMarkPaid: () => paid = true,
           ),
@@ -179,7 +208,14 @@ void main() {
       });
 
       testWidgets('ending it is phrased in the plan own terms', (tester) async {
-        await show(tester, ItemDetailScreen(item: course, today: today));
+        await show(
+          tester,
+          ItemDetailScreen(
+            item: course,
+            category: CategoryBook.shipped[course.categoryId],
+            today: today,
+          ),
+        );
 
         expect(find.text('Stop after this payment'), findsOneWidget);
         expect(find.text('Cancel this subscription'), findsNothing);
@@ -192,6 +228,7 @@ void main() {
           tester,
           ItemDetailScreen(
             item: course.copyWith(repeatCount: () => null),
+            category: CategoryBook.shipped['STREAMING'],
             today: today,
           ),
         );
@@ -209,12 +246,17 @@ void main() {
       var opened = 0;
       await show(
         tester,
-        ItemDetailScreen(item: claude, today: today, onEdit: () => opened++),
+        ItemDetailScreen(
+          item: claude,
+          category: CategoryBook.shipped[claude.categoryId],
+          today: today,
+          onEdit: () => opened++,
+        ),
       );
 
       await tester.tap(find.text('Edit'));
       await tester.tap(find.text(r'$20.00 / mo'));
-      await tester.tap(find.text('Subscription'));
+      await tester.tap(find.text('Streaming'));
       await tester.pumpAndSettle();
 
       expect(opened, 3);
@@ -226,6 +268,7 @@ void main() {
         tester,
         ItemDetailScreen(
           item: claude.copyWith(amountMinor: () => null),
+          category: CategoryBook.shipped['STREAMING'],
           today: today,
           onEdit: () {},
         ),
@@ -235,7 +278,14 @@ void main() {
     });
 
     testWidgets('with no editor wired there is no Edit link', (tester) async {
-      await show(tester, ItemDetailScreen(item: claude, today: today));
+      await show(
+        tester,
+        ItemDetailScreen(
+          item: claude,
+          category: CategoryBook.shipped[claude.categoryId],
+          today: today,
+        ),
+      );
 
       expect(find.text('Edit'), findsNothing);
       expect(find.text('Add a cost'), findsNothing);
@@ -398,9 +448,7 @@ void main() {
   });
 
   group('History', () {
-    testWidgets('groups by month and separates skipped from done', (
-      tester,
-    ) async {
+    testWidgets('groups by month, newest first', (tester) async {
       await show(
         tester,
         HistoryScreen(
@@ -418,19 +466,103 @@ void main() {
               what: 'cancelled',
             ),
           ],
-          skipped: [
-            HistoryEntry(
-              itemName: 'Netflix Premium',
-              on: d('2026-07-21'),
-              what: 'skipped one cycle',
-            ),
-          ],
         ),
       );
 
       expect(find.text('AUGUST'), findsOneWidget);
       expect(find.text('JULY'), findsOneWidget);
-      expect(find.text('SKIPPED'), findsOneWidget);
+    });
+
+    testWidgets('the filter narrows the list to one outcome', (tester) async {
+      await show(
+        tester,
+        HistoryScreen(
+          currentYear: 2026,
+          done: [
+            HistoryEntry(
+              itemName: 'Spotify Family',
+              on: d('2026-08-08'),
+              what: 'renewed',
+            ),
+            HistoryEntry(
+              itemName: 'Electricity bill',
+              on: d('2026-07-20'),
+              what: 'missed',
+              missed: true,
+            ),
+          ],
+        ),
+      );
+
+      expect(find.text('Spotify Family'), findsOneWidget);
+      expect(find.text('Electricity bill'), findsOneWidget);
+
+      await tester.tap(find.text('Missed'));
+      await tester.pumpAndSettle();
+      expect(find.text('Spotify Family'), findsNothing);
+      expect(find.text('Electricity bill'), findsOneWidget);
+
+      await tester.tap(find.text('Paid'));
+      await tester.pumpAndSettle();
+      expect(find.text('Spotify Family'), findsOneWidget);
+      expect(find.text('Electricity bill'), findsNothing);
+    });
+
+    // "The record of what did not happen" said over a list with a miss in it
+    // is the screen contradicting its own rows.
+    testWidgets('the lead line stops claiming a clean record once one is not', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        HistoryScreen(
+          currentYear: 2026,
+          done: [
+            HistoryEntry(
+              itemName: 'Spotify Family',
+              on: d('2026-08-08'),
+              what: 'renewed',
+            ),
+            HistoryEntry(
+              itemName: 'Electricity bill',
+              on: d('2026-07-20'),
+              what: 'missed',
+              missed: true,
+            ),
+          ],
+        ),
+      );
+
+      expect(
+        find.text('2 closed · 1 after the date had passed.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('what did not happen'), findsNothing);
+    });
+
+    // An empty Missed list is the one result on this screen that is good news,
+    // so it says what it means rather than "nothing here".
+    testWidgets('an empty Missed list says what it means', (tester) async {
+      await show(
+        tester,
+        HistoryScreen(
+          currentYear: 2026,
+          done: [
+            HistoryEntry(
+              itemName: 'Spotify Family',
+              on: d('2026-08-08'),
+              what: 'renewed',
+            ),
+          ],
+        ),
+      );
+
+      await tester.tap(find.text('Missed'));
+      await tester.pumpAndSettle();
+      expect(
+        find.text('Nothing has gone past its date unhandled.'),
+        findsOneWidget,
+      );
     });
 
     // A month from another year gets its year spelled out; a bare month name
@@ -501,54 +633,259 @@ void main() {
   });
 
   group('Add item', () {
+    /// Puts the form on screen past step one.
+    ///
+    /// Adding a new item now opens on the service picker, so a test about the
+    /// *form* has to say which way it got there. "Enter manually" is the path
+    /// for a service the catalogue does not have, which is the case most of
+    /// these tests are describing; the ones that are about the catalogue tap a
+    /// row in the picker instead and land on the same form.
+    Future<void> showForm(WidgetTester tester, Widget screen) async {
+      await show(tester, screen);
+      final manual = find.text('Enter manually');
+      if (manual.evaluate().isNotEmpty) {
+        await tester.ensureVisible(manual);
+        await tester.pumpAndSettle();
+        await tester.tap(manual);
+        await tester.pumpAndSettle();
+      }
+    }
+
     final catalog = ServiceCatalog([
       const CatalogEntry(
         id: 'netflix',
         name: 'Netflix Premium',
         aliases: ['netflix'],
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         defaultCycle: Cycle.monthly,
         typicalAmountMinor: 260000,
         currency: 'VND',
       ),
     ]);
 
-    testWidgets('save stays disabled until there is a name and a date', (
-      tester,
-    ) async {
+    // The form is a pushed route, built once with whatever source list the app
+    // held at the time. Nothing rebuilds it when the database gains a row, so a
+    // source created from inside the form has to appear from the field's own
+    // state -- otherwise the write goes through, the card closes, and
+    // `Add source` reads as a button that does nothing.
+    testWidgets('a source created here becomes a chip here', (tester) async {
       DraftItem? saved;
-      await show(
+      var created = 0;
+      await showForm(
         tester,
         AddItemScreen(
           catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (draft) => saved = draft,
+          // The caller writes it and hands back an id. It does *not* hand back
+          // a new list, which is the whole point of this test.
+          onCreateSource: (name, glyph) async => 'src${++created}',
+        ),
+      );
+
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('New'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('New'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).last, 'VCB 4412');
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Add source'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Add source'));
+      await tester.pumpAndSettle();
+
+      expect(created, 1);
+      // The chip is on screen, and it is the one now selected.
+      expect(find.text('VCB 4412'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Save item'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save item'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.paymentSourceId, 'src1');
+    });
+
+    // The date is the only thing that gates the button. A missing name is not
+    // a reason to refuse a save -- it becomes `Untitled item`, which the user
+    // fixes in one tap, where refusing would lose the date they just set.
+    testWidgets('save waits for a date, not for a name', (tester) async {
+      DraftItem? saved;
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
           today: today,
           onSave: (draft) => saved = draft,
         ),
       );
 
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.text('Save item'));
       await tester.pumpAndSettle();
-      expect(saved, isNull, reason: 'nothing typed yet');
+      expect(saved, isNull, reason: 'no date yet');
+
+      // The date chips are one row that runs off the edge of the phone, so
+      // the last of them has to be scrolled to before it can be tapped.
+      await tester.ensureVisible(find.text('+30'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('+30'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Save item'));
+      await tester.pumpAndSettle();
+      expect(saved?.name, 'Untitled item');
+      expect(saved?.expiresOn, d('2026-09-14'));
 
       await tester.enterText(find.byType(TextField).first, 'Spotify');
       await tester.pumpAndSettle();
-      // The date chips are one row that runs off the edge of the phone, so
-      // the last of them has to be scrolled to before it can be tapped.
-      await tester.ensureVisible(find.text('In 1 month'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('In 1 month'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.text('Save item'));
       await tester.pumpAndSettle();
       expect(saved?.name, 'Spotify');
-      expect(saved?.expiresOn, d('2026-09-15'));
+    });
+
+    // The catalogue's plan grid. Its whole claim is "this is the listed price
+    // of that tier", so the lit tile and the number in the cost field have to
+    // agree — and `_pickPlan` writes into the very field whose listener clears
+    // the selection, which is a latch that is easy to break and invisible in
+    // an analyzer run.
+    testWidgets('picking a plan lights the tile and fills the cost', (
+      tester,
+    ) async {
+      final priced = ServiceCatalog([
+        CatalogEntry(
+          id: 'netflix',
+          name: 'Netflix Premium',
+          aliases: const ['netflix'],
+          categoryId: 'STREAMING',
+          defaultCycle: Cycle.monthly,
+          defaultPlan: 'premium',
+          plans: const [
+            CatalogPlan(
+              tier: 'standard',
+              name: 'Standard',
+              region: 'VN',
+              currency: 'VND',
+              cycle: Cycle.monthly,
+              amountMinor: 220000,
+              source: 'https://netflix.com/vn/plans',
+              checkedAt: '2026-07-30',
+            ),
+            CatalogPlan(
+              tier: 'premium',
+              name: 'Premium',
+              region: 'VN',
+              currency: 'VND',
+              cycle: Cycle.monthly,
+              amountMinor: 260000,
+              source: 'https://netflix.com/vn/plans',
+              checkedAt: '2026-07-30',
+            ),
+          ],
+        ),
+      ]);
+
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: priced,
+          categories: CategoryBook.shipped,
+          today: today,
+        ),
+      );
+
+      await tester.tap(find.text('Netflix Premium'));
+      await tester.pumpAndSettle();
+
+      // The vendor's own default tier arrives already lit.
+      expect(
+        tester.widget<PlanGrid>(find.byType(PlanGrid)).selected,
+        'premium',
+      );
+
+      // The cost field is folded away behind the grid until the user says
+      // their price differs, so the amount is only readable once it is open.
+      expect(find.text('260,000'), findsNothing);
+      await tester.tap(find.text('Enter it'));
+      await tester.pumpAndSettle();
+      expect(find.text('260,000'), findsOneWidget);
+
+      await tester.tap(find.text('standard'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<PlanGrid>(find.byType(PlanGrid)).selected,
+        'standard',
+        reason: 'the tap must survive its own write to the cost field',
+      );
+      expect(find.text('220,000'), findsOneWidget);
+    });
+
+    // Typing over the price does unlatch it: the grid would otherwise claim a
+    // listed price the user has just contradicted.
+    testWidgets('typing a different amount unlatches the tile', (tester) async {
+      final priced = ServiceCatalog([
+        CatalogEntry(
+          id: 'netflix',
+          name: 'Netflix Premium',
+          aliases: const ['netflix'],
+          categoryId: 'STREAMING',
+          defaultCycle: Cycle.monthly,
+          defaultPlan: 'premium',
+          plans: const [
+            CatalogPlan(
+              tier: 'premium',
+              name: 'Premium',
+              region: 'VN',
+              currency: 'VND',
+              cycle: Cycle.monthly,
+              amountMinor: 260000,
+              source: 'https://netflix.com/vn/plans',
+              checkedAt: '2026-07-30',
+            ),
+          ],
+        ),
+      ]);
+
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: priced,
+          categories: CategoryBook.shipped,
+          today: today,
+        ),
+      );
+      await tester.tap(find.text('Netflix Premium'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<PlanGrid>(find.byType(PlanGrid)).selected,
+        'premium',
+      );
+
+      await tester.tap(find.text('Enter it'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.text('260,000'), '190000');
+      await tester.pumpAndSettle();
+
+      expect(tester.widget<PlanGrid>(find.byType(PlanGrid)).selected, isNull);
     });
 
     // Tapping a known service fills the category, the cycle and the price in
     // one go. It is the biggest single reduction in entry friction here.
     testWidgets('a catalog match fills the rest of the form', (tester) async {
-      await show(tester, AddItemScreen(catalog: catalog, today: today));
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+        ),
+      );
 
       await tester.enterText(find.byType(TextField).first, 'net');
       await tester.pumpAndSettle();
@@ -558,7 +895,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // The chip the catalog picked is now the selected one.
-      expect(find.text('Subscription'), findsOneWidget);
+      expect(find.text('Streaming'), findsOneWidget);
       // In major units, grouped, the way the catalog row itself showed it —
       // not the 260000 that minor units would put in a dong field.
       expect(find.text('260,000'), findsOneWidget);
@@ -569,9 +906,16 @@ void main() {
     testWidgets('the picked date is echoed back as a real date', (
       tester,
     ) async {
-      await show(tester, AddItemScreen(catalog: catalog, today: today));
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+        ),
+      );
 
-      await tester.tap(find.text('In 7 days'));
+      await tester.tap(find.text('+7'));
       await tester.pumpAndSettle();
       expect(find.text('Saturday, 22/08/2026'), findsOneWidget);
     });
@@ -582,28 +926,32 @@ void main() {
       tester,
     ) async {
       DraftItem? saved;
-      await show(
+      await showForm(
         tester,
         AddItemScreen(
           catalog: catalog,
+          categories: CategoryBook.shipped,
           today: today,
           onSave: (draft) => saved = draft,
           onPickDate: (from) async => d('2027-03-09'),
         ),
       );
 
-      expect(find.text('Pick a date'), findsOneWidget);
-      await tester.tap(find.text('Pick a date'));
+      expect(find.text('Choose a date'), findsOneWidget);
+      expect(find.text('Tap to open the calendar'), findsOneWidget);
+      await tester.tap(find.text('Choose a date'));
       await tester.pumpAndSettle();
 
       // The row now carries the date it was used to pick, rather than sending
-      // the reader to a separate line to find out what was chosen.
-      expect(find.text('Pick a date'), findsNothing);
+      // the reader to a separate line to find out what was chosen. The prompt
+      // under it goes with it: it explained a control that has now been used.
+      expect(find.text('Choose a date'), findsNothing);
+      expect(find.text('Tap to open the calendar'), findsNothing);
       expect(find.text('Tuesday, 09/03/2027'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField).first, 'Passport');
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.text('Save item'));
       await tester.pumpAndSettle();
 
       expect(saved?.expiresOn, d('2027-03-09'));
@@ -615,10 +963,11 @@ void main() {
       tester,
     ) async {
       DraftItem? saved;
-      await show(
+      await showForm(
         tester,
         AddItemScreen(
           catalog: catalog,
+          categories: CategoryBook.shipped,
           today: today,
           onSave: (draft) => saved = draft,
         ),
@@ -629,35 +978,72 @@ void main() {
       await tester.tap(find.text('Today'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Other…'));
+      // The cycle dropdown, which names the cycle it is on.
+      await tester.tap(find.text('Monthly'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Every N days, weeks, months…'));
       await tester.pumpAndSettle();
 
+      // No second modal: the row is now on the form, under the dropdown, and
+      // the dropdown reads back what it holds.
+      expect(find.text('Every 2 months'), findsOneWidget);
+      expect(find.text('Every'), findsOneWidget);
+
       await tester.enterText(find.byType(TextField).last, '5');
       await tester.pumpAndSettle();
-      expect(find.text('Repeats every 5 months.'), findsOneWidget);
+      expect(find.text('Every 5 months'), findsOneWidget);
 
-      await tester.tap(find.text('Done'));
-      await tester.pumpAndSettle();
-
-      // The segment that opened the sheet now says what came back out of it.
-      expect(find.text('5 mo'), findsOneWidget);
-
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.text('Save item'));
       await tester.pumpAndSettle();
 
       expect(saved?.cycle, Cycle.every(5, CycleField.month));
+    });
+
+    // A prepaid SIM's validity is sold in days, and that is the one item in
+    // this app whose lapse cannot be undone.
+    testWidgets('a custom interval can be counted in days', (tester) async {
+      DraftItem? saved;
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (draft) => saved = draft,
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField).first, 'Viettel SIM');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Monthly'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Every N days, weeks, months…'));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField).last, '45');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Days'));
+      await tester.pumpAndSettle();
+      expect(find.text('Every 45 days'), findsOneWidget);
+
+      await tester.tap(find.text('Save item'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.cycle, Cycle.every(45, CycleField.day));
     });
 
     // Two currency chips on one field means the amount can be typed under the
     // wrong one, and the digits alone do not show it.
     testWidgets('the cost is echoed in the other currency', (tester) async {
       DraftItem? saved;
-      await show(
+      await showForm(
         tester,
         AddItemScreen(
           catalog: catalog,
+          categories: CategoryBook.shipped,
           today: today,
           onSave: (draft) => saved = draft,
         ),
@@ -674,7 +1060,7 @@ void main() {
 
       expect(find.textContaining('≈ 2,891,106 ₫'), findsOneWidget);
 
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.text('Save item'));
       await tester.pumpAndSettle();
 
       // $111, not the $1.11 that reading the field as cents would have saved.
@@ -682,22 +1068,44 @@ void main() {
       expect(saved?.currency, 'USD');
     });
 
-    // "Once" and "how many times" cannot both be true.
-    testWidgets('the repeat count disappears for a one-off', (tester) async {
-      await show(tester, AddItemScreen(catalog: catalog, today: today));
+    // A subscription runs until it is stopped, so `Forever` is the answer
+    // until the user says otherwise, and the count control does not exist
+    // until they do.
+    testWidgets('the count control appears only once Repeats forever is off', (
+      tester,
+    ) async {
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+        ),
+      );
 
-      expect(find.text('HOW MANY TIMES'), findsOneWidget);
-      await tester.tap(find.text('Once'));
+      expect(find.text('Stops after'), findsNothing);
+
+      await tester.tap(find.text('Repeats forever'));
       await tester.pumpAndSettle();
-      expect(find.text('HOW MANY TIMES'), findsNothing);
+      expect(find.text('Stops after'), findsOneWidget);
+      expect(find.text('After a number of payments'), findsOneWidget);
+      expect(find.text('On a date'), findsOneWidget);
+      // Twelve, the build file's own default. A count control that opens on
+      // nothing makes the user answer a question they were not asked.
+      expect(find.text('12 payments'), findsOneWidget);
+
+      await tester.tap(find.text('Repeats forever'));
+      await tester.pumpAndSettle();
+      expect(find.text('Stops after'), findsNothing);
     });
 
     testWidgets('a limited repeat count reaches the draft', (tester) async {
       DraftItem? saved;
-      await show(
+      await showForm(
         tester,
         AddItemScreen(
           catalog: catalog,
+          categories: CategoryBook.shipped,
           today: today,
           onSave: (draft) => saved = draft,
         ),
@@ -705,17 +1113,19 @@ void main() {
 
       await tester.enterText(find.byType(TextField).first, 'Course');
       await tester.pumpAndSettle();
-      await tester.ensureVisible(find.text('In 1 month'));
+      await tester.ensureVisible(find.text('+30'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('In 1 month'));
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('Forever'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('6 times'));
+      await tester.tap(find.text('+30'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Save'));
+      await tester.tap(find.text('Repeats forever'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('6 payments'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('6 payments'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Save item'));
       await tester.pumpAndSettle();
 
       expect(saved?.repeatCount, 6);
@@ -729,7 +1139,7 @@ void main() {
         id: 'netflix',
         name: 'Netflix Premium',
         aliases: ['netflix'],
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         defaultCycle: Cycle.monthly,
       ),
     ]);
@@ -744,8 +1154,9 @@ void main() {
         tester,
         AddItemScreen(
           catalog: catalog,
+          categories: CategoryBook.shipped,
           today: today,
-          initial: DraftItem.of(item),
+          initial: DraftItem.of(item, CategoryBook.shipped),
           onSave: (draft) => saved = draft,
         ),
       );
@@ -762,8 +1173,9 @@ void main() {
         tester,
         AddItemScreen(
           catalog: catalog,
+          categories: CategoryBook.shipped,
           today: today,
-          initial: DraftItem.of(claude),
+          initial: DraftItem.of(claude, CategoryBook.shipped),
         ),
       );
 
@@ -809,7 +1221,7 @@ void main() {
       final quarterly = TrackedItem(
         id: 'domain',
         name: 'Domain name',
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         expiresOn: d('2026-09-01'),
         anchorDate: d('2026-09-01'),
         cycle: Cycle.quarterly,
@@ -817,7 +1229,7 @@ void main() {
 
       final saved = await edit(tester, quarterly);
 
-      expect(find.text('3 months'), findsOneWidget);
+      expect(find.text('Quarterly'), findsOneWidget);
       expect(saved?.cycle, Cycle.quarterly);
     });
 
@@ -829,7 +1241,7 @@ void main() {
       final netflix = TrackedItem(
         id: 'netflix',
         name: 'Netflix Premium',
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         expiresOn: d('2026-09-01'),
         anchorDate: d('2026-09-01'),
       );
@@ -838,8 +1250,9 @@ void main() {
         tester,
         AddItemScreen(
           catalog: catalog,
+          categories: CategoryBook.shipped,
           today: today,
-          initial: DraftItem.of(netflix),
+          initial: DraftItem.of(netflix, CategoryBook.shipped),
         ),
       );
 
@@ -959,7 +1372,7 @@ void main() {
     }) => TrackedItem(
       id: 'claude',
       name: 'Claude',
-      category: Category.subscription,
+      categoryId: 'STREAMING',
       expiresOn: d('2026-09-17'),
       anchorDate: d('2026-09-17'),
       cycle: Cycle.monthly,
@@ -976,6 +1389,7 @@ void main() {
       final subject = item ?? claudeItem();
       return ItemDetailScreen(
         item: subject,
+        category: CategoryBook.shipped[subject.categoryId],
         today: checked,
         catalogEntry: matched ? shipped.matchByName(subject.name) : null,
         onOpenManage: onOpenManage ?? (_) {},
@@ -1051,6 +1465,7 @@ void main() {
         tester,
         ItemDetailScreen(
           item: claudeItem(),
+          category: CategoryBook.shipped['STREAMING'],
           today: checked,
           catalogEntry: shipped.matchByName('Claude'),
         ),

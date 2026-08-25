@@ -118,7 +118,7 @@ class AnnualSaving {
   int get savingMinor => monthly.amountMinor * 12 - yearly.amountMinor;
 }
 
-/// Crucially it also carries a [category], so the add form never has to ask
+/// Crucially it also carries a [categoryId], so the add form never has to ask
 /// the user to classify anything. See product-spec.md 4.2.
 @immutable
 class CatalogEntry {
@@ -128,7 +128,14 @@ class CatalogEntry {
   /// Lowercase strings the user might type. Matched as prefixes and substrings.
   final List<String> aliases;
 
-  final Category category;
+  /// Which shelf this belongs on: a [Category.id], and the shelf a new item
+  /// made from this entry starts on.
+  ///
+  /// A plain string rather than a type, because the shelves are rows the user
+  /// owns: the catalogue names one, and if the user has renamed or deleted it
+  /// the lookup answers with what actually exists.
+  final String categoryId;
+
   final Cycle? defaultCycle;
 
   /// Indicative price in minor units. Shown as a suggestion, never as fact.
@@ -148,11 +155,6 @@ class CatalogEntry {
 
   final String? noteVi;
 
-  /// The catalogue's own grouping -- AI, STREAMING, PHONE. Deliberately a
-  /// plain string and not an enum: it is a shelf label for browsing, while
-  /// [category] carries the meaning the reminder logic actually branches on.
-  final String sector;
-
   /// Published prices. Empty when no price could be sourced, which is the
   /// honest state for a bill whose amount changes every period.
   final List<CatalogPlan> plans;
@@ -164,14 +166,13 @@ class CatalogEntry {
     required this.id,
     required this.name,
     this.aliases = const [],
-    required this.category,
+    required this.categoryId,
     this.defaultCycle,
     this.typicalAmountMinor,
     this.currency,
     this.cancelUrl,
     this.manageUrl,
     this.noteVi,
-    this.sector = 'OTHER',
     this.plans = const [],
     this.defaultPlan,
   });
@@ -208,17 +209,6 @@ class CatalogEntry {
       return value;
     }
 
-    final categoryWire = required('category');
-    final category = Category.values
-        .where((c) => c.wireName == categoryWire)
-        .firstOrNull;
-    if (category == null) {
-      throw FormatException(
-        'unknown category "$categoryWire"',
-        json.toString(),
-      );
-    }
-
     final cycleWire = json['defaultCycle'] as String?;
     final cycle = CycleWire.fromWire(cycleWire);
     if (cycleWire != null && cycle == null) {
@@ -231,14 +221,13 @@ class CatalogEntry {
       aliases: (json['aliases'] as List<dynamic>? ?? const [])
           .map((e) => e as String)
           .toList(growable: false),
-      category: category,
+      categoryId: required('category'),
       defaultCycle: cycle,
       typicalAmountMinor: (json['typicalAmountMinor'] as num?)?.toInt(),
       currency: json['currency'] as String?,
       cancelUrl: json['cancelUrl'] as String?,
       manageUrl: json['manageUrl'] as String?,
       noteVi: json['noteVi'] as String?,
-      sector: json['sector'] as String? ?? 'OTHER',
       plans: (json['plans'] as List<dynamic>? ?? const [])
           .map((e) => CatalogPlan.fromJson(e as Map<String, dynamic>))
           .toList(growable: false),
@@ -296,6 +285,20 @@ class ServiceCatalog {
   /// Type-ahead suggestions. Exact name matches first, then prefix matches,
   /// then substring matches, so typing "net" surfaces Netflix before
   /// Vietnamobile.
+  /// The shelf ids that actually have entries.
+  ///
+  /// Derived rather than declared, so a shelf added to the data appears in the
+  /// browser without a code change — and one emptied out of the data stops
+  /// offering an empty shelf. The *order* comes from the user's own shelf list,
+  /// not from here.
+  Set<String> categoryIds() => {for (final entry in _entries) entry.categoryId};
+
+  /// Everything on one shelf, by name.
+  List<CatalogEntry> byCategory(String categoryId) =>
+      (_entries.where((e) => e.categoryId == categoryId).toList()
+            ..sort((a, b) => a.name.compareTo(b.name)))
+          .toList(growable: false);
+
   List<CatalogEntry> search(String query, {int limit = 8}) {
     final q = _normalize(query);
     if (q.isEmpty) return const [];

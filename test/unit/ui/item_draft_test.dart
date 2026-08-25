@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/domain/instalments.dart';
 import 'package:subdock/domain/local_date.dart';
@@ -13,7 +14,7 @@ void main() {
   TrackedItem course() => TrackedItem(
     id: 'course',
     name: 'Course instalment',
-    category: Category.bill,
+    categoryId: 'UTILITIES',
     expiresOn: d('2026-08-21'),
     anchorDate: d('2026-05-21'),
     cycle: Cycle.monthly,
@@ -28,11 +29,11 @@ void main() {
 
   group('DraftItem.of', () {
     test('carries every field the form can change', () {
-      final draft = DraftItem.of(course());
+      final draft = DraftItem.of(course(), CategoryBook.shipped);
 
       expect(draft.name, 'Course instalment');
       expect(draft.expiresOn, d('2026-08-21'));
-      expect(draft.category, Category.bill);
+      expect(draft.category, CategoryBook.shipped['UTILITIES']);
       expect(draft.cycle, Cycle.monthly);
       expect(draft.repeatCount, 6);
       expect(draft.amountMinor, 1200000);
@@ -44,15 +45,16 @@ void main() {
     // the name through the catalog would overwrite whatever the user has since
     // put there.
     test('does not re-derive the catalog match', () {
-      expect(DraftItem.of(course()).matched, isNull);
+      expect(DraftItem.of(course(), CategoryBook.shipped).matched, isNull);
     });
   });
 
   group('DraftItem.applyTo', () {
     test('the edited cost reaches the item', () {
-      final edited = DraftItem.of(course())
-          .copyForTest(amountMinor: 1500000)
-          .applyTo(course());
+      final edited = DraftItem.of(
+        course(),
+        CategoryBook.shipped,
+      ).copyForTest(amountMinor: 1500000).applyTo(course());
 
       expect(edited.amountMinor, 1500000);
       expect(edited.currency, 'VND');
@@ -62,7 +64,7 @@ void main() {
       final edited = DraftItem(
         name: 'Course instalment',
         expiresOn: d('2026-08-21'),
-        category: Category.bill,
+        category: CategoryBook.shipped['UTILITIES'],
         cycle: Cycle.monthly,
         repeatCount: 6,
       ).applyTo(course());
@@ -74,9 +76,10 @@ void main() {
     // The form asks for eight things; the item carries two dozen. Everything
     // it never showed has to come through the edit untouched.
     test('leaves the fields the form never showed alone', () {
-      final edited = DraftItem.of(course())
-          .copyForTest(amountMinor: 1500000)
-          .applyTo(course());
+      final edited = DraftItem.of(
+        course(),
+        CategoryBook.shipped,
+      ).copyForTest(amountMinor: 1500000).applyTo(course());
 
       expect(edited.id, 'course');
       expect(edited.actByOffsetDays, 2);
@@ -91,9 +94,10 @@ void main() {
     test('moving the due date keeps the place in a counted plan', () {
       expect(Instalments.of(course())!.index, 4);
 
-      final edited = DraftItem.of(course())
-          .copyForTest(expiresOn: d('2026-08-25'))
-          .applyTo(course());
+      final edited = DraftItem.of(
+        course(),
+        CategoryBook.shipped,
+      ).copyForTest(expiresOn: d('2026-08-25')).applyTo(course());
 
       expect(edited.expiresOn, d('2026-08-25'));
       expect(edited.anchorDate, d('2026-05-25'));
@@ -104,9 +108,10 @@ void main() {
     // Leaving the old anchor where it was would undo the edit on the next
     // mark-as-paid: the next occurrence is computed from the anchor's own day.
     test('the next occurrence lands on the day the user typed', () {
-      final edited = DraftItem.of(course())
-          .copyForTest(expiresOn: d('2026-08-25'))
-          .applyTo(course());
+      final edited = DraftItem.of(
+        course(),
+        CategoryBook.shipped,
+      ).copyForTest(expiresOn: d('2026-08-25')).applyTo(course());
 
       expect(
         Recurrence.nextDue(edited.anchorDate, edited.cycle, edited.expiresOn),
@@ -115,7 +120,7 @@ void main() {
     });
 
     test('a moved date is from memory again and drops the snooze', () {
-      final edited = DraftItem.of(course())
+      final edited = DraftItem.of(course(), CategoryBook.shipped)
           .copyForTest(expiresOn: d('2026-08-25'))
           .applyTo(course().copyWith(dateSource: DateSource.userConfirmed));
 
@@ -124,9 +129,10 @@ void main() {
     });
 
     test('dropping the cycle drops the instalment count with it', () {
-      final edited = DraftItem.of(course())
-          .copyForTest(cycle: () => null)
-          .applyTo(course());
+      final edited = DraftItem.of(
+        course(),
+        CategoryBook.shipped,
+      ).copyForTest(cycle: () => null).applyTo(course());
 
       expect(edited.cycle, isNull);
       expect(edited.repeatCount, isNull);
@@ -137,20 +143,21 @@ void main() {
     // Neither is on the form and both are derived from the category, so they
     // are re-derived when the category moves.
     test('changing the category re-derives the nag and verify defaults', () {
-      final edited = DraftItem.of(course())
-          .copyForTest(category: Category.document)
+      final edited = DraftItem.of(course(), CategoryBook.shipped)
+          .copyForTest(category: CategoryBook.shipped['DOCUMENTS'])
           .applyTo(course());
 
-      expect(edited.category, Category.document);
+      expect(edited.categoryId, 'DOCUMENTS');
       expect(edited.nagAfterDue, NagPolicy.weekly);
       expect(edited.verifyEveryDays, 60);
     });
 
     test('keeping the category leaves an overridden nag policy in place', () {
       final overridden = course().copyWith(nagAfterDue: NagPolicy.none);
-      final edited = DraftItem.of(overridden)
-          .copyForTest(amountMinor: 1)
-          .applyTo(overridden);
+      final edited = DraftItem.of(
+        overridden,
+        CategoryBook.shipped,
+      ).copyForTest(amountMinor: 1).applyTo(overridden);
 
       expect(edited.nagAfterDue, NagPolicy.none);
     });
@@ -160,15 +167,16 @@ void main() {
         id: 'netflix',
         name: 'Netflix Premium',
         aliases: ['netflix'],
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         defaultCycle: Cycle.monthly,
         cancelUrl: 'https://netflix.com/cancelplan',
         noteVi: 'Huỷ trong phần Tài khoản.',
       );
 
-      final edited = DraftItem.of(course())
-          .copyForTest(matched: netflix)
-          .applyTo(course());
+      final edited = DraftItem.of(
+        course(),
+        CategoryBook.shipped,
+      ).copyForTest(matched: netflix).applyTo(course());
 
       expect(edited.actionUrl, 'https://netflix.com/cancelplan');
       expect(edited.note, 'Huỷ trong phần Tài khoản.');

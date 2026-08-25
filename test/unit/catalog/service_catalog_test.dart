@@ -1,12 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/catalog/bundled_data.dart';
 import 'package:subdock/catalog/service_catalog.dart';
-import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/recurrence.dart';
-import 'package:subdock/domain/reminders.dart';
-import 'package:subdock/ui/item_presenter.dart';
 
 void main() {
   // Read straight off disk rather than through the asset bundle: this is a
@@ -27,20 +25,22 @@ void main() {
       expect(ids.toSet().length, ids.length);
     });
 
-    test('every category has a label the picker can show', () {
-      for (final category in Category.values) {
-        expect(ItemPresenter.categoryLabel(category), isNotEmpty);
+    test('every shipped shelf has a label the picker can show', () {
+      for (final category in CategoryBook.shipped.all) {
+        expect(category.label, isNotEmpty);
       }
     });
 
-    // A catalog entry that classified itself as "Other" would be a row that
-    // knows the service and still makes the user choose.
-    test('no entry falls back to Other', () {
+    // A catalog entry that shelved itself as "Other" would be a row that knows
+    // the service and still makes the user choose. It also has to name a shelf
+    // the app actually ships, or the picker rail would offer an empty one.
+    test('every entry names a shipped shelf, and never Other', () {
       for (final entry in catalog.entries) {
+        expect(entry.categoryId, isNot('OTHER'), reason: entry.id);
         expect(
-          entry.category,
-          isNot(Category.other),
-          reason: '${entry.id} is unclassified',
+          CategoryBook.shipped.contains(entry.categoryId),
+          isTrue,
+          reason: '${entry.id} is on an unknown shelf ${entry.categoryId}',
         );
       }
     });
@@ -119,30 +119,36 @@ void main() {
     test(
       'the catalog carries documents, bills and insurance, not just apps',
       () {
-        for (final category in const [
-          Category.document,
-          Category.bill,
-          Category.insurance,
-        ]) {
+        for (final shelf in const ['DOCUMENTS', 'UTILITIES', 'INSURANCE']) {
           expect(
-            catalog.entries.where((e) => e.category == category),
+            catalog.entries.where((e) => e.categoryId == shelf),
             isNotEmpty,
-            reason: 'nothing in the catalog is a ${category.wireName}',
+            reason: 'nothing in the catalog is on $shelf',
           );
         }
       },
     );
 
     // A deadline that arrives silently during Focus is a deadline the app
-    // failed to deliver. Only a subscription renewing is mere news.
-    test('everything that is not a subscription is time-sensitive', () {
-      for (final entry in catalog.entries) {
+    // failed to deliver, and the shipped shelves for bills, policies, SIMs and
+    // paperwork all say so. What makes them say it is a setting the user can
+    // change, which is the point.
+    test('the obligation shelves ship time-sensitive', () {
+      for (final shelf in const [
+        'UTILITIES',
+        'HOUSING',
+        'FINANCE',
+        'INSURANCE',
+        'DOCUMENTS',
+        'PHONE',
+      ]) {
         expect(
-          Reminders.isTimeSensitive(entry.category),
-          entry.category != Category.subscription,
-          reason: entry.id,
+          CategoryBook.shipped[shelf].isTimeSensitive,
+          isTrue,
+          reason: shelf,
         );
       }
+      expect(CategoryBook.shipped['STREAMING'].isTimeSensitive, isFalse);
     });
 
     test('cancel urls are https', () {
@@ -247,10 +253,9 @@ void main() {
       }
     });
 
-    test('every entry is shelved under a sector', () {
+    test('every entry is shelved', () {
       for (final entry in catalog.entries) {
-        expect(entry.sector, isNotEmpty, reason: entry.id);
-        expect(entry.sector, isNot('OTHER'), reason: entry.id);
+        expect(entry.categoryId, isNotEmpty, reason: entry.id);
       }
     });
   });
@@ -280,8 +285,7 @@ void main() {
       const entry = CatalogEntry(
         id: 'x',
         name: 'X',
-        category: Category.subscription,
-        sector: 'AI',
+        categoryId: 'AI',
         defaultPlan: 'pro',
         plans: [monthly, yearly],
       );
@@ -294,8 +298,7 @@ void main() {
       const entry = CatalogEntry(
         id: 'x',
         name: 'X',
-        category: Category.subscription,
-        sector: 'AI',
+        categoryId: 'AI',
         defaultPlan: 'pro',
         plans: [
           CatalogPlan(
@@ -319,8 +322,7 @@ void main() {
       const entry = CatalogEntry(
         id: 'x',
         name: 'X',
-        category: Category.subscription,
-        sector: 'AI',
+        categoryId: 'AI',
         defaultPlan: 'pro',
         plans: [
           CatalogPlan(

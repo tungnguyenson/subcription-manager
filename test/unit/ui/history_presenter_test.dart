@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/ui/screens/history_screen.dart';
@@ -46,19 +47,19 @@ void main() {
   });
 
   group('building entries from stored events', () {
-    TrackedItem item(String id, Category category) => TrackedItem(
+    TrackedItem item(String id, String categoryId) => TrackedItem(
       id: id,
       name: id,
-      category: category,
+      categoryId: categoryId,
       expiresOn: d('2026-08-01'),
       anchorDate: d('2026-08-01'),
     );
 
     test('each category gets wording that says what was avoided', () {
       final items = {
-        'sub': item('sub', Category.subscription),
-        'power': item('power', Category.bill),
-        'passport': item('passport', Category.document),
+        'sub': item('sub', 'STREAMING'),
+        'power': item('power', 'UTILITIES'),
+        'passport': item('passport', 'DOCUMENTS'),
       };
       final events = [
         for (final id in items.keys)
@@ -70,19 +71,27 @@ void main() {
           ),
       ];
 
-      final built = HistoryFromEvents.build(events, items);
+      final built = HistoryFromEvents.build(
+        events,
+        items,
+        CategoryBook.shipped,
+      );
       expect(built.map((e) => e.what), ['renewed', 'paid', 'renewed']);
     });
 
     test('an event whose item is gone still reads sensibly', () {
-      final built = HistoryFromEvents.build([
-        HandledEvent(
-          id: 'e',
-          itemId: 'deleted',
-          handledAtEpochSeconds: 1,
-          forDueDate: d('2026-08-04'),
-        ),
-      ], const {});
+      final built = HistoryFromEvents.build(
+        [
+          HandledEvent(
+            id: 'e',
+            itemId: 'deleted',
+            handledAtEpochSeconds: 1,
+            forDueDate: d('2026-08-04'),
+          ),
+        ],
+        const {},
+        CategoryBook.shipped,
+      );
 
       expect(built.single.itemName, 'deleted');
       expect(built.single.what, 'handled');
@@ -91,29 +100,37 @@ void main() {
     // The bank's foreign-currency fee makes the computed figure structurally
     // low, so a real statement figure always wins.
     test('the statement figure wins over the computed one', () {
-      final built = HistoryFromEvents.build([
-        HandledEvent(
-          id: 'e',
-          itemId: 'x',
-          handledAtEpochSeconds: 1,
-          forDueDate: d('2026-08-04'),
-          baseAmountMinor: 520920,
-          actualChargedMinor: 532745,
-        ),
-      ], const {});
+      final built = HistoryFromEvents.build(
+        [
+          HandledEvent(
+            id: 'e',
+            itemId: 'x',
+            handledAtEpochSeconds: 1,
+            forDueDate: d('2026-08-04'),
+            baseAmountMinor: 520920,
+            actualChargedMinor: 532745,
+          ),
+        ],
+        const {},
+        CategoryBook.shipped,
+      );
 
       expect(built.single.amount, '532,745 ₫');
     });
 
     test('an event with no money shows no amount', () {
-      final built = HistoryFromEvents.build([
-        HandledEvent(
-          id: 'e',
-          itemId: 'x',
-          handledAtEpochSeconds: 1,
-          forDueDate: d('2026-08-04'),
-        ),
-      ], const {});
+      final built = HistoryFromEvents.build(
+        [
+          HandledEvent(
+            id: 'e',
+            itemId: 'x',
+            handledAtEpochSeconds: 1,
+            forDueDate: d('2026-08-04'),
+          ),
+        ],
+        const {},
+        CategoryBook.shipped,
+      );
 
       expect(built.single.amount, isNull);
     });

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/instalments.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
@@ -9,8 +10,10 @@ void main() {
   LocalDate d(String iso) => LocalDate.parse(iso);
   final today = d('2026-08-15');
 
+  Category shelfOf(TrackedItem item) => CategoryBook.shipped[item.categoryId];
+
   TrackedItem item({
-    Category category = Category.subscription,
+    String categoryId = 'STREAMING',
     String expiresOn = '2026-08-17',
     String? anchorDate,
     int actByOffsetDays = 0,
@@ -21,7 +24,7 @@ void main() {
   }) => TrackedItem(
     id: 'x',
     name: 'x',
-    category: category,
+    categoryId: categoryId,
     expiresOn: d(expiresOn),
     actByOffsetDays: actByOffsetDays,
     anchorDate: d(anchorDate ?? expiresOn),
@@ -35,10 +38,9 @@ void main() {
     test('says how soon, exactly when, and for how much', () {
       expect(
         ItemPresenter.summary(
-          item(
-            category: Category.subscription,
-            amountMinor: 2000,
-            currency: 'USD',
+          item(categoryId: 'STREAMING', amountMinor: 2000, currency: 'USD'),
+          shelfOf(
+            item(categoryId: 'STREAMING', amountMinor: 2000, currency: 'USD'),
           ),
           today,
         ),
@@ -47,6 +49,7 @@ void main() {
       expect(
         ItemPresenter.summary(
           item(amountMinor: 260000, currency: 'VND'),
+          shelfOf(item(amountMinor: 260000, currency: 'VND')),
           today,
         ),
         'Due in 2 days · 17/08 · 260,000 ₫',
@@ -55,7 +58,11 @@ void main() {
 
     test('drops the amount clause when there is no amount', () {
       expect(
-        ItemPresenter.summary(item(category: Category.document), today),
+        ItemPresenter.summary(
+          item(categoryId: 'DOCUMENTS'),
+          shelfOf(item(categoryId: 'DOCUMENTS')),
+          today,
+        ),
         'Expires in 2 days · 17/08',
       );
     });
@@ -65,14 +72,16 @@ void main() {
     test('a document expires, everything else is due', () {
       expect(
         ItemPresenter.when(
-          item(category: Category.document, expiresOn: '2026-08-16'),
+          item(categoryId: 'DOCUMENTS', expiresOn: '2026-08-16'),
+          shelfOf(item(categoryId: 'DOCUMENTS', expiresOn: '2026-08-16')),
           today,
         ),
         'Expires tomorrow',
       );
       expect(
         ItemPresenter.when(
-          item(category: Category.bill, expiresOn: '2026-08-16'),
+          item(categoryId: 'UTILITIES', expiresOn: '2026-08-16'),
+          shelfOf(item(categoryId: 'UTILITIES', expiresOn: '2026-08-16')),
           today,
         ),
         'Due tomorrow',
@@ -81,12 +90,17 @@ void main() {
 
     test('a lapsed item says how far past it is', () {
       expect(
-        ItemPresenter.when(item(expiresOn: '2026-08-11'), today),
+        ItemPresenter.when(
+          item(expiresOn: '2026-08-11'),
+          shelfOf(item(expiresOn: '2026-08-11')),
+          today,
+        ),
         'Overdue by 4 days',
       );
       expect(
         ItemPresenter.when(
-          item(category: Category.document, expiresOn: '2026-08-14'),
+          item(categoryId: 'DOCUMENTS', expiresOn: '2026-08-14'),
+          shelfOf(item(categoryId: 'DOCUMENTS', expiresOn: '2026-08-14')),
           today,
         ),
         'Expired 1 day ago',
@@ -95,7 +109,11 @@ void main() {
 
     test('today is named rather than counted', () {
       expect(
-        ItemPresenter.when(item(expiresOn: '2026-08-15'), today),
+        ItemPresenter.when(
+          item(expiresOn: '2026-08-15'),
+          shelfOf(item(expiresOn: '2026-08-15')),
+          today,
+        ),
         'Due today',
       );
     });
@@ -133,9 +151,9 @@ void main() {
   });
 
   group('labels', () {
-    test('every category and cycle has wording', () {
-      for (final category in Category.values) {
-        expect(ItemPresenter.categoryLabel(category), isNotEmpty);
+    test('every shelf and cycle has wording', () {
+      for (final category in CategoryBook.shipped.all) {
+        expect(category.label, isNotEmpty);
       }
       for (final cycle in [null, ...Cycle.values]) {
         expect(ItemPresenter.cycleLabel(cycle), isNotEmpty);
@@ -199,16 +217,19 @@ void main() {
       },
     );
 
-    // The five the hand-off names, in its wording. "Other" is a real choice
-    // the user makes, not the fallback an unrecognised value lands in.
-    test('the categories read as the hand-off writes them', () {
-      expect(Category.values.map(ItemPresenter.categoryLabel), [
-        'Subscription',
-        'Bill',
-        'Insurance',
-        'Document',
-        'Other',
+    // The shipped shelves, in the order they are offered. Every one is a
+    // label the user can change, so this pins what the app *ships* with rather
+    // than anything it depends on.
+    test('the shipped shelves lead with the ones people add most', () {
+      expect(CategoryBook.shipped.all.take(6).map((c) => c.label), [
+        'Streaming',
+        'Music',
+        'AI and tools',
+        'Cloud storage',
+        'Productivity',
+        'Mobile and SIM',
       ]);
+      expect(CategoryBook.shipped.all.last.label, 'Other');
     });
 
     test('lead days read as chips, with zero and one spelled out', () {
@@ -229,11 +250,69 @@ void main() {
       ItemPresenter.deleteConsequence(4),
       contains('Removes 4 pending reminders'),
     );
-    expect(ItemPresenter.deleteConsequence(4), contains('stays under Money'));
+    expect(
+      ItemPresenter.deleteConsequence(4),
+      contains('stays under Spending'),
+    );
     expect(ItemPresenter.deleteConsequence(1), contains('1 pending reminder.'));
     expect(
       ItemPresenter.deleteConsequence(0),
       contains('No reminders are pending'),
     );
+  });
+
+  // A SIM is the case the whole app exists for: letting a prepaid one lapse
+  // costs a phone number, which no refund returns. Nothing in the code knows
+  // that any more -- it is the shipped settings on the shelf SIMs go on, and
+  // the user can change every one of them.
+  group('a SIM', () {
+    TrackedItem sim(String expiresOn) => TrackedItem(
+      id: 'viettel',
+      name: 'Viettel 0912 345 678',
+      categoryId: 'PHONE',
+      expiresOn: LocalDate.parse(expiresOn),
+      anchorDate: LocalDate.parse(expiresOn),
+    );
+
+    // "Due in 4 days" reads as a bill the user could pay late without losing
+    // anything, and losing the number is exactly what happens.
+    test('expires rather than falls due', () {
+      final today = LocalDate.parse('2026-08-15');
+
+      expect(
+        ItemPresenter.when(
+          sim('2026-08-19'),
+          shelfOf(sim('2026-08-19')),
+          today,
+        ),
+        'Expires in 4 days',
+      );
+      expect(
+        ItemPresenter.when(
+          sim('2026-08-15'),
+          shelfOf(sim('2026-08-15')),
+          today,
+        ),
+        'Expires today',
+      );
+      expect(
+        ItemPresenter.when(
+          sim('2026-08-11'),
+          shelfOf(sim('2026-08-11')),
+          today,
+        ),
+        'Expired 4 days ago',
+      );
+    });
+
+    test('nags daily once the date has gone by, the way a bill does', () {
+      expect(CategoryBook.shipped['PHONE'].nag, NagPolicy.daily);
+    });
+
+    // Time Sensitive gets past Focus and Do Not Disturb. A subscription
+    // renewing is news; this is a deadline with a consequence.
+    test('its reminders get past Focus', () {
+      expect(CategoryBook.shipped['PHONE'].isTimeSensitive, isTrue);
+    });
   });
 }

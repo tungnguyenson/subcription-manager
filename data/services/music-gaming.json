@@ -11,12 +11,12 @@
       "aliases": [
         "spotify"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://www.spotify.com/account/subscription/",
-      "noteVi": "Spotify không bán gói năm trên trang giá — chỉ có gói tháng cho Individual.",
       "defaultPlan": "individual",
+      "cancelUrl": "https://www.spotify.com/account/subscription/",
+      "manageUrl": "https://www.spotify.com/account/subscription/manage/",
+      "noteVi": "Spotify không bán gói năm trên trang giá — chỉ có gói tháng cho Individual.",
       "plans": [
         {
           "tier": "individual",
@@ -40,8 +40,7 @@
           "source": "https://www.spotify.com/us/premium/",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://www.spotify.com/account/subscription/manage/"
+      ]
     },
     {
       "id": "apple-music",
@@ -50,12 +49,12 @@
         "apple music",
         "applemusic"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": "Apple Music có gói năm cho cá nhân nhưng chỉ hiện trong mục quản lý tài khoản sau khi đã đăng ký gói tháng, không có trên trang giá công khai nên không ghi vào plans.",
       "defaultPlan": "individual",
+      "cancelUrl": null,
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "noteVi": "Apple Music có gói năm cho cá nhân nhưng chỉ hiện trong mục quản lý tài khoản sau khi đã đăng ký gói tháng, không có trên trang giá công khai nên không ghi vào plans.",
       "plans": [
         {
           "tier": "individual",
@@ -77,8 +76,7 @@
           "source": "https://www.apple.com/apple-music/",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://apps.apple.com/account/subscriptions"
+      ]
     },
     {
       "id": "nhaccuatui",
@@ -87,12 +85,11 @@
         "nhaccuatui",
         "nct"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "vip",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "vip",
       "plans": [
         {
           "tier": "vip",
@@ -124,12 +121,11 @@
         "zing",
         "zing mp3"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "vip",
       "cancelUrl": null,
       "noteVi": "Đã xác minh lại độc lập trên zingmp3.vn (tên miền mới, mp3.zing.vn đã đổi): gói Premium đúng 49.000đ/tháng và 499.000đ/12 tháng (giảm 15%). Trùng với giá NhacCuaTui VIP là trùng hợp có thật giữa hai đối thủ, không phải lỗi copy dữ liệu.",
-      "defaultPlan": "vip",
       "plans": [
         {
           "tier": "vip",
@@ -162,12 +158,12 @@
         "xbox game pass",
         "game pass"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": "Không tìm được giá VND chính thức hiện hành trên xbox.com/vi-VN nên chỉ ghi giá USD toàn cầu. Chọn tier Ultimate vì đây là tier phổ biến nhất với người chơi cá nhân (đầy đủ console + PC + cloud + EA Play) và cũng là tier các cửa hàng bán lẻ VN bán nhiều nhất.",
       "defaultPlan": "ultimate",
+      "cancelUrl": null,
+      "manageUrl": "https://account.microsoft.com/services",
+      "noteVi": "Không tìm được giá VND chính thức hiện hành trên xbox.com/vi-VN nên chỉ ghi giá USD toàn cầu. Chọn tier Ultimate vì đây là tier phổ biến nhất với người chơi cá nhân (đầy đủ console + PC + cloud + EA Play) và cũng là tier các cửa hàng bán lẻ VN bán nhiều nhất.",
       "plans": [
         {
           "tier": "ultimate",
@@ -179,8 +175,7 @@
           "source": "https://news.xbox.com/en-us/2026/04/21/xbox-game-pass-update/",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://account.microsoft.com/services"
+      ]
     },
     {
       "id": "playstation-plus",
@@ -190,12 +185,11 @@
         "ps plus",
         "playstation plus"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "essential",
       "cancelUrl": "https://www.playstation.com/en-vn/support/subscriptions/change-ps-plus/",
       "noteVi": "Việt Nam không có PS Store riêng; giá chính thức chỉ có bằng USD (mua qua tài khoản khu vực khác).",
-      "defaultPlan": "essential",
       "plans": [
         {
           "tier": "essential",
@@ -228,12 +222,11 @@
         "switch online",
         "nso"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "individual",
       "cancelUrl": null,
       "noteVi": "Nintendo eShop không có gian hàng riêng cho VN nên giá chính thức chỉ có bằng USD. Trang giá chính chỉ niêm yết gói năm cho Individual, không hiện giá tháng.",
-      "defaultPlan": "individual",
       "plans": [
         {
           "tier": "individual",
@@ -255,12 +248,11 @@
         "soundcloud go",
         "soundcloud go+"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "go-plus",
       "cancelUrl": null,
       "noteVi": "checkout.soundcloud.com/go xác nhận bằng trình duyệt thật: SoundCloud Go+ chưa mở bán tại Việt Nam (\"still working on launching SoundCloud Go+ in your country\"). Giá lấy từ danh sách In-App Purchase trên App Store; không thấy gói năm.",
-      "defaultPlan": "go-plus",
       "plans": [
         {
           "tier": "go-plus",
@@ -281,12 +273,11 @@
       "aliases": [
         "tidal"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "individual",
       "cancelUrl": null,
       "noteVi": "tidal.com vẫn chặn bot bằng captcha \"slide to secure\" dù dùng trình duyệt thật; giá lấy từ danh sách In-App Purchase trên App Store (đã gồm phần chênh do thanh toán qua Apple), không thấy gói năm trong danh sách này.",
-      "defaultPlan": "individual",
       "plans": [
         {
           "tier": "individual",
@@ -308,12 +299,11 @@
         "amazon music",
         "amazon music unlimited"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "individual",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "individual",
       "plans": [
         {
           "tier": "individual",
@@ -334,12 +324,11 @@
       "aliases": [
         "deezer"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -369,12 +358,11 @@
       "aliases": [
         "qobuz"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "solo",
       "cancelUrl": null,
       "noteVi": "Gói năm không ghi được: trang hãng chỉ niêm yết mức quy ra tháng khi cam kết trả năm, không hiện tổng tiền cả năm.",
-      "defaultPlan": "solo",
       "plans": [
         {
           "tier": "solo",
@@ -396,12 +384,11 @@
         "ea play",
         "eaplay"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard",
       "cancelUrl": null,
       "noteVi": "Có tier EA Play Pro (16.99 USD/tháng, chỉ dành cho PC) — mục này lấy tier EA Play chuẩn vì phổ biến hơn cho cá nhân.",
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -433,12 +420,11 @@
         "ubisoft+",
         "uplay+"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": "Có tier Ubisoft+ Classics rẻ hơn (7.99 USD/tháng, chỉ thư viện game cũ) — mục này lấy tier Premium (đầy đủ, có game phát hành ngày đầu) vì đây là gói được biết đến rộng rãi hơn với tên \"Ubisoft+\". Không thấy gói năm trên trang giá chính thức.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -459,12 +445,12 @@
         "apple arcade",
         "applearcade"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": null,
       "defaultPlan": "individual",
+      "cancelUrl": null,
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "noteVi": null,
       "plans": [
         {
           "tier": "individual",
@@ -506,8 +492,7 @@
           "source": "https://www.apple.com/apple-arcade/",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://apps.apple.com/account/subscriptions"
+      ]
     },
     {
       "id": "google-play-pass",
@@ -517,12 +502,11 @@
         "play pass",
         "playpass"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Xác nhận bằng trình duyệt thật (đã đăng nhập Google): play.google.com/store/pass/getstarted trả về \"Play Pass isn't available for your Google account\" — Play Pass chưa/không phục vụ tài khoản ở khu vực Việt Nam nên không có giá để ghi.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -533,12 +517,11 @@
         "geforcenow",
         "gfn"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "nvidia.com tự chuyển hướng sang locale en-vn và ghi rõ \"GeForce NOW is operated by GeForce NOW Alliance Partners in your region\" (đối tác vận hành riêng, ví dụ StarHub) — không có trang giá USD/VND thống nhất của chính NVIDIA áp dụng cho khu vực này để ghi.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -548,12 +531,11 @@
         "discord nitro",
         "nitro"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "nitro",
       "cancelUrl": null,
       "noteVi": "Trang chính thức discord.com/nitro chỉ hiện giá tháng, không hiện giá năm.",
-      "defaultPlan": "nitro",
       "plans": [
         {
           "tier": "nitro",
@@ -574,12 +556,11 @@
         "roblox premium",
         "roblox"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium-450",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "premium-450",
       "plans": [
         {
           "tier": "premium-450",
@@ -601,12 +582,11 @@
         "minecraft realms",
         "realms"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "realms",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "realms",
       "plans": [
         {
           "tier": "realms",
@@ -629,12 +609,11 @@
         "wow",
         "wow sub"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",

@@ -13,12 +13,11 @@
         "no",
         "khoan vay"
       ],
-      "sector": "FINANCE",
-      "category": "BILL",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -28,12 +27,11 @@
         "tra gop",
         "installment"
       ],
-      "sector": "FINANCE",
-      "category": "BILL",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -44,12 +42,11 @@
         "credit card",
         "sao ke"
       ],
-      "sector": "FINANCE",
-      "category": "BILL",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -59,12 +56,11 @@
         "phi thuong nien",
         "annual fee"
       ],
-      "sector": "FINANCE",
-      "category": "BILL",
+      "category": "FINANCE",
       "defaultCycle": "YEARLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -74,12 +70,12 @@
         "tradingview",
         "trading view"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": null,
       "defaultPlan": "essential",
+      "cancelUrl": null,
+      "manageUrl": "https://www.tradingview.com/settings/",
+      "noteVi": null,
       "plans": [
         {
           "tier": "essential",
@@ -103,8 +99,7 @@
           "source": "https://www.tradingview.com/pricing/",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://www.tradingview.com/settings/"
+      ]
     },
     {
       "id": "money-lover",
@@ -113,12 +108,11 @@
         "money lover",
         "moneylover"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Kiểm tra lại qua danh sách In-App Purchase trên App Store: vẫn là các mục cũ chồng chéo (gói trọn đời, các đợt giảm giá cũ, phí liên kết ngân hàng, Budget Plus...) không có cặp giá Premium tháng/năm hiện hành rõ ràng để ghi.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -128,12 +122,11 @@
         "ynab",
         "you need a budget"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -167,12 +160,11 @@
         "fiin trade",
         "fiin"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": "Chỉ bán theo kỳ hạn dài (3 tháng/6 tháng/1 năm/3 năm), không có gói tháng lẻ nên chỉ ghi được chu kỳ năm.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -194,12 +186,11 @@
         "vietstock",
         "viet stock"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -231,12 +222,11 @@
       "aliases": [
         "simplize"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "professional",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "professional",
       "plans": [
         {
           "tier": "professional",
@@ -270,12 +260,11 @@
         "phi quan ly tk",
         "phi tai khoan ngan hang"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -286,12 +275,11 @@
         "phi sms",
         "bao dong so du"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -301,12 +289,12 @@
         "duolingo",
         "duolingo super"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": "Duolingo không công khai giá trên trang web (chỉ hiện sau khi vào luồng mua trong app); giá lấy từ mục mua trong ứng dụng trên App Store, là giá niêm yết thường xuyên, không phải giá khuyến mãi.",
       "defaultPlan": "super",
+      "cancelUrl": null,
+      "manageUrl": "https://www.duolingo.com/settings/account",
+      "noteVi": "Duolingo không công khai giá trên trang web (chỉ hiện sau khi vào luồng mua trong app); giá lấy từ mục mua trong ứng dụng trên App Store, là giá niêm yết thường xuyên, không phải giá khuyến mãi.",
       "plans": [
         {
           "tier": "super",
@@ -330,8 +318,7 @@
           "source": "https://apps.apple.com/us/app/duolingo-language-lessons/id570060128",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://www.duolingo.com/settings/account"
+      ]
     },
     {
       "id": "elsa-speak",
@@ -340,12 +327,11 @@
         "elsa",
         "elsa speak"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": "Trang bán hàng riêng cho VN (vn.elsaspeak.com) chạy mã giảm giá liên tục nên không dùng làm nguồn; giá lấy từ mục mua trong ứng dụng ELSA Premium trên App Store VN.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -378,12 +364,11 @@
         "monkey",
         "monkey junior"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "1-year",
       "cancelUrl": null,
       "noteVi": "Monkey Junior chỉ bán theo gói 6 tháng/1 năm/trọn đời, không có gói tháng; chỉ lấy gói 1 năm theo đúng luật giá, bỏ qua gói trọn đời.",
-      "defaultPlan": "1-year",
       "plans": [
         {
           "tier": "1-year",
@@ -405,12 +390,11 @@
         "coursera",
         "coursera plus"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "plus",
       "cancelUrl": null,
       "noteVi": "Coursera có ưu đãi 40% cho 3 tháng đầu với gói tháng; ghi giá niêm yết thường xuyên ($24/tháng), không phải giá khuyến mãi.",
-      "defaultPlan": "plus",
       "plans": [
         {
           "tier": "plus",
@@ -442,12 +426,11 @@
       "aliases": [
         "skillshare"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": "skillshare.com/en/pricing mở được bằng trình duyệt thật: chỉ có một mức giá 13.99 USD/tháng nhưng bắt buộc thanh toán theo năm (167.88 USD/năm), không có hình thức trả theo tháng riêng.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -469,12 +452,11 @@
         "masterclass",
         "master class"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "individual",
       "cancelUrl": null,
       "noteVi": "MasterClass chỉ bán theo năm, không có gói tháng; trang giá chính thức chặn truy cập tự động (403) nên giá lấy từ mục mua trong ứng dụng trên App Store.",
-      "defaultPlan": "individual",
       "plans": [
         {
           "tier": "individual",
@@ -495,12 +477,11 @@
       "aliases": [
         "linkedin learning"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Đã thử lại bằng trình duyệt thật (linkedin.com/learning-login/checkout, trang App Store, Play Store): không nơi nào công khai giá cụ thể, chỉ hiện sau khi đăng nhập tài khoản.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -510,12 +491,11 @@
         "datacamp",
         "data camp"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": "DataCamp Premium chỉ hiển thị một hình thức thanh toán (billed annually, $13/tháng); không tra được gói trả theo tháng riêng lẻ.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -537,12 +517,11 @@
         "codecademy",
         "code academy"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "pro",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "pro",
       "plans": [
         {
           "tier": "pro",
@@ -574,12 +553,11 @@
       "aliases": [
         "brilliant"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": "Trình duyệt thật mở brilliant.org/premium (chuyển hướng sang /subscribe/) hiện giá bằng VNĐ theo vùng truy cập: gói tháng 400.000đ, gói năm hiển thị 250.000đ/tháng \"billed as one payment, renews annually\" — tổng năm suy ra 3.000.000đ (chưa xác nhận được số lẻ chính xác vì cần đăng nhập để vào trang thanh toán).",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -611,12 +589,11 @@
         "quizlet",
         "quizlet plus"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "plus",
       "cancelUrl": null,
       "noteVi": "Trang quizlet.com/plus chặn truy cập tự động (captcha); giá lấy từ mục mua trong ứng dụng trên App Store.",
-      "defaultPlan": "plus",
       "plans": [
         {
           "tier": "plus",
@@ -650,12 +627,11 @@
         "o'reilly",
         "oreilly learning"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "individual",
       "cancelUrl": null,
       "noteVi": "oreilly.com/online-learning/pricing.html vẫn chặn bot, nhưng trang đăng ký learning.oreilly.com/signup/ (chính hãng) hiện đủ 3 mức giá không cần đăng nhập.",
-      "defaultPlan": "individual",
       "plans": [
         {
           "tier": "individual",
@@ -687,12 +663,11 @@
         "frontend masters",
         "frontendmasters"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "individual",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "individual",
       "plans": [
         {
           "tier": "individual",
@@ -724,12 +699,11 @@
       "aliases": [
         "babbel"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "individual",
       "cancelUrl": null,
       "noteVi": "Trang my.babbel.com/en/prices (chính hãng) mở được bằng trình duyệt thật: hiện tại chỉ có MỘT tier \"Individual Plan\" áp dụng cho cả 14 ngôn ngữ ở mọi kỳ hạn — không còn phân biệt gói 1 ngôn ngữ/tháng như ghi chú cũ. Không có gói 1 tháng lẻ, chỉ bán theo kỳ trả trước 3/6/12 tháng (giá dưới đây là tổng cả kỳ); lấy kỳ ngắn nhất (3 tháng) và kỳ 12 tháng theo đúng luật giá.",
-      "defaultPlan": "individual",
       "plans": [
         {
           "tier": "individual",
@@ -762,12 +736,11 @@
         "hoc phi",
         "tuition"
       ],
-      "sector": "EDUCATION",
-      "category": "BILL",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": null,
       "plans": []
     }
   ]

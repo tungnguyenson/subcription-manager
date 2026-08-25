@@ -11,8 +11,7 @@
         "c ai",
         "cai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "plus",
       "plans": [
@@ -50,12 +49,11 @@
         "gpt",
         "chat gpt"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "plus",
       "cancelUrl": "https://chatgpt.com/#settings/Subscription",
       "noteVi": "ChatGPT Plus chỉ bán theo tháng, OpenAI không có gói năm cho tier này.",
-      "defaultPlan": "plus",
       "plans": [
         {
           "tier": "plus",
@@ -79,11 +77,11 @@
         "anthropic",
         "claude ai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://claude.ai/settings/billing",
       "defaultPlan": "pro",
+      "cancelUrl": "https://claude.ai/settings/billing",
+      "manageUrl": "https://claude.ai/settings/billing",
       "plans": [
         {
           "tier": "pro",
@@ -108,7 +106,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://claude.ai/settings/billing",
       "typicalAmountMinor": 2000,
       "currency": "USD"
     },
@@ -119,11 +116,11 @@
         "cursor",
         "cursor ai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Chỉ thấy gói tháng trên trang giá, không thấy gói năm cho Pro.",
       "defaultPlan": "pro",
+      "manageUrl": "https://www.cursor.com/dashboard",
+      "noteVi": "Chỉ thấy gói tháng trên trang giá, không thấy gói năm cho Pro.",
       "plans": [
         {
           "tier": "pro",
@@ -136,7 +133,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://www.cursor.com/dashboard",
       "typicalAmountMinor": 2000,
       "currency": "USD"
     },
@@ -148,11 +144,10 @@
         "eleven labs",
         "11labs"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Giá niêm yết chuẩn của gói Creator; tháng đầu tiên đang được giảm còn 11 USD.",
       "defaultPlan": "creator",
+      "noteVi": "Giá niêm yết chuẩn của gói Creator; tháng đầu tiên đang được giảm còn 11 USD.",
       "plans": [
         {
           "tier": "creator",
@@ -188,11 +183,10 @@
         "google gemini",
         "google ai pro"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Chỉ thấy gói tháng, Google không hiện gói năm riêng cho Google AI Pro.",
       "defaultPlan": "pro",
+      "noteVi": "Chỉ thấy gói tháng, Google không hiện gói năm riêng cho Google AI Pro.",
       "plans": [
         {
           "tier": "pro",
@@ -226,11 +220,11 @@
         "github copilot",
         "gh copilot"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://github.com/settings/copilot",
       "defaultPlan": "pro",
+      "cancelUrl": "https://github.com/settings/copilot",
+      "manageUrl": "https://github.com/settings/copilot",
       "plans": [
         {
           "tier": "pro",
@@ -253,7 +247,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://github.com/settings/copilot",
       "typicalAmountMinor": 1000,
       "currency": "USD"
     },
@@ -266,11 +259,10 @@
         "xai",
         "x ai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Đây là giá gói SuperGrok mua riêng trên x.ai, không phải gói Grok đi kèm X Premium+.",
       "defaultPlan": "supergrok",
+      "noteVi": "Đây là giá gói SuperGrok mua riêng trên x.ai, không phải gói Grok đi kèm X Premium+.",
       "plans": [
         {
           "tier": "supergrok",
@@ -294,8 +286,7 @@
         "leonardo",
         "leonardoai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "premium",
       "plans": [
@@ -332,8 +323,7 @@
         "lovable",
         "lovable dev"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "plans": [
@@ -370,8 +360,7 @@
         "midjourney",
         "mj"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "plans": [
@@ -408,8 +397,7 @@
         "perplexity ai",
         "perplexity pro"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "plans": [
@@ -446,8 +434,7 @@
         "poe ai",
         "quora poe"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "plus",
       "plans": [
@@ -484,8 +471,7 @@
         "replit",
         "repl it"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "core",
       "plans": [
@@ -522,8 +508,7 @@
         "runwayml",
         "runway ml"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "plans": [
@@ -559,8 +544,7 @@
         "suno",
         "suno ai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "plans": [
@@ -596,11 +580,10 @@
         "v0 dev",
         "vercel v0"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Giá tính theo credit sử dụng mỗi tháng, không phải hạn mức cố định.",
       "defaultPlan": "plus",
+      "noteVi": "Giá tính theo credit sử dụng mỗi tháng, không phải hạn mức cố định.",
       "plans": [
         {
           "tier": "plus",
@@ -624,8 +607,7 @@
         "badoo",
         "badoo premium"
       ],
-      "sector": "DATING",
-      "category": "SUBSCRIPTION",
+      "category": "DATING",
       "defaultCycle": "MONTHLY",
       "noteVi": "Badoo định giá theo quốc gia/thiết bị/khuyến mãi, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
@@ -637,8 +619,7 @@
         "bumble",
         "bumble premium"
       ],
-      "sector": "DATING",
-      "category": "SUBSCRIPTION",
+      "category": "DATING",
       "defaultCycle": "MONTHLY",
       "noteVi": "Bumble định giá theo tuổi và khu vực, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
@@ -650,8 +631,7 @@
         "coffee meets bagel",
         "cmb"
       ],
-      "sector": "DATING",
-      "category": "SUBSCRIPTION",
+      "category": "DATING",
       "defaultCycle": "MONTHLY",
       "noteVi": "Coffee Meets Bagel định giá theo khu vực/thời hạn, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
@@ -663,8 +643,7 @@
         "grindr",
         "grindr xtra"
       ],
-      "sector": "DATING",
-      "category": "SUBSCRIPTION",
+      "category": "DATING",
       "defaultCycle": "MONTHLY",
       "noteVi": "Grindr XTRA định giá theo khu vực và không có trang giá chính thức công khai ổn định nên không lưu giá (không lấy giá từ blog).",
       "plans": []
@@ -676,8 +655,7 @@
         "happn",
         "happn premium"
       ],
-      "sector": "DATING",
-      "category": "SUBSCRIPTION",
+      "category": "DATING",
       "defaultCycle": "MONTHLY",
       "noteVi": "happn định giá theo khu vực/thiết bị, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
@@ -689,8 +667,7 @@
         "hinge",
         "hinge x"
       ],
-      "sector": "DATING",
-      "category": "SUBSCRIPTION",
+      "category": "DATING",
       "defaultCycle": "MONTHLY",
       "noteVi": "Hinge định giá theo tuổi và khu vực, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
@@ -702,8 +679,7 @@
         "okcupid",
         "ok cupid"
       ],
-      "sector": "DATING",
-      "category": "SUBSCRIPTION",
+      "category": "DATING",
       "defaultCycle": "MONTHLY",
       "noteVi": "OkCupid định giá động theo người dùng (giới tính, tuổi, khu vực...), không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
@@ -714,8 +690,7 @@
       "aliases": [
         "tinder"
       ],
-      "sector": "DATING",
-      "category": "SUBSCRIPTION",
+      "category": "DATING",
       "defaultCycle": "MONTHLY",
       "noteVi": "Tinder định giá theo tuổi và khu vực, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
@@ -729,8 +704,7 @@
         "cmnd",
         "the can cuoc"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "noteVi": "Theo Luật Căn cước 2023, phải làm thủ tục cấp đổi thẻ khi đủ 14, 25, 40 và 60 tuổi; thẻ cấp trong vòng 2 năm trước mốc tuổi đó có giá trị đến mốc tuổi tiếp theo, thẻ cấp từ 58-60 tuổi trở lên có giá trị vô thời hạn.",
       "plans": []
     },
@@ -741,8 +715,7 @@
         "chung chi",
         "chung chi hanh nghe"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "noteVi": "Thời hạn hiệu lực khác nhau theo ngành nghề và hội nghề nghiệp cấp chứng chỉ nên không có thời hạn cố định.",
       "plans": []
     },
@@ -754,8 +727,7 @@
         "kiem dinh",
         "dang kiem xe"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "noteVi": "Xe con dưới 9 chỗ không kinh doanh vận tải: chu kỳ đăng kiểm lần đầu 36 tháng, các chu kỳ sau rút ngắn còn 24 hoặc 12 tháng tuỳ tuổi xe. Phải đi đăng kiểm trước ngày hết hạn tem, nên đặt ngày phải làm sớm.",
       "plans": []
     },
@@ -767,8 +739,7 @@
         "kinh doanh",
         "giay phep kinh doanh"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "noteVi": "Thời hạn hiệu lực do từng cơ quan cấp phép quy định theo ngành nghề nên không có thời hạn cố định.",
       "plans": []
     },
@@ -781,8 +752,7 @@
         "lai xe",
         "bang lai xe"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "noteVi": "Từ 1/1/2025, GPLX hạng B (gộp B1, B2 cũ) và C1 có thời hạn 10 năm kể từ ngày cấp; các hạng còn lại (C, D1, D2, D, BE, C1E, CE, D1E, D2E, DE) có thời hạn 5 năm.",
       "plans": []
     },
@@ -793,8 +763,7 @@
         "ho chieu",
         "passport"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "noteVi": "Hộ chiếu có giá trị 10 năm kể từ ngày cấp với người từ đủ 14 tuổi trở lên (5 năm với trẻ dưới 14 tuổi). Nhiều nước yêu cầu hộ chiếu còn hạn ít nhất 6 tháng khi nhập cảnh, nên đặt ngày phải làm sớm.",
       "plans": []
     },
@@ -805,8 +774,7 @@
         "tam tru",
         "the tam tru"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "noteVi": "Thời hạn khác nhau theo diện tạm trú và cơ quan cấp nên không có thời hạn cố định.",
       "plans": []
     },
@@ -817,8 +785,7 @@
         "visa",
         "thi thuc"
       ],
-      "sector": "DOCUMENTS",
-      "category": "DOCUMENT",
+      "category": "DOCUMENTS",
       "noteVi": "Thời hạn khác nhau theo loại visa và nước cấp nên không có giá chuẩn hay thời hạn cố định.",
       "plans": []
     },
@@ -828,11 +795,10 @@
       "aliases": [
         "babbel"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "YEARLY",
-      "noteVi": "Trang my.babbel.com/en/prices (chính hãng) mở được bằng trình duyệt thật: hiện tại chỉ có MỘT tier \"Individual Plan\" áp dụng cho cả 14 ngôn ngữ ở mọi kỳ hạn — không còn phân biệt gói 1 ngôn ngữ/tháng như ghi chú cũ. Không có gói 1 tháng lẻ, chỉ bán theo kỳ trả trước 3/6/12 tháng (giá dưới đây là tổng cả kỳ); lấy kỳ ngắn nhất (3 tháng) và kỳ 12 tháng theo đúng luật giá.",
       "defaultPlan": "individual",
+      "noteVi": "Trang my.babbel.com/en/prices (chính hãng) mở được bằng trình duyệt thật: hiện tại chỉ có MỘT tier \"Individual Plan\" áp dụng cho cả 14 ngôn ngữ ở mọi kỳ hạn — không còn phân biệt gói 1 ngôn ngữ/tháng như ghi chú cũ. Không có gói 1 tháng lẻ, chỉ bán theo kỳ trả trước 3/6/12 tháng (giá dưới đây là tổng cả kỳ); lấy kỳ ngắn nhất (3 tháng) và kỳ 12 tháng theo đúng luật giá.",
       "plans": [
         {
           "tier": "individual",
@@ -866,11 +832,10 @@
       "aliases": [
         "brilliant"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Trình duyệt thật mở brilliant.org/premium (chuyển hướng sang /subscribe/) hiện giá bằng VNĐ theo vùng truy cập: gói tháng 400.000đ, gói năm hiển thị 250.000đ/tháng \"billed as one payment, renews annually\" — tổng năm suy ra 3.000.000đ (chưa xác nhận được số lẻ chính xác vì cần đăng nhập để vào trang thanh toán).",
       "defaultPlan": "premium",
+      "noteVi": "Trình duyệt thật mở brilliant.org/premium (chuyển hướng sang /subscribe/) hiện giá bằng VNĐ theo vùng truy cập: gói tháng 400.000đ, gói năm hiển thị 250.000đ/tháng \"billed as one payment, renews annually\" — tổng năm suy ra 3.000.000đ (chưa xác nhận được số lẻ chính xác vì cần đăng nhập để vào trang thanh toán).",
       "plans": [
         {
           "tier": "premium",
@@ -904,8 +869,7 @@
         "codecademy",
         "code academy"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "plans": [
@@ -942,11 +906,10 @@
         "coursera",
         "coursera plus"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Coursera có ưu đãi 40% cho 3 tháng đầu với gói tháng; ghi giá niêm yết thường xuyên ($24/tháng), không phải giá khuyến mãi.",
       "defaultPlan": "plus",
+      "noteVi": "Coursera có ưu đãi 40% cho 3 tháng đầu với gói tháng; ghi giá niêm yết thường xuyên ($24/tháng), không phải giá khuyến mãi.",
       "plans": [
         {
           "tier": "plus",
@@ -981,11 +944,10 @@
         "datacamp",
         "data camp"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "YEARLY",
-      "noteVi": "DataCamp Premium chỉ hiển thị một hình thức thanh toán (billed annually, $13/tháng); không tra được gói trả theo tháng riêng lẻ.",
       "defaultPlan": "premium",
+      "noteVi": "DataCamp Premium chỉ hiển thị một hình thức thanh toán (billed annually, $13/tháng); không tra được gói trả theo tháng riêng lẻ.",
       "plans": [
         {
           "tier": "premium",
@@ -1009,11 +971,11 @@
         "duolingo",
         "duolingo super"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Duolingo không công khai giá trên trang web (chỉ hiện sau khi vào luồng mua trong app); giá lấy từ mục mua trong ứng dụng trên App Store, là giá niêm yết thường xuyên, không phải giá khuyến mãi.",
       "defaultPlan": "super",
+      "manageUrl": "https://www.duolingo.com/settings/account",
+      "noteVi": "Duolingo không công khai giá trên trang web (chỉ hiện sau khi vào luồng mua trong app); giá lấy từ mục mua trong ứng dụng trên App Store, là giá niêm yết thường xuyên, không phải giá khuyến mãi.",
       "plans": [
         {
           "tier": "super",
@@ -1038,7 +1000,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://www.duolingo.com/settings/account",
       "typicalAmountMinor": 1299,
       "currency": "USD"
     },
@@ -1049,11 +1010,10 @@
         "elsa",
         "elsa speak"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Trang bán hàng riêng cho VN (vn.elsaspeak.com) chạy mã giảm giá liên tục nên không dùng làm nguồn; giá lấy từ mục mua trong ứng dụng ELSA Premium trên App Store VN.",
       "defaultPlan": "premium",
+      "noteVi": "Trang bán hàng riêng cho VN (vn.elsaspeak.com) chạy mã giảm giá liên tục nên không dùng làm nguồn; giá lấy từ mục mua trong ứng dụng ELSA Premium trên App Store VN.",
       "plans": [
         {
           "tier": "premium",
@@ -1088,8 +1048,7 @@
         "frontend masters",
         "frontendmasters"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "individual",
       "plans": [
@@ -1126,8 +1085,7 @@
         "hoc phi",
         "tuition"
       ],
-      "sector": "EDUCATION",
-      "category": "BILL",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
       "plans": []
     },
@@ -1137,8 +1095,7 @@
       "aliases": [
         "linkedin learning"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
       "noteVi": "Đã thử lại bằng trình duyệt thật (linkedin.com/learning-login/checkout, trang App Store, Play Store): không nơi nào công khai giá cụ thể, chỉ hiện sau khi đăng nhập tài khoản.",
       "plans": []
@@ -1150,11 +1107,10 @@
         "masterclass",
         "master class"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "YEARLY",
-      "noteVi": "MasterClass chỉ bán theo năm, không có gói tháng; trang giá chính thức chặn truy cập tự động (403) nên giá lấy từ mục mua trong ứng dụng trên App Store.",
       "defaultPlan": "individual",
+      "noteVi": "MasterClass chỉ bán theo năm, không có gói tháng; trang giá chính thức chặn truy cập tự động (403) nên giá lấy từ mục mua trong ứng dụng trên App Store.",
       "plans": [
         {
           "tier": "individual",
@@ -1178,11 +1134,10 @@
         "monkey",
         "monkey junior"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "YEARLY",
-      "noteVi": "Monkey Junior chỉ bán theo gói 6 tháng/1 năm/trọn đời, không có gói tháng; chỉ lấy gói 1 năm theo đúng luật giá, bỏ qua gói trọn đời.",
       "defaultPlan": "1-year",
+      "noteVi": "Monkey Junior chỉ bán theo gói 6 tháng/1 năm/trọn đời, không có gói tháng; chỉ lấy gói 1 năm theo đúng luật giá, bỏ qua gói trọn đời.",
       "plans": [
         {
           "tier": "1-year",
@@ -1207,11 +1162,10 @@
         "o'reilly",
         "oreilly learning"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
-      "noteVi": "oreilly.com/online-learning/pricing.html vẫn chặn bot, nhưng trang đăng ký learning.oreilly.com/signup/ (chính hãng) hiện đủ 3 mức giá không cần đăng nhập.",
       "defaultPlan": "individual",
+      "noteVi": "oreilly.com/online-learning/pricing.html vẫn chặn bot, nhưng trang đăng ký learning.oreilly.com/signup/ (chính hãng) hiện đủ 3 mức giá không cần đăng nhập.",
       "plans": [
         {
           "tier": "individual",
@@ -1245,11 +1199,10 @@
         "quizlet",
         "quizlet plus"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Trang quizlet.com/plus chặn truy cập tự động (captcha); giá lấy từ mục mua trong ứng dụng trên App Store.",
       "defaultPlan": "plus",
+      "noteVi": "Trang quizlet.com/plus chặn truy cập tự động (captcha); giá lấy từ mục mua trong ứng dụng trên App Store.",
       "plans": [
         {
           "tier": "plus",
@@ -1283,11 +1236,10 @@
       "aliases": [
         "skillshare"
       ],
-      "sector": "EDUCATION",
-      "category": "SUBSCRIPTION",
+      "category": "EDUCATION",
       "defaultCycle": "YEARLY",
-      "noteVi": "skillshare.com/en/pricing mở được bằng trình duyệt thật: chỉ có một mức giá 13.99 USD/tháng nhưng bắt buộc thanh toán theo năm (167.88 USD/năm), không có hình thức trả theo tháng riêng.",
       "defaultPlan": "premium",
+      "noteVi": "skillshare.com/en/pricing mở được bằng trình duyệt thật: chỉ có một mức giá 13.99 USD/tháng nhưng bắt buộc thanh toán theo năm (167.88 USD/năm), không có hình thức trả theo tháng riêng.",
       "plans": [
         {
           "tier": "premium",
@@ -1310,11 +1262,10 @@
       "aliases": [
         "audible"
       ],
-      "sector": "ENTERTAINMENT",
-      "category": "SUBSCRIPTION",
+      "category": "ENTERTAINMENT",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://help.audible.com/s/topic/0TO4z000000SoIzGAK/cancel?language=en_US",
       "defaultPlan": "premium-plus",
+      "cancelUrl": "https://help.audible.com/s/topic/0TO4z000000SoIzGAK/cancel?language=en_US",
       "plans": [
         {
           "tier": "premium-plus",
@@ -1338,11 +1289,10 @@
         "everand",
         "scribd"
       ],
-      "sector": "ENTERTAINMENT",
-      "category": "SUBSCRIPTION",
+      "category": "ENTERTAINMENT",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Everand (Scribd cũ) đổi sang mô hình unlock theo thẻ; gói Standard chỉ có 1 lượt unlock mỗi tháng.",
       "defaultPlan": "standard",
+      "noteVi": "Everand (Scribd cũ) đổi sang mô hình unlock theo thẻ; gói Standard chỉ có 1 lượt unlock mỗi tháng.",
       "plans": [
         {
           "tier": "standard",
@@ -1365,8 +1315,7 @@
       "aliases": [
         "fonos"
       ],
-      "sector": "ENTERTAINMENT",
-      "category": "SUBSCRIPTION",
+      "category": "ENTERTAINMENT",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "premium",
       "plans": [
@@ -1404,11 +1353,10 @@
         "ku",
         "kindle"
       ],
-      "sector": "ENTERTAINMENT",
-      "category": "SUBSCRIPTION",
+      "category": "ENTERTAINMENT",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://www.amazon.com/gp/help/customer/display.html?nodeId=GLSQ4722655M4ZEJ",
       "defaultPlan": "standard",
+      "cancelUrl": "https://www.amazon.com/gp/help/customer/display.html?nodeId=GLSQ4722655M4ZEJ",
       "plans": [
         {
           "tier": "standard",
@@ -1431,11 +1379,10 @@
       "aliases": [
         "mubi"
       ],
-      "sector": "ENTERTAINMENT",
-      "category": "SUBSCRIPTION",
+      "category": "ENTERTAINMENT",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://help.mubi.com/article/68-how-do-i-cancel-my-subscription-if-i-purchased-it-online-through-the-web",
       "defaultPlan": "standard",
+      "cancelUrl": "https://help.mubi.com/article/68-how-do-i-cancel-my-subscription-if-i-purchased-it-online-through-the-web",
       "plans": [
         {
           "tier": "standard",
@@ -1467,8 +1414,7 @@
       "aliases": [
         "nebula"
       ],
-      "sector": "ENTERTAINMENT",
-      "category": "SUBSCRIPTION",
+      "category": "ENTERTAINMENT",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "plans": [
@@ -1502,8 +1448,7 @@
       "aliases": [
         "patreon"
       ],
-      "sector": "ENTERTAINMENT",
-      "category": "SUBSCRIPTION",
+      "category": "ENTERTAINMENT",
       "defaultCycle": "MONTHLY",
       "cancelUrl": "https://support.patreon.com/hc/en-us/articles/360005502572-Canceling-a-paid-membership",
       "noteVi": "Giá do từng creator tự đặt, Patreon không có bảng giá chung.",
@@ -1515,8 +1460,7 @@
       "aliases": [
         "storytel"
       ],
-      "sector": "ENTERTAINMENT",
-      "category": "SUBSCRIPTION",
+      "category": "ENTERTAINMENT",
       "defaultCycle": "MONTHLY",
       "noteVi": "Xác nhận qua trình duyệt thật ở trang chọn quốc gia storytel.com/store-select: Việt Nam không nằm trong danh sách quốc gia Storytel phục vụ (chỉ có Ấn Độ, Indonesia, Singapore, Hàn Quốc, Thái Lan ở khu vực Á); Storytel cũng không có bảng giá USD toàn cầu, mỗi nước niêm yết bằng nội tệ riêng, nên không có giá để tham chiếu cho người dùng VN.",
       "plans": []
@@ -1527,11 +1471,10 @@
       "aliases": [
         "waka"
       ],
-      "sector": "ENTERTAINMENT",
-      "category": "SUBSCRIPTION",
+      "category": "ENTERTAINMENT",
       "defaultCycle": "YEARLY",
-      "noteVi": "Đã xác minh lại độc lập trên waka.vn: bảng giá chính thức liệt kê 03 tháng = 207.000đ, 06 tháng = 414.000đ, 12 tháng = 828.000đ — đúng là không giảm giá gì cho gói dài hơn (828.000 = 4 lần 207.000), không phải suy luận sai của lần thu thập trước, đây là giá thật của hãng.",
       "defaultPlan": "standard",
+      "noteVi": "Đã xác minh lại độc lập trên waka.vn: bảng giá chính thức liệt kê 03 tháng = 207.000đ, 06 tháng = 414.000đ, 12 tháng = 828.000đ — đúng là không giảm giá gì cho gói dài hơn (828.000 = 4 lần 207.000), không phải suy luận sai của lần thu thập trước, đây là giá thật của hãng.",
       "plans": [
         {
           "tier": "standard",
@@ -1566,11 +1509,10 @@
         "webtoon",
         "webtoon comics"
       ],
-      "sector": "ENTERTAINMENT",
-      "category": "SUBSCRIPTION",
+      "category": "ENTERTAINMENT",
       "defaultCycle": "MONTHLY",
-      "noteVi": "WEBTOON bán 4 mức Premium theo số Coin/tháng (3.99-49.99 USD); ghi mức phổ biến nhất, không có gói năm.",
       "defaultPlan": "premium-100",
+      "noteVi": "WEBTOON bán 4 mức Premium theo số Coin/tháng (3.99-49.99 USD); ghi mức phổ biến nhất, không có gói năm.",
       "plans": [
         {
           "tier": "premium-100",
@@ -1595,11 +1537,10 @@
         "fiin trade",
         "fiin"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "YEARLY",
-      "noteVi": "Chỉ bán theo kỳ hạn dài (3 tháng/6 tháng/1 năm/3 năm), không có gói tháng lẻ nên chỉ ghi được chu kỳ năm.",
       "defaultPlan": "premium",
+      "noteVi": "Chỉ bán theo kỳ hạn dài (3 tháng/6 tháng/1 năm/3 năm), không có gói tháng lẻ nên chỉ ghi được chu kỳ năm.",
       "plans": [
         {
           "tier": "premium",
@@ -1624,8 +1565,7 @@
         "no",
         "khoan vay"
       ],
-      "sector": "FINANCE",
-      "category": "BILL",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
       "plans": []
     },
@@ -1636,8 +1576,7 @@
         "money lover",
         "moneylover"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
       "noteVi": "Kiểm tra lại qua danh sách In-App Purchase trên App Store: vẫn là các mục cũ chồng chéo (gói trọn đời, các đợt giảm giá cũ, phí liên kết ngân hàng, Budget Plus...) không có cặp giá Premium tháng/năm hiện hành rõ ràng để ghi.",
       "plans": []
@@ -1650,8 +1589,7 @@
         "phi quan ly tk",
         "phi tai khoan ngan hang"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
       "plans": []
     },
@@ -1662,8 +1600,7 @@
         "phi thuong nien",
         "annual fee"
       ],
-      "sector": "FINANCE",
-      "category": "BILL",
+      "category": "FINANCE",
       "defaultCycle": "YEARLY",
       "plans": []
     },
@@ -1673,8 +1610,7 @@
       "aliases": [
         "simplize"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "professional",
       "plans": [
@@ -1712,8 +1648,7 @@
         "phi sms",
         "bao dong so du"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
       "plans": []
     },
@@ -1725,8 +1660,7 @@
         "credit card",
         "sao ke"
       ],
-      "sector": "FINANCE",
-      "category": "BILL",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
       "plans": []
     },
@@ -1737,8 +1671,7 @@
         "tra gop",
         "installment"
       ],
-      "sector": "FINANCE",
-      "category": "BILL",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
       "plans": []
     },
@@ -1749,10 +1682,10 @@
         "tradingview",
         "trading view"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "essential",
+      "manageUrl": "https://www.tradingview.com/settings/",
       "plans": [
         {
           "tier": "essential",
@@ -1777,7 +1710,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://www.tradingview.com/settings/",
       "typicalAmountMinor": 1495,
       "currency": "USD"
     },
@@ -1788,8 +1720,7 @@
         "vietstock",
         "viet stock"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "plans": [
@@ -1826,8 +1757,7 @@
         "ynab",
         "you need a budget"
       ],
-      "sector": "FINANCE",
-      "category": "SUBSCRIPTION",
+      "category": "FINANCE",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "plans": [
@@ -1865,11 +1795,11 @@
         "apple fitness plus",
         "fitness plus"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://support.apple.com/en-us/HT202039",
       "defaultPlan": "individual",
+      "cancelUrl": "https://support.apple.com/en-us/HT202039",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
       "plans": [
         {
           "tier": "individual",
@@ -1892,7 +1822,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://apps.apple.com/account/subscriptions",
       "typicalAmountMinor": 999,
       "currency": "USD"
     },
@@ -1902,11 +1831,10 @@
       "aliases": [
         "calm"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "MONTHLY",
-      "noteVi": "calm.com/pricing vẫn bị chặn khi thử bằng trình duyệt thật. Giá lấy từ mục \"Subscription pricing and terms\" trong mô tả app Calm trên App Store (nguồn chính thức của hãng).",
       "defaultPlan": "premium",
+      "noteVi": "calm.com/pricing vẫn bị chặn khi thử bằng trình duyệt thật. Giá lấy từ mục \"Subscription pricing and terms\" trong mô tả app Calm trên App Store (nguồn chính thức của hãng).",
       "plans": [
         {
           "tier": "premium",
@@ -1941,11 +1869,10 @@
         "google health premium",
         "google health"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Fitbit Premium đã đổi tên thành Google Health Premium (app Fitbit gộp vào app Google Health). Xác nhận bằng trình duyệt thật tại store.google.com: giá $9.99/tháng hoặc $99.99/năm. Đã đổi tên hiển thị (name) thành Google Health Premium cho đúng.",
       "defaultPlan": "premium",
+      "noteVi": "Fitbit Premium đã đổi tên thành Google Health Premium (app Fitbit gộp vào app Google Health). Xác nhận bằng trình duyệt thật tại store.google.com: giá $9.99/tháng hoặc $99.99/năm. Đã đổi tên hiển thị (name) thành Google Health Premium cho đúng.",
       "plans": [
         {
           "tier": "premium",
@@ -1979,8 +1906,7 @@
         "garmin connect+",
         "garmin"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "connect-plus",
       "plans": [
@@ -2014,11 +1940,10 @@
       "aliases": [
         "headspace"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Trang headspace.com vẫn không lộ giá qua HTML tĩnh. Giá lấy từ mô tả app Headspace trên App Store (nguồn chính thức của hãng): \"Subscription options: $12.99/month, $69.99/year\".",
       "defaultPlan": "unlimited",
+      "noteVi": "Trang headspace.com vẫn không lộ giá qua HTML tĩnh. Giá lấy từ mô tả app Headspace trên App Store (nguồn chính thức của hãng): \"Subscription options: $12.99/month, $69.99/year\".",
       "plans": [
         {
           "tier": "unlimited",
@@ -2052,8 +1977,7 @@
         "my fitness pal",
         "mfp"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "premium",
       "plans": [
@@ -2088,11 +2012,10 @@
         "noom",
         "noom weight"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "YEARLY",
-      "noteVi": "Noom không bán gói theo tháng riêng — chỉ bán gói trả trước 6 tháng hoặc 12 tháng (số tiền dưới đây là tổng cả kỳ, không phải giá mỗi tháng), tự động gia hạn theo đúng chu kỳ đó.",
       "defaultPlan": "weight",
+      "noteVi": "Noom không bán gói theo tháng riêng — chỉ bán gói trả trước 6 tháng hoặc 12 tháng (số tiền dưới đây là tổng cả kỳ, không phải giá mỗi tháng), tự động gia hạn theo đúng chu kỳ đó.",
       "plans": [
         {
           "tier": "weight",
@@ -2127,11 +2050,10 @@
         "oura",
         "oura ring"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Chỉ tính phí membership, không gồm giá nhẫn Oura. Oura chỉ bán theo tháng, không có gói năm.",
       "defaultPlan": "membership",
+      "noteVi": "Chỉ tính phí membership, không gồm giá nhẫn Oura. Oura chỉ bán theo tháng, không có gói năm.",
       "plans": [
         {
           "tier": "membership",
@@ -2155,11 +2077,10 @@
         "peloton",
         "peloton app"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Mở bằng trình duyệt thật onepeloton.com/app thấy rõ 2 tier: App One (không cần thiết bị Peloton) 12.99 USD/tháng, App+ (dùng với xe đạp/máy chạy Peloton) 28.99 USD/tháng. Chỉ xác nhận được giá tháng; nút chuyển sang \"Annual\" không đổi số hiển thị nên không ghi gói năm.",
       "defaultPlan": "app-one",
+      "noteVi": "Mở bằng trình duyệt thật onepeloton.com/app thấy rõ 2 tier: App One (không cần thiết bị Peloton) 12.99 USD/tháng, App+ (dùng với xe đạp/máy chạy Peloton) 28.99 USD/tháng. Chỉ xác nhận được giá tháng; nút chuyển sang \"Annual\" không đổi số hiển thị nên không ghi gói năm.",
       "plans": [
         {
           "tier": "app-one",
@@ -2182,11 +2103,10 @@
       "aliases": [
         "strava"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Chỉ xác nhận được giá niêm yết cho VN (trang giá tự động hiển thị theo khu vực truy cập); chưa xác nhận được giá GLOBAL/USD từ chính hãng nên không ghi thêm.",
       "defaultPlan": "individual",
+      "noteVi": "Chỉ xác nhận được giá niêm yết cho VN (trang giá tự động hiển thị theo khu vực truy cập); chưa xác nhận được giá GLOBAL/USD từ chính hãng nên không ghi thêm.",
       "plans": [
         {
           "tier": "individual",
@@ -2222,8 +2142,7 @@
         "phong gym",
         "tap gym"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "MONTHLY",
       "noteVi": "Mục chung cho thẻ tập gym — mỗi phòng tập một giá khác nhau nên không có giá chuẩn để ghi.",
       "plans": []
@@ -2234,11 +2153,10 @@
       "aliases": [
         "whoop"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "YEARLY",
-      "noteVi": "whoop.com/us/en/membership/ mở được bằng trình duyệt thật. Whoop chỉ bán theo năm (không có gói tháng riêng), tier thấp nhất là \"One\" tại 199 USD/năm.",
       "defaultPlan": "one",
+      "noteVi": "whoop.com/us/en/membership/ mở được bằng trình duyệt thật. Whoop chỉ bán theo năm (không có gói tháng riêng), tier thấp nhất là \"One\" tại 199 USD/năm.",
       "plans": [
         {
           "tier": "one",
@@ -2260,8 +2178,7 @@
       "aliases": [
         "zwift"
       ],
-      "sector": "FITNESS",
-      "category": "SUBSCRIPTION",
+      "category": "FITNESS",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "plans": [
@@ -2300,11 +2217,10 @@
         "be one",
         "hoi vien be"
       ],
-      "sector": "FOOD",
-      "category": "SUBSCRIPTION",
+      "category": "FOOD",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Gói \"Hội viên\" cũ đã được thay bằng gói khách hàng ưu tiên beOne (từ 24/6/2026): 19.000đ/tháng, không có gói năm; cũng có thể được miễn phí nếu chi tiêu từ 1 triệu đồng/30 ngày. Tên gói nên cập nhật thành beOne.",
       "defaultPlan": "beone",
+      "noteVi": "Gói \"Hội viên\" cũ đã được thay bằng gói khách hàng ưu tiên beOne (từ 24/6/2026): 19.000đ/tháng, không có gói năm; cũng có thể được miễn phí nếu chi tiêu từ 1 triệu đồng/30 ngày. Tên gói nên cập nhật thành beOne.",
       "plans": [
         {
           "tier": "beone",
@@ -2329,11 +2245,10 @@
         "doordash dashpass",
         "doordash"
       ],
-      "sector": "FOOD",
-      "category": "SUBSCRIPTION",
+      "category": "FOOD",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Chỉ xác nhận được gói tháng qua mô tả app trên App Store (\"membership auto-renews at $9.99/month\"); không thấy gói năm được công bố.",
       "defaultPlan": "standard",
+      "noteVi": "Chỉ xác nhận được gói tháng qua mô tả app trên App Store (\"membership auto-renews at $9.99/month\"); không thấy gói năm được công bố.",
       "plans": [
         {
           "tier": "standard",
@@ -2357,8 +2272,7 @@
         "deliveroo plus",
         "deliveroo"
       ],
-      "sector": "FOOD",
-      "category": "SUBSCRIPTION",
+      "category": "FOOD",
       "defaultCycle": "MONTHLY",
       "noteVi": "Đã thử mở lại bằng trình duyệt thật: deliveroo.co.uk/plus vẫn bị Cloudflare chặn (\"Just a moment\"), và trang App Store của Deliveroo không liệt kê giá Plus. Nguồn thứ cấp nói gói Gold 4,99 GBP/tháng hoặc 49,90 GBP/năm nhưng chưa xác nhận được từ chính hãng nên để trống.",
       "plans": []
@@ -2371,8 +2285,7 @@
         "grabunlimited",
         "grab"
       ],
-      "sector": "FOOD",
-      "category": "SUBSCRIPTION",
+      "category": "FOOD",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "unlimited",
       "plans": [
@@ -2409,8 +2322,7 @@
         "hellofresh",
         "hello fresh"
       ],
-      "sector": "FOOD",
-      "category": "SUBSCRIPTION",
+      "category": "FOOD",
       "defaultCycle": "WEEKLY",
       "noteVi": "HelloFresh không có một mức giá cố định: giá đổi theo số người ăn và số bữa/tuần người dùng tự chọn, không phải phí thuê bao cố định như Netflix. Trang giá chính thức vẫn bị Cloudflare chặn khi thử lại bằng trình duyệt thật nên không lấy được số cụ thể — để trống thay vì suy đoán.",
       "plans": []
@@ -2423,8 +2335,7 @@
         "uberone",
         "uber"
       ],
-      "sector": "FOOD",
-      "category": "SUBSCRIPTION",
+      "category": "FOOD",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "one",
       "plans": [
@@ -2461,10 +2372,10 @@
         "apple arcade",
         "applearcade"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "individual",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
       "plans": [
         {
           "tier": "individual",
@@ -2507,7 +2418,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://apps.apple.com/account/subscriptions",
       "typicalAmountMinor": 179000,
       "currency": "VND"
     },
@@ -2518,11 +2428,10 @@
         "discord nitro",
         "nitro"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Trang chính thức discord.com/nitro chỉ hiện giá tháng, không hiện giá năm.",
       "defaultPlan": "nitro",
+      "noteVi": "Trang chính thức discord.com/nitro chỉ hiện giá tháng, không hiện giá năm.",
       "plans": [
         {
           "tier": "nitro",
@@ -2545,11 +2454,10 @@
         "ea play",
         "eaplay"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Có tier EA Play Pro (16.99 USD/tháng, chỉ dành cho PC) — mục này lấy tier EA Play chuẩn vì phổ biến hơn cho cá nhân.",
       "defaultPlan": "standard",
+      "noteVi": "Có tier EA Play Pro (16.99 USD/tháng, chỉ dành cho PC) — mục này lấy tier EA Play chuẩn vì phổ biến hơn cho cá nhân.",
       "plans": [
         {
           "tier": "standard",
@@ -2583,8 +2491,7 @@
         "geforcenow",
         "gfn"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
       "noteVi": "nvidia.com tự chuyển hướng sang locale en-vn và ghi rõ \"GeForce NOW is operated by GeForce NOW Alliance Partners in your region\" (đối tác vận hành riêng, ví dụ StarHub) — không có trang giá USD/VND thống nhất của chính NVIDIA áp dụng cho khu vực này để ghi.",
       "plans": []
@@ -2597,8 +2504,7 @@
         "play pass",
         "playpass"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
       "noteVi": "Xác nhận bằng trình duyệt thật (đã đăng nhập Google): play.google.com/store/pass/getstarted trả về \"Play Pass isn't available for your Google account\" — Play Pass chưa/không phục vụ tài khoản ở khu vực Việt Nam nên không có giá để ghi.",
       "plans": []
@@ -2610,8 +2516,7 @@
         "minecraft realms",
         "realms"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "realms",
       "plans": [
@@ -2639,11 +2544,10 @@
         "switch online",
         "nso"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "YEARLY",
-      "noteVi": "Nintendo eShop không có gian hàng riêng cho VN nên giá chính thức chỉ có bằng USD. Trang giá chính chỉ niêm yết gói năm cho Individual, không hiện giá tháng.",
       "defaultPlan": "individual",
+      "noteVi": "Nintendo eShop không có gian hàng riêng cho VN nên giá chính thức chỉ có bằng USD. Trang giá chính chỉ niêm yết gói năm cho Individual, không hiện giá tháng.",
       "plans": [
         {
           "tier": "individual",
@@ -2667,12 +2571,11 @@
         "ps plus",
         "playstation plus"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "essential",
       "cancelUrl": "https://www.playstation.com/en-vn/support/subscriptions/change-ps-plus/",
       "noteVi": "Việt Nam không có PS Store riêng; giá chính thức chỉ có bằng USD (mua qua tài khoản khu vực khác).",
-      "defaultPlan": "essential",
       "plans": [
         {
           "tier": "essential",
@@ -2705,8 +2608,7 @@
         "roblox premium",
         "roblox"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "premium-450",
       "plans": [
@@ -2733,11 +2635,10 @@
         "ubisoft+",
         "uplay+"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Có tier Ubisoft+ Classics rẻ hơn (7.99 USD/tháng, chỉ thư viện game cũ) — mục này lấy tier Premium (đầy đủ, có game phát hành ngày đầu) vì đây là gói được biết đến rộng rãi hơn với tên \"Ubisoft+\". Không thấy gói năm trên trang giá chính thức.",
       "defaultPlan": "premium",
+      "noteVi": "Có tier Ubisoft+ Classics rẻ hơn (7.99 USD/tháng, chỉ thư viện game cũ) — mục này lấy tier Premium (đầy đủ, có game phát hành ngày đầu) vì đây là gói được biết đến rộng rãi hơn với tên \"Ubisoft+\". Không thấy gói năm trên trang giá chính thức.",
       "plans": [
         {
           "tier": "premium",
@@ -2761,8 +2662,7 @@
         "wow",
         "wow sub"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "plans": [
@@ -2801,11 +2701,11 @@
         "xbox game pass",
         "game pass"
       ],
-      "sector": "GAMING",
-      "category": "SUBSCRIPTION",
+      "category": "GAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Không tìm được giá VND chính thức hiện hành trên xbox.com/vi-VN nên chỉ ghi giá USD toàn cầu. Chọn tier Ultimate vì đây là tier phổ biến nhất với người chơi cá nhân (đầy đủ console + PC + cloud + EA Play) và cũng là tier các cửa hàng bán lẻ VN bán nhiều nhất.",
       "defaultPlan": "ultimate",
+      "manageUrl": "https://account.microsoft.com/services",
+      "noteVi": "Không tìm được giá VND chính thức hiện hành trên xbox.com/vi-VN nên chỉ ghi giá USD toàn cầu. Chọn tier Ultimate vì đây là tier phổ biến nhất với người chơi cá nhân (đầy đủ console + PC + cloud + EA Play) và cũng là tier các cửa hàng bán lẻ VN bán nhiều nhất.",
       "plans": [
         {
           "tier": "ultimate",
@@ -2818,7 +2718,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://account.microsoft.com/services",
       "typicalAmountMinor": 2299,
       "currency": "USD"
     },
@@ -2831,8 +2730,7 @@
         "phi quan ly",
         "phi dich vu chung cu"
       ],
-      "sector": "HOUSING",
-      "category": "BILL",
+      "category": "HOUSING",
       "defaultCycle": "MONTHLY",
       "noteVi": "Mức phí do từng ban quản lý toà nhà quy định nên không đặt giá chuẩn.",
       "plans": []
@@ -2846,8 +2744,7 @@
         "phi gui xe",
         "ve xe"
       ],
-      "sector": "HOUSING",
-      "category": "BILL",
+      "category": "HOUSING",
       "defaultCycle": "MONTHLY",
       "noteVi": "Mức phí do từng toà nhà/bãi xe quy định nên không đặt giá chuẩn.",
       "plans": []
@@ -2861,8 +2758,7 @@
         "phi rac",
         "tien rac"
       ],
-      "sector": "HOUSING",
-      "category": "BILL",
+      "category": "HOUSING",
       "defaultCycle": "MONTHLY",
       "noteVi": "Mức phí do từng địa phương/đơn vị thu gom quy định nên không đặt giá chuẩn.",
       "plans": []
@@ -2875,7 +2771,6 @@
         "travel",
         "bao hiem du lich"
       ],
-      "sector": "INSURANCE",
       "category": "INSURANCE",
       "noteVi": "Phí đóng tuỳ chuyến đi, thời gian và hãng bảo hiểm nên không có giá chuẩn.",
       "plans": []
@@ -2887,7 +2782,6 @@
         "nhan tho",
         "bao hiem nhan tho"
       ],
-      "sector": "INSURANCE",
       "category": "INSURANCE",
       "defaultCycle": "YEARLY",
       "noteVi": "Phí đóng tuỳ hợp đồng và gói bảo hiểm của từng khách hàng nên không có giá chuẩn.",
@@ -2900,7 +2794,6 @@
         "suc khoe",
         "bao hiem suc khoe"
       ],
-      "sector": "INSURANCE",
       "category": "INSURANCE",
       "defaultCycle": "YEARLY",
       "noteVi": "Phí đóng tuỳ gói và độ tuổi người được bảo hiểm nên không có giá chuẩn.",
@@ -2913,7 +2806,6 @@
         "bao hiem xe",
         "tnds"
       ],
-      "sector": "INSURANCE",
       "category": "INSURANCE",
       "defaultCycle": "YEARLY",
       "noteVi": "Phí khác nhau theo loại xe, hãng bảo hiểm và có/không kèm bảo hiểm vật chất nên không có giá chuẩn.",
@@ -2928,11 +2820,10 @@
         "bao hiem y te",
         "bao hiem y te ho gia dinh"
       ],
-      "sector": "INSURANCE",
       "category": "INSURANCE",
       "defaultCycle": "YEARLY",
-      "noteVi": "Giá là mức đóng của người thứ nhất trong hộ; từ người thứ hai trở đi được giảm dần còn 70%/60%/50%/40% mức này.",
       "defaultPlan": "ho-gia-dinh-nguoi-1",
+      "noteVi": "Giá là mức đóng của người thứ nhất trong hộ; từ người thứ hai trở đi được giảm dần còn 70%/60%/50%/40% mức này.",
       "plans": [
         {
           "tier": "ho-gia-dinh-nguoi-1",
@@ -2956,8 +2847,7 @@
         "amazon music",
         "amazon music unlimited"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "individual",
       "plans": [
@@ -2983,11 +2873,11 @@
         "apple music",
         "applemusic"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Apple Music có gói năm cho cá nhân nhưng chỉ hiện trong mục quản lý tài khoản sau khi đã đăng ký gói tháng, không có trên trang giá công khai nên không ghi vào plans.",
       "defaultPlan": "individual",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "noteVi": "Apple Music có gói năm cho cá nhân nhưng chỉ hiện trong mục quản lý tài khoản sau khi đã đăng ký gói tháng, không có trên trang giá công khai nên không ghi vào plans.",
       "plans": [
         {
           "tier": "individual",
@@ -3010,7 +2900,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://apps.apple.com/account/subscriptions",
       "typicalAmountMinor": 65000,
       "currency": "VND"
     },
@@ -3020,8 +2909,7 @@
       "aliases": [
         "deezer"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "premium",
       "plans": [
@@ -3056,8 +2944,7 @@
         "nhaccuatui",
         "nct"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "vip",
       "plans": [
@@ -3091,11 +2978,10 @@
       "aliases": [
         "qobuz"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Gói năm không ghi được: trang hãng chỉ niêm yết mức quy ra tháng khi cam kết trả năm, không hiện tổng tiền cả năm.",
       "defaultPlan": "solo",
+      "noteVi": "Gói năm không ghi được: trang hãng chỉ niêm yết mức quy ra tháng khi cam kết trả năm, không hiện tổng tiền cả năm.",
       "plans": [
         {
           "tier": "solo",
@@ -3120,11 +3006,10 @@
         "soundcloud go",
         "soundcloud go+"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
-      "noteVi": "checkout.soundcloud.com/go xác nhận bằng trình duyệt thật: SoundCloud Go+ chưa mở bán tại Việt Nam (\"still working on launching SoundCloud Go+ in your country\"). Giá lấy từ danh sách In-App Purchase trên App Store; không thấy gói năm.",
       "defaultPlan": "go-plus",
+      "noteVi": "checkout.soundcloud.com/go xác nhận bằng trình duyệt thật: SoundCloud Go+ chưa mở bán tại Việt Nam (\"still working on launching SoundCloud Go+ in your country\"). Giá lấy từ danh sách In-App Purchase trên App Store; không thấy gói năm.",
       "plans": [
         {
           "tier": "go-plus",
@@ -3147,12 +3032,12 @@
       "aliases": [
         "spotify"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://www.spotify.com/account/subscription/",
-      "noteVi": "Spotify không bán gói năm trên trang giá — chỉ có gói tháng cho Individual.",
       "defaultPlan": "individual",
+      "cancelUrl": "https://www.spotify.com/account/subscription/",
+      "manageUrl": "https://www.spotify.com/account/subscription/manage/",
+      "noteVi": "Spotify không bán gói năm trên trang giá — chỉ có gói tháng cho Individual.",
       "plans": [
         {
           "tier": "individual",
@@ -3177,7 +3062,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://www.spotify.com/account/subscription/manage/",
       "typicalAmountMinor": 65000,
       "currency": "VND"
     },
@@ -3187,11 +3071,10 @@
       "aliases": [
         "tidal"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
-      "noteVi": "tidal.com vẫn chặn bot bằng captcha \"slide to secure\" dù dùng trình duyệt thật; giá lấy từ danh sách In-App Purchase trên App Store (đã gồm phần chênh do thanh toán qua Apple), không thấy gói năm trong danh sách này.",
       "defaultPlan": "individual",
+      "noteVi": "tidal.com vẫn chặn bot bằng captcha \"slide to secure\" dù dùng trình duyệt thật; giá lấy từ danh sách In-App Purchase trên App Store (đã gồm phần chênh do thanh toán qua Apple), không thấy gói năm trong danh sách này.",
       "plans": [
         {
           "tier": "individual",
@@ -3216,11 +3099,10 @@
         "zing",
         "zing mp3"
       ],
-      "sector": "MUSIC",
-      "category": "SUBSCRIPTION",
+      "category": "MUSIC",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Đã xác minh lại độc lập trên zingmp3.vn (tên miền mới, mp3.zing.vn đã đổi): gói Premium đúng 49.000đ/tháng và 499.000đ/12 tháng (giảm 15%). Trùng với giá NhacCuaTui VIP là trùng hợp có thật giữa hai đối thủ, không phải lỗi copy dữ liệu.",
       "defaultPlan": "vip",
+      "noteVi": "Đã xác minh lại độc lập trên zingmp3.vn (tên miền mới, mp3.zing.vn đã đổi): gói Premium đúng 49.000đ/tháng và 499.000đ/12 tháng (giảm 15%). Trùng với giá NhacCuaTui VIP là trùng hợp có thật giữa hai đối thủ, không phải lỗi copy dữ liệu.",
       "plans": [
         {
           "tier": "vip",
@@ -3254,12 +3136,12 @@
         "apple news plus",
         "apple news"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://apps.apple.com/account/subscriptions",
-      "noteVi": "Chưa bán ở Việt Nam — chỉ có giá Mỹ (USD), không có bảng giá VND.",
       "defaultPlan": "news-plus",
+      "cancelUrl": "https://apps.apple.com/account/subscriptions",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "noteVi": "Chưa bán ở Việt Nam — chỉ có giá Mỹ (USD), không có bảng giá VND.",
       "plans": [
         {
           "tier": "news-plus",
@@ -3272,7 +3154,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://apps.apple.com/account/subscriptions",
       "typicalAmountMinor": 1299,
       "currency": "USD"
     },
@@ -3283,11 +3164,10 @@
         "bloomberg",
         "bloomberg.com"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
-      "noteVi": "bloomberg.com/subscriptions chặn bằng CAPTCHA nên không lấy được giá trực tiếp; giá lấy từ App Store Mỹ. Giá quảng cáo năm đầu có thể thấp hơn 399 USD/năm ghi ở đây.",
       "defaultPlan": "digital",
+      "noteVi": "bloomberg.com/subscriptions chặn bằng CAPTCHA nên không lấy được giá trực tiếp; giá lấy từ App Store Mỹ. Giá quảng cáo năm đầu có thể thấp hơn 399 USD/năm ghi ở đây.",
       "plans": [
         {
           "tier": "digital",
@@ -3322,11 +3202,10 @@
         "ft",
         "ft.com"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Giá cho gói 'Standard Digital' (gói Premium Digital cao hơn, 75 USD/tháng). ft.com ghi 'trả trước 1 năm tiết kiệm 20%' nhưng không ghi số tiền cụ thể; số năm lấy từ App Store Mỹ.",
       "defaultPlan": "standard-digital",
+      "noteVi": "Giá cho gói 'Standard Digital' (gói Premium Digital cao hơn, 75 USD/tháng). ft.com ghi 'trả trước 1 năm tiết kiệm 20%' nhưng không ghi số tiền cụ thể; số năm lấy từ App Store Mỹ.",
       "plans": [
         {
           "tier": "standard-digital",
@@ -3359,11 +3238,10 @@
         "medium",
         "medium.com"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Trang web chỉ bán gói năm (50 USD/năm); giá gói tháng chỉ thấy trên App Store (4.99 USD/tháng).",
       "defaultPlan": "membership",
+      "noteVi": "Trang web chỉ bán gói năm (50 USD/năm); giá gói tháng chỉ thấy trên App Store (4.99 USD/tháng).",
       "plans": [
         {
           "tier": "membership",
@@ -3397,12 +3275,11 @@
         "new york times",
         "nytimes"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "all-access",
       "cancelUrl": "https://myaccount.nytimes.com/seg/subscription",
       "noteVi": "Giá quảng cáo năm đầu thấp hơn nhiều (khoảng 1 USD/tuần); đây là giá niêm yết thường xuyên của gói All Access. nytimes.com chặn truy cập tự động nên giá lấy từ App Store Mỹ thay vì trang chủ.",
-      "defaultPlan": "all-access",
       "plans": [
         {
           "tier": "all-access",
@@ -3424,8 +3301,7 @@
       "aliases": [
         "substack"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
       "noteVi": "Substack là nền tảng xuất bản — mỗi tác giả/newsletter tự đặt giá riêng, không có bảng giá chuẩn của Substack để ghi.",
       "plans": []
@@ -3437,12 +3313,11 @@
         "the athletic",
         "athletic"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard",
       "cancelUrl": "https://www.theathletic.com/account/",
       "noteVi": "Giá khuyến mãi năm đầu có thể chỉ 1 USD/tháng; đây là giá thường xuyên sau khuyến mãi. The Athletic hiện thuộc sở hữu của The New York Times Company nhưng vẫn bán thuê bao riêng.",
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -3475,11 +3350,10 @@
         "economist",
         "the economist"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Giá khuyến mãi năm đầu chỉ 328.30 USD; trang economist.com/subscribe ghi rõ giá gia hạn thường xuyên là 469 USD/năm — đây là con số đã lấy, không phải giá năm đầu.",
       "defaultPlan": "digital",
+      "noteVi": "Giá khuyến mãi năm đầu chỉ 328.30 USD; trang economist.com/subscribe ghi rõ giá gia hạn thường xuyên là 469 USD/năm — đây là con số đã lấy, không phải giá năm đầu.",
       "plans": [
         {
           "tier": "digital",
@@ -3514,12 +3388,11 @@
         "wsj",
         "wall street journal"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "digital",
       "cancelUrl": "https://customercenter.wsj.com/",
       "noteVi": "subscribe.wsj.com không hiển thị giá cụ thể (bắt chọn gói mới thấy giá); giá lấy từ App Store Mỹ. Giá quảng cáo ban đầu thấp hơn nhiều (khoảng 2-4 USD/tuần cho 12 tháng đầu). Không xác minh được giá gói năm nên bỏ qua.",
-      "defaultPlan": "digital",
       "plans": [
         {
           "tier": "digital",
@@ -3545,8 +3418,7 @@
         "5g",
         "goi data"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
       "noteVi": "Mục chung cho gói data không thuộc nhà mạng cụ thể trong danh sách trên; giá rất khác nhau theo nhà mạng và dung lượng nên không đặt giá chuẩn.",
       "plans": []
@@ -3559,8 +3431,7 @@
         "goi tra sau",
         "postpaid"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
       "noteVi": "Mục chung cho gói cước trả sau, giá khác nhau theo nhà mạng và gói cụ thể nên không đặt giá chuẩn.",
       "plans": []
@@ -3574,8 +3445,7 @@
         "wifi fpt",
         "mang fpt"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "giga-f1",
       "plans": [
@@ -3603,8 +3473,7 @@
         "mang viettel",
         "cap quang viettel"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "meshvt1-t",
       "plans": [
@@ -3632,8 +3501,7 @@
         "mang vnpt",
         "cap quang vnpt"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "home-1",
       "plans": [
@@ -3659,11 +3527,10 @@
         "itel",
         "sim itel"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
       "defaultPlan": "itel99",
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
       "plans": [
         {
           "tier": "itel99",
@@ -3688,11 +3555,10 @@
         "mobi",
         "sim mobifone"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
       "defaultPlan": "hd70",
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
       "plans": [
         {
           "tier": "hd70",
@@ -3717,11 +3583,10 @@
         "vnmb",
         "sim vietnamobile"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
       "defaultPlan": "d50",
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
       "plans": [
         {
           "tier": "d50",
@@ -3745,11 +3610,10 @@
         "viettel",
         "sim viettel"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
       "defaultPlan": "5g150",
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
       "plans": [
         {
           "tier": "5g150",
@@ -3774,11 +3638,10 @@
         "vina",
         "sim vinaphone"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
       "defaultPlan": "5g150",
+      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
       "plans": [
         {
           "tier": "5g150",
@@ -3803,8 +3666,7 @@
         "reddi",
         "sim wintel"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao. Trình duyệt thật mở được wintel.vn (không còn bị 403), nhưng trang /goi-cuoc là công cụ tự thiết kế gói cước (\"Gói cước tự do trải nghiệm\" - tự chọn data/phút gọi/SMS), không phải bảng giá cố định theo tier, nên không có một mức giá phổ biến để ghi.",
       "plans": []
     },
@@ -3816,8 +3678,7 @@
         "cap",
         "truyen hinh cap"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
       "noteVi": "Mục chung cho các gói truyền hình cáp/K+ theo từng nhà cung cấp và combo khác nhau nên không đặt giá chuẩn.",
       "plans": []
@@ -3829,11 +3690,10 @@
         "vnsky",
         "sim vnsky"
       ],
-      "sector": "PHONE",
-      "category": "SUBSCRIPTION",
+      "category": "PHONE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Nhà mạng ảo (Mobicast) thuộc hệ sinh thái VNPAY. Hết hạn mà không nạp thì mất số.",
       "defaultPlan": "sky69d",
+      "noteVi": "Nhà mạng ảo (Mobicast) thuộc hệ sinh thái VNPAY. Hết hạn mà không nạp thì mất số.",
       "plans": [
         {
           "tier": "sky69d",
@@ -3859,11 +3719,10 @@
         "creative cloud",
         "adobe cc"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://account.adobe.com/plans",
       "defaultPlan": "pro",
+      "cancelUrl": "https://account.adobe.com/plans",
       "plans": [
         {
           "tier": "pro",
@@ -3899,11 +3758,10 @@
       "aliases": [
         "airtable"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "Chỉ xác nhận được giá trả theo năm (20 USD/user/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "defaultPlan": "team",
+      "noteVi": "Chỉ xác nhận được giá trả theo năm (20 USD/user/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "plans": [
         {
           "tier": "team",
@@ -3927,8 +3785,7 @@
       "aliases": [
         "asana"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "starter",
       "plans": [
@@ -3966,8 +3823,7 @@
       "aliases": [
         "canva"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "plans": [
@@ -4003,8 +3859,7 @@
       "aliases": [
         "clickup"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "unlimited",
       "plans": [
@@ -4042,11 +3897,10 @@
       "aliases": [
         "cloudflare"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Giá Pro tính theo 1 website/domain.",
       "defaultPlan": "pro",
+      "noteVi": "Giá Pro tính theo 1 website/domain.",
       "plans": [
         {
           "tier": "pro",
@@ -4083,8 +3937,7 @@
         "domain",
         "ten mien"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
       "noteVi": "Mục chung, không có brand — phí đăng ký/gia hạn khác nhau theo TLD và nhà cung cấp.",
       "plans": []
@@ -4095,8 +3948,7 @@
       "aliases": [
         "evernote"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "noteVi": "Trang evernote.com/compare-plans mở được bằng trình duyệt thật nhưng hiện giá VND với số lẻ tới hàng thập phân (vd 62.766,58đ/tháng) — dấu hiệu quy đổi tỉ giá tự động theo IP chứ không phải bảng giá VND chính thức của hãng, nên không dùng. Danh sách In-App Purchase trên App Store cũng chỉ là các mục cũ chồng chéo (Premium/Plus/Personal, có cả gói trọn đời) không tách được cặp giá tháng/năm hiện hành rõ ràng.",
       "plans": []
@@ -4107,10 +3959,10 @@
       "aliases": [
         "figma"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "professional",
+      "manageUrl": "https://www.figma.com/settings",
       "plans": [
         {
           "tier": "professional",
@@ -4137,7 +3989,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://www.figma.com/settings",
       "typicalAmountMinor": 2000,
       "currency": "USD"
     },
@@ -4147,11 +3998,10 @@
       "aliases": [
         "github"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Xác nhận lại bằng trình duyệt thật trên github.com/pricing: GitHub chỉ còn 3 gói Free, Team (4 USD/user/tháng, tính theo tổ chức chứ không phải cá nhân) và Enterprise (từ 21 USD/user/tháng); không còn gói Pro cho tài khoản cá nhân nên không có tier phù hợp để ghi giá.",
       "manageUrl": "https://github.com/settings/billing/summary",
+      "noteVi": "Xác nhận lại bằng trình duyệt thật trên github.com/pricing: GitHub chỉ còn 3 gói Free, Team (4 USD/user/tháng, tính theo tổ chức chứ không phải cá nhân) và Enterprise (từ 21 USD/user/tháng); không còn gói Pro cho tài khoản cá nhân nên không có tier phù hợp để ghi giá.",
       "plans": []
     },
     {
@@ -4162,11 +4012,10 @@
         "gsuite",
         "g suite"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "Chỉ xác nhận được giá cam kết năm (7 USD/user/tháng); trang giá không hiện tĩnh mức phí trả linh hoạt theo tháng.",
       "defaultPlan": "business-starter",
+      "noteVi": "Chỉ xác nhận được giá cam kết năm (7 USD/user/tháng); trang giá không hiện tĩnh mức phí trả linh hoạt theo tháng.",
       "plans": [
         {
           "tier": "business-starter",
@@ -4190,8 +4039,7 @@
       "aliases": [
         "grammarly"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "plans": [
@@ -4231,11 +4079,11 @@
         "jetbrains",
         "all products pack"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Giá năm là giá năm đầu (299 USD); các năm gia hạn tiếp theo rẻ hơn nhờ continuity discount của JetBrains.",
       "defaultPlan": "all-products-pack",
+      "manageUrl": "https://account.jetbrains.com/licenses",
+      "noteVi": "Giá năm là giá năm đầu (299 USD); các năm gia hạn tiếp theo rẻ hơn nhờ continuity discount của JetBrains.",
       "plans": [
         {
           "tier": "all-products-pack",
@@ -4262,7 +4110,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://account.jetbrains.com/licenses",
       "typicalAmountMinor": 2990,
       "currency": "USD"
     },
@@ -4272,11 +4119,10 @@
       "aliases": [
         "linear"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "Chỉ xác nhận được giá trả theo năm (10 USD/user/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "defaultPlan": "basic",
+      "noteVi": "Chỉ xác nhận được giá trả theo năm (10 USD/user/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "plans": [
         {
           "tier": "basic",
@@ -4303,10 +4149,10 @@
         "m365",
         "microsoft 365"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "personal",
+      "manageUrl": "https://account.microsoft.com/services",
       "plans": [
         {
           "tier": "personal",
@@ -4333,7 +4179,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://account.microsoft.com/services",
       "typicalAmountMinor": 999,
       "currency": "USD"
     },
@@ -4343,11 +4188,10 @@
       "aliases": [
         "miro"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "Chỉ xác nhận được giá trả theo năm (8 USD/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "defaultPlan": "starter",
+      "noteVi": "Chỉ xác nhận được giá trả theo năm (8 USD/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "plans": [
         {
           "tier": "starter",
@@ -4371,8 +4215,7 @@
       "aliases": [
         "notion"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "plus",
       "plans": [
@@ -4411,8 +4254,7 @@
         "obsidian sync",
         "obsidian"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "plans": [
@@ -4450,11 +4292,10 @@
       "aliases": [
         "raycast"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "Chỉ xác nhận được giá trả theo năm (8 USD/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "defaultPlan": "pro",
+      "noteVi": "Chỉ xác nhận được giá trả theo năm (8 USD/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "plans": [
         {
           "tier": "pro",
@@ -4478,8 +4319,7 @@
       "aliases": [
         "setapp"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "mac-ios",
       "plans": [
@@ -4515,10 +4355,10 @@
       "aliases": [
         "slack"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
+      "manageUrl": "https://slack.com/account/settings",
       "plans": [
         {
           "tier": "pro",
@@ -4545,7 +4385,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://slack.com/account/settings",
       "typicalAmountMinor": 875,
       "currency": "USD"
     },
@@ -4555,10 +4394,10 @@
       "aliases": [
         "todoist"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
+      "manageUrl": "https://app.todoist.com/app/settings/subscription",
       "plans": [
         {
           "tier": "pro",
@@ -4583,7 +4422,6 @@
           "checkedAt": "2026-08-24"
         }
       ],
-      "manageUrl": "https://app.todoist.com/app/settings/subscription",
       "typicalAmountMinor": 700,
       "currency": "USD"
     },
@@ -4593,8 +4431,7 @@
       "aliases": [
         "trello"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "plans": [
@@ -4632,11 +4469,10 @@
       "aliases": [
         "vercel"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Vercel Pro chỉ tính phí theo tháng (theo seat), không bán gói trả trước theo năm.",
       "defaultPlan": "pro",
+      "noteVi": "Vercel Pro chỉ tính phí theo tháng (theo seat), không bán gói trả trước theo năm.",
       "plans": [
         {
           "tier": "pro",
@@ -4662,8 +4498,7 @@
         "hosting",
         "server"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "noteVi": "Mục chung, không có brand — phí VPS/hosting khác nhau theo nhà cung cấp và cấu hình.",
       "plans": []
@@ -4674,10 +4509,10 @@
       "aliases": [
         "zoom"
       ],
-      "sector": "PRODUCTIVITY",
-      "category": "SUBSCRIPTION",
+      "category": "PRODUCTIVITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
+      "manageUrl": "https://zoom.us/billing",
       "plans": [
         {
           "tier": "pro",
@@ -4704,7 +4539,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://zoom.us/billing",
       "typicalAmountMinor": 1699,
       "currency": "USD"
     },
@@ -4714,11 +4548,10 @@
       "aliases": [
         "1password"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "1Password chỉ bán gói Individual theo năm, không có gói theo tháng riêng.",
       "defaultPlan": "individual",
+      "noteVi": "1Password chỉ bán gói Individual theo năm, không có gói theo tháng riêng.",
       "plans": [
         {
           "tier": "individual",
@@ -4742,11 +4575,11 @@
         "bitwarden",
         "bit warden"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "Chỉ bán theo năm, không có gói theo tháng riêng.",
       "defaultPlan": "premium",
+      "manageUrl": "https://vault.bitwarden.com/",
+      "noteVi": "Chỉ bán theo năm, không có gói theo tháng riêng.",
       "plans": [
         {
           "tier": "premium",
@@ -4760,7 +4593,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://vault.bitwarden.com/",
       "typicalAmountMinor": 1980,
       "currency": "USD"
     },
@@ -4771,8 +4603,7 @@
         "bkav",
         "bkav pro"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
       "noteVi": "Xác nhận lại bằng trình duyệt thật tại bkav.com/bkav-pro và trang đặt mua: vẫn chỉ ghi giá 299.000đ/Thẻ mà không nêu rõ thời hạn sử dụng (1 năm hay khác) ở bất kỳ đâu trên trang, nên không thể ghi vào plans mà không đoán.",
       "plans": []
@@ -4784,11 +4615,10 @@
         "cleanmymac",
         "clean my mac"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "Là phần mềm dọn dẹp/tối ưu máy Mac, không phải phần mềm bảo mật — sector SECURITY trong stub có thể chưa đúng, cân nhắc đổi sang UTILITIES. Chỉ bán theo năm cho 1 thiết bị.",
       "defaultPlan": "single-device",
+      "noteVi": "Là phần mềm dọn dẹp/tối ưu máy Mac, không phải phần mềm bảo mật — sector SECURITY trong stub có thể chưa đúng, cân nhắc đổi sang UTILITIES. Chỉ bán theo năm cho 1 thiết bị.",
       "plans": [
         {
           "tier": "single-device",
@@ -4811,11 +4641,10 @@
       "aliases": [
         "dashlane"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "dashlane.com/personal-password-manager (chính hãng) mở bằng trình duyệt thật hiện rõ giá: Premium $5.42/tháng, chỉ bán theo hình thức thanh toán năm, không có gói tháng riêng.",
       "defaultPlan": "premium",
+      "noteVi": "dashlane.com/personal-password-manager (chính hãng) mở bằng trình duyệt thật hiện rõ giá: Premium $5.42/tháng, chỉ bán theo hình thức thanh toán năm, không có gói tháng riêng.",
       "plans": [
         {
           "tier": "premium",
@@ -4839,11 +4668,11 @@
         "expressvpn",
         "express vpn"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Trang đặt hàng chính hãng (expressvpn.com/pricing) có bộ chọn kỳ hạn ẩn (\"2-year plans / 12-month plans / 1-month plans\"). Chọn \"1-month plans\" hiện đúng giá gia hạn tháng; cả 3 kỳ hạn của tier Basic đều ghi rõ \"Then autorenews at $99.95 annually\" — đây là giá gia hạn thường xuyên dùng cho gói năm, không phải giá khuyến mãi.",
       "defaultPlan": "basic",
+      "manageUrl": "https://www.expressvpn.com/subscriptions",
+      "noteVi": "Trang đặt hàng chính hãng (expressvpn.com/pricing) có bộ chọn kỳ hạn ẩn (\"2-year plans / 12-month plans / 1-month plans\"). Chọn \"1-month plans\" hiện đúng giá gia hạn tháng; cả 3 kỳ hạn của tier Basic đều ghi rõ \"Then autorenews at $99.95 annually\" — đây là giá gia hạn thường xuyên dùng cho gói năm, không phải giá khuyến mãi.",
       "plans": [
         {
           "tier": "basic",
@@ -4867,7 +4696,6 @@
           "checkedAt": "2026-08-24"
         }
       ],
-      "manageUrl": "https://www.expressvpn.com/subscriptions",
       "typicalAmountMinor": 1499,
       "currency": "USD"
     },
@@ -4878,11 +4706,10 @@
         "kaspersky",
         "kaspersky antivirus"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "kaspersky.com/premium (chính hãng) mở bằng trình duyệt thật: chỉ bán theo năm. Trang ghi rõ giá gia hạn thường xuyên \"Thereafter your subscription will be renewed automatically at $119.99 per year\" cho gói Premium 5 thiết bị (giá hiển thị nổi bật $72.99 chỉ là ưu đãi năm đầu 15 tháng).",
       "defaultPlan": "premium-5",
+      "noteVi": "kaspersky.com/premium (chính hãng) mở bằng trình duyệt thật: chỉ bán theo năm. Trang ghi rõ giá gia hạn thường xuyên \"Thereafter your subscription will be renewed automatically at $119.99 per year\" cho gói Premium 5 thiết bị (giá hiển thị nổi bật $72.99 chỉ là ưu đãi năm đầu 15 tháng).",
       "plans": [
         {
           "tier": "premium-5",
@@ -4906,11 +4733,10 @@
         "lastpass",
         "last pass"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "lastpass.com/pricing (chính hãng) mở bằng trình duyệt thật hiện rõ giá: Premium 3.00 USD/tháng, chỉ thanh toán theo năm (36 USD/năm). Trang đang chạy khuyến mãi giảm 30% còn 2.10 USD/tháng — ghi giá gốc không khuyến mãi theo đúng luật giá.",
       "defaultPlan": "premium",
+      "noteVi": "lastpass.com/pricing (chính hãng) mở bằng trình duyệt thật hiện rõ giá: Premium 3.00 USD/tháng, chỉ thanh toán theo năm (36 USD/năm). Trang đang chạy khuyến mãi giảm 30% còn 2.10 USD/tháng — ghi giá gốc không khuyến mãi theo đúng luật giá.",
       "plans": [
         {
           "tier": "premium",
@@ -4934,11 +4760,10 @@
         "malwarebytes",
         "malware bytes"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "Chỉ bán theo năm, không có gói theo tháng riêng.",
       "defaultPlan": "premium",
+      "noteVi": "Chỉ bán theo năm, không có gói theo tháng riêng.",
       "plans": [
         {
           "tier": "premium",
@@ -4962,11 +4787,10 @@
         "mcafee",
         "mc afee"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "Chỉ bán theo năm. Giá ghi là giá gia hạn chuẩn; năm đầu thường có giá khuyến mãi thấp hơn nhiều (khoảng 39.99 USD).",
       "defaultPlan": "essential",
+      "noteVi": "Chỉ bán theo năm. Giá ghi là giá gia hạn chuẩn; năm đầu thường có giá khuyến mãi thấp hơn nhiều (khoảng 39.99 USD).",
       "plans": [
         {
           "tier": "essential",
@@ -4990,8 +4814,7 @@
         "mullvad",
         "mullvad vpn"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
       "noteVi": "Xác nhận lại bằng trình duyệt thật tại mullvad.net/en: vẫn chỉ niêm yết €5/tháng cố định (không giảm giá theo năm, không có bảng giá USD/VND) nên không ghi được theo chuẩn dữ liệu này (không tự quy đổi tỉ giá).",
       "plans": []
@@ -5004,8 +4827,7 @@
         "nord vpn",
         "nord"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "basic",
       "plans": [
@@ -5043,11 +4865,10 @@
         "norton 360",
         "norton360"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
-      "noteVi": "Chỉ bán theo năm. Giá ghi là giá gia hạn chuẩn; năm đầu thường có giá khuyến mãi thấp hơn nhiều (khoảng 34.99 USD).",
       "defaultPlan": "standard",
+      "noteVi": "Chỉ bán theo năm. Giá ghi là giá gia hạn chuẩn; năm đầu thường có giá khuyến mãi thấp hơn nhiều (khoảng 34.99 USD).",
       "plans": [
         {
           "tier": "standard",
@@ -5071,11 +4892,10 @@
         "protonvpn",
         "proton vpn"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Chưa xác nhận được giá gói năm vì trang giá hiển thị số động qua JavaScript.",
       "defaultPlan": "plus",
+      "noteVi": "Chưa xác nhận được giá gói năm vì trang giá hiển thị số động qua JavaScript.",
       "plans": [
         {
           "tier": "plus",
@@ -5099,11 +4919,10 @@
         "surfshark",
         "surf shark"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
-      "noteVi": "surfshark.com/pricing có tab \"1 month\" cho ra giá gia hạn tháng thật (16.45 USD/mo). Tab \"12 months\"/\"24 months\" chỉ hiện giá khuyến mãi kỳ đầu, không công bố số tiền gia hạn cụ thể (chỉ nói chung chung \"charged the applicable renewal price\") nên không ghi được gói năm mà không đoán.",
       "defaultPlan": "starter",
+      "noteVi": "surfshark.com/pricing có tab \"1 month\" cho ra giá gia hạn tháng thật (16.45 USD/mo). Tab \"12 months\"/\"24 months\" chỉ hiện giá khuyến mãi kỳ đầu, không công bố số tiền gia hạn cụ thể (chỉ nói chung chung \"charged the applicable renewal price\") nên không ghi được gói năm mà không đoán.",
       "plans": [
         {
           "tier": "starter",
@@ -5126,12 +4945,12 @@
         "linkedin premium",
         "linkedin"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://www.linkedin.com/premium/cancel",
-      "noteVi": "Giá cho gói 'Premium Career' (phổ biến nhất cho cá nhân tìm việc). LinkedIn hiện báo giá $39.99/tháng cho thuê bao mới; người dùng cũ có thể vẫn đang trả mức thấp hơn (khoảng $29.99/tháng).",
       "defaultPlan": "career",
+      "cancelUrl": "https://www.linkedin.com/premium/cancel",
+      "manageUrl": "https://www.linkedin.com/premium/manage/",
+      "noteVi": "Giá cho gói 'Premium Career' (phổ biến nhất cho cá nhân tìm việc). LinkedIn hiện báo giá $39.99/tháng cho thuê bao mới; người dùng cũ có thể vẫn đang trả mức thấp hơn (khoảng $29.99/tháng).",
       "plans": [
         {
           "tier": "career",
@@ -5154,7 +4973,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://www.linkedin.com/premium/manage/",
       "typicalAmountMinor": 3999,
       "currency": "USD"
     },
@@ -5166,12 +4984,11 @@
         "facebook verified",
         "instagram verified"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard",
       "cancelUrl": "https://www.facebook.com/business/help/23875260945405570?id=579726174359330",
       "noteVi": "Đăng ký qua web rẻ hơn qua app (11.99 USD so với 14.99 USD). Giá VND (gói Standard) lấy từ App Store VN qua app Instagram.",
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -5205,12 +5022,11 @@
         "reddit premium",
         "reddit"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": "https://www.reddit.com/settings/premium",
       "noteVi": "reddit.com chặn truy cập tự động nên không lấy được giá trực tiếp từ trang chủ; giá lấy từ App Store Mỹ, có thể cao hơn giá trả qua web.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -5244,12 +5060,11 @@
         "snapchat plus",
         "snap plus"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "plus",
       "cancelUrl": "https://support.snapchat.com/en-US/a/cancel-subscription",
       "noteVi": "Trang giá chính thức (accounts.snapchat.com/plus/plans) chỉ render bằng JavaScript nên không lấy được số cụ thể; giá tháng lấy từ App Store Mỹ. Không xác minh được giá gói năm từ nguồn chính hãng nên bỏ qua.",
-      "defaultPlan": "plus",
       "plans": [
         {
           "tier": "plus",
@@ -5272,11 +5087,10 @@
         "telegram premium",
         "tele premium"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Không có trang hủy riêng — hủy qua App Store/Google Play (nếu mua trong app) hoặc qua @PremiumBot trong Telegram. Giá VND lấy từ App Store VN.",
       "defaultPlan": "premium",
+      "noteVi": "Không có trang hủy riêng — hủy qua App Store/Google Play (nếu mua trong app) hoặc qua @PremiumBot trong Telegram. Giá VND lấy từ App Store VN.",
       "plans": [
         {
           "tier": "premium",
@@ -5311,12 +5125,11 @@
         "twitter blue",
         "x blue"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": "https://x.com/settings/premium",
       "noteVi": "Giá VND lấy từ App Store VN (gói giữa 'X Premium', không phải Basic hay Premium+) — X không có trang giá riêng bằng VND, đây là giá X tự niêm yết trên App Store khu vực Việt Nam.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -5349,10 +5162,10 @@
       "aliases": [
         "backblaze"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "personal",
+      "manageUrl": "https://secure.backblaze.com/account_settings.htm",
       "plans": [
         {
           "tier": "personal",
@@ -5377,7 +5190,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://secure.backblaze.com/account_settings.htm",
       "typicalAmountMinor": 900,
       "currency": "USD"
     },
@@ -5388,11 +5200,11 @@
         "box",
         "box.com"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "box.com/pricing/individual (chính hãng) mở được bằng trình duyệt thật, có toggle Monthly/Annually riêng cho tier Personal Pro.",
       "defaultPlan": "personal-pro",
+      "manageUrl": "https://app.box.com/account",
+      "noteVi": "box.com/pricing/individual (chính hãng) mở được bằng trình duyệt thật, có toggle Monthly/Annually riêng cho tier Personal Pro.",
       "plans": [
         {
           "tier": "personal-pro",
@@ -5417,7 +5229,6 @@
           "checkedAt": "2026-08-24"
         }
       ],
-      "manageUrl": "https://app.box.com/account",
       "typicalAmountMinor": 1600,
       "currency": "USD"
     },
@@ -5427,10 +5238,10 @@
       "aliases": [
         "dropbox"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "plus",
+      "manageUrl": "https://www.dropbox.com/account/plan",
       "plans": [
         {
           "tier": "plus",
@@ -5444,7 +5255,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://www.dropbox.com/account/plan",
       "typicalAmountMinor": 999,
       "currency": "USD"
     },
@@ -5456,10 +5266,10 @@
         "google drive",
         "drive"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "100gb",
+      "manageUrl": "https://one.google.com/settings",
       "plans": [
         {
           "tier": "100gb",
@@ -5473,7 +5283,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://one.google.com/settings",
       "typicalAmountMinor": 45000,
       "currency": "VND"
     },
@@ -5484,11 +5293,11 @@
         "icloud",
         "apple storage"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://support.apple.com/en-vn/HT207594",
       "defaultPlan": "50gb",
+      "cancelUrl": "https://support.apple.com/en-vn/HT207594",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
       "plans": [
         {
           "tier": "50gb",
@@ -5502,7 +5311,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://apps.apple.com/account/subscriptions",
       "typicalAmountMinor": 25000,
       "currency": "VND"
     },
@@ -5514,11 +5322,10 @@
         "mega.nz",
         "mega io"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "YEARLY",
-      "noteVi": "Chỉ có giá thanh toán theo năm. Trang ghi rõ đây là giá USD ước tính, khách sẽ bị tính phí thật bằng EUR nên số tiền trên sao kê có thể khác đôi chút.",
       "defaultPlan": "pro-lite",
+      "noteVi": "Chỉ có giá thanh toán theo năm. Trang ghi rõ đây là giá USD ước tính, khách sẽ bị tính phí thật bằng EUR nên số tiền trên sao kê có thể khác đôi chút.",
       "plans": [
         {
           "tier": "pro-lite",
@@ -5541,11 +5348,11 @@
       "aliases": [
         "onedrive"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Gói lưu trữ 100GB độc lập nay bán dưới tên Microsoft 365 Basic.",
       "defaultPlan": "basic-100gb",
+      "manageUrl": "https://account.microsoft.com/services",
+      "noteVi": "Gói lưu trữ 100GB độc lập nay bán dưới tên Microsoft 365 Basic.",
       "plans": [
         {
           "tier": "basic-100gb",
@@ -5570,7 +5377,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://account.microsoft.com/services",
       "typicalAmountMinor": 199,
       "currency": "USD"
     },
@@ -5581,11 +5387,10 @@
         "pcloud",
         "p cloud"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "YEARLY",
-      "noteVi": "Bỏ gói trọn đời theo yêu cầu, chỉ lấy gói năm. Chưa xác nhận được giá gói tháng.",
       "defaultPlan": "premium-500gb",
+      "noteVi": "Bỏ gói trọn đời theo yêu cầu, chỉ lấy gói năm. Chưa xác nhận được giá gói tháng.",
       "plans": [
         {
           "tier": "premium-500gb",
@@ -5609,11 +5414,10 @@
         "protondrive",
         "proton drive"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "proton.me/drive/pricing (chính hãng) mở được bằng trình duyệt thật, có tab Monthly/Yearly riêng biệt. Tier thấp nhất có tên riêng là Drive Plus (200GB).",
       "defaultPlan": "drive-plus",
+      "noteVi": "proton.me/drive/pricing (chính hãng) mở được bằng trình duyệt thật, có tab Monthly/Yearly riêng biệt. Tier thấp nhất có tên riêng là Drive Plus (200GB).",
       "plans": [
         {
           "tier": "drive-plus",
@@ -5649,11 +5453,10 @@
         "sync.com",
         "synccom"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Trang giá ghi kèm khuyến mãi \"Save 50% năm đầu\" nên số liệu có thể là giá năm đầu, không chắc là giá gia hạn chuẩn.",
       "defaultPlan": "personal-150gb",
+      "noteVi": "Trang giá ghi kèm khuyến mãi \"Save 50% năm đầu\" nên số liệu có thể là giá năm đầu, không chắc là giá gia hạn chuẩn.",
       "plans": [
         {
           "tier": "personal-150gb",
@@ -5689,11 +5492,10 @@
         "c2 backup",
         "synology"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "c2.synology.com/en-global/pricing/backup/personal (chính hãng) mở được bằng trình duyệt thật, có tab Monthly billing/Annual billing riêng cho gói 500GB (tier thấp nhất trong 3 gói 500GB/1TB/2TB).",
       "defaultPlan": "500gb",
+      "noteVi": "c2.synology.com/en-global/pricing/backup/personal (chính hãng) mở được bằng trình duyệt thật, có tab Monthly billing/Annual billing riêng cho gói 500GB (tier thấp nhất trong 3 gói 500GB/1TB/2TB).",
       "plans": [
         {
           "tier": "500gb",
@@ -5728,11 +5530,10 @@
         "terabox",
         "tera box"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "terabox.com/cloud-storage-pricing-plans (chính hãng) mở được bằng trình duyệt thật, tự động hiện giá VNĐ theo vùng truy cập. Trang ghi rõ giá gia hạn thường xuyên (\"Automatically renew at X\"), không phải giá khuyến mãi.",
       "defaultPlan": "premium",
+      "noteVi": "terabox.com/cloud-storage-pricing-plans (chính hãng) mở được bằng trình duyệt thật, tự động hiện giá VNĐ theo vùng truy cập. Trang ghi rõ giá gia hạn thường xuyên (\"Automatically renew at X\"), không phải giá khuyến mãi.",
       "plans": [
         {
           "tier": "premium",
@@ -5767,11 +5568,10 @@
         "prime video",
         "amazon prime"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Xác nhận qua trình duyệt thật: primevideo.com trả về trang \"servicerestricted\" khi truy cập từ Việt Nam, tức Prime Video không phục vụ trực tiếp tại VN. Trang App Store (US) chỉ liệt kê gói mua thêm \"Ad free $2.99\" chứ không phải giá thuê bao Prime Video/Prime gốc, nên vẫn không có giá tier phổ biến để ghi.",
       "manageUrl": "https://www.amazon.com/gp/primecentral",
+      "noteVi": "Xác nhận qua trình duyệt thật: primevideo.com trả về trang \"servicerestricted\" khi truy cập từ Việt Nam, tức Prime Video không phục vụ trực tiếp tại VN. Trang App Store (US) chỉ liệt kê gói mua thêm \"Ad free $2.99\" chứ không phải giá thuê bao Prime Video/Prime gốc, nên vẫn không có giá tier phổ biến để ghi.",
       "plans": []
     },
     {
@@ -5780,12 +5580,12 @@
       "aliases": [
         "appletv"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://apps.apple.com/account/subscriptions",
-      "noteVi": "Đã xác minh lại độc lập trên tv.apple.com/vn: giá đúng 179.000đ/tháng. Trùng với giá Apple Arcade VN cùng thời điểm (cũng 179.000đ/tháng) — đã kiểm tra riêng trên apple.com/vn/apple-arcade, đây là trùng hợp thật của bảng giá VN, không phải lỗi nhập liệu (giá GLOBAL hai dịch vụ khác nhau: TV+ 12.99 USD, Arcade 6.99 USD).",
       "defaultPlan": "standard",
+      "cancelUrl": "https://apps.apple.com/account/subscriptions",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "noteVi": "Đã xác minh lại độc lập trên tv.apple.com/vn: giá đúng 179.000đ/tháng. Trùng với giá Apple Arcade VN cùng thời điểm (cũng 179.000đ/tháng) — đã kiểm tra riêng trên apple.com/vn/apple-arcade, đây là trùng hợp thật của bảng giá VN, không phải lỗi nhập liệu (giá GLOBAL hai dịch vụ khác nhau: TV+ 12.99 USD, Arcade 6.99 USD).",
       "plans": [
         {
           "tier": "standard",
@@ -5799,7 +5599,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://apps.apple.com/account/subscriptions",
       "typicalAmountMinor": 179000,
       "currency": "VND"
     },
@@ -5809,11 +5608,10 @@
       "aliases": [
         "crunchyroll"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "crunchyroll.com/plans chặn truy cập tự động (403). Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Mega Fan vì có cả giá tháng và giá năm nhất quán trong danh sách IAP (đây cũng là tier phổ biến, đầy đủ tính năng tải xuống/nhiều thiết bị).",
       "defaultPlan": "mega-fan",
+      "noteVi": "crunchyroll.com/plans chặn truy cập tự động (403). Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Mega Fan vì có cả giá tháng và giá năm nhất quán trong danh sách IAP (đây cũng là tier phổ biến, đầy đủ tính năng tải xuống/nhiều thiết bị).",
       "plans": [
         {
           "tier": "mega-fan",
@@ -5847,11 +5645,10 @@
         "disney+",
         "disney plus"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Không bán chính thức tại VN (disneyplus.com báo lỗi \"unavailable\" khi truy cập). Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Premium (không quảng cáo, 4K, tải xuống) vì đây là tier đầy đủ và được nhắc tới nhiều nhất cho cá nhân, có cả giá tháng và năm nhất quán trong danh sách IAP.",
       "defaultPlan": "premium",
+      "noteVi": "Không bán chính thức tại VN (disneyplus.com báo lỗi \"unavailable\" khi truy cập). Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Premium (không quảng cáo, 4K, tải xuống) vì đây là tier đầy đủ và được nhắc tới nhiều nhất cho cá nhân, có cả giá tháng và năm nhất quán trong danh sách IAP.",
       "plans": [
         {
           "tier": "premium",
@@ -5886,11 +5683,11 @@
         "fptplay",
         "fpt play"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "fptplay.vn yêu cầu đăng nhập mới hiện được bảng giá gói trên web; lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng). App Store liệt kê nhiều gói (MAX, SMAX, Premium, Cine, VIP, VIP A...); chọn gói VIP vì đây là tên gói phổ biến/được biết đến rộng rãi nhất với người dùng cá nhân. Không xác nhận được gói năm qua kênh này.",
       "defaultPlan": "vip",
+      "manageUrl": "https://fptplay.vn/tai-khoan",
+      "noteVi": "fptplay.vn yêu cầu đăng nhập mới hiện được bảng giá gói trên web; lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng). App Store liệt kê nhiều gói (MAX, SMAX, Premium, Cine, VIP, VIP A...); chọn gói VIP vì đây là tên gói phổ biến/được biết đến rộng rãi nhất với người dùng cá nhân. Không xác nhận được gói năm qua kênh này.",
       "plans": [
         {
           "tier": "vip",
@@ -5904,7 +5701,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://fptplay.vn/tai-khoan",
       "typicalAmountMinor": 139000,
       "currency": "VND"
     },
@@ -5914,8 +5710,7 @@
       "aliases": [
         "galaxyplay"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "premium",
       "plans": [
@@ -5942,11 +5737,10 @@
         "hbo go",
         "max"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "YEARLY",
-      "noteVi": "HBO Go đã đổi thương hiệu thành Max tại Việt Nam (Max ra mắt 16/6/2026, HBO Go ngừng phân phối từ 15/6/2026); chỉ xác minh được giá gói năm, chưa tìm được giá gói tháng trên trang chính hãng.",
       "defaultPlan": "standard",
+      "noteVi": "HBO Go đã đổi thương hiệu thành Max tại Việt Nam (Max ra mắt 16/6/2026, HBO Go ngừng phân phối từ 15/6/2026); chỉ xác minh được giá gói năm, chưa tìm được giá gói tháng trên trang chính hãng.",
       "plans": [
         {
           "tier": "standard",
@@ -5971,11 +5765,10 @@
         "iqiyi",
         "iq"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Không kết nối được iq.com trực tiếp. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng), chọn gói Diamond VIP (tier cao cấp phổ biến nhất). Danh sách IAP có nhiều mốc giá khác nhau cho cùng tên gói (có thể do lịch sử đổi giá); chọn cặp giá tháng/năm xuất hiện nhất quán và tỉ lệ hợp lý (59.000đ/tháng, 599.000đ/năm).",
       "defaultPlan": "diamond-vip",
+      "noteVi": "Không kết nối được iq.com trực tiếp. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng), chọn gói Diamond VIP (tier cao cấp phổ biến nhất). Danh sách IAP có nhiều mốc giá khác nhau cho cùng tên gói (có thể do lịch sử đổi giá); chọn cặp giá tháng/năm xuất hiện nhất quán và tỉ lệ hợp lý (59.000đ/tháng, 599.000đ/năm).",
       "plans": [
         {
           "tier": "diamond-vip",
@@ -6009,11 +5802,10 @@
       "aliases": [
         "mytv"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Ghi chú cũ nói MyTV chỉ có combo Internet+truyền hình là chưa đúng: App Store VN liệt kê nhiều gói ứng dụng độc lập (VIP, Nâng cao Plus, Chuẩn...). Lấy giá gói VIP vì đây là gói phổ biến/đầy đủ nhất cho người dùng cá nhân. Không thấy gói 12 tháng trong danh sách IAP.",
       "defaultPlan": "vip",
+      "noteVi": "Ghi chú cũ nói MyTV chỉ có combo Internet+truyền hình là chưa đúng: App Store VN liệt kê nhiều gói ứng dụng độc lập (VIP, Nâng cao Plus, Chuẩn...). Lấy giá gói VIP vì đây là gói phổ biến/đầy đủ nhất cho người dùng cá nhân. Không thấy gói 12 tháng trong danh sách IAP.",
       "plans": [
         {
           "tier": "vip",
@@ -6036,11 +5828,11 @@
       "aliases": [
         "netflix"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://www.netflix.com/cancelplan",
       "defaultPlan": "standard",
+      "cancelUrl": "https://www.netflix.com/cancelplan",
+      "manageUrl": "https://www.netflix.com/account",
       "plans": [
         {
           "tier": "standard",
@@ -6055,7 +5847,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://www.netflix.com/account",
       "typicalAmountMinor": 231000,
       "currency": "VND"
     },
@@ -6067,11 +5858,10 @@
         "paramount plus",
         "paramount+"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "paramountplus.com trả lỗi 406 khi truy cập tự động. Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Essential (gói cơ bản/rẻ nhất, phổ biến nhất cho cá nhân, có quảng cáo). Không thấy gói năm trong danh sách IAP.",
       "defaultPlan": "essential",
+      "noteVi": "paramountplus.com trả lỗi 406 khi truy cập tự động. Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Essential (gói cơ bản/rẻ nhất, phổ biến nhất cho cá nhân, có quảng cáo). Không thấy gói năm trong danh sách IAP.",
       "plans": [
         {
           "tier": "essential",
@@ -6093,11 +5883,10 @@
       "aliases": [
         "peacock"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "peacocktv.com chỉ khả dụng khi truy cập từ Mỹ (chặn theo khu vực). Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Premium (gói tiêu chuẩn có quảng cáo, phổ biến nhất), có cả giá tháng và năm.",
       "defaultPlan": "premium",
+      "noteVi": "peacocktv.com chỉ khả dụng khi truy cập từ Mỹ (chặn theo khu vực). Lấy giá GLOBAL từ mục In-App Purchases trên App Store Mỹ (nguồn chính hãng): chọn tier Premium (gói tiêu chuẩn có quảng cáo, phổ biến nhất), có cả giá tháng và năm.",
       "plans": [
         {
           "tier": "premium",
@@ -6129,11 +5918,10 @@
       "aliases": [
         "tv360"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "tv360.vn render động không tải được bảng giá tĩnh. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng); chọn gói Standard Tháng vì đây là gói phổ biến nhất cho người dùng cá nhân (các gói khác như VSPORT, VCINE, WORLDCUP là gói bổ sung theo chủ đề). Không thấy gói 12 tháng trong danh sách IAP.",
       "defaultPlan": "standard",
+      "noteVi": "tv360.vn render động không tải được bảng giá tĩnh. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng); chọn gói Standard Tháng vì đây là gói phổ biến nhất cho người dùng cá nhân (các gói khác như VSPORT, VCINE, WORLDCUP là gói bổ sung theo chủ đề). Không thấy gói 12 tháng trong danh sách IAP.",
       "plans": [
         {
           "tier": "standard",
@@ -6157,8 +5945,7 @@
         "twitch turbo",
         "twitch"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
       "defaultPlan": "turbo",
       "plans": [
@@ -6183,11 +5970,10 @@
       "aliases": [
         "vieon"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "vieon.vn/mua-goi hiện được danh sách gói (VIP, VIP PRO) nhưng bấm đăng ký sẽ chuyển sang trang đăng nhập, không lộ giá cho khách chưa đăng nhập. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng); danh sách có nhiều mốc giá VIP 1 tháng khác nhau (79.000đ xuất hiện nhiều nhất), không thấy gói 12 tháng nên chỉ ghi giá tháng.",
       "defaultPlan": "vip",
+      "noteVi": "vieon.vn/mua-goi hiện được danh sách gói (VIP, VIP PRO) nhưng bấm đăng ký sẽ chuyển sang trang đăng nhập, không lộ giá cho khách chưa đăng nhập. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng); danh sách có nhiều mốc giá VIP 1 tháng khác nhau (79.000đ xuất hiện nhiều nhất), không thấy gói 12 tháng nên chỉ ghi giá tháng.",
       "plans": [
         {
           "tier": "vip",
@@ -6210,8 +5996,7 @@
       "aliases": [
         "viu"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
       "noteVi": "Xác nhận qua trình duyệt thật: viu.com tự chuyển hướng sang trang \"No Service\" (https://www.viu.com/ott/no-service/) khi mở từ Việt Nam, tức Viu hiện không phục vụ thị trường VN.",
       "plans": []
@@ -6222,11 +6007,10 @@
       "aliases": [
         "wetv"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "noteVi": "wetv.vip không hiển thị giá cụ thể khi chưa đăng nhập. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng): WeTV VIP Monthly Subscription. Không thấy gói 12 tháng trong danh sách IAP (chỉ có gói tháng và gói quý).",
       "defaultPlan": "vip",
+      "noteVi": "wetv.vip không hiển thị giá cụ thể khi chưa đăng nhập. Lấy giá từ mục In-App Purchases trên App Store VN (nguồn chính hãng): WeTV VIP Monthly Subscription. Không thấy gói 12 tháng trong danh sách IAP (chỉ có gói tháng và gói quý).",
       "plans": [
         {
           "tier": "vip",
@@ -6250,11 +6034,11 @@
         "youtube",
         "ytb"
       ],
-      "sector": "STREAMING",
-      "category": "SUBSCRIPTION",
+      "category": "STREAMING",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://www.youtube.com/paid_memberships",
       "defaultPlan": "individual",
+      "cancelUrl": "https://www.youtube.com/paid_memberships",
+      "manageUrl": "https://www.youtube.com/paid_memberships",
       "plans": [
         {
           "tier": "individual",
@@ -6268,7 +6052,6 @@
           "checkedAt": "2026-08-23"
         }
       ],
-      "manageUrl": "https://www.youtube.com/paid_memberships",
       "typicalAmountMinor": 79000,
       "currency": "VND"
     },
@@ -6279,8 +6062,7 @@
         "airalo",
         "airalo esim"
       ],
-      "sector": "TRAVEL",
-      "category": "SUBSCRIPTION",
+      "category": "TRAVEL",
       "defaultCycle": "MONTHLY",
       "noteVi": "Airalo bán gói eSIM theo dung lượng/quốc gia dùng một lần, không phải thuê bao định kỳ nên không có giá chuẩn để lưu.",
       "plans": []
@@ -6292,12 +6074,11 @@
         "priority pass",
         "priority-pass"
       ],
-      "sector": "TRAVEL",
-      "category": "SUBSCRIPTION",
+      "category": "TRAVEL",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "standard",
       "cancelUrl": "https://www.prioritypass.com/en-GB/support/membership-help/how-do-i-cancel-my-membership",
       "noteVi": "Priority Pass chỉ bán theo năm, không có gói tháng; hạng Standard vẫn tính 35 USD mỗi lượt vào phòng chờ.",
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -6323,8 +6104,7 @@
         "xe buyt",
         "metro"
       ],
-      "sector": "TRAVEL",
-      "category": "SUBSCRIPTION",
+      "category": "TRAVEL",
       "defaultCycle": "MONTHLY",
       "noteVi": "Mục chung: giá vé tháng xe buýt/metro khác nhau theo tuyến và thành phố, không có mức giá chuẩn toàn quốc.",
       "plans": []
@@ -6338,8 +6118,7 @@
         "tien dien",
         "hoa don dien"
       ],
-      "sector": "UTILITIES",
-      "category": "BILL",
+      "category": "UTILITIES",
       "defaultCycle": "MONTHLY",
       "noteVi": "Số tiền thay đổi theo sản lượng tiêu thụ mỗi kỳ nên không đặt giá chuẩn.",
       "plans": []
@@ -6352,8 +6131,7 @@
         "tien gas",
         "binh gas"
       ],
-      "sector": "UTILITIES",
-      "category": "BILL",
+      "category": "UTILITIES",
       "defaultCycle": "MONTHLY",
       "noteVi": "Số tiền thay đổi theo lượng dùng và giá thị trường mỗi kỳ nên không đặt giá chuẩn.",
       "plans": []
@@ -6366,8 +6144,7 @@
         "tien nuoc",
         "hoa don nuoc"
       ],
-      "sector": "UTILITIES",
-      "category": "BILL",
+      "category": "UTILITIES",
       "defaultCycle": "MONTHLY",
       "noteVi": "Số tiền thay đổi theo sản lượng tiêu thụ mỗi kỳ nên không đặt giá chuẩn.",
       "plans": []

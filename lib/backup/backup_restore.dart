@@ -51,7 +51,7 @@ class BackupRestore {
     return TrackedItem(
       id: row.id,
       name: row.name,
-      category: enumFromWire(Category.values, row.category, Category.other),
+      categoryId: row.category,
       iconName: row.iconName,
       expiresOn: LocalDate.parse(row.expiresOn),
       actByOffsetDays: row.actByOffsetDays,
@@ -71,7 +71,6 @@ class BackupRestore {
         NagPolicy.none,
       ),
       verifyEveryDays: row.verifyEveryDays,
-      verifyEveryDaysIsExplicit: true,
       lastVerifiedAt: row.lastVerifiedAt == null
           ? null
           : LocalDate.parse(row.lastVerifiedAt!),

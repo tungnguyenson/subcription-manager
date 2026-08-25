@@ -236,7 +236,7 @@ class NotificationScheduler {
     return _plugin.zonedSchedule(
       id: alert.numericId,
       title: _title(alert),
-      body: alert.itemName,
+      body: alert.body,
       scheduledDate: when,
       androidScheduleMode: mode,
       notificationDetails: NotificationDetails(

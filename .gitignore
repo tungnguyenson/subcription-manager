@@ -33,3 +33,10 @@ ios/Runner/GeneratedPluginRegistrant.*
 
 # macOS
 .DS_Store
+
+# Golden debug output, rewritten on every failing run.
+test/golden/failures/
+
+# Screenshots from tool/shots/capture.dart. Regenerated on demand and dated
+# from the clock, so they are never a fixed artefact to compare against.
+tool/shots/out/

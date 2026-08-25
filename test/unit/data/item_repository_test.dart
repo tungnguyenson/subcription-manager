@@ -22,7 +22,7 @@ void main() {
   TrackedItem sampleItem({
     String id = 'netflix',
     String name = 'Netflix Premium',
-    Category category = Category.subscription,
+    String categoryId = 'STREAMING',
     String? iconName,
     Cycle? cycle = Cycle.monthly,
     ItemState state = ItemState.active,
@@ -30,7 +30,7 @@ void main() {
     return TrackedItem(
       id: id,
       name: name,
-      category: category,
+      categoryId: categoryId,
       iconName: iconName,
       expiresOn: d('2026-09-01'),
       anchorDate: d('2026-01-01'),
@@ -50,7 +50,7 @@ void main() {
     final loaded = await repo.findById('netflix');
     expect(loaded, isNotNull);
     expect(loaded!.name, item.name);
-    expect(loaded.category, item.category);
+    expect(loaded.categoryId, item.categoryId);
     expect(loaded.expiresOn, item.expiresOn);
     expect(loaded.anchorDate, item.anchorDate);
     expect(loaded.cycle, item.cycle);
@@ -216,10 +216,7 @@ void main() {
   });
 
   test('marking verified records the date the user last checked', () async {
-    await repo.upsert(
-      sampleItem(id: 'sim', category: Category.subscription),
-      1,
-    );
+    await repo.upsert(sampleItem(id: 'sim', categoryId: 'STREAMING'), 1);
     await repo.markVerified('sim', d('2026-08-15'));
 
     expect((await repo.findById('sim'))?.lastVerifiedAt, d('2026-08-15'));

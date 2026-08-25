@@ -70,23 +70,27 @@ abstract final class DateCopy {
   /// never has to carry the general case. That is what lets it stay a short
   /// list of the dates people actually type — a rail whose last chip is the
   /// picker puts the most-used control at the end of a sideways scroll.
+  /// `Today · Tomorrow · +7 · +14 · +30`, which is how the build file labels
+  /// them. The offsets are written the way a person writing a note to
+  /// themselves writes them, and five short chips fit the row without
+  /// scrolling — `In 7 days` and `In 1 month` did not, and a shortcut rail
+  /// that scrolls is a rail whose last shortcuts nobody sees.
+  ///
+  /// The resolved date is spelled out in full on the picker row above, so the
+  /// terseness here costs the reader nothing.
   static const List<DateShortcut> shortcuts = [
     DateShortcut('Today', _today),
     DateShortcut('Tomorrow', _tomorrow),
-    DateShortcut('In 7 days', _plus7),
-    DateShortcut('In 1 month', _plusMonth),
-    DateShortcut('In 3 months', _plus3Months),
-    DateShortcut('In 6 months', _plus6Months),
-    DateShortcut('In 1 year', _plusYear),
+    DateShortcut('+7', _plus7),
+    DateShortcut('+14', _plus14),
+    DateShortcut('+30', _plus30),
   ];
 
   static LocalDate _today(LocalDate today) => today;
   static LocalDate _tomorrow(LocalDate today) => today.plusDays(1);
   static LocalDate _plus7(LocalDate today) => today.plusDays(7);
-  static LocalDate _plusMonth(LocalDate today) => today.plusMonths(1);
-  static LocalDate _plus3Months(LocalDate today) => today.plusMonths(3);
-  static LocalDate _plus6Months(LocalDate today) => today.plusMonths(6);
-  static LocalDate _plusYear(LocalDate today) => today.plusMonths(12);
+  static LocalDate _plus14(LocalDate today) => today.plusDays(14);
+  static LocalDate _plus30(LocalDate today) => today.plusDays(30);
 
   /// The act-by line: what date the user must have acted by, and how much
   /// earlier that is than the expiry.

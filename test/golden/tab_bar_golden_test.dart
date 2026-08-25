@@ -6,9 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:subdock/ui/app_shell.dart';
 import 'package:subdock/ui/theme.dart';
 
-/// The tab bar is drawn entirely from stacked shadows and one accent disc, and
-/// none of that is expressible as an assertion — a shadow layer can go missing
-/// without a single widget test noticing. Regenerate with:
+/// The tab bar is a frosted translucent panel over a gradient with one accent
+/// disc on it, and none of that is expressible as an assertion — the blur, the
+/// bright top hairline and the panel's own alpha can each go missing without a
+/// single widget test noticing. Regenerate with:
 ///
 ///     flutter test test/golden --update-goldens
 void main() {
@@ -38,7 +39,7 @@ void main() {
     }
   });
 
-  testWidgets('three destinations and the add button', (tester) async {
+  testWidgets('four destinations and the add button', (tester) async {
     tester.view.physicalSize = const Size(390 * 3, 130 * 3);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
@@ -50,7 +51,10 @@ void main() {
           current: ShellTab.upcoming,
           onSelect: (_) {},
           onAdd: () {},
-          child: const ColoredBox(color: SubdockColors.canvas),
+          // Something with edges under the bar, so the blur has work to do. A
+          // flat fill would look identical whether the BackdropFilter is there
+          // or not, which is the one thing this golden exists to catch.
+          child: const _Stripes(),
         ),
       ),
     );
@@ -58,4 +62,22 @@ void main() {
 
     await expectLater(find.byType(AppShell), matchesGoldenFile('tab_bar.png'));
   });
+}
+
+/// Bands the frosted bar has to visibly smear.
+class _Stripes extends StatelessWidget {
+  const _Stripes();
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      for (var i = 0; i < 10; i++)
+        Expanded(
+          child: ColoredBox(
+            color: i.isEven ? SubdockColors.accent : SubdockColors.canvas,
+            child: const SizedBox.expand(),
+          ),
+        ),
+    ],
+  );
 }

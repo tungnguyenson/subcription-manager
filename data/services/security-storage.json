@@ -11,12 +11,11 @@
       "aliases": [
         "1password"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "individual",
       "cancelUrl": null,
       "noteVi": "1Password chỉ bán gói Individual theo năm, không có gói theo tháng riêng.",
-      "defaultPlan": "individual",
       "plans": [
         {
           "tier": "individual",
@@ -38,12 +37,12 @@
         "icloud",
         "apple storage"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://support.apple.com/en-vn/HT207594",
-      "noteVi": null,
       "defaultPlan": "50gb",
+      "cancelUrl": "https://support.apple.com/en-vn/HT207594",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "noteVi": null,
       "plans": [
         {
           "tier": "50gb",
@@ -56,8 +55,7 @@
           "source": "https://support.apple.com/en-us/108047",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://apps.apple.com/account/subscriptions"
+      ]
     },
     {
       "id": "google-one",
@@ -67,12 +65,12 @@
         "google drive",
         "drive"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": null,
       "defaultPlan": "100gb",
+      "cancelUrl": null,
+      "manageUrl": "https://one.google.com/settings",
+      "noteVi": null,
       "plans": [
         {
           "tier": "100gb",
@@ -85,8 +83,7 @@
           "source": "https://one.google.com/about/plans",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://one.google.com/settings"
+      ]
     },
     {
       "id": "dropbox",
@@ -94,12 +91,12 @@
       "aliases": [
         "dropbox"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": null,
       "defaultPlan": "plus",
+      "cancelUrl": null,
+      "manageUrl": "https://www.dropbox.com/account/plan",
+      "noteVi": null,
       "plans": [
         {
           "tier": "plus",
@@ -112,8 +109,7 @@
           "source": "https://www.dropbox.com/plans",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://www.dropbox.com/account/plan"
+      ]
     },
     {
       "id": "onedrive",
@@ -121,12 +117,12 @@
       "aliases": [
         "onedrive"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": "Gói lưu trữ 100GB độc lập nay bán dưới tên Microsoft 365 Basic.",
       "defaultPlan": "basic-100gb",
+      "cancelUrl": null,
+      "manageUrl": "https://account.microsoft.com/services",
+      "noteVi": "Gói lưu trữ 100GB độc lập nay bán dưới tên Microsoft 365 Basic.",
       "plans": [
         {
           "tier": "basic-100gb",
@@ -150,8 +146,7 @@
           "source": "https://www.microsoft.com/en-us/microsoft-365/onedrive/personal",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://account.microsoft.com/services"
+      ]
     },
     {
       "id": "backblaze",
@@ -159,12 +154,12 @@
       "aliases": [
         "backblaze"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": null,
       "defaultPlan": "personal",
+      "cancelUrl": null,
+      "manageUrl": "https://secure.backblaze.com/account_settings.htm",
+      "noteVi": null,
       "plans": [
         {
           "tier": "personal",
@@ -188,8 +183,7 @@
           "source": "https://www.backblaze.com/cloud-backup/personal",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://secure.backblaze.com/account_settings.htm"
+      ]
     },
     {
       "id": "nordvpn",
@@ -199,12 +193,11 @@
         "nord vpn",
         "nord"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "basic",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "basic",
       "plans": [
         {
           "tier": "basic",
@@ -237,12 +230,12 @@
         "expressvpn",
         "express vpn"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": "Trang đặt hàng chính hãng (expressvpn.com/pricing) có bộ chọn kỳ hạn ẩn (\"2-year plans / 12-month plans / 1-month plans\"). Chọn \"1-month plans\" hiện đúng giá gia hạn tháng; cả 3 kỳ hạn của tier Basic đều ghi rõ \"Then autorenews at $99.95 annually\" — đây là giá gia hạn thường xuyên dùng cho gói năm, không phải giá khuyến mãi.",
       "defaultPlan": "basic",
+      "cancelUrl": null,
+      "manageUrl": "https://www.expressvpn.com/subscriptions",
+      "noteVi": "Trang đặt hàng chính hãng (expressvpn.com/pricing) có bộ chọn kỳ hạn ẩn (\"2-year plans / 12-month plans / 1-month plans\"). Chọn \"1-month plans\" hiện đúng giá gia hạn tháng; cả 3 kỳ hạn của tier Basic đều ghi rõ \"Then autorenews at $99.95 annually\" — đây là giá gia hạn thường xuyên dùng cho gói năm, không phải giá khuyến mãi.",
       "plans": [
         {
           "tier": "basic",
@@ -265,8 +258,7 @@
           "source": "https://www.expressvpn.com/pricing",
           "checkedAt": "2026-08-24"
         }
-      ],
-      "manageUrl": "https://www.expressvpn.com/subscriptions"
+      ]
     },
     {
       "id": "surfshark",
@@ -275,12 +267,11 @@
         "surfshark",
         "surf shark"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "starter",
       "cancelUrl": null,
       "noteVi": "surfshark.com/pricing có tab \"1 month\" cho ra giá gia hạn tháng thật (16.45 USD/mo). Tab \"12 months\"/\"24 months\" chỉ hiện giá khuyến mãi kỳ đầu, không công bố số tiền gia hạn cụ thể (chỉ nói chung chung \"charged the applicable renewal price\") nên không ghi được gói năm mà không đoán.",
-      "defaultPlan": "starter",
       "plans": [
         {
           "tier": "starter",
@@ -301,12 +292,11 @@
         "protonvpn",
         "proton vpn"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "plus",
       "cancelUrl": null,
       "noteVi": "Chưa xác nhận được giá gói năm vì trang giá hiển thị số động qua JavaScript.",
-      "defaultPlan": "plus",
       "plans": [
         {
           "tier": "plus",
@@ -328,12 +318,11 @@
         "mullvad",
         "mullvad vpn"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Xác nhận lại bằng trình duyệt thật tại mullvad.net/en: vẫn chỉ niêm yết €5/tháng cố định (không giảm giá theo năm, không có bảng giá USD/VND) nên không ghi được theo chuẩn dữ liệu này (không tự quy đổi tỉ giá).",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -343,12 +332,12 @@
         "bitwarden",
         "bit warden"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
-      "cancelUrl": null,
-      "noteVi": "Chỉ bán theo năm, không có gói theo tháng riêng.",
       "defaultPlan": "premium",
+      "cancelUrl": null,
+      "manageUrl": "https://vault.bitwarden.com/",
+      "noteVi": "Chỉ bán theo năm, không có gói theo tháng riêng.",
       "plans": [
         {
           "tier": "premium",
@@ -361,8 +350,7 @@
           "source": "https://bitwarden.com/pricing/",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://vault.bitwarden.com/"
+      ]
     },
     {
       "id": "dashlane",
@@ -370,12 +358,11 @@
       "aliases": [
         "dashlane"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": "dashlane.com/personal-password-manager (chính hãng) mở bằng trình duyệt thật hiện rõ giá: Premium $5.42/tháng, chỉ bán theo hình thức thanh toán năm, không có gói tháng riêng.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -397,12 +384,11 @@
         "lastpass",
         "last pass"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": "lastpass.com/pricing (chính hãng) mở bằng trình duyệt thật hiện rõ giá: Premium 3.00 USD/tháng, chỉ thanh toán theo năm (36 USD/năm). Trang đang chạy khuyến mãi giảm 30% còn 2.10 USD/tháng — ghi giá gốc không khuyến mãi theo đúng luật giá.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -425,12 +411,11 @@
         "norton 360",
         "norton360"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "standard",
       "cancelUrl": null,
       "noteVi": "Chỉ bán theo năm. Giá ghi là giá gia hạn chuẩn; năm đầu thường có giá khuyến mãi thấp hơn nhiều (khoảng 34.99 USD).",
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -452,12 +437,11 @@
         "kaspersky",
         "kaspersky antivirus"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "premium-5",
       "cancelUrl": null,
       "noteVi": "kaspersky.com/premium (chính hãng) mở bằng trình duyệt thật: chỉ bán theo năm. Trang ghi rõ giá gia hạn thường xuyên \"Thereafter your subscription will be renewed automatically at $119.99 per year\" cho gói Premium 5 thiết bị (giá hiển thị nổi bật $72.99 chỉ là ưu đãi năm đầu 15 tháng).",
-      "defaultPlan": "premium-5",
       "plans": [
         {
           "tier": "premium-5",
@@ -479,12 +463,11 @@
         "mcafee",
         "mc afee"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "essential",
       "cancelUrl": null,
       "noteVi": "Chỉ bán theo năm. Giá ghi là giá gia hạn chuẩn; năm đầu thường có giá khuyến mãi thấp hơn nhiều (khoảng 39.99 USD).",
-      "defaultPlan": "essential",
       "plans": [
         {
           "tier": "essential",
@@ -506,12 +489,11 @@
         "malwarebytes",
         "malware bytes"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": "Chỉ bán theo năm, không có gói theo tháng riêng.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -533,12 +515,11 @@
         "bkav",
         "bkav pro"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Xác nhận lại bằng trình duyệt thật tại bkav.com/bkav-pro và trang đặt mua: vẫn chỉ ghi giá 299.000đ/Thẻ mà không nêu rõ thời hạn sử dụng (1 năm hay khác) ở bất kỳ đâu trên trang, nên không thể ghi vào plans mà không đoán.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -548,12 +529,11 @@
         "cleanmymac",
         "clean my mac"
       ],
-      "sector": "SECURITY",
-      "category": "SUBSCRIPTION",
+      "category": "SECURITY",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "single-device",
       "cancelUrl": null,
       "noteVi": "Là phần mềm dọn dẹp/tối ưu máy Mac, không phải phần mềm bảo mật — sector SECURITY trong stub có thể chưa đúng, cân nhắc đổi sang UTILITIES. Chỉ bán theo năm cho 1 thiết bị.",
-      "defaultPlan": "single-device",
       "plans": [
         {
           "tier": "single-device",
@@ -576,12 +556,11 @@
         "mega.nz",
         "mega io"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "pro-lite",
       "cancelUrl": null,
       "noteVi": "Chỉ có giá thanh toán theo năm. Trang ghi rõ đây là giá USD ước tính, khách sẽ bị tính phí thật bằng EUR nên số tiền trên sao kê có thể khác đôi chút.",
-      "defaultPlan": "pro-lite",
       "plans": [
         {
           "tier": "pro-lite",
@@ -603,12 +582,11 @@
         "pcloud",
         "p cloud"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "premium-500gb",
       "cancelUrl": null,
       "noteVi": "Bỏ gói trọn đời theo yêu cầu, chỉ lấy gói năm. Chưa xác nhận được giá gói tháng.",
-      "defaultPlan": "premium-500gb",
       "plans": [
         {
           "tier": "premium-500gb",
@@ -630,12 +608,11 @@
         "protondrive",
         "proton drive"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "drive-plus",
       "cancelUrl": null,
       "noteVi": "proton.me/drive/pricing (chính hãng) mở được bằng trình duyệt thật, có tab Monthly/Yearly riêng biệt. Tier thấp nhất có tên riêng là Drive Plus (200GB).",
-      "defaultPlan": "drive-plus",
       "plans": [
         {
           "tier": "drive-plus",
@@ -668,12 +645,12 @@
         "box",
         "box.com"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": "box.com/pricing/individual (chính hãng) mở được bằng trình duyệt thật, có toggle Monthly/Annually riêng cho tier Personal Pro.",
       "defaultPlan": "personal-pro",
+      "cancelUrl": null,
+      "manageUrl": "https://app.box.com/account",
+      "noteVi": "box.com/pricing/individual (chính hãng) mở được bằng trình duyệt thật, có toggle Monthly/Annually riêng cho tier Personal Pro.",
       "plans": [
         {
           "tier": "personal-pro",
@@ -697,8 +674,7 @@
           "source": "https://www.box.com/pricing/individual",
           "checkedAt": "2026-08-24"
         }
-      ],
-      "manageUrl": "https://app.box.com/account"
+      ]
     },
     {
       "id": "sync-com",
@@ -708,12 +684,11 @@
         "sync.com",
         "synccom"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "personal-150gb",
       "cancelUrl": null,
       "noteVi": "Trang giá ghi kèm khuyến mãi \"Save 50% năm đầu\" nên số liệu có thể là giá năm đầu, không chắc là giá gia hạn chuẩn.",
-      "defaultPlan": "personal-150gb",
       "plans": [
         {
           "tier": "personal-150gb",
@@ -747,12 +722,11 @@
         "c2 backup",
         "synology"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "500gb",
       "cancelUrl": null,
       "noteVi": "c2.synology.com/en-global/pricing/backup/personal (chính hãng) mở được bằng trình duyệt thật, có tab Monthly billing/Annual billing riêng cho gói 500GB (tier thấp nhất trong 3 gói 500GB/1TB/2TB).",
-      "defaultPlan": "500gb",
       "plans": [
         {
           "tier": "500gb",
@@ -785,12 +759,11 @@
         "terabox",
         "tera box"
       ],
-      "sector": "STORAGE",
-      "category": "SUBSCRIPTION",
+      "category": "STORAGE",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": "terabox.com/cloud-storage-pricing-plans (chính hãng) mở được bằng trình duyệt thật, tự động hiện giá VNĐ theo vùng truy cập. Trang ghi rõ giá gia hạn thường xuyên (\"Automatically renew at X\"), không phải giá khuyến mãi.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",

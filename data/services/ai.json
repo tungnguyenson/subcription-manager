@@ -12,12 +12,12 @@
         "anthropic",
         "claude ai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://claude.ai/settings/billing",
-      "noteVi": null,
       "defaultPlan": "pro",
+      "cancelUrl": "https://claude.ai/settings/billing",
+      "manageUrl": "https://claude.ai/settings/billing",
+      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -41,8 +41,7 @@
           "source": "https://claude.com/pricing",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://claude.ai/settings/billing"
+      ]
     },
     {
       "id": "chatgpt",
@@ -53,12 +52,11 @@
         "gpt",
         "chat gpt"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "plus",
       "cancelUrl": "https://chatgpt.com/#settings/Subscription",
       "noteVi": "ChatGPT Plus chỉ bán theo tháng, OpenAI không có gói năm cho tier này.",
-      "defaultPlan": "plus",
       "plans": [
         {
           "tier": "plus",
@@ -81,12 +79,11 @@
         "google gemini",
         "google ai pro"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "pro",
       "cancelUrl": null,
       "noteVi": "Chỉ thấy gói tháng, Google không hiện gói năm riêng cho Google AI Pro.",
-      "defaultPlan": "pro",
       "plans": [
         {
           "tier": "pro",
@@ -118,12 +115,12 @@
         "github copilot",
         "gh copilot"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://github.com/settings/copilot",
-      "noteVi": null,
       "defaultPlan": "pro",
+      "cancelUrl": "https://github.com/settings/copilot",
+      "manageUrl": "https://github.com/settings/copilot",
+      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -145,8 +142,7 @@
           "source": "https://github.com/features/copilot/plans",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://github.com/settings/copilot"
+      ]
     },
     {
       "id": "cursor",
@@ -155,12 +151,12 @@
         "cursor",
         "cursor ai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": null,
-      "noteVi": "Chỉ thấy gói tháng trên trang giá, không thấy gói năm cho Pro.",
       "defaultPlan": "pro",
+      "cancelUrl": null,
+      "manageUrl": "https://www.cursor.com/dashboard",
+      "noteVi": "Chỉ thấy gói tháng trên trang giá, không thấy gói năm cho Pro.",
       "plans": [
         {
           "tier": "pro",
@@ -172,8 +168,7 @@
           "source": "https://cursor.com/pricing",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://www.cursor.com/dashboard"
+      ]
     },
     {
       "id": "midjourney",
@@ -182,12 +177,11 @@
         "midjourney",
         "mj"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -220,12 +214,11 @@
         "perplexity ai",
         "perplexity pro"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "pro",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "pro",
       "plans": [
         {
           "tier": "pro",
@@ -259,12 +252,11 @@
         "xai",
         "x ai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "supergrok",
       "cancelUrl": null,
       "noteVi": "Đây là giá gói SuperGrok mua riêng trên x.ai, không phải gói Grok đi kèm X Premium+.",
-      "defaultPlan": "supergrok",
       "plans": [
         {
           "tier": "supergrok",
@@ -286,12 +278,11 @@
         "eleven labs",
         "11labs"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "creator",
       "cancelUrl": null,
       "noteVi": "Giá niêm yết chuẩn của gói Creator; tháng đầu tiên đang được giảm còn 11 USD.",
-      "defaultPlan": "creator",
       "plans": [
         {
           "tier": "creator",
@@ -323,12 +314,11 @@
         "suno",
         "suno ai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "pro",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "pro",
       "plans": [
         {
           "tier": "pro",
@@ -360,12 +350,11 @@
         "runwayml",
         "runway ml"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -398,12 +387,11 @@
         "leonardo",
         "leonardoai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -437,12 +425,11 @@
         "v0 dev",
         "vercel v0"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "plus",
       "cancelUrl": null,
       "noteVi": "Giá tính theo credit sử dụng mỗi tháng, không phải hạn mức cố định.",
-      "defaultPlan": "plus",
       "plans": [
         {
           "tier": "plus",
@@ -464,12 +451,11 @@
         "lovable",
         "lovable dev"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "pro",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "pro",
       "plans": [
         {
           "tier": "pro",
@@ -502,12 +488,11 @@
         "replit",
         "repl it"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "core",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "core",
       "plans": [
         {
           "tier": "core",
@@ -540,12 +525,11 @@
         "poe ai",
         "quora poe"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "plus",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "plus",
       "plans": [
         {
           "tier": "plus",
@@ -580,12 +564,11 @@
         "c ai",
         "cai"
       ],
-      "sector": "AI",
-      "category": "SUBSCRIPTION",
+      "category": "AI",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "plus",
       "cancelUrl": null,
       "noteVi": null,
-      "defaultPlan": "plus",
       "plans": [
         {
           "tier": "plus",

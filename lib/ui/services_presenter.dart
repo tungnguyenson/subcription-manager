@@ -1,0 +1,118 @@
+import 'package:subdock/domain/category_book.dart';
+import 'package:subdock/domain/local_date.dart';
+import 'package:subdock/domain/model.dart';
+import 'package:subdock/ui/money_format.dart';
+import 'package:subdock/ui/screens/services_screen.dart';
+import 'package:subdock/ui/screens/sources_screen.dart';
+
+/// The two list screens that answer "what is in here", worded.
+///
+/// Both are pure and both take the whole item list, because both say something
+/// about the *relationship* between two tables — which services are switched
+/// off, and which items point at which source. Neither answer can be assembled
+/// a row at a time.
+abstract final class ServicesPresenter {
+  /// Every tracked service, on the shelves the user keeps.
+  ///
+  /// One grouping, and it is the shelf the item already carries. This screen is
+  /// read to answer "do I still have a music subscription", which a heading
+  /// that says *Subscription* over forty rows cannot answer -- and which is why
+  /// the old five-value classification and the catalogue's own twenty-one-way
+  /// grouping were folded into one thing the user owns.
+  ///
+  /// Empty shelves are left out, so the list is what the user has rather than
+  /// what they could have. Order comes from [Category.sortOrder], which they
+  /// set: nothing here jumps the queue on its own, not even the shelf the SIMs
+  /// are on. A shelf the app promotes by name is a shelf the user cannot demote
+  /// when the app guessed wrong about them.
+  ///
+  /// Archived items are left out. They are not paused, they are finished — the
+  /// last instalment of a course, a cancelled plan whose period has run out --
+  /// and a switch on one would promise to bring it back, which it cannot.
+  static List<ServiceGroup> groups(
+    List<TrackedItem> items,
+    CategoryBook categories,
+    LocalDate today,
+  ) {
+    final byCategory = <String, List<ServiceToggle>>{};
+
+    for (final item in items) {
+      if (item.state == ItemState.archived) continue;
+
+      byCategory
+          .putIfAbsent(item.categoryId, () => [])
+          .add(
+            ServiceToggle(
+              id: item.id,
+              name: item.name,
+              subtitle: _subtitle(item),
+              iconName: item.iconName,
+              on: !item.paused,
+            ),
+          );
+    }
+
+    for (final rows in byCategory.values) {
+      rows.sort((a, b) => a.name.compareTo(b.name));
+    }
+
+    return [
+      for (final category in categories.all)
+        if (byCategory[category.id] case final rows?)
+          ServiceGroup(label: category.label, rows: rows),
+
+      // Anything pointing at a shelf that is not in the book. The foreign key
+      // is supposed to make this impossible; it is drawn rather than dropped
+      // because a service missing from this list is a service the user thinks
+      // they are not being charged for.
+      for (final id in byCategory.keys.where((id) => !categories.contains(id)))
+        ServiceGroup(label: categories.fallback.label, rows: byCategory[id]!),
+    ];
+  }
+
+  /// `Next 22/08 · 260,000 ₫`, or `Off · no reminders`.
+  ///
+  /// The off state replaces the whole line rather than appending to it. A
+  /// paused item's next date is not a fact about the future any more — nothing
+  /// will happen on it — so showing it beside the word "off" would be showing
+  /// two contradictory things on one line.
+  static String _subtitle(TrackedItem item) {
+    if (item.paused) return 'Off · no reminders';
+
+    final parts = <String>[
+      if (item.isTrial)
+        'Trial ends ${MoneyFormat.shortDate(item.expiresOn)}'
+      else
+        'Next ${MoneyFormat.shortDate(item.expiresOn)}',
+      if (item.money case final money?) MoneyFormat.full(money),
+    ];
+    return parts.join(' · ');
+  }
+
+  /// Each source, with what is pointing at it.
+  ///
+  /// The usage line names the single item when there is only one, and that is
+  /// the point of it: Remove is destructive-looking and the user has to be able
+  /// to see what it costs them before tapping. "1 item" makes them guess;
+  /// "Netflix Premium" does not.
+  static List<SourceRow> sourceRows(
+    List<PaymentSource> sources,
+    List<TrackedItem> items,
+  ) => [
+    for (final source in sources)
+      () {
+        final used = items
+            .where((i) => i.paymentSourceId == source.id)
+            .toList(growable: false);
+        return SourceRow(
+          source: source,
+          itemCount: used.length,
+          usage: switch (used.length) {
+            0 => 'Not used yet',
+            1 => used.single.name,
+            final n => '$n items',
+          },
+        );
+      }(),
+  ];
+}

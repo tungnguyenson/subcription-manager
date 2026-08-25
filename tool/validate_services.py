@@ -14,13 +14,12 @@ import re
 import sys
 from datetime import date
 
-SECTORS = {
+CATEGORIES = {
     "AI", "STREAMING", "MUSIC", "GAMING", "PRODUCTIVITY", "SOCIAL", "NEWS",
     "FOOD", "FITNESS", "FINANCE", "EDUCATION", "SECURITY", "ENTERTAINMENT",
     "TRAVEL", "DATING", "STORAGE", "PHONE",
     "UTILITIES", "HOUSING", "DOCUMENTS", "INSURANCE",
 }
-CATEGORIES = {"SUBSCRIPTION", "BILL", "INSURANCE", "DOCUMENT", "OTHER"}
 CYCLES = {"WEEKLY", "MONTHLY", "QUARTERLY", "SEMIANNUAL", "YEARLY"}
 REGIONS = {"VN", "GLOBAL"}
 CURRENCY_OF_REGION = {"VN": "VND", "GLOBAL": "USD"}
@@ -121,10 +120,6 @@ def check_entry(rep, entry, seen_ids):
 
     if not entry.get("name"):
         rep.error(eid, 'missing "name"')
-
-    if entry.get("sector") not in SECTORS:
-        rep.error(eid, f'sector "{entry.get("sector")}" is not one of '
-                       f'{sorted(SECTORS)}')
 
     if entry.get("category") not in CATEGORIES:
         rep.error(eid, f'category "{entry.get("category")}" is not one of '

@@ -22,6 +22,45 @@ class ItemRepository {
 
   ItemRepository(this._db);
 
+  // ---- categories ----
+
+  Stream<List<Category>> observeCategories() => _db
+      .selectAllCategories()
+      .watch()
+      .map((rows) => rows.map((r) => r.toDomain()).toList());
+
+  Future<List<Category>> allCategories() async =>
+      (await _db.selectAllCategories().get())
+          .map((r) => r.toDomain())
+          .toList(growable: false);
+
+  Future<void> upsertCategory(Category category) => _db
+      .into(_db.categoryRow)
+      .insert(category.toCompanion(), mode: InsertMode.insertOrReplace);
+
+  /// Moves every item off [id] and onto [onto], then forgets the shelf.
+  ///
+  /// One transaction because the two halves are one decision. Halfway through
+  /// is a database where the foreign key points at a row that is gone, and the
+  /// app opens on a list that cannot say where anything lives.
+  Future<void> deleteCategory(String id, {required String onto}) =>
+      _db.transaction(() async {
+        await (_db.update(_db.itemRow)..where((t) => t.category.equals(id)))
+            .write(ItemRowCompanion(category: Value(onto)));
+        await (_db.delete(_db.categoryRow)..where((t) => t.id.equals(id))).go();
+      });
+
+  /// Writes a whole new order in one transaction, so no redraw ever sees two
+  /// shelves claiming the same position.
+  Future<void> reorderCategories(List<String> idsInOrder) =>
+      _db.transaction(() async {
+        for (var i = 0; i < idsInOrder.length; i++) {
+          await (_db.update(_db.categoryRow)
+                ..where((t) => t.id.equals(idsInOrder[i])))
+              .write(CategoryRowCompanion(sortOrder: Value(i)));
+        }
+      });
+
   // ---- items ----
 
   Stream<List<TrackedItem>> observeAll() => _db.selectAll().watch().map(
@@ -45,7 +84,7 @@ class ItemRepository {
           ItemRowCompanion(
             id: Value(item.id),
             name: Value(item.name),
-            category: Value(item.category.wireName),
+            category: Value(item.categoryId),
             iconName: Value(item.iconName),
             expiresOn: Value(item.expiresOn.toString()),
             actByOffsetDays: Value(item.actByOffsetDays),
@@ -66,6 +105,10 @@ class ItemRepository {
             snoozedUntil: Value(item.snoozedUntil?.toString()),
             state: Value(item.state.wireName),
             purchaseChannel: Value(item.purchaseChannel.wireName),
+            trialStart: Value(item.trialStart?.toString()),
+            paymentSourceId: Value(item.paymentSourceId),
+            paused: Value(item.paused),
+            yearlyChoice: Value(item.yearlyChoice.wireName),
             createdAt: Value(createdAtEpochSeconds),
           ),
           mode: InsertMode.insertOrReplace,
@@ -102,6 +145,66 @@ class ItemRepository {
 
   Future<void> delete(String id) async {
     await (_db.delete(_db.itemRow)..where((t) => t.id.equals(id))).go();
+  }
+
+  // ---- payment sources ----
+
+  Stream<List<PaymentSource>> observeSources() => _db
+      .selectAllSources()
+      .watch()
+      .map((rows) => rows.map((r) => r.toDomain()).toList());
+
+  Future<void> upsertSource(PaymentSource source, int createdAtEpochSeconds) {
+    return _db
+        .into(_db.paymentSourceRow)
+        .insert(
+          PaymentSourceRowCompanion(
+            id: Value(source.id),
+            name: Value(source.name),
+            glyph: Value(source.glyph.wireName),
+            createdAt: Value(createdAtEpochSeconds),
+          ),
+          mode: InsertMode.insertOrReplace,
+        );
+  }
+
+  /// Forgets a source. Every item that pointed at it goes back to "not said".
+  ///
+  /// The items are not touched here — `ON DELETE SET NULL` in the schema does
+  /// it, which is the only way it stays true for a write that comes from
+  /// anywhere else too. It needs `PRAGMA foreign_keys = ON`, which `beforeOpen`
+  /// sets on every connection.
+  Future<void> deleteSource(String id) async {
+    await (_db.delete(
+      _db.paymentSourceRow,
+    )..where((t) => t.id.equals(id))).go();
+  }
+
+  /// Turns an item's reminders off, or back on. See [TrackedItem.paused].
+  Future<void> setPaused(String id, bool paused) async {
+    await (_db.update(_db.itemRow)..where((t) => t.id.equals(id))).write(
+      ItemRowCompanion(paused: Value(paused)),
+    );
+  }
+
+  /// Records what the user said about the yearly suggestion for one item.
+  Future<void> setYearlyChoice(String id, YearlyChoice choice) async {
+    await (_db.update(_db.itemRow)..where((t) => t.id.equals(id))).write(
+      ItemRowCompanion(yearlyChoice: Value(choice.wireName)),
+    );
+  }
+
+  /// Un-skips every suggestion at once, behind the "N skipped — show again"
+  /// line. A per-item undo would need the user to remember which ones they
+  /// dismissed, which is the thing they dismissed them to stop doing.
+  Future<void> clearSkippedYearly() async {
+    await (_db.update(_db.itemRow)
+          ..where((t) => t.yearlyChoice.equals(YearlyChoice.skipped.wireName)))
+        .write(
+          ItemRowCompanion(
+            yearlyChoice: Value(YearlyChoice.undecided.wireName),
+          ),
+        );
   }
 
   // ---- history ----

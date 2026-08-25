@@ -104,7 +104,7 @@ class BackupItem {
   factory BackupItem.fromTrackedItem(TrackedItem item) => BackupItem(
     id: item.id,
     name: item.name,
-    category: item.category.wireName,
+    category: item.categoryId,
     iconName: item.iconName,
     expiresOn: item.expiresOn.toString(),
     actByOffsetDays: item.actByOffsetDays,
@@ -392,7 +392,7 @@ abstract final class Backup {
       (item) => [
         item.id,
         item.name,
-        item.category.wireName,
+        item.categoryId,
         item.expiresOn.toString(),
         item.actByOffsetDays.toString(),
         item.anchorDate.toString(),

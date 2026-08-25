@@ -100,7 +100,7 @@ void main() {
       final item = TrackedItem(
         id: 'a',
         name: 'Netflix',
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         expiresOn: LocalDate(2026, 9, 1),
         anchorDate: LocalDate(2026, 9, 1),
       );
@@ -111,7 +111,7 @@ void main() {
       final item = TrackedItem(
         id: 'a',
         name: 'Netflix',
-        category: Category.subscription,
+        categoryId: 'STREAMING',
         expiresOn: LocalDate(2026, 9, 1),
         anchorDate: LocalDate(2026, 9, 1),
       ).copyWith(purchaseChannel: PurchaseChannel.appStore);

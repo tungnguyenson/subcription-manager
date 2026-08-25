@@ -151,6 +151,12 @@ Tag là tính năng được yêu cầu nhiều nhất và dùng ít nhất tron
 
 ## 4bis. SIM và các dịch vụ trả trước
 
+> **Đã đổi so với bản này.** SIM không còn là một giá trị phân loại riêng trong code. Nó
+> nằm trên nhóm `PHONE` dựng sẵn, nhóm này ship với nhắc hằng ngày sau hạn và chữ
+> *expires* thay vì *due*. Mọi thứ dưới đây vẫn đúng về mặt sản phẩm, chỉ khác chỗ: các
+> mặc định đó là **dữ liệu người dùng sửa được**, không phải luật cứng trong code. Xem bẫy
+> số 19 trong `CLAUDE.md`.
+
 SIM được xử lý **như mọi mục khác**: một cái tên, một ngày hết hạn, một mức quan trọng, một ô ghi chú. Không có mô hình riêng, không có cấu hình nhà mạng, không có bảng thời hạn thu hồi.
 
 Lý do ghi lại ở đây vì bản trước của tài liệu này đi theo hướng ngược lại. Nghiên cứu ra rất nhiều chi tiết về quy định viễn thông Việt Nam, và tôi đã biến hết chúng thành tính năng: mô hình ba đồng hồ đếm ngược, tệp cấu hình bốn nhà mạng, cảnh báo thường trực. Đó là độ phức tạp tôi tự tạo ra, không phải thứ người dùng cần.

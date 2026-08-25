@@ -14,12 +14,11 @@
         "twitter blue",
         "x blue"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": "https://x.com/settings/premium",
       "noteVi": "Giá VND lấy từ App Store VN (gói giữa 'X Premium', không phải Basic hay Premium+) — X không có trang giá riêng bằng VND, đây là giá X tự niêm yết trên App Store khu vực Việt Nam.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -51,12 +50,11 @@
         "telegram premium",
         "tele premium"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": null,
       "noteVi": "Không có trang hủy riêng — hủy qua App Store/Google Play (nếu mua trong app) hoặc qua @PremiumBot trong Telegram. Giá VND lấy từ App Store VN.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -87,12 +85,12 @@
         "linkedin premium",
         "linkedin"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://www.linkedin.com/premium/cancel",
-      "noteVi": "Giá cho gói 'Premium Career' (phổ biến nhất cho cá nhân tìm việc). LinkedIn hiện báo giá $39.99/tháng cho thuê bao mới; người dùng cũ có thể vẫn đang trả mức thấp hơn (khoảng $29.99/tháng).",
       "defaultPlan": "career",
+      "cancelUrl": "https://www.linkedin.com/premium/cancel",
+      "manageUrl": "https://www.linkedin.com/premium/manage/",
+      "noteVi": "Giá cho gói 'Premium Career' (phổ biến nhất cho cá nhân tìm việc). LinkedIn hiện báo giá $39.99/tháng cho thuê bao mới; người dùng cũ có thể vẫn đang trả mức thấp hơn (khoảng $29.99/tháng).",
       "plans": [
         {
           "tier": "career",
@@ -114,8 +112,7 @@
           "source": "https://premium.linkedin.com/careers/career",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://www.linkedin.com/premium/manage/"
+      ]
     },
     {
       "id": "meta-verified",
@@ -125,12 +122,11 @@
         "facebook verified",
         "instagram verified"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard",
       "cancelUrl": "https://www.facebook.com/business/help/23875260945405570?id=579726174359330",
       "noteVi": "Đăng ký qua web rẻ hơn qua app (11.99 USD so với 14.99 USD). Giá VND (gói Standard) lấy từ App Store VN qua app Instagram.",
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",
@@ -163,12 +159,11 @@
         "snapchat plus",
         "snap plus"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "plus",
       "cancelUrl": "https://support.snapchat.com/en-US/a/cancel-subscription",
       "noteVi": "Trang giá chính thức (accounts.snapchat.com/plus/plans) chỉ render bằng JavaScript nên không lấy được số cụ thể; giá tháng lấy từ App Store Mỹ. Không xác minh được giá gói năm từ nguồn chính hãng nên bỏ qua.",
-      "defaultPlan": "plus",
       "plans": [
         {
           "tier": "plus",
@@ -189,12 +184,11 @@
         "reddit premium",
         "reddit"
       ],
-      "sector": "SOCIAL",
-      "category": "SUBSCRIPTION",
+      "category": "SOCIAL",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "premium",
       "cancelUrl": "https://www.reddit.com/settings/premium",
       "noteVi": "reddit.com chặn truy cập tự động nên không lấy được giá trực tiếp từ trang chủ; giá lấy từ App Store Mỹ, có thể cao hơn giá trả qua web.",
-      "defaultPlan": "premium",
       "plans": [
         {
           "tier": "premium",
@@ -226,12 +220,12 @@
         "apple news plus",
         "apple news"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
-      "cancelUrl": "https://apps.apple.com/account/subscriptions",
-      "noteVi": "Chưa bán ở Việt Nam — chỉ có giá Mỹ (USD), không có bảng giá VND.",
       "defaultPlan": "news-plus",
+      "cancelUrl": "https://apps.apple.com/account/subscriptions",
+      "manageUrl": "https://apps.apple.com/account/subscriptions",
+      "noteVi": "Chưa bán ở Việt Nam — chỉ có giá Mỹ (USD), không có bảng giá VND.",
       "plans": [
         {
           "tier": "news-plus",
@@ -243,8 +237,7 @@
           "source": "https://www.apple.com/apple-news/",
           "checkedAt": "2026-08-23"
         }
-      ],
-      "manageUrl": "https://apps.apple.com/account/subscriptions"
+      ]
     },
     {
       "id": "nyt",
@@ -254,12 +247,11 @@
         "new york times",
         "nytimes"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "all-access",
       "cancelUrl": "https://myaccount.nytimes.com/seg/subscription",
       "noteVi": "Giá quảng cáo năm đầu thấp hơn nhiều (khoảng 1 USD/tuần); đây là giá niêm yết thường xuyên của gói All Access. nytimes.com chặn truy cập tự động nên giá lấy từ App Store Mỹ thay vì trang chủ.",
-      "defaultPlan": "all-access",
       "plans": [
         {
           "tier": "all-access",
@@ -280,12 +272,11 @@
         "economist",
         "the economist"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "digital",
       "cancelUrl": null,
       "noteVi": "Giá khuyến mãi năm đầu chỉ 328.30 USD; trang economist.com/subscribe ghi rõ giá gia hạn thường xuyên là 469 USD/năm — đây là con số đã lấy, không phải giá năm đầu.",
-      "defaultPlan": "digital",
       "plans": [
         {
           "tier": "digital",
@@ -318,12 +309,11 @@
         "bloomberg",
         "bloomberg.com"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "digital",
       "cancelUrl": null,
       "noteVi": "bloomberg.com/subscriptions chặn bằng CAPTCHA nên không lấy được giá trực tiếp; giá lấy từ App Store Mỹ. Giá quảng cáo năm đầu có thể thấp hơn 399 USD/năm ghi ở đây.",
-      "defaultPlan": "digital",
       "plans": [
         {
           "tier": "digital",
@@ -355,12 +345,11 @@
         "wsj",
         "wall street journal"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "digital",
       "cancelUrl": "https://customercenter.wsj.com/",
       "noteVi": "subscribe.wsj.com không hiển thị giá cụ thể (bắt chọn gói mới thấy giá); giá lấy từ App Store Mỹ. Giá quảng cáo ban đầu thấp hơn nhiều (khoảng 2-4 USD/tuần cho 12 tháng đầu). Không xác minh được giá gói năm nên bỏ qua.",
-      "defaultPlan": "digital",
       "plans": [
         {
           "tier": "digital",
@@ -382,12 +371,11 @@
         "ft",
         "ft.com"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": "standard-digital",
       "cancelUrl": null,
       "noteVi": "Giá cho gói 'Standard Digital' (gói Premium Digital cao hơn, 75 USD/tháng). ft.com ghi 'trả trước 1 năm tiết kiệm 20%' nhưng không ghi số tiền cụ thể; số năm lấy từ App Store Mỹ.",
-      "defaultPlan": "standard-digital",
       "plans": [
         {
           "tier": "standard-digital",
@@ -418,12 +406,11 @@
         "medium",
         "medium.com"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "membership",
       "cancelUrl": null,
       "noteVi": "Trang web chỉ bán gói năm (50 USD/năm); giá gói tháng chỉ thấy trên App Store (4.99 USD/tháng).",
-      "defaultPlan": "membership",
       "plans": [
         {
           "tier": "membership",
@@ -453,12 +440,11 @@
       "aliases": [
         "substack"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "MONTHLY",
+      "defaultPlan": null,
       "cancelUrl": null,
       "noteVi": "Substack là nền tảng xuất bản — mỗi tác giả/newsletter tự đặt giá riêng, không có bảng giá chuẩn của Substack để ghi.",
-      "defaultPlan": null,
       "plans": []
     },
     {
@@ -468,12 +454,11 @@
         "the athletic",
         "athletic"
       ],
-      "sector": "NEWS",
-      "category": "SUBSCRIPTION",
+      "category": "NEWS",
       "defaultCycle": "YEARLY",
+      "defaultPlan": "standard",
       "cancelUrl": "https://www.theathletic.com/account/",
       "noteVi": "Giá khuyến mãi năm đầu có thể chỉ 1 USD/tháng; đây là giá thường xuyên sau khuyến mãi. The Athletic hiện thuộc sở hữu của The New York Times Company nhưng vẫn bán thuê bao riêng.",
-      "defaultPlan": "standard",
       "plans": [
         {
           "tier": "standard",

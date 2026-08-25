@@ -20,8 +20,8 @@ import unicodedata
 OUT_DIR = "data/services"
 EXISTING = "assets/services.json"
 
-# id -> sector, for the 71 entries that already ship.
-EXISTING_SECTOR = {
+# id -> category, for the 71 entries that already ship.
+EXISTING_CATEGORY = {
     "netflix": "STREAMING", "youtube-premium": "STREAMING",
     "hbo-go": "STREAMING", "disney-plus": "STREAMING",
     "fpt-play": "STREAMING", "vieon": "STREAMING",
@@ -55,7 +55,7 @@ EXISTING_SECTOR = {
     "giay-phep-kd": "DOCUMENTS", "chung-chi": "DOCUMENTS",
 }
 
-# batch -> (sectors it owns, new services to add as [id, name, sector, note])
+# batch -> (categorys it owns, new services to add as [id, name, category, note])
 NEW = {
     "ai": [
         ("grok", "Grok", "AI", "gói riêng và gói kèm X Premium — lấy gói riêng"),
@@ -257,25 +257,25 @@ def main():
     existing = json.load(open(EXISTING, encoding="utf-8"))["entries"]
     by_id = {e["id"]: e for e in existing}
 
-    missing = set(by_id) - set(EXISTING_SECTOR)
+    missing = set(by_id) - set(EXISTING_CATEGORY)
     if missing:
-        raise SystemExit(f"no sector assigned for: {sorted(missing)}")
+        raise SystemExit(f"no category assigned for: {sorted(missing)}")
 
-    sector_to_batch = {s: b for b, ss in BATCH_OWNS.items() for s in ss}
+    category_to_batch = {s: b for b, ss in BATCH_OWNS.items() for s in ss}
     all_ids = set()
 
-    for batch, sectors in BATCH_OWNS.items():
+    for batch, categorys in BATCH_OWNS.items():
         entries = []
 
         for eid, old in by_id.items():
-            sector = EXISTING_SECTOR[eid]
-            if sector_to_batch[sector] != batch:
+            category = EXISTING_CATEGORY[eid]
+            if category_to_batch[category] != batch:
                 continue
             entry = {
                 "id": eid,
                 "name": old["name"],
                 "aliases": old.get("aliases", []),
-                "sector": sector,
+                "category": category,
                 "category": old["category"],
                 "defaultCycle": old.get("defaultCycle"),
                 "cancelUrl": old.get("cancelUrl"),
@@ -292,12 +292,12 @@ def main():
                 }
             entries.append(entry)
 
-        for eid, name, sector, note in NEW.get(batch, []):
+        for eid, name, category, note in NEW.get(batch, []):
             entries.append({
                 "id": eid,
                 "name": name,
                 "aliases": [],
-                "sector": sector,
+                "category": category,
                 "category": "SUBSCRIPTION",
                 "defaultCycle": "MONTHLY",
                 "cancelUrl": None,
@@ -315,7 +315,7 @@ def main():
 
         path = os.path.join(OUT_DIR, f"{batch}.json")
         with open(path, "w", encoding="utf-8") as f:
-            json.dump({"batch": batch, "sectors": sectors, "entries": entries},
+            json.dump({"batch": batch, "categorys": categorys, "entries": entries},
                       f, ensure_ascii=False, indent=2)
             f.write("\n")
         todo = sum(1 for e in entries if e.get("_todo"))

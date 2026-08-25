@@ -76,6 +76,32 @@ void main() {
       expect(MoneyFormat.parseMajor(r'$20', 'USD'), 2000);
     });
 
+    // iOS labels the decimal pad's separator key in the *device's* locale, so a
+    // phone set to Vietnamese offers a comma and no full stop at all. Someone
+    // entering $32.68 has no way to type a full stop; they type `32,68`, and
+    // every comma used to be stripped as a thousands mark. That made it
+    // $3,268.00 -- silently, and off by a hundred.
+    test('a comma standing in for the decimal point is read as one', () {
+      expect(MoneyFormat.parseMajor('32,68', 'USD'), 3268);
+      expect(MoneyFormat.parseMajor('20,5', 'USD'), 2050);
+      expect(MoneyFormat.parseMajor('0,99', 'USD'), 99);
+      expect(MoneyFormat.parseMajor('-32,68', 'USD'), -3268);
+    });
+
+    // The narrow half of the same rule. `1,234` is how a thousand is written
+    // everywhere, and reading it as 1.234 would be the same size of mistake in
+    // the other direction.
+    test('a comma that is a thousands mark stays one', () {
+      expect(MoneyFormat.parseMajor('1,234', 'USD'), 123400);
+      expect(MoneyFormat.parseMajor('260,000', 'USD'), 26000000);
+      expect(MoneyFormat.parseMajor('1,234,567', 'USD'), 123456700);
+      // A full stop anywhere settles it: the full stop is the point, and every
+      // comma beside it is grouping.
+      expect(MoneyFormat.parseMajor('1,234.56', 'USD'), 123456);
+      // A currency with no minor unit has no decimal point for a comma to be.
+      expect(MoneyFormat.parseMajor('1,234', 'VND'), 1234);
+    });
+
     test('a round trip through the field changes nothing', () {
       for (final (minor, currency) in const [
         (2000, 'USD'),

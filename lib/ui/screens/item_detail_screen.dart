@@ -5,6 +5,7 @@ import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/money.dart';
 import 'package:subdock/ui/annual_saving_presenter.dart';
+import 'package:subdock/ui/date_copy.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/manage_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
@@ -14,6 +15,11 @@ import 'package:subdock/ui/widgets/primitives.dart';
 
 class ItemDetailScreen extends StatelessWidget {
   final TrackedItem item;
+
+  /// The shelf this item sits on, resolved by the caller. It decides the
+  /// wording of the summary line and names the Category row.
+  final Category category;
+
   final LocalDate today;
   final List<HandledEvent> history;
 
@@ -51,6 +57,11 @@ class ItemDetailScreen extends StatelessWidget {
 
   final VoidCallback? onDelete;
 
+  /// The source this item pays from, already resolved. Null when the user has
+  /// not said, in which case the row is simply absent — "Pays from: not set" is
+  /// a row that states nothing and costs a line of the card.
+  final PaymentSource? source;
+
   /// Leaves the app for the page that holds the real answer, and records what
   /// the tap revealed about where this subscription was bought.
   final void Function(ManageAction action)? onOpenManage;
@@ -58,6 +69,7 @@ class ItemDetailScreen extends StatelessWidget {
   const ItemDetailScreen({
     super.key,
     required this.item,
+    required this.category,
     required this.today,
     this.history = const [],
     this.scheduledCount = 0,
@@ -71,6 +83,7 @@ class ItemDetailScreen extends StatelessWidget {
     this.onStop,
     this.onDelete,
     this.onOpenManage,
+    this.source,
   });
 
   @override
@@ -84,15 +97,14 @@ class ItemDetailScreen extends StatelessWidget {
     );
     final manage = onOpenManage == null
         ? null
-        : ManagePresenter.of(item: item, entry: catalogEntry);
+        : ManagePresenter.of(
+            item: item,
+            category: category,
+            entry: catalogEntry,
+          );
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(
-        SubdockSpacing.screenH,
-        6,
-        SubdockSpacing.screenH,
-        SubdockSpacing.contentBottom,
-      ),
+      padding: SubdockSpacing.screenPadding(context),
       children: [
         Row(
           children: [
@@ -125,7 +137,7 @@ class ItemDetailScreen extends StatelessWidget {
                   Text(item.name, style: SubdockText.detailTitle),
                   const SizedBox(height: 5),
                   Text(
-                    ItemPresenter.summary(item, today),
+                    ItemPresenter.summary(item, category, today),
                     style: SubdockText.itemSubtitle.copyWith(fontSize: 12),
                   ),
                 ],
@@ -139,11 +151,7 @@ class ItemDetailScreen extends StatelessWidget {
             if (position != null) _PaymentProgress(position: position),
             // The three rows the form owns open the form. The rest of this
             // card is derived or already has an editor of its own.
-            DetailRow(
-              label: 'Category',
-              value: ItemPresenter.categoryLabel(item.category),
-              onTap: onEdit,
-            ),
+            DetailRow(label: 'Category', value: category.label, onTap: onEdit),
             DetailRow(
               label: 'Repeats',
               value: ItemPresenter.repeatLabel(item),
@@ -180,6 +188,8 @@ class ItemDetailScreen extends StatelessWidget {
                 value: MoneyFormat.full(left),
                 monoValue: true,
               ),
+            if (source case final PaymentSource paid)
+              DetailRow(label: 'Pays from', value: paid.name, onTap: onEdit),
             DetailRow(
               label: 'Date from',
               value: ItemPresenter.dateSourceLabel(item.dateSource),
@@ -187,6 +197,14 @@ class ItemDetailScreen extends StatelessWidget {
             DetailRow(label: 'Note', value: item.note ?? '—'),
           ],
         ),
+        // The trial block comes before the yearly one, and before the manage
+        // button. On an item in a trial it is the only thing on the screen with
+        // a deadline attached: everything else here is about how much, and this
+        // is about how long.
+        if (item.isTrial) ...[
+          const SizedBox(height: 12),
+          _TrialCard(item: item, today: today, remind: _remindLabel()),
+        ],
         // Both blocks answer "what about this one?", which is this screen's
         // question. Neither belongs on the list, which answers "what is coming
         // up?" -- see design-spec.md 2.2.
@@ -291,6 +309,78 @@ class ItemDetailScreen extends StatelessWidget {
 /// Three states rather than two. A plan the user is halfway through has a
 /// payment that is *due now*, and drawing it the same as one already made
 /// would tell them they are one further ahead than they are.
+/// A free trial, with the date it stops being free.
+///
+/// The one card on this screen with a deadline in it. Its wording is the app's
+/// core promise made specific: nothing has been charged, this is the day that
+/// changes, and here is when you will be warned. A trial block that said only
+/// "free trial" would be decoration — the dates are the whole value.
+class _TrialCard extends StatelessWidget {
+  final TrackedItem item;
+  final LocalDate today;
+
+  /// The reminder ladder, already worded, so the promise names a real warning
+  /// rather than a generic one.
+  final String remind;
+
+  const _TrialCard({
+    required this.item,
+    required this.today,
+    required this.remind,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final start = item.trialStart;
+    final span = item.trialLengthDays;
+    final money = item.money;
+    final left = today.daysUntil(item.expiresOn);
+
+    return GroupedCard(
+      decoration: SubdockSurface.accented(),
+      padding: const EdgeInsets.all(14),
+      children: [
+        Text(
+          // The countdown, not the date, as the headline. A date needs
+          // arithmetic before it means anything; "6 days left" does not.
+          left < 0
+              ? 'The trial ended ${MoneyFormat.shortDate(item.expiresOn)}'
+              : (left == 0
+                    ? 'Free until today — it charges today'
+                    : 'Free for '
+                          '$left more ${left == 1 ? "day" : "days"}'),
+          style: const TextStyle(
+            fontFamily: SubdockText.family,
+            fontSize: 16,
+            height: 1.3,
+            fontWeight: SubdockWeight.medium,
+            color: SubdockColors.accent,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          money == null
+              ? 'The first charge lands '
+                    '${DateCopy.longDate(item.expiresOn)}. You will be '
+                    'reminded ${remind.toLowerCase()}.'
+              : '${MoneyFormat.full(money)} is charged '
+                    '${DateCopy.longDate(item.expiresOn)}. You will be '
+                    'reminded ${remind.toLowerCase()}.',
+          style: SubdockText.footnote,
+        ),
+        if (start != null && span != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Started ${DateCopy.listedDate(start)} · '
+            '$span-day trial',
+            style: SubdockText.caption,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
 class _PaymentProgress extends StatelessWidget {
   final Instalments position;
 

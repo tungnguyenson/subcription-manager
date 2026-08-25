@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/recurrence.dart';
+import 'package:subdock/domain/upcoming_filter.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
 
@@ -12,7 +13,7 @@ void main() {
   TrackedItem item(
     String id, {
     required String expiresOn,
-    Category category = Category.subscription,
+    String categoryId = 'STREAMING',
     int actByOffsetDays = 0,
     int? amountMinor,
     String? currency,
@@ -20,11 +21,14 @@ void main() {
     int? repeatCount,
     String? anchorDate,
     ItemState state = ItemState.active,
+    bool paused = false,
+    LocalDate? trialStart,
+    String? paymentSourceId,
   }) {
     return TrackedItem(
       id: id,
       name: id,
-      category: category,
+      categoryId: categoryId,
       expiresOn: d(expiresOn),
       actByOffsetDays: actByOffsetDays,
       anchorDate: d(anchorDate ?? expiresOn),
@@ -33,6 +37,9 @@ void main() {
       amountMinor: amountMinor,
       currency: currency,
       state: state,
+      paused: paused,
+      trialStart: trialStart,
+      paymentSourceId: paymentSourceId,
     );
   }
 
@@ -81,6 +88,19 @@ void main() {
     expect(view.isEmpty, isTrue);
   });
 
+  // Off means off. Upcoming used to carry a line naming the switched-off
+  // services, which put on the home screen exactly the names the user had asked
+  // the app to stop mentioning. The switch is on All services and so is the
+  // item, still sitting there with its switch off; that is where the state
+  // belongs.
+  test('a switched-off item leaves no trace on this screen', () {
+    final view = UpcomingPresenter.build([
+      item('muted', expiresOn: '2026-08-18', paused: true),
+    ], today);
+
+    expect(view.isEmpty, isTrue);
+  });
+
   group('wording', () {
     test('the near dates read as phrases, not as dates', () {
       final view = UpcomingPresenter.build([
@@ -89,11 +109,10 @@ void main() {
         item('c', expiresOn: '2026-08-19'),
       ], today);
 
-      expect(everything(view).map((e) => e.when), [
-        'Today',
-        'Tomorrow',
-        '4 days',
-      ]);
+      // Today and tomorrow are spelled out because they are the two the reader
+      // acts on; everything else is abbreviated so the column stays narrow
+      // enough to scan straight down.
+      expect(everything(view).map((e) => e.when), ['Today', 'Tomorrow', '4d']);
     });
 
     test('an overdue row says how far past it is', () {
@@ -102,19 +121,20 @@ void main() {
       ], today);
 
       final entry = view.overdue.single;
-      expect(entry.when, 'Overdue');
+      expect(entry.when, 'Late');
       expect(entry.date, '4 days ago');
       expect(entry.overdue, isTrue);
     });
 
-    // Never rounded up into a friendlier unit. "About a month" on something due
-    // in 29 days is the single most common one-star complaint in this category.
-    test('a distant date is still counted in days', () {
+    // Abbreviated, never rounded. "About a month" on something due in 29 days
+    // is the single most common one-star complaint in this category, and it is
+    // always the app trying to be reassuring; `29d` is the same exact number.
+    test('a distant date is still counted in exact days', () {
       final view = UpcomingPresenter.build([
         item('x', expiresOn: '2026-09-13'),
       ], today);
 
-      expect(everything(view).single.when, '29 days');
+      expect(everything(view).single.when, '29d');
     });
 
     // Day-first. Using the device locale would render 17/08 as 08/17 for a
@@ -155,7 +175,7 @@ void main() {
           'course',
           anchorDate: '2026-05-21',
           expiresOn: '2026-08-21',
-          category: Category.bill,
+          categoryId: 'UTILITIES',
           cycle: Cycle.monthly,
           repeatCount: 6,
           amountMinor: 1200000,
@@ -182,27 +202,145 @@ void main() {
 
     test('an item with no amount shows no second line', () {
       final view = UpcomingPresenter.build([
-        item('passport', expiresOn: '2026-08-18', category: Category.document),
+        item('passport', expiresOn: '2026-08-18', categoryId: 'DOCUMENTS'),
       ], today);
 
       expect(everything(view).single.subtitle, isNull);
     });
 
-    test('the summary counts what is urgent and nothing else', () {
+    // The summary line the presenter used to build is gone: every section
+    // heading carries its own count, so the line restated the screen at the
+    // cost of the first row's place on it.
+    test('each bucket carries its own count and nothing restates them', () {
       final view = UpcomingPresenter.build([
         item('late', expiresOn: '2026-08-11'),
         item('soon', expiresOn: '2026-08-18'),
         item('far', expiresOn: '2027-01-01'),
       ], today);
 
-      expect(view.summary, '1 overdue · 1 item within 7 days');
+      expect(view.overdue.length, 1);
+      expect(view.thisWeek.length, 1);
+      expect(view.later.length, 1);
+    });
+  });
+
+  // The row says `FREE TRIAL` in a badge beside the name, so this column is
+  // free to go back to saying *when*. It used to read `Trial ends`, which is
+  // the same fact told twice -- and two words here cost the name most of its
+  // width: `Claude Pro` came out of it as `Claude ...`.
+  group('a trial row', () {
+    test('counts down like every other row', () {
+      final view = UpcomingPresenter.build([
+        item(
+          'Claude Pro',
+          expiresOn: '2026-08-17',
+          trialStart: d('2026-08-10'),
+        ),
+      ], today);
+
+      expect(view.trials.single.when, '2d');
+      expect(view.trials.single.date, '17/08');
+      // The badge is what carries the state now, so the flag has to survive.
+      expect(view.trials.single.trial, isTrue);
     });
 
-    test('an empty list says so rather than showing a bare zero', () {
-      expect(
-        UpcomingPresenter.build([], today).summary,
-        'Nothing due in the next 7 days',
+    // A trial whose charge date has already gone by is late like anything
+    // else. `Trial ends` on a row that ended two days ago says nothing.
+    test('an overdue trial still reads as late', () {
+      final view = UpcomingPresenter.build([
+        item(
+          'Claude Pro',
+          expiresOn: '2026-08-13',
+          trialStart: d('2026-08-06'),
+        ),
+      ], today);
+
+      expect(view.overdue.single.when, 'Late');
+    });
+  });
+
+  // The filter narrows the list without changing its shape: every section the
+  // screen draws is still the section it was, and an item that survives lands
+  // where its own date puts it.
+  group('with a filter on', () {
+    final items = [
+      item('netflix', expiresOn: '2026-08-18', categoryId: 'STREAMING'),
+      item('viettel', expiresOn: '2026-08-19', categoryId: 'PHONE'),
+      item('bhyt', expiresOn: '2026-09-20', categoryId: 'INSURANCE'),
+      item('muted', expiresOn: '2026-08-17', paused: true),
+    ];
+
+    test('nothing selected leaves the list exactly as it was', () {
+      final plain = UpcomingPresenter.build(items, today);
+      final filtered = UpcomingPresenter.build(
+        items,
+        today,
+        filter: UpcomingFilter.none,
       );
+
+      expect(filtered.filtering, isFalse);
+      expect(
+        filtered.thisWeek.map((e) => e.id),
+        plain.thisWeek.map((e) => e.id),
+      );
+    });
+
+    test('a shelf chip keeps only that shelf', () {
+      final view = UpcomingPresenter.build(
+        items,
+        today,
+        filter: const UpcomingFilter(categoryIds: {'PHONE'}),
+      );
+
+      expect(view.thisWeek.map((e) => e.id), ['viettel']);
+      expect(view.filtering, isTrue);
+      expect(view.shown, 1);
+      // Counted against the pool the filter drew from, which is the three
+      // items Upcoming would have shown -- not against the muted one too.
+      expect(view.total, 3);
+    });
+
+    test('a match past the horizon still lands in its own section', () {
+      final view = UpcomingPresenter.build(
+        items,
+        today,
+        filter: const UpcomingFilter(categoryIds: {'INSURANCE'}),
+      );
+
+      expect(view.later.map((e) => e.id), ['bhyt']);
+      expect(view.thisWeek, isEmpty);
+    });
+
+    // The one chip that reaches items the screen otherwise refuses to show.
+    test(
+      'Reminders off brings back the switched-off items, and only those',
+      () {
+        final view = UpcomingPresenter.build(
+          items,
+          today,
+          filter: const UpcomingFilter(mutedOnly: true),
+        );
+
+        expect(view.thisWeek.map((e) => e.id), ['muted']);
+        expect(view.total, 1);
+      },
+    );
+
+    test('a filter that matches nothing is not an untracked app', () {
+      final view = UpcomingPresenter.build(
+        items,
+        today,
+        filter: const UpcomingFilter(noPriceOnly: true, trialOnly: true),
+      );
+
+      expect(view.isEmpty, isTrue);
+      expect(view.noMatches, isTrue);
+    });
+
+    test('an empty list with no filter on is not a failed match', () {
+      final view = UpcomingPresenter.build(const [], today);
+      expect(view.isEmpty, isTrue);
+      expect(view.noMatches, isFalse);
     });
   });
 }

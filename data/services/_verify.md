@@ -127,8 +127,8 @@ Riêng `bhyt`: cần kiểm tra Nghị định 161/2026/NĐ-CP và mức lương
 | be-hoi-vien | gói cũ thay bằng **beOne** (19.000đ/th, ra mắt 24/6/2026) → đổi `name` |
 | fitbit-premium | đang gộp vào **Google Health Premium** |
 | hulu | hulu.com/plans redirect 302 sang disneyplus.com → kiểm tra còn là dịch vụ riêng không |
-| cleanmymac | `sector: SECURITY` sai, là phần mềm dọn máy → cân nhắc chuyển |
-| grab-unlimited, uber-one | `sector: FOOD` nhưng thực chất là gói bundle cả đi lại lẫn giao đồ ăn |
+| cleanmymac | `category: SECURITY` sai, là phần mềm dọn máy → cân nhắc chuyển |
+| grab-unlimited, uber-one | `category: FOOD` nhưng thực chất là gói bundle cả đi lại lẫn giao đồ ăn |
 
 ## G. Cần trình duyệt thật (chrome-devtools MCP) thay cho WebFetch
 

@@ -49,6 +49,10 @@ abstract final class ItemActions {
       // The snooze was postponing the occurrence that just closed. Carrying it
       // into the next one would fire a reminder about a payment already made.
       snoozedUntil: () => null,
+      // The occurrence that just closed *was* the first charge, so the trial
+      // is over. Leaving the start date on would keep the item out of the
+      // spending total forever and keep labelling a paid subscription "free".
+      trialStart: () => null,
     );
   }
 

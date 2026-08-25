@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"><script src="./doc-page.js"></script><style>
+doc-page:not(:defined){visibility:hidden}
+body{margin:0;font-family:'Be Vietnam Pro',-apple-system,system-ui,sans-serif;color:#1b2230}
+a{color:#4a6ac6;text-decoration:none}a:hover{color:#33509e}
+</style></helmet>
+<doc-page margin="0.7in">
+  <h1 style="font:600 30px/1.25 'Be Vietnam Pro',sans-serif;letter-spacing:-.03em;margin:0 0 10px">Subdock — hand-off spec (Glass)</h1>
+  <p style="font:400 14px/1.6 'Be Vietnam Pro',sans-serif;color:#5b6272;margin:0 0 6px">Bản dựng tham chiếu: <strong style="color:#1b2230">Subdock Glass App.dc.html</strong> — khung 390×844, theme <strong style="color:#1b2230">Glass</strong>. Ảnh chụp trong tài liệu này lấy trực tiếp từ bản dựng đó, đúng pixel, không vẽ lại.</p>
+  <p style="font:400 14px/1.6 'Be Vietnam Pro',sans-serif;color:#5b6272;margin:0 0 24px">Khi có khác biệt giữa mô tả chữ và ảnh chụp: ảnh chụp là đúng. Khi có khác biệt giữa ảnh chụp và file dựng: file dựng là đúng.</p>
+
+  <h2 style="font:600 18px/1.3 'Be Vietnam Pro',sans-serif;letter-spacing:-.02em;margin:0 0 12px;padding-top:14px;border-top:1px solid #dfe2ea">1. Style tokens — Glass</h2>
+  <table style="width:100%;border-collapse:collapse;font:400 13px/1.55 'Be Vietnam Pro',sans-serif;margin:0 0 12px">
+    <thead><tr>
+      <th style="text-align:left;padding:8px 10px;border-bottom:1px solid #1b2230;font-weight:600;width:24%">Token</th>
+      <th style="text-align:left;padding:8px 10px;border-bottom:1px solid #1b2230;font-weight:600">Giá trị</th>
+    </tr></thead>
+    <tbody>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee;vertical-align:top">Nền màn hình</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px">linear-gradient(160deg, #dfe6f6 0%, #eef0f4 42%, #f6ece6 74%, #e3edf1 100%)</span> — gradient tĩnh, không cuộn theo nội dung</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee;vertical-align:top">Card / surface</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px">rgba(255,255,255,.55)</span> + <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">backdrop-filter: blur(14px)</span> + viền <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">1px rgba(255,255,255,.75)</span></td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee;vertical-align:top">Elevation</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Không dùng drop shadow trên card. Độ nổi đến từ trong suốt + viền trắng. Chỉ khung máy có shadow: <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">0 22px 60px rgba(24,34,58,.16)</span></td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee;vertical-align:top">Bo góc</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Card <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">15px</span> · chip/nút nhỏ <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">9px</span> · tile icon <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">9px</span> (34×34) · khung máy <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">42px</span></td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee;vertical-align:top">Accent</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px">oklch(.55 .13 262)</span> ≈ <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">#4a6ac6</span> — nút chính, tab active, chip đang chọn, link, cột chart. Chữ trên accent: <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">#fff</span></td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee;vertical-align:top">Chữ</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Chính <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">#1b2230</span> · phụ <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">rgba(27,34,48,.62)</span> · mờ <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">rgba(27,34,48,.5)</span></td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee;vertical-align:top">Đường kẻ</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px">rgba(27,34,48,.10)</span> — chỉ dùng bên trong card, không dùng để chia list</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee;vertical-align:top">Cảnh báo</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px">oklch(.52 .21 26)</span>. Nền hàng overdue = danger 10% trộn trên surface, viền = danger 32%</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee;vertical-align:top">Tab bar</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Nền <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">rgba(255,255,255,.62)</span> + blur, viền trên <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">0 -1px 0 rgba(255,255,255,.7)</span></td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee;vertical-align:top">Chip tắt</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee"><span style="font-family:'IBM Plex Mono',monospace;font-size:12px">rgba(255,255,255,.55)</span> + viền <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">rgba(255,255,255,.75)</span>. Chip bật = nền accent, chữ trắng</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee;vertical-align:top">Font</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Be Vietnam Pro (đủ dấu tiếng Việt) · IBM Plex Mono cho ngày, giờ, số tiền phụ. Icon: Material Symbols Rounded, nét (FILL 0), tab active dùng bản tô đặc</td></tr>
+    </tbody>
+  </table>
+  <p style="font:400 13.5px/1.65 'Be Vietnam Pro',sans-serif;margin:0 0 8px"><strong>Thang chữ:</strong> title màn 34/600, tracking -.02em · section title 24/600 · tên item và body 17/500 · dòng phụ 14/400 · nhãn uppercase 12.5/600 tracking .1em.</p>
+  <p style="font:400 13.5px/1.65 'Be Vietnam Pro',sans-serif;margin:0 0 22px"><strong>Spacing:</strong> padding ngang màn 18px · card padding 13–14px · khoảng cách giữa các hàng trong nhóm 10px · nhãn nhóm cách nhóm trên 28px, cách hàng dưới 10px · nội dung cách tab bar 18px.</p>
+
+  <h2 style="font:600 18px/1.3 'Be Vietnam Pro',sans-serif;letter-spacing:-.02em;margin:0 0 10px;padding-top:14px;border-top:1px solid #dfe2ea">2. Lưu ý khi implement lớp glass</h2>
+  <ul style="font:400 13.5px/1.7 'Be Vietnam Pro',sans-serif;margin:0 0 22px;padding-left:20px">
+    <li>Card <strong>trong suốt thật</strong>, không phải màu xám giả trong suốt. iOS: <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">UIBlurEffect(.systemUltraThinMaterialLight)</span>. Android: blur nền + overlay trắng 55%.</li>
+    <li>Gradient nền đứng yên khi list cuộn. Card trượt qua nó, đó là toàn bộ hiệu ứng chiều sâu.</li>
+    <li>Viền trắng 1px là bắt buộc — bỏ viền thì card biến mất trên vùng nền sáng.</li>
+    <li>Không thêm shadow cho card để “nổi hơn”. Style này không có shadow ở lớp nội dung.</li>
+    <li>Thiết bị không hỗ trợ blur: dùng nền đặc <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">rgba(255,255,255,.82)</span>, giữ nguyên viền và bo góc.</li>
+  </ul>
+
+  <h2 style="font:600 18px/1.3 'Be Vietnam Pro',sans-serif;letter-spacing:-.02em;margin:0 0 4px;padding-top:14px;border-top:1px solid #dfe2ea">3. Màn hình</h2>
+  <p style="font:400 13.5px/1.6 'Be Vietnam Pro',sans-serif;color:#5b6272;margin:0 0 16px">Ảnh chụp ở 390×844, mật độ 1×. Phần dưới màn hình có cuộn tiếp; ảnh chụp là trạng thái mặc định khi mở màn.</p>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px 18px;margin:0 0 24px">
+    <div style="break-inside:avoid">
+      <img src="screens/onboarding.png" alt="Onboarding" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">Onboarding</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Ba dòng giá trị, nút “Get started” dính đáy. Không có “Skip”.</div>
+    </div>
+    <div style="break-inside:avoid">
+      <img src="screens/upcoming.png" alt="Upcoming" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">Upcoming — màn chính</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Nhóm: Overdue → Free trial → Next 7 days. Banner thông báo nằm trên nhóm đầu.</div>
+    </div>
+    <div style="break-inside:avoid">
+      <img src="screens/detail.png" alt="Detail" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">Item detail</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Card thuộc tính, rồi nhóm Actions. Nút chính đặc accent, nút phụ là card glass.</div>
+    </div>
+    <div style="break-inside:avoid">
+      <img src="screens/edit.png" alt="Edit" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">Edit item</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Cùng cấu trúc field với bước 2 của Add. Field prefill từ item đang mở.</div>
+    </div>
+    <div style="break-inside:avoid">
+      <img src="screens/add-pick.png" alt="Add step 1" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">Add · bước 1 — chọn dịch vụ</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Lọc theo nhóm, lưới dịch vụ. Lối thoát “Enter manually” luôn hiện ở cuối.</div>
+    </div>
+    <div style="break-inside:avoid">
+      <img src="screens/add-details.png" alt="Add step 2" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">Add · bước 2 — chi tiết</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Gói giá dựng sẵn theo dịch vụ. Hàng chip ngày cuộn ngang, không xuống dòng.</div>
+    </div>
+    <div style="break-inside:avoid">
+      <img src="screens/money.png" alt="Spending" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">Spending</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Tổng theo tháng, chart cột, danh sách theo giá giảm dần.</div>
+    </div>
+    <div style="break-inside:avoid">
+      <img src="screens/savings.png" alt="Savings" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">Savings</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Màn duy nhất dùng màu xanh lá; accent xanh dương không xuất hiện ở đây.</div>
+    </div>
+    <div style="break-inside:avoid">
+      <img src="screens/history.png" alt="History" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">History</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Vào từ tab Spending. Nhóm theo tháng, mỗi hàng là một lần đã trả.</div>
+    </div>
+    <div style="break-inside:avoid">
+      <img src="screens/settings.png" alt="Settings" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">Settings</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Các nhóm card, mỗi hàng mở một màn con hoặc bật/tắt tại chỗ.</div>
+    </div>
+    <div style="break-inside:avoid">
+      <img src="screens/reminders.png" alt="Reminders" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">Reminders</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Quy tắc nhắc mặc định áp cho mọi item mới; item có thể ghi đè riêng.</div>
+    </div>
+    <div style="break-inside:avoid">
+      <img src="screens/services.png" alt="All services" style="width:100%;display:block;border-radius:16px">
+      <div style="font:600 13.5px/1.35 'Be Vietnam Pro',sans-serif;margin-top:8px">All services</div>
+      <div style="font:400 12.5px/1.5 'Be Vietnam Pro',sans-serif;color:#5b6272;margin-top:3px">Toàn bộ item kể cả đã tắt nhắc. Nơi duy nhất bật/tắt nhắc theo từng item.</div>
+    </div>
+  </div>
+
+  <h2 style="font:600 18px/1.3 'Be Vietnam Pro',sans-serif;letter-spacing:-.02em;margin:0 0 12px;padding-top:14px;border-top:1px solid #dfe2ea">4. Mô hình dữ liệu</h2>
+  <p style="font:400 13.5px/1.6 'Be Vietnam Pro',sans-serif;margin:0 0 10px">Mỗi mốc ngày là <strong>một item độc lập</strong>. Không có nhóm nhiều mốc trong một đối tượng, không có xử lý riêng cho SIM.</p>
+  <table style="width:100%;border-collapse:collapse;font:400 13px/1.55 'Be Vietnam Pro',sans-serif;margin:0 0 22px">
+    <thead><tr>
+      <th style="text-align:left;padding:8px 10px;border-bottom:1px solid #1b2230;font-weight:600;width:24%">Trường</th>
+      <th style="text-align:left;padding:8px 10px;border-bottom:1px solid #1b2230;font-weight:600">Giá trị</th>
+    </tr></thead>
+    <tbody>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">name</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Bắt buộc. Gõ tự do, có gợi ý dịch vụ phổ biến.</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">icon</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Tự detect theo tên. Không khớp thì dùng chữ cái đầu trên tile màu.</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">category</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Subscription · Bill · SIM · Insurance · Document</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">date</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Preset 1-chạm: Today · Tomorrow · +7 · +14 · +30 · chọn ngày.</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">repeat</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Monthly · Yearly · One-off</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">cycles</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Forever hoặc giới hạn số lần / đến một ngày. Item có giới hạn hiển thị tiến độ.</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">cost</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Số + đơn vị chọn ở cuối field: <strong>đ</strong> (mặc định) hoặc $.</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">source</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Tuỳ chọn. Tên gợi nhớ, không bao giờ là số thẻ.</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">trial</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">Cờ dùng thử + ngày hết hạn. Item trial nằm nhóm riêng, giá hiển thị “Free now · then …”.</td></tr>
+      <tr><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">remind</td><td style="padding:8px 10px;border-bottom:1px solid #e6e8ee">On the day · 1 day · 3 days (mặc định) · 7 days before.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 style="font:600 18px/1.3 'Be Vietnam Pro',sans-serif;letter-spacing:-.02em;margin:0 0 10px;padding-top:14px;border-top:1px solid #dfe2ea">5. Điểm còn mở</h2>
+  <ul style="font:400 13.5px/1.7 'Be Vietnam Pro',sans-serif;margin:0 0 8px;padding-left:20px">
+    <li>Nguồn logo dịch vụ và cách xử lý khi không có bản quyền hình.</li>
+    <li>Danh sách dịch vụ gợi ý khi gõ tên — lấy từ đâu, cập nhật thế nào.</li>
+    <li>Quy tắc khi item hết số chu kỳ: tự lưu trữ hay hỏi người dùng.</li>
+    <li>Ngưỡng thiết bị tắt blur (đời máy, chế độ tiết kiệm pin).</li>
+  </ul>
+</doc-page>
+</x-dc>
+</body>
+</html>

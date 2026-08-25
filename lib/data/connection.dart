@@ -17,13 +17,20 @@ import 'package:subdock/data/database.dart';
 /// this exact function. Pointing a test at its own `NativeDatabase` instead
 /// would skip the two things that only break on a real file — the migration
 /// and WAL — which is how the `repeatCount` crash reached a device.
+///
+/// [reshelve] is only read by the v6 migration, and only on a file written
+/// before it. `main` passes one backed by the service catalogue, which is the
+/// difference between an old Netflix row landing on Streaming and landing in
+/// Other; without it the fallback is honest but blunt.
 Future<SubdockDatabase> openDatabase({
   String fileName = 'subdock.sqlite',
+  LegacyCategoryResolver reshelve = legacyCategoryByCode,
 }) async {
   final directory = await getApplicationSupportDirectory();
   final file = File(p.join(directory.path, fileName));
 
   return SubdockDatabase(
+    reshelve: reshelve,
     NativeDatabase.createInBackground(
       file,
       // Everything the app does with SQLite happens off the UI isolate, so a

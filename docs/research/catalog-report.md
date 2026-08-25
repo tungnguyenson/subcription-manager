@@ -40,14 +40,22 @@ Danh mục cũ có 71 mục, mỗi mục đúng một con số giá, không ngu�
 | Tên và các cách gõ tắt | Có cả bản không dấu, vì người dùng gõ vội trên điện thoại |
 | Lĩnh vực (`sector`) | AI, Streaming, Music, Gaming... |
 | Cách thanh toán (`category`) | Subscription, Bill, Insurance, Document |
+| *(đã gộp)* | Hai dòng trên nay là **một** trường `category`, xem ghi chú cuối mục |
 | Các gói cước | Giá, tiền tệ, chu kỳ, vùng, kèm nguồn và ngày kiểm |
 | Icon | Dấu hiệu riêng của hãng nếu có |
 | Link huỷ | Trang huỷ thật, không phải trang chủ |
 | Link trang thuê bao | Nơi người dùng xem gói của chính họ (thêm giữa đợt, xem 1.5) |
 
-`sector` và `category` là **hai cách phân loại khác nhau và cùng tồn tại**: một cái nói
+Lúc dựng danh mục, `sector` và `category` là hai cách phân loại cùng tồn tại: một cái nói
 dịch vụ thuộc lĩnh vực gì (để duyệt và chọn), cái kia nói nó được thanh toán ra sao (để
-tính tiền và đặt nhắc hạn). Gộp hai cái làm một sẽ phá phần nhắc hạn.
+tính tiền và đặt nhắc hạn).
+
+> **Đã đổi.** Hai trường này nay là **một**, tên là `category`, mang giá trị của `sector`
+> cũ. Cái mất đi là phân loại năm giá trị: mọi hành vi nó từng lái (nhắc gắt hay nhẹ, chữ
+> *due* hay *expires*, có tính vào chi tiêu không) nay là cột của chính nhóm, và nhóm là
+> hàng trong bảng `categoryRow` mà người dùng tự thêm sửa xoá. Lý do gộp: 199 trong 223
+> mục là `SUBSCRIPTION` nên phân loại cũ không xếp kệ được, còn `sector` thì không lái
+> được hành vi nào. Chi tiết ở `lib/domain/default_categories.dart`.
 
 ### 1.3 Phạm vi
 

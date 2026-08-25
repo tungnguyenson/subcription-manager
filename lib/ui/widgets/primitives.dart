@@ -27,12 +27,13 @@ class SectionLabel extends StatelessWidget {
   }
 }
 
-/// The white container everything sits in.
+/// The translucent container everything sits in.
 ///
-/// There is no border. The card is told apart from the grey ground purely by
-/// [SubdockShadow.card], which is why this is a single widget rather than a
-/// decoration each screen repeats: one card drawn with a border, or with a
-/// flatter shadow, reads as a different surface class entirely.
+/// There is no drop shadow. A card is told apart from the gradient behind it
+/// by the bright hairline in [SubdockSurface.card] — which is why this is a
+/// single widget rather than a decoration each screen repeats. One card drawn
+/// with a shadow instead disappears; one drawn opaque stops belonging to the
+/// theme.
 class GroupedCard extends StatelessWidget {
   final List<Widget> children;
 
@@ -42,16 +43,17 @@ class GroupedCard extends StatelessWidget {
   final EdgeInsetsGeometry? padding;
 
   final double radius;
-  final Color color;
-  final List<BoxShadow> shadow;
+
+  /// Overrides the fill. Used for the two rows that carry a hue of their own:
+  /// overdue, and a free trial.
+  final BoxDecoration? decoration;
 
   const GroupedCard({
     super.key,
     required this.children,
     this.padding,
     this.radius = SubdockRadius.card,
-    this.color = SubdockColors.card,
-    this.shadow = SubdockShadow.card,
+    this.decoration,
   });
 
   @override
@@ -69,11 +71,7 @@ class GroupedCard extends StatelessWidget {
     }
 
     return Container(
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(radius),
-        boxShadow: shadow,
-      ),
+      decoration: decoration ?? SubdockSurface.card(radius: radius),
       clipBehavior: Clip.antiAlias,
       padding: padding,
       child: Column(
@@ -191,26 +189,45 @@ class DetailRow extends StatelessWidget {
         ),
         child: Row(
           children: [
+            // The pair shares one Expanded and pushes apart inside it, rather
+            // than each taking a flex of its own. Two flexible children of the
+            // same Row split the free space in half, so the value used to land
+            // at the end of its *half* -- near the middle of the card -- with
+            // its `textAlign: right` doing nothing, because a loose Flexible is
+            // already exactly as wide as its text. Both are still Flexible in
+            // here, so a long label and a long value give way to each other
+            // instead of overflowing.
             Expanded(
-              child: Text(
-                label,
-                style: chevron ? SubdockText.rowLink : SubdockText.rowLabel,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: Text(
+                      label,
+                      style: chevron
+                          ? SubdockText.rowLink
+                          : SubdockText.rowLabel,
+                    ),
+                  ),
+                  if (value != null) ...[
+                    const SizedBox(width: 12),
+                    Flexible(
+                      child: Text(
+                        value!,
+                        textAlign: TextAlign.right,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: chevron
+                            ? SubdockText.rowLabel.copyWith(fontSize: 12)
+                            : (valueColor == null
+                                  ? base
+                                  : base.copyWith(color: valueColor)),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            if (value != null)
-              Flexible(
-                child: Text(
-                  value!,
-                  textAlign: TextAlign.right,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: chevron
-                      ? SubdockText.rowLabel.copyWith(fontSize: 12)
-                      : (valueColor == null
-                            ? base
-                            : base.copyWith(color: valueColor)),
-                ),
-              ),
             if (chevron) ...[
               const SizedBox(width: 8),
               const Text(
@@ -230,12 +247,22 @@ class DetailRow extends StatelessWidget {
   }
 }
 
-/// The rounded square that stands in for a service's mark.
+/// The rounded square that carries a service's mark.
 ///
-/// Filled with the page ground rather than white, so on a white card it reads
-/// as a hole rather than as another card. Carries the item's initial until
-/// there is a real logo to put in it — an empty square beside a name reads as
-/// an image that failed to load.
+/// Three outcomes, in falling order of how much the app actually knows:
+///
+/// 1. **A brand mark** — the drawn logo, on a tile tinted with that brand's
+///    own colour at 10%.
+/// 2. **A category glyph** — a bill, a SIM, a document. Drawn on plain glass,
+///    never tinted, so a colour in this column always means "this is that
+///    service" and never "this row is a bill".
+/// 3. **The first letter**, on a filled accent tile with white type.
+///
+/// The design mock-ups show (3) for everything, because HTML cannot draw the
+/// app's vector marks. Keeping (1) and (2) is deliberate: the marks are real
+/// work with golden tests behind them, and a wall of identical accent squares
+/// carries less information than a Netflix logo does. The letter tile is the
+/// fallback the design specifies, not the default.
 class ServiceTile extends StatelessWidget {
   final String name;
 
@@ -249,6 +276,16 @@ class ServiceTile extends StatelessWidget {
 
   /// Set on the add form, where the tile is the way into the icon gallery.
   final VoidCallback? onTap;
+
+  /// The size for a two-line list row: name over subtitle.
+  ///
+  /// Measured, not chosen. `itemName` at 17/1.3 is 22pt, the 3pt gap, and a
+  /// 14/1.4 subtitle is 20pt, so the text beside the tile stands 45pt tall. A
+  /// 34pt tile against that leaves the mark floating in the middle of a taller
+  /// column and reads as undersized. The tile matches the block it sits
+  /// beside, with a point to spare so a subtitle a shade taller cannot
+  /// overtake it. Rows carrying a single line keep the smaller default.
+  static const double listSize = 46;
 
   const ServiceTile(
     this.name, {
@@ -281,7 +318,7 @@ class ServiceTile extends StatelessWidget {
           BrandGlyph(mark: mark, size: size * 0.56),
           Color(mark.colour),
         ),
-        null => (_letter(trimmed), SubdockColors.canvas),
+        null => (_letter(trimmed), SubdockColors.accent),
       },
       GlyphSpec(:final glyph, brandColour: final int colour) => (
         CategoryMark(glyph: glyph, colour: Color(colour), size: size * 0.62),
@@ -290,27 +327,35 @@ class ServiceTile extends StatelessWidget {
       GlyphSpec(:final glyph) => (
         CategoryMark(
           glyph: glyph,
-          colour: SubdockColors.inkMuted,
+          colour: SubdockColors.inkSecondary,
           size: size * 0.62,
         ),
-        SubdockColors.canvas,
+        _plain,
       ),
-      null => (_letter(trimmed), SubdockColors.canvas),
+      null => (_letter(trimmed), SubdockColors.accent),
     };
+
+    // A letter tile is filled solid and a mark tile is not. The letter has to
+    // carry the whole identity of the row on its own, and 16px of grey type on
+    // glass does not; a mark already has a shape to be recognised by, and
+    // filling its tile would fight the logo inside it.
+    final solid =
+        spec == null || (spec is BrandSpec && brandMarks[spec.key] == null);
 
     final tile = Container(
       width: size,
       height: size,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        // A category glyph and the letter both keep the flat canvas fill the
-        // tile always had; only a brand tints. So a colour in that column
-        // means "this is that service", never "this row is a bill".
-        color: tint == SubdockColors.canvas
-            ? SubdockColors.canvas
-            : tint.withValues(alpha: 0.10),
+        color: solid
+            ? tint
+            : (tint == _plain
+                  ? SubdockColors.thumb
+                  : tint.withValues(alpha: 0.10)),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: SubdockColors.hairline),
+        border: Border.all(
+          color: solid ? const Color(0x00000000) : SubdockColors.thumbEdge,
+        ),
       ),
       child: child,
     );
@@ -324,6 +369,10 @@ class ServiceTile extends StatelessWidget {
   }
 
   static const MarkSpec _blank = GlyphSpec(CategoryGlyph.calendar);
+
+  /// Sentinel for "no brand colour" in the switch above. Any colour would do;
+  /// it is compared by identity, never painted.
+  static const Color _plain = Color(0x00000001);
 
   Widget _letter(String trimmed) => Text(
     trimmed.isEmpty ? '' : trimmed.substring(0, 1).toUpperCase(),
@@ -346,10 +395,9 @@ class PrimaryButton extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(SubdockRadius.card),
-        boxShadow: enabled ? SubdockShadow.card : const [],
       ),
       child: Material(
-        color: enabled ? SubdockColors.accent : SubdockColors.accentTrack,
+        color: enabled ? SubdockColors.accent : SubdockColors.accentSoft,
         borderRadius: BorderRadius.circular(SubdockRadius.card),
         child: InkWell(
           onTap: onPressed,
@@ -364,7 +412,9 @@ class PrimaryButton extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: SubdockText.button.copyWith(
-                color: enabled ? SubdockColors.card : SubdockColors.inkMuted,
+                color: enabled
+                    ? const Color(0xFFFFFFFF)
+                    : SubdockColors.inkMuted,
               ),
             ),
           ),
@@ -379,28 +429,37 @@ class SecondaryButton extends StatelessWidget {
   final String label;
   final VoidCallback? onPressed;
 
-  const SecondaryButton(this.label, {super.key, this.onPressed});
+  /// Reads in the accent rather than in ink. The design uses this where the
+  /// card-shaped button is the *only* action on the block — "Open Netflix
+  /// account", "Enter manually", "Add a service" — so it has to look like the
+  /// thing to tap without becoming a second filled button on the screen.
+  final bool accent;
+
+  const SecondaryButton(
+    this.label, {
+    super.key,
+    this.onPressed,
+    this.accent = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(SubdockRadius.card),
-        boxShadow: SubdockShadow.soft,
-      ),
+    return Container(
+      decoration: SubdockSurface.card(),
+      clipBehavior: Clip.antiAlias,
       child: Material(
-        color: SubdockColors.card,
-        borderRadius: BorderRadius.circular(SubdockRadius.card),
+        color: const Color(0x00000000),
         child: InkWell(
           onTap: onPressed,
-          borderRadius: BorderRadius.circular(SubdockRadius.card),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 15),
+            padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
             alignment: Alignment.center,
             child: Text(
               label,
               textAlign: TextAlign.center,
-              style: SubdockText.button.copyWith(color: SubdockColors.ink),
+              style: SubdockText.button.copyWith(
+                color: accent ? SubdockColors.accent : SubdockColors.ink,
+              ),
             ),
           ),
         ),
@@ -461,34 +520,69 @@ class ChoiceChipPill extends StatelessWidget {
   /// On a field it inverts — the ground colour comes back as the fill.
   final bool onField;
 
+  /// A mark drawn before the label. Only the payment-source chips use one: the
+  /// list is user-written names ("VCB 4412", "Momo"), and a card glyph beside
+  /// them is what says the row is about money rather than about a service.
+  final Widget? icon;
+
   const ChoiceChipPill(
     this.label, {
     super.key,
     this.selected = false,
     this.onTap,
     this.onField = false,
+    this.icon,
   });
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
+    return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(SubdockRadius.chip),
-        boxShadow: selected || onField ? const [] : SubdockShadow.soft,
-      ),
-      child: Material(
         color: selected
             ? SubdockColors.accent
-            : (onField ? SubdockColors.canvas : SubdockColors.card),
+            : (onField ? SubdockColors.hairline : SubdockColors.card),
         borderRadius: BorderRadius.circular(SubdockRadius.chip),
+        border: Border.all(
+          color: selected || onField
+              ? const Color(0x00000000)
+              : SubdockColors.glassEdge,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: const Color(0x00000000),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(SubdockRadius.chip),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
-            child: Text(
-              label,
-              style: selected ? SubdockText.chipSelected : SubdockText.chip,
+            padding: EdgeInsets.symmetric(
+              horizontal: 12,
+              // 44px minimum on a chip the thumb has to hit. The design's own
+              // padding gives 32px, which is under the platform minimum on
+              // both iOS and Android; the extra goes into the touch target,
+              // not the drawn box, because the row of chips has to keep the
+              // proportions the mock-up gives it.
+              vertical: 9,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (icon != null) ...[
+                  IconTheme(
+                    data: IconThemeData(
+                      size: 16,
+                      color: selected
+                          ? const Color(0xFFFFFFFF)
+                          : SubdockColors.inkSecondary,
+                    ),
+                    child: icon!,
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  label,
+                  style: selected ? SubdockText.chipSelected : SubdockText.chip,
+                ),
+              ],
             ),
           ),
         ),
@@ -508,6 +602,87 @@ class ChoiceChipPill extends StatelessWidget {
 ///
 /// Because the rail supplies its own gutters, the screen that holds it must
 /// not — put it outside the body's horizontal padding.
+/// A chip with no edge: transparent when off, accent-faint when on.
+///
+/// The build file calls this shape `flat`, and it is used where a chip is a
+/// *shortcut* to a control that is already on screen rather than the control
+/// itself. A bordered pill beside the field it fills would read as a second
+/// place the value could live.
+/// A small word set into a row, naming a state the row is in.
+///
+/// `FREE TRIAL` is the one it exists for. It replaced tinting the row's edge,
+/// its amount and its countdown all at once: those three say "pay attention to
+/// this line", which is what an overdue item means, and a trial is not that. It
+/// is a fact — *you are not being charged yet* — and a fact is best said in the
+/// word for it.
+///
+/// Uppercase and letter-spaced rather than sentence case, so it reads as a
+/// label attached to the name rather than as a second, shouting name. Caller
+/// passes normal case; the widget does the shouting.
+class StatusBadge extends StatelessWidget {
+  final String label;
+
+  const StatusBadge(this.label, {super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: SubdockColors.accentFaint,
+        borderRadius: BorderRadius.circular(SubdockRadius.chip),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+      child: Text(
+        label.toUpperCase(),
+        maxLines: 1,
+        style: const TextStyle(
+          fontFamily: SubdockText.family,
+          fontSize: 11,
+          height: 1.25,
+          letterSpacing: 0.7,
+          fontWeight: SubdockWeight.semibold,
+          color: SubdockColors.accent,
+        ),
+      ),
+    );
+  }
+}
+
+class FlatChip extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  const FlatChip({
+    super.key,
+    required this.label,
+    this.selected = false,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? SubdockColors.accentFaint : const Color(0x00000000),
+      borderRadius: BorderRadius.circular(SubdockRadius.chip),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 8),
+          child: Text(
+            label,
+            style: SubdockText.chip.copyWith(
+              fontSize: 13,
+              color: selected ? SubdockColors.accent : SubdockColors.inkMuted,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class ChipRail extends StatelessWidget {
   final List<Widget> children;
 
@@ -519,9 +694,7 @@ class ChipRail extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       padding: const EdgeInsets.symmetric(
         horizontal: SubdockSpacing.screenH,
-        // The chips carry a soft shadow, and a scroll view clips to its own
-        // bounds; without the room the shadow is sliced off along the line.
-        vertical: 4,
+        vertical: 2,
       ),
       child: Row(
         children: [
@@ -535,64 +708,123 @@ class ChipRail extends StatelessWidget {
   }
 }
 
-/// A row of pills that divide the width between them: Monthly / Yearly / Once.
+/// A row of segments that divide the width between them.
 ///
-/// Separate from [ChoiceChipPill] because the options are exhaustive and
-/// mutually exclusive, and equal widths are what say so.
+/// The Glass design draws this as one inset tray with the selected segment
+/// lifted out of it in solid white — not as a row of separate pills. That
+/// matters: the options here are exhaustive and mutually exclusive (Month /
+/// Year, Move to yearly / Cancel a service), and a single tray is what says
+/// "one of these, always". Separate pills would read as independent filters.
 class SegmentedRow extends StatelessWidget {
   final List<String> labels;
   final int selected;
   final ValueChanged<int>? onSelect;
+
+  /// Give each segment a share of the width in proportion to its label.
+  ///
+  /// Off by default, because equal thirds are what a tray of short options
+  /// (Month / Year, All / Paid / Missed) should look like. On where the labels
+  /// are lopsided — `After a number of payments` beside `On a date` — since an
+  /// equal split there spends half the tray on nine characters and truncates
+  /// the twenty-six beside them, which is the one thing a segment must never
+  /// do: a segment whose label is cut off cannot be read before it is chosen.
+  final bool weighted;
 
   const SegmentedRow({
     super.key,
     required this.labels,
     required this.selected,
     this.onSelect,
+    this.weighted = false,
   });
+
+  /// The horizontal padding inside one segment, both sides.
+  static const double _segmentPadding = 16;
+
+  static const TextStyle _segmentStyle = TextStyle(
+    fontFamily: SubdockText.family,
+    fontSize: 14.5,
+    height: 1.2,
+    fontWeight: SubdockWeight.medium,
+  );
+
+  /// What each segment needs, measured rather than guessed.
+  ///
+  /// Character count is not a usable stand-in here: the labels this is used
+  /// for are ordinary English, where `payments` is eight narrow letters and
+  /// `On a date` is nine mostly-wide ones plus two spaces. Laying out the text
+  /// for real is a handful of microseconds and it is the only way to be sure
+  /// no segment is handed less width than its own label occupies.
+  static List<double> _widths(List<String> labels, TextScaler scaler) => [
+    for (final label in labels)
+      (TextPainter(
+            text: TextSpan(text: label, style: _segmentStyle),
+            textDirection: TextDirection.ltr,
+            textScaler: scaler,
+            maxLines: 1,
+          )..layout()).width +
+          _segmentPadding,
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (var i = 0; i < labels.length; i++) ...[
-          if (i > 0) const SizedBox(width: 7),
-          Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(SubdockRadius.control),
-                boxShadow: i == selected ? const [] : SubdockShadow.soft,
-              ),
-              child: Material(
-                color: i == selected
-                    ? SubdockColors.accent
-                    : SubdockColors.card,
-                borderRadius: BorderRadius.circular(SubdockRadius.control),
-                child: InkWell(
-                  onTap: onSelect == null ? null : () => onSelect!(i),
-                  borderRadius: BorderRadius.circular(SubdockRadius.control),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 11),
-                    alignment: Alignment.center,
-                    child: Text(
-                      labels[i],
-                      // A segment is a quarter of a phone wide at most. A
-                      // label that does not fit has to clip on one line
-                      // rather than wrap and make this row taller than the
-                      // one beside it.
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: i == selected
-                          ? SubdockText.chipSelected
-                          : SubdockText.chip,
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: SubdockColors.card,
+        borderRadius: BorderRadius.circular(SubdockRadius.chip),
+        border: Border.all(color: SubdockColors.hairline),
+      ),
+      child: Builder(
+        builder: (context) {
+          final widths = weighted
+              ? _widths(labels, MediaQuery.textScalerOf(context))
+              : null;
+
+          return Row(
+            children: [
+              for (var i = 0; i < labels.length; i++)
+                Expanded(
+                  // Flex is an int, so the measured widths are scaled up
+                  // before rounding — at 1:1 a two-point difference between
+                  // two segments would round away to nothing.
+                  flex: widths == null ? 1 : (widths[i] * 10).round(),
+                  child: Material(
+                    color: i == selected
+                        ? const Color(0xE6FFFFFF)
+                        : const Color(0x00000000),
+                    borderRadius: BorderRadius.circular(SubdockRadius.chip),
+                    child: InkWell(
+                      onTap: onSelect == null ? null : () => onSelect!(i),
+                      borderRadius: BorderRadius.circular(SubdockRadius.chip),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 10,
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          labels[i],
+                          // A segment is a third of a phone wide at most. A label
+                          // that does not fit has to clip on one line rather than
+                          // wrap and make this row taller than the one beside it.
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.center,
+                          style: _segmentStyle.copyWith(
+                            color: i == selected
+                                ? SubdockColors.ink
+                                : SubdockColors.inkMuted,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            ),
-          ),
-        ],
-      ],
+            ],
+          );
+        },
+      ),
     );
   }
 }
@@ -615,14 +847,11 @@ class FieldBox extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        color: SubdockColors.card,
-        borderRadius: BorderRadius.circular(SubdockRadius.field),
-        boxShadow: focused ? SubdockShadow.card : SubdockShadow.soft,
-        border: focused
-            ? Border.all(color: SubdockColors.accent, width: 1.5)
-            : null,
-      ),
+      decoration: focused
+          ? SubdockSurface.card(radius: SubdockRadius.field).copyWith(
+              border: Border.all(color: SubdockColors.accent, width: 1.5),
+            )
+          : SubdockSurface.card(radius: SubdockRadius.field),
       padding: padding,
       child: child,
     );
@@ -631,7 +860,14 @@ class FieldBox extends StatelessWidget {
 
 /// A label above a field, with the field under it.
 class Field extends StatelessWidget {
-  final String label;
+  /// Null draws the control with no heading.
+  ///
+  /// The add form uses it: the build file labels `NAME` and `BILLING CYCLE`
+  /// and then stops, because the chips under the name field are self-evidently
+  /// a category and the switch reading "In a free trial now" is its own label.
+  /// A heading over either would be the screen saying the same thing twice.
+  final String? label;
+
   final Widget child;
 
   /// Set when the child supplies its own gutters and runs to the screen edge
@@ -650,14 +886,15 @@ class Field extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: EdgeInsets.only(
-            left: bleed ? SubdockSpacing.screenH : 0,
-            right: bleed ? SubdockSpacing.screenH : 0,
-            bottom: SubdockSpacing.labelToControl,
+        if (label case final label?)
+          Padding(
+            padding: EdgeInsets.only(
+              left: bleed ? SubdockSpacing.screenH : 0,
+              right: bleed ? SubdockSpacing.screenH : 0,
+              bottom: SubdockSpacing.labelToControl,
+            ),
+            child: Text(label.toUpperCase(), style: SubdockText.sectionLabel),
           ),
-          child: Text(label.toUpperCase(), style: SubdockText.sectionLabel),
-        ),
         child,
       ],
     );
@@ -670,11 +907,20 @@ class PickerField extends StatelessWidget {
   final bool placeholder;
   final VoidCallback? onTap;
 
+  /// A second line under the value, saying what tapping does.
+  ///
+  /// Only worth having where the value itself is still a prompt — the date
+  /// field reads `Choose a date` before it is set, and `Tap to open the
+  /// calendar` under it is what turns that from a label into an affordance.
+  /// A field that already holds a real value has nothing to add.
+  final String? hint;
+
   const PickerField({
     super.key,
     required this.value,
     this.placeholder = false,
     this.onTap,
+    this.hint,
   });
 
   @override
@@ -686,15 +932,30 @@ class PickerField extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
-              child: Text(
-                value,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: placeholder
-                    ? SubdockText.fieldValue.copyWith(
-                        color: SubdockColors.inkMuted,
-                      )
-                    : SubdockText.fieldValue,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: placeholder
+                        ? SubdockText.fieldValue.copyWith(
+                            color: SubdockColors.inkMuted,
+                          )
+                        : SubdockText.fieldValue,
+                  ),
+                  if (hint case final hint?) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      hint,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: SubdockText.caption,
+                    ),
+                  ],
+                ],
               ),
             ),
             const SizedBox(width: 8),
@@ -728,14 +989,14 @@ class AppToggle extends StatelessWidget {
           padding: const EdgeInsets.all(3),
           alignment: value ? Alignment.centerRight : Alignment.centerLeft,
           decoration: BoxDecoration(
-            color: value ? SubdockColors.accent : SubdockColors.accentTrack,
+            color: value ? SubdockColors.accent : SubdockColors.accentSoft,
             borderRadius: BorderRadius.circular(13),
           ),
           child: Container(
             width: 19,
             height: 19,
             decoration: const BoxDecoration(
-              color: SubdockColors.card,
+              color: SubdockColors.knob,
               shape: BoxShape.circle,
               boxShadow: SubdockShadow.knob,
             ),

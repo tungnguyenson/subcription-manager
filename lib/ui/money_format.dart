@@ -77,8 +77,13 @@ abstract final class MoneyFormat {
   /// cents. Anything finer than the currency allows is rounded half-up, so
   /// `20.5` under VND is 21 dong rather than a silent truncation to 20.
   static int? parseMajor(String raw, String currency) {
-    var text = raw.replaceAll(RegExp(r'[\s,_ ₫$]'), '');
+    var text = raw.replaceAll(RegExp(r'[\s_ ₫$]'), '');
     if (text.isEmpty) return null;
+
+    final exponent = Currencies.exponentOf(currency);
+    // Work out what a comma meant *before* throwing commas away. See
+    // [_decimalised].
+    text = _decimalised(text, exponent).replaceAll(',', '');
 
     final negative = text.startsWith('-');
     if (negative) text = text.substring(1);
@@ -95,7 +100,6 @@ abstract final class MoneyFormat {
     final fraction = parts.length == 2 ? parts[1] : '';
     if (fraction.isNotEmpty && !_digits.hasMatch(fraction)) return null;
 
-    final exponent = Currencies.exponentOf(currency);
     // One digit past the currency's precision, which is the one that decides
     // the rounding.
     final padded = fraction.padRight(exponent + 1, '0');
@@ -104,6 +108,35 @@ abstract final class MoneyFormat {
 
     final minor = whole * Currencies.pow10(exponent) + kept + (roundUp ? 1 : 0);
     return negative ? -minor : minor;
+  }
+
+  /// Rewrites a comma that is standing in for the decimal point.
+  ///
+  /// iOS renders the decimal pad's separator key in the *device's* locale, so a
+  /// phone set to Vietnamese offers a comma and no full stop at all. Someone
+  /// entering \$32.68 has no way to type a full stop, types `32,68`, and every
+  /// comma used to be stripped as a thousands mark — which turned it into
+  /// \$3,268.00. Silently, and off by a hundred, which is exactly the shape of
+  /// mistake this app must never make with a number the user typed.
+  ///
+  /// The rule is narrow on purpose, because `1,234` genuinely is grouping:
+  /// a lone comma is a decimal point only when there is no full stop anywhere,
+  /// the currency has decimals at all, and the digits after it would fit in
+  /// them. Three digits after a comma stay grouping, which is every real
+  /// thousands mark ever written.
+  static String _decimalised(String text, int exponent) {
+    if (exponent == 0) return text;
+    // A full stop present means the full stop is the point and every comma is
+    // grouping — `1,234.56` reads the way it looks.
+    if (text.contains('.')) return text;
+
+    final at = text.indexOf(',');
+    if (at < 0 || text.indexOf(',', at + 1) >= 0) return text;
+
+    final after = text.length - at - 1;
+    if (after < 1 || after > exponent) return text;
+
+    return '${text.substring(0, at)}.${text.substring(at + 1)}';
   }
 
   static final RegExp _digits = RegExp(r'^\d+$');
