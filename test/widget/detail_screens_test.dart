@@ -681,6 +681,48 @@ void main() {
       ),
     ]);
 
+    // The one thing the trial switch has to do: be enough on its own. It asks
+    // for no dates -- the day the free period ends is the day the charge lands,
+    // which is the form's own date field -- so a tap on it and a date is a
+    // complete item.
+    testWidgets('the trial switch is enough on its own to save', (
+      tester,
+    ) async {
+      DraftItem? saved;
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (draft) => saved = draft,
+        ),
+      );
+
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('In a free trial now'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('In a free trial now'));
+      await tester.pumpAndSettle();
+
+      // The date field does not go away when the trial comes on: for a trial
+      // that date *is* the first charge, and the summary at the foot of the
+      // form goes on reading it back.
+      expect(find.textContaining('Badged FREE TRIAL'), findsOneWidget);
+      expect(find.textContaining('Free until Saturday'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Save item'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save item'));
+      await tester.pumpAndSettle();
+
+      expect(saved, isNotNull);
+      expect(saved!.inTrial, isTrue);
+      expect(saved!.expiresOn, today);
+    });
+
     // The form is a pushed route, built once with whatever source list the app
     // held at the time. Nothing rebuilds it when the database gains a row, so a
     // source created from inside the form has to appear from the field's own

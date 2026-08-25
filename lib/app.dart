@@ -266,7 +266,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         options: _filterOptions,
         // Counted over items rather than read off the view, so the number on
         // the button is the same one the summary line will show.
-        countFor: (filter) => filter.apply(_items).length,
+        countFor: (filter) => filter.apply(_items, LocalDate.today()).length,
         onChanged: _setFilter,
       ),
     );
@@ -429,7 +429,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       case ShellTab.savings:
         return SavingsScreen(
           view: _savings(today),
-          monthlyCount: SavingsPresenter.monthlyCount(_items, _categories),
+          monthlyCount: SavingsPresenter.monthlyCount(
+            _items,
+            _categories,
+            today,
+          ),
           onChoose: _setYearlyChoice,
           onUnskip: () => unawaited(widget.repository.clearSkippedYearly()),
           onOpenItem: _openItemById,
@@ -842,6 +846,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// and the card that pays for it. A generic "allow notifications?" at this
   /// moment throws that away.
   Future<void> _askForNotifications(TrackedItem item) async {
+    final today = LocalDate.today();
     final lead = item.leadDays.isEmpty
         ? 0
         : item.leadDays.reduce((a, b) => a > b ? a : b);
@@ -850,7 +855,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     final money = item.money == null
         ? ''
-        : (item.isTrial
+        : (item.isTrialOn(today)
               ? ' · then ${MoneyFormat.full(item.money!)}'
               : ' · ${MoneyFormat.full(item.money!)}');
     final from = source == null ? '' : ' from ${source.name}';
@@ -866,7 +871,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       context,
       itemName: item.name,
       iconName: item.iconName,
-      title: item.isTrial
+      title: item.isTrialOn(today)
           ? 'Remind you before the trial ends?'
           : 'Remind you before ${item.name} charges?',
       line: line,

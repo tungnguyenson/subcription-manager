@@ -127,13 +127,18 @@ CREATE TABLE itemRow (
 
     state             TEXT NOT NULL,
 
-    -- The day a free trial began, or NULL for an item that is being paid for.
+    -- The user said this one is not being paid for yet. A flag, not a date.
     --
-    -- The trial's *end* is not stored: it is expiresOn, because the day the
-    -- free period ends is the day the first charge lands. Storing both would
-    -- let them disagree, and every reminder in the app already fires ahead of
-    -- expiresOn -- which is exactly the promise a trial reminder makes.
-    trialStart        TEXT,
+    -- The trial's end is not stored either: it is expiresOn, because the day
+    -- the free period ends is the day the first charge lands. Storing that
+    -- would let two dates disagree, and every reminder in the app already
+    -- fires ahead of expiresOn -- which is exactly the promise a trial
+    -- reminder makes.
+    --
+    -- Stays TRUE after expiresOn passes, on purpose: it records that the
+    -- months before the first charge were free, and that never stops being
+    -- true. Whether the item is in a trial *today* is TrackedItem.isTrialOn.
+    inTrial           BOOLEAN NOT NULL DEFAULT FALSE,
 
     -- Which card or account pays for this, or NULL for "not said".
     --

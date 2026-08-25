@@ -105,7 +105,7 @@ class ItemRepository {
             snoozedUntil: Value(item.snoozedUntil?.toString()),
             state: Value(item.state.wireName),
             purchaseChannel: Value(item.purchaseChannel.wireName),
-            trialStart: Value(item.trialStart?.toString()),
+            inTrial: Value(item.inTrial),
             paymentSourceId: Value(item.paymentSourceId),
             paused: Value(item.paused),
             yearlyChoice: Value(item.yearlyChoice.wireName),

@@ -108,7 +108,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   /// has typed their own amount. Only ever set alongside [_matched].
   String? _planTier;
 
-  TrialDraft _trial = TrialDraft.off;
+  bool _inTrial = false;
   String? _sourceId;
 
   /// True once the user has picked a suggestion or explicitly declined one.
@@ -216,10 +216,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     }
 
     _sourceId = initial.paymentSourceId;
-    final trialStart = initial.trialStart;
-    if (trialStart != null) {
-      _trial = TrialDraft(start: trialStart, firstCharge: initial.expiresOn);
-    }
+    _inTrial = initial.inTrial;
 
     // The name is already what the user meant. Offering to replace it with a
     // catalog row the moment the screen opens is an offer to undo their edit.
@@ -242,12 +239,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
   List<CatalogEntry> get _suggestions =>
       _nameSettled ? const [] : widget.catalog.search(_name.text);
 
-  /// The item's due date: a trial's first charge, or the date field.
+  /// The item's due date, trial or not.
   ///
-  /// One value, resolved in one place. A trial's free period ending *is* the
-  /// charge landing, so letting the two fields hold different dates would let
-  /// the reminder fire against one and the row display the other.
-  LocalDate? get _dueDate => _trial.on ? _trial.firstCharge : _expiresOn;
+  /// One field asks for it, because a trial's free period ending *is* the
+  /// charge landing. Two fields would let the reminder fire against one date
+  /// and the row display the other.
+  LocalDate? get _dueDate => _expiresOn;
 
   /// The name as it will be stored: what was typed, or a stand-in.
   ///
@@ -417,21 +414,19 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 const SizedBox(height: 9),
                 _gutter(_everyRow()),
               ],
-              // The date field only appears when there is no trial. With one on,
-              // the first charge date *is* the due date, and a second date
-              // field beside it is a second answer to the same question.
-              if (!_trial.on) ...[
-                const SizedBox(height: SubdockSpacing.formBlock),
-                Field(
-                  // No heading on a new item. The field itself reads `Choose a
-                  // date`, so a `NEXT PAYMENT` label over it is the screen
-                  // asking the same question twice. An edit gets one, because
-                  // there the field holds a date rather than a prompt.
-                  label: _isEdit ? 'Next date' : null,
-                  bleed: true,
-                  child: _dateField(),
-                ),
-              ],
+              // Asked once, trial or not. For a trial this date is the day
+              // the free period ends, which is the same day the first charge
+              // lands -- see the trial card's own note.
+              const SizedBox(height: SubdockSpacing.formBlock),
+              Field(
+                // No heading on a new item. The field itself reads `Choose a
+                // date`, so a `NEXT PAYMENT` label over it is the screen
+                // asking the same question twice. An edit gets one, because
+                // there the field holds a date rather than a prompt.
+                label: _isEdit ? 'Next date' : null,
+                bleed: true,
+                child: _dateField(),
+              ),
               // Hidden for a one-off. There is no series to end, and a
               // `Repeats forever` toggle over a payment that happens once is
               // a question with no true answer.
@@ -444,11 +439,8 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 Field(
                   label: _isEdit ? 'Free trial' : null,
                   child: TrialField(
-                    value: _trial,
-                    today: widget.today,
-                    leadDays: _lead,
-                    onChanged: (next) => setState(() => _trial = next),
-                    onPickDate: widget.onPickDate,
+                    value: _inTrial,
+                    onChanged: (on) => setState(() => _inTrial = on),
                   ),
                 ),
               ),
@@ -475,7 +467,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 SummaryBlock(
                   due: _dueDate,
                   amount: _parsedAmount,
-                  trial: _trial.on,
+                  trial: _inTrial,
                   leadDays: _lead,
                 ),
               ),
@@ -1309,7 +1301,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         // show it, so it has nothing to say about it.
         leadDays: initial?.leadDays ?? [_lead],
         matched: _matched,
-        trialStart: _trial.on ? _trial.start : null,
+        inTrial: _inTrial,
         paymentSourceId: _sourceId,
       ),
     );

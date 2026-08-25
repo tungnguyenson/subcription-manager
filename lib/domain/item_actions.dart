@@ -50,9 +50,10 @@ abstract final class ItemActions {
       // into the next one would fire a reminder about a payment already made.
       snoozedUntil: () => null,
       // The occurrence that just closed *was* the first charge, so the trial
-      // is over. Leaving the start date on would keep the item out of the
-      // spending total forever and keep labelling a paid subscription "free".
-      trialStart: () => null,
+      // is over for good. Clearing it here rather than leaving it to expire
+      // with the date: `expiresOn` has just moved to next month, so a flag
+      // left on would read as "free until then" all over again.
+      inTrial: false,
     );
   }
 

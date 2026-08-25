@@ -16,7 +16,7 @@ void main() {
     Cycle? cycle = Cycle.monthly,
     int? repeatCount,
     String? snoozedUntil,
-    String? trialStart,
+    bool inTrial = false,
     bool paused = false,
     YearlyChoice yearlyChoice = YearlyChoice.undecided,
     // `.on` rather than the plain constructor, so the item picks up the
@@ -31,7 +31,7 @@ void main() {
     cycle: cycle,
     repeatCount: repeatCount,
     snoozedUntil: snoozedUntil == null ? null : d(snoozedUntil),
-    trialStart: trialStart == null ? null : d(trialStart),
+    inTrial: inTrial,
     paused: paused,
     yearlyChoice: yearlyChoice,
   );
@@ -125,24 +125,36 @@ void main() {
   });
 
   group('a free trial', () {
-    test('is a trial exactly while it has a start date', () {
-      expect(item().isTrial, isFalse);
-      expect(item(trialStart: '2026-08-07').isTrial, isTrue);
+    // The flag alone is not the answer: the free period ends when the charge
+    // date arrives, whether or not anyone came back to the app to say so, and
+    // a row still badged FREE TRIAL a week after the money left is the app
+    // claiming to know something it does not.
+    test('runs until the first charge date, then stops on its own', () {
+      final trial = item(expiresOn: '2026-08-21', inTrial: true);
+
+      expect(trial.isTrialOn(d('2026-08-20')), isTrue);
+      expect(trial.isTrialOn(d('2026-08-21')), isFalse);
+      expect(trial.isTrialOn(d('2026-08-22')), isFalse);
     });
 
-    // The end of the free period *is* expiresOn. Storing both would let them
-    // disagree, and every reminder already fires ahead of expiresOn — which is
-    // the promise a trial reminder makes.
-    test('its length is the distance to the first charge', () {
-      expect(
-        item(expiresOn: '2026-08-21', trialStart: '2026-08-07').trialLengthDays,
-        14,
-      );
+    test('an item without the flag is never in one', () {
+      expect(item(expiresOn: '2026-08-21').isTrialOn(d('2026-08-01')), isFalse);
     });
 
-    // The amount on a trial is what the user *will* pay. A figure nobody has
-    // been charged has no business in a spending total.
-    test('does not count toward spend', () {
+    // The flag says the months *before* the first charge were free, and that
+    // never stops being true. Whether it is a trial today is a separate
+    // question -- see isTrialOn -- and the two must not be folded together.
+    test('the flag outlives the free period', () {
+      final trial = item(expiresOn: '2026-08-21', inTrial: true);
+
+      expect(trial.isTrialOn(d('2026-09-01')), isFalse);
+      expect(trial.inTrial, isTrue);
+    });
+
+    // Whether an amount lands in a spending total is a question about the
+    // month it lands in, not about the item. The months a trial covered carry
+    // no money; the ones after its first charge carry the full amount.
+    test('does not change whether the item counts toward spend', () {
       final trial = TrackedItem(
         id: 'x',
         name: 'Claude Pro',
@@ -152,30 +164,25 @@ void main() {
         cycle: Cycle.monthly,
         amountMinor: 520000,
         currency: 'VND',
-        trialStart: d('2026-08-07'),
+        inTrial: true,
       );
 
       expect(
         trial.countsTowardSpend(CategoryBook.shipped[trial.categoryId]),
-        isFalse,
-      );
-      expect(
-        trial
-            .copyWith(trialStart: () => null)
-            .countsTowardSpend(CategoryBook.shipped[trial.categoryId]),
         isTrue,
       );
     });
 
     // The occurrence that just closed *was* the first charge, so the trial is
-    // over. Leaving the start date on would keep a paid subscription out of the
-    // spending total forever and keep labelling it free.
-    test('is over once the first charge is recorded', () {
+    // over for good. expiresOn has just moved to next month, so a flag left on
+    // would read as "free until then" all over again.
+    test('the flag is cleared once the first charge is recorded', () {
       final advanced = ItemActions.advanced(
-        item(expiresOn: '2026-08-21', trialStart: '2026-08-07'),
+        item(expiresOn: '2026-08-21', inTrial: true),
       );
 
-      expect(advanced.isTrial, isFalse);
+      expect(advanced.inTrial, isFalse);
+      expect(advanced.isTrialOn(d('2026-08-22')), isFalse);
       expect(advanced.expiresOn, d('2026-09-21'));
     });
   });

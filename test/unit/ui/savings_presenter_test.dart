@@ -59,7 +59,7 @@ void main() {
     Cycle? cycle = Cycle.monthly,
     int? amountMinor = 260000,
     String currency = 'VND',
-    LocalDate? trialStart,
+    bool inTrial = false,
     YearlyChoice yearlyChoice = YearlyChoice.undecided,
     PurchaseChannel purchaseChannel = PurchaseChannel.unknown,
     ItemState state = ItemState.active,
@@ -74,7 +74,7 @@ void main() {
     amountMinor: amountMinor,
     currency: amountMinor == null ? null : currency,
     leadDays: const [7],
-    trialStart: trialStart,
+    inTrial: inTrial,
     yearlyChoice: yearlyChoice,
     purchaseChannel: purchaseChannel,
     state: state,
@@ -189,7 +189,7 @@ void main() {
         [
           item('Netflix Premium'),
           item('Adobe', cycle: Cycle.yearly),
-          item('Claude Pro', trialStart: d('2026-08-20')),
+          item('Claude Pro', inTrial: true),
         ],
         [netflix()],
       );
@@ -374,7 +374,7 @@ void main() {
       expect(
         view.leadFor(
           SavingsTab.yearly,
-          SavingsPresenter.monthlyCount(items, CategoryBook.shipped),
+          SavingsPresenter.monthlyCount(items, CategoryBook.shipped, today),
         ),
         '1 of 2 monthly plans cost less yearly.',
       );

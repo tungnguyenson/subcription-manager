@@ -9,6 +9,7 @@ import 'package:subdock/domain/default_categories.dart';
 
 import '../../fixtures/schema_v1.dart';
 import '../../fixtures/schema_v4.dart';
+import '../../fixtures/schema_v6.dart';
 
 /// Opening a v1 file is the one code path no unit test can fake convincingly,
 /// because the v1 schema exists nowhere in the tree any more — the migration
@@ -114,7 +115,7 @@ void main() {
       final raw = sqlite3.open(file.path);
       addTearDown(raw.close);
 
-      expect(raw.select('PRAGMA user_version;').single['user_version'], 6);
+      expect(raw.select('PRAGMA user_version;').single['user_version'], 7);
 
       final columns = raw
           .select('PRAGMA table_info(itemRow);')
@@ -132,13 +133,17 @@ void main() {
           'purchaseChannel',
           // Same again for v5. Every one of these reaches a v1 file through
           // the rebuild, not through its own addColumn step.
-          'trialStart',
+          'inTrial',
           'paymentSourceId',
           'paused',
           'yearlyChoice',
         ]),
       );
       expect(columns, isNot(contains('stake')));
+      // v7 replaced the trial start date with a flag. A v1 file never had the
+      // column, but the rebuild recreates the table at the current schema, so
+      // this also catches a schema that quietly kept it.
+      expect(columns, isNot(contains('trialStart')));
       expect(columns, isNot(contains('kind')));
       expect(columns, isNot(contains('categoryId')));
       expect(columns, isNot(contains('groupId')));
@@ -208,7 +213,7 @@ void main() {
 
       // Every existing row reads as what is true of it: not in a trial, no
       // source named, not paused, and never asked about the yearly plan.
-      expect(rows.every((r) => r.trialStart == null), isTrue);
+      expect(rows.every((r) => r.inTrial == false), isTrue);
       expect(rows.every((r) => r.paymentSourceId == null), isTrue);
       expect(rows.every((r) => r.paused == false), isTrue);
       expect(rows.every((r) => r.yearlyChoice == null), isTrue);
@@ -259,12 +264,89 @@ void main() {
 
       final raw = sqlite3.open(v4file.path);
       addTearDown(raw.close);
-      expect(raw.select('PRAGMA user_version;').single['user_version'], 6);
+      expect(raw.select('PRAGMA user_version;').single['user_version'], 7);
       // A second open must be a no-op rather than a second round of
       // addColumn, which would fail on a duplicate name.
       final again = SubdockDatabase(NativeDatabase(v4file));
       expect(await again.selectAll().get(), hasLength(2));
       await again.close();
+    });
+  });
+
+  // The version every installed copy is on, and the only one that has a trial
+  // to carry. v7 replaces `trialStart` with `inTrial`, which is the first
+  // migration in this file that reads an old column and writes its meaning
+  // into a new one -- a step the other two fixtures cannot exercise, because
+  // in both of them every row is correctly not in a trial whatever the
+  // backfill does.
+  group('a v6 file', () {
+    late Directory v6dir;
+    late File v6file;
+
+    setUp(() {
+      v6dir = Directory.systemTemp.createTempSync('subdock_v6');
+      v6file = File('${v6dir.path}/db.sqlite');
+
+      final raw = sqlite3.open(v6file.path);
+      raw.execute(schemaV6);
+      raw.execute(seedV6);
+      raw.execute('PRAGMA user_version = 6');
+      raw.close();
+    });
+
+    tearDown(() => v6dir.deleteSync(recursive: true));
+
+    test('turns a trial start date into the flag', () async {
+      final db = SubdockDatabase(NativeDatabase(v6file));
+      addTearDown(db.close);
+
+      final rows = await db.selectAll().get();
+      expect(rows, hasLength(2));
+
+      final byId = {for (final row in rows) row.id: row};
+      // The row that had a start date was in a trial; the one that did not was
+      // being paid for. Both halves matter: a backfill that set every row, or
+      // no row, would still pass one of these two expectations.
+      expect(byId['claude']!.inTrial, isTrue);
+      expect(byId['netflix']!.inTrial, isFalse);
+    });
+
+    test('drops the column it replaced, and keeps the history', () async {
+      final db = SubdockDatabase(NativeDatabase(v6file));
+      await db.selectAll().get();
+      // The rebuild that drops the column copies the whole table. A foreign key
+      // pointing into it is the thing most likely to be left dangling.
+      expect(await db.selectForItem('claude').get(), hasLength(1));
+      await db.close();
+
+      final raw = sqlite3.open(v6file.path);
+      addTearDown(raw.close);
+
+      expect(raw.select('PRAGMA user_version;').single['user_version'], 7);
+
+      final columns = raw
+          .select('PRAGMA table_info(itemRow);')
+          .map((r) => r['name'] as String);
+      expect(columns, contains('inTrial'));
+      expect(columns, isNot(contains('trialStart')));
+
+      // A failed rebuild leaves this behind; a clean one never does.
+      final tables = raw
+          .select("SELECT name FROM sqlite_master WHERE type = 'table';")
+          .map((r) => r['name'] as String);
+      expect(tables.where((name) => name.startsWith('tmp_for_copy')), isEmpty);
+
+      expect(raw.select('PRAGMA foreign_key_check;'), isEmpty);
+    });
+
+    test('a second open is a no-op', () async {
+      final first = SubdockDatabase(NativeDatabase(v6file));
+      await first.selectAll().get();
+      await first.close();
+
+      final again = SubdockDatabase(NativeDatabase(v6file));
+      addTearDown(again.close);
+      expect(await again.selectAll().get(), hasLength(2));
     });
   });
 }

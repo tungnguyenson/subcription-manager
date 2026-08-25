@@ -22,7 +22,7 @@ void main() {
     String? anchorDate,
     ItemState state = ItemState.active,
     bool paused = false,
-    LocalDate? trialStart,
+    bool inTrial = false,
     String? paymentSourceId,
   }) {
     return TrackedItem(
@@ -38,7 +38,7 @@ void main() {
       currency: currency,
       state: state,
       paused: paused,
-      trialStart: trialStart,
+      inTrial: inTrial,
       paymentSourceId: paymentSourceId,
     );
   }
@@ -231,11 +231,7 @@ void main() {
   group('a trial row', () {
     test('counts down like every other row', () {
       final view = UpcomingPresenter.build([
-        item(
-          'Claude Pro',
-          expiresOn: '2026-08-17',
-          trialStart: d('2026-08-10'),
-        ),
+        item('Claude Pro', expiresOn: '2026-08-17', inTrial: true),
       ], today);
 
       expect(view.trials.single.when, '2d');
@@ -248,14 +244,23 @@ void main() {
     // else. `Trial ends` on a row that ended two days ago says nothing.
     test('an overdue trial still reads as late', () {
       final view = UpcomingPresenter.build([
-        item(
-          'Claude Pro',
-          expiresOn: '2026-08-13',
-          trialStart: d('2026-08-06'),
-        ),
+        item('Claude Pro', expiresOn: '2026-08-13', inTrial: true),
       ], today);
 
       expect(view.overdue.single.when, 'Late');
+    });
+
+    // And it has stopped being a trial, badge and all. Nobody had to come back
+    // to the app and say so: the money left on the 13th whether they did or
+    // not, and a row still reading `Free now` after that is the app claiming
+    // to know something it does not.
+    test('the badge and the free-now line go once the charge date passes', () {
+      final view = UpcomingPresenter.build([
+        item('Claude Pro', expiresOn: '2026-08-13', inTrial: true),
+      ], today);
+
+      expect(view.overdue.single.trial, isFalse);
+      expect(view.overdue.single.subtitle, isNot(contains('Free now')));
     });
   });
 

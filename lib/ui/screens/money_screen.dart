@@ -87,8 +87,14 @@ class MoneyScreen extends StatelessWidget {
               top: SubdockSpacing.sectionTop,
               bottom: SubdockSpacing.sectionBottom,
             ),
+            // Not "not counted yet" any more. The charge itself is counted, in
+            // the month it lands in; what the trial bought was the months
+            // before it, and those are empty in the chart above rather than
+            // annotated down here. A heading claiming a figure is uncounted
+            // while it sits inside the total above it is the screen
+            // contradicting itself.
             child: Text(
-              'NOT COUNTED YET · TRIALS',
+              'IN A FREE TRIAL',
               style: SubdockText.sectionLabel.copyWith(
                 color: SubdockColors.accent,
               ),

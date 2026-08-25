@@ -98,6 +98,14 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
    `category` nhận được khoá ngoại trỏ sang `categoryRow`. Bảng `categoryRow` phải được
    tạo và seed **trước cả hai** bước dựng lại, vì bước dựng lại nào cũng tạo bảng mới
    theo lược đồ hiện tại, tức là có sẵn khoá ngoại đó.
+   Từ v7 có thêm hai điều. Một: **bước thêm cột của v7 nằm trên bước v6 trong file**, cố
+   ý và bắt buộc, vì bước dựng lại của v6 đọc theo lược đồ hiện tại nên nó chết ngay nếu
+   cột `inTrial` chưa tồn tại. Đổi lại, cột bị bỏ (`trialStart`) tự rụng khi đi qua bất
+   kỳ bước dựng lại nào, vì bước đó chỉ chép những cột lược đồ mới có gọi tên. Hai: có
+   `test/fixtures/schema_v6.dart`, và nó là đường **duy nhất** có dữ liệu thật để chuyển
+   đổi. Hai fixture kia đều không có mục nào đang dùng thử, nên một phép chuyển đổi
+   không làm gì cả vẫn xanh ở đó. Migration nào đọc cột cũ để ghi nghĩa của nó vào cột
+   mới thì phải khoá bằng fixture v6, và fixture phải có **cả hai** loại hàng.
 2. **Luật icon khớp theo tên người dùng gõ, không theo id.** Đổi `name` của một mục trong
    danh mục là golden test đỏ ngay.
 3. **Trong `_rules` của `service_mark.dart`, cụm dài phải nằm trên từ nằm trong nó**, vì
@@ -149,11 +157,26 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     đáng làm mờ; còn một thẻ nằm yên trên nền gradient thì không. Xem `BlurLayer` trong
     `lib/ui/widgets/glass.dart`.
 
-14. **Ngày kết thúc dùng thử chính là `expiresOn`, không có cột riêng.** Ngày hết miễn phí
-    và ngày bị trừ tiền lần đầu là một ngày. Model chỉ lưu `trialStart`; độ dài suy ra từ
-    khoảng cách giữa hai ngày. Thêm cột `trialEnd` là mở đường cho hai giá trị nói khác
-    nhau, và mọi nhắc hạn trong app đều đã bắn trước `expiresOn`, đúng cái mà một nhắc hạn
-    dùng thử hứa.
+14. **Dùng thử là một cái cờ, không có ngày nào của riêng nó.** Ngày hết miễn phí và ngày
+    bị trừ tiền lần đầu là một ngày, và đó chính là `expiresOn`, tức ô ngày bình thường
+    của form. Thêm cột `trialEnd` là mở đường cho hai giá trị nói khác nhau, và mọi nhắc
+    hạn trong app đều đã bắn trước `expiresOn`, đúng cái mà một nhắc hạn dùng thử hứa.
+    Trước v7 có cột `trialStart`; nó bị bỏ vì ngày bắt đầu không hiện ở đâu ngoài chính
+    cái ô đã nhập nó, và bắt người dùng nhập ngày mới bật được cờ là bắt họ trả lời một
+    câu hỏi app không cần.
+
+    Hệ quả: **cờ `inTrial` và câu hỏi "hôm nay còn dùng thử không" là hai thứ khác nhau.**
+    Cờ không bao giờ tự tắt, vì nó ghi rằng những tháng trước lần trừ tiền đầu là miễn
+    phí, mà điều đó thì đúng mãi mãi. Còn `isTrialOn(today)` tắt ngay khi qua `expiresOn`,
+    vì tiền đã đi rồi dù người dùng có mở app nói lại hay không. Badge, dòng "Free now" và
+    chip lọc `Free trials` đều hỏi `isTrialOn`; chỗ tính tiền hỏi `inTrial`. Hỏi nhầm
+    chiều nào cũng sai: hỏi `isTrialOn` trong phép tính tiền thì sáng hôm sau các tháng
+    miễn phí đầy tiền trở lại, còn hỏi `inTrial` ở badge thì một gói đã trừ tiền vẫn còn
+    dán chữ FREE TRIAL.
+
+    `ItemActions.advanced` xoá hẳn cờ khi người dùng ghi nhận đã trả. Bắt buộc phải xoá:
+    lúc đó `expiresOn` vừa nhảy sang tháng sau, nên cờ còn bật là `isTrialOn` bật lại và
+    badge quay về.
 
 15. **`paused` không phải giá trị thứ tư của `ItemState`.** Tắt một dịch vụ nghĩa là "im
     đi", còn ba trạng thái kia nói chuyện gì đã xảy ra với chính gói thuê bao. Một gói đã
@@ -231,6 +254,10 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     cho một dòng chữ dưới con số, xem bẫy 24.
     Cùng một phép tính lo cả ba thứ trên card: cột chart, con số lớn, và danh sách By item.
     Thêm điều kiện lọc mới thì sửa ở `_chargesByMonth`, đừng sửa riêng chỗ nào.
+    Một mục đang dùng thử bỏ hết các kỳ **trước** `expiresOn`, vì `expiresOn` là lần trừ
+    tiền đầu tiên. Đó là điều kiện theo từng kỳ chứ không phải theo mục, nên nó nằm trong
+    `countedOccurrences`, không nằm trong `countsTowardSpend`. Trước đây mục dùng thử bị
+    loại hẳn khỏi mọi tổng, kể cả sau khi đã bị trừ tiền.
 
 23. **Dấu `≈` trên màn Money chỉ có một nghĩa: đã đem một khoản ngoại tệ nhân với tỉ giá
     đóng gói sẵn.** Nó không nói về phép nhân theo chu kỳ, vì nhân một số tiền đồng với
@@ -273,7 +300,7 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | App làm gì và vì sao | `docs/product-spec.md` |
 | Giao diện | Canvas `Subdock Glass App.dc.html` bên Claude Design, **không nằm trong repo**. Tokens đã chép vào `lib/ui/theme.dart`, đọc doc comment ở đầu file trước khi sửa màu. `docs/design-spec.md` đã cũ và có ghi rõ ở đầu file |
 | Nguồn tiền, bật tắt dịch vụ, Savings | `lib/ui/savings_presenter.dart`, `lib/ui/services_presenter.dart`, `lib/ui/screens/savings_screen.dart` |
-| Dùng thử miễn phí | `lib/ui/screens/add/trial_field.dart`, chỗ duy nhất có phép tính ba ngày ràng buộc nhau |
+| Dùng thử miễn phí | `lib/ui/screens/add/trial_field.dart` cho cái công tắc, `TrackedItem.isTrialOn` cho câu hỏi hôm nay còn miễn phí không |
 | Phần riêng của Android | `android/build.gradle.kts`, `android/app/src/main/AndroidManifest.xml`, `android/app/src/main/res/xml/` |
 | Danh mục dịch vụ | `docs/research/README.md` |
 | Nhóm dịch vụ (category) | `lib/domain/default_categories.dart` cho 22 nhóm dựng sẵn, `lib/domain/category_book.dart` cho cách tra |

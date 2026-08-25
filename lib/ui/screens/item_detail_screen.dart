@@ -206,7 +206,7 @@ class ItemDetailScreen extends StatelessWidget {
         // button. On an item in a trial it is the only thing on the screen with
         // a deadline attached: everything else here is about how much, and this
         // is about how long.
-        if (item.isTrial) ...[
+        if (item.isTrialOn(today)) ...[
           const SizedBox(height: 12),
           _TrialCard(item: item, today: today, remind: _remindLabel()),
         ],
@@ -319,7 +319,10 @@ class ItemDetailScreen extends StatelessWidget {
 /// The one card on this screen with a deadline in it. Its wording is the app's
 /// core promise made specific: nothing has been charged, this is the day that
 /// changes, and here is when you will be warned. A trial block that said only
-/// "free trial" would be decoration — the dates are the whole value.
+/// "free trial" would be decoration — the date is the whole value.
+///
+/// Only ever built while the trial is still running, so it never has to word
+/// the past tense: `isTrialOn` has already gone false by the morning after.
 class _TrialCard extends StatelessWidget {
   final TrackedItem item;
   final LocalDate today;
@@ -336,8 +339,6 @@ class _TrialCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final start = item.trialStart;
-    final span = item.trialLengthDays;
     final money = item.money;
     final left = today.daysUntil(item.expiresOn);
 
@@ -348,12 +349,9 @@ class _TrialCard extends StatelessWidget {
         Text(
           // The countdown, not the date, as the headline. A date needs
           // arithmetic before it means anything; "6 days left" does not.
-          left < 0
-              ? 'The trial ended ${MoneyFormat.shortDate(item.expiresOn)}'
-              : (left == 0
-                    ? 'Free until today — it charges today'
-                    : 'Free for '
-                          '$left more ${left == 1 ? "day" : "days"}'),
+          left == 0
+              ? 'Free until today — it charges today'
+              : 'Free for $left more ${left == 1 ? "day" : "days"}',
           style: const TextStyle(
             fontFamily: SubdockText.family,
             fontSize: 16,
@@ -373,14 +371,6 @@ class _TrialCard extends StatelessWidget {
                     'reminded ${remind.toLowerCase()}.',
           style: SubdockText.footnote,
         ),
-        if (start != null && span != null) ...[
-          const SizedBox(height: 8),
-          Text(
-            'Started ${DateCopy.listedDate(start)} · '
-            '$span-day trial',
-            style: SubdockText.caption,
-          ),
-        ],
       ],
     );
   }

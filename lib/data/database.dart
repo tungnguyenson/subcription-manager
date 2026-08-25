@@ -50,7 +50,7 @@ class SubdockDatabase extends _$SubdockDatabase {
   final LegacyCategoryResolver reshelve;
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -123,7 +123,7 @@ class SubdockDatabase extends _$SubdockDatabase {
               // schema out of the old table, so a column the old file never
               // had makes the SELECT fail on a name that does not exist there.
               itemRow.purchaseChannel,
-              itemRow.trialStart,
+              itemRow.inTrial,
               itemRow.paymentSourceId,
               itemRow.paused,
               itemRow.yearlyChoice,
@@ -165,8 +165,12 @@ class SubdockDatabase extends _$SubdockDatabase {
       // SQLite allows ADD COLUMN with a REFERENCES clause as long as the
       // default is NULL, which it is, and `paused` carries DEFAULT 0 so
       // existing rows read as "not paused" -- which is true of all of them.
+      //
+      // v5's trial column is not among them any more. It was `trialStart`, a
+      // date, and v7 replaced it with a flag; a v3 or v4 file has no trial
+      // data to carry either way, so the v7 step below simply gives it the
+      // flag and there is nothing to create here and drop again.
       if (from >= 3 && from < 5) {
-        await m.addColumn(itemRow, itemRow.trialStart);
         await m.addColumn(itemRow, itemRow.paymentSourceId);
         await m.addColumn(itemRow, itemRow.paused);
         await m.addColumn(itemRow, itemRow.yearlyChoice);
@@ -174,6 +178,33 @@ class SubdockDatabase extends _$SubdockDatabase {
           'CREATE INDEX IF NOT EXISTS item_paymentSourceId '
           'ON itemRow(paymentSourceId)',
         );
+      }
+
+      // v7 turns the free trial from a start date into a flag. The start was
+      // never shown anywhere but the field that set it, and the date the trial
+      // is measured against was always `expiresOn`, so the column was carrying
+      // a value nothing asked for.
+      //
+      // Out of version order on purpose, and it has to be. The v6 step below
+      // rebuilds itemRow at the *current* schema, which now has `inTrial`; a
+      // rebuild that runs before the column exists dies selecting a name the
+      // old table does not have. Adding it here means every rebuild past this
+      // point finds it, and sheds `trialStart` on the way simply by never
+      // asking for it.
+      //
+      // Files older than v3 skip this: the rebuild at the top of this method
+      // already recreated the table at the current schema.
+      if (from >= 3 && from < 7) {
+        await m.addColumn(itemRow, itemRow.inTrial);
+
+        // A row with a start date was a row in a trial. Only a file already at
+        // v5 has such a column to read -- v5 is where trials arrived -- so v3
+        // and v4 files keep the default, which is true of every row in them.
+        if (from >= 5) {
+          await customStatement(
+            'UPDATE itemRow SET inTrial = (trialStart IS NOT NULL)',
+          );
+        }
       }
 
       // v6 turns the classification into a shelf the user owns. The column
@@ -208,6 +239,17 @@ class SubdockDatabase extends _$SubdockDatabase {
             'CREATE INDEX IF NOT EXISTS item_category ON itemRow(category)',
           );
         }
+      }
+
+      // The other half of v7: getting rid of `trialStart`. Dropping a column is
+      // the one thing SQLite will not do in place, so it takes a rebuild, and
+      // a rebuild copies only what the current schema names.
+      //
+      // Only for a file sitting exactly on v6. Anything older has already been
+      // through a rebuild above -- the v3 one or the v6 one -- and lost the
+      // column there.
+      if (from >= 6 && from < 7) {
+        await m.alterTable(TableMigration(itemRow));
       }
     },
     beforeOpen: (details) async {

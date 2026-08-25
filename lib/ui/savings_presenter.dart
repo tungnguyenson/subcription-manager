@@ -282,7 +282,7 @@ abstract final class SavingsPresenter {
         .where(
           (i) =>
               !categories[i.categoryId].isObligation &&
-              !i.isTrial &&
+              !i.isTrialOn(today) &&
               _billedMoreOftenThanYearly(i.cycle),
         )
         .toList(growable: false);
@@ -322,11 +322,11 @@ abstract final class SavingsPresenter {
         .where(
           (i) =>
               !categories[i.categoryId].isObligation &&
-              !i.isTrial &&
+              !i.isTrialOn(today) &&
               !_billedMoreOftenThanYearly(i.cycle),
         )
         .length;
-    final inTrial = live.where((i) => i.isTrial).length;
+    final inTrial = live.where((i) => i.isTrialOn(today)).length;
 
     return SavingsView(
       total: _joinCurrencies(totals, sign: false),
@@ -346,16 +346,19 @@ abstract final class SavingsPresenter {
   }
 
   /// How many monthly plans were considered, for the lead line's denominator.
-  static int monthlyCount(List<TrackedItem> items, CategoryBook categories) =>
-      items
-          .where(
-            (i) =>
-                i.state != ItemState.archived &&
-                !categories[i.categoryId].isObligation &&
-                !i.isTrial &&
-                _billedMoreOftenThanYearly(i.cycle),
-          )
-          .length;
+  static int monthlyCount(
+    List<TrackedItem> items,
+    CategoryBook categories,
+    LocalDate today,
+  ) => items
+      .where(
+        (i) =>
+            i.state != ItemState.archived &&
+            !categories[i.categoryId].isObligation &&
+            !i.isTrialOn(today) &&
+            _billedMoreOftenThanYearly(i.cycle),
+      )
+      .length;
 
   // ---- move to yearly ----
 

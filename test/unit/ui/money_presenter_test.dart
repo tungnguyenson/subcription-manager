@@ -14,11 +14,12 @@ void main() {
   TrackedItem item(
     String name, {
     String expiresOn = '2026-08-20',
+    String? anchorDate,
     String categoryId = 'STREAMING',
     Cycle? cycle = Cycle.monthly,
     int? amountMinor = 260000,
     String currency = 'VND',
-    LocalDate? trialStart,
+    bool inTrial = false,
     ItemState state = ItemState.active,
     bool paused = false,
   }) => TrackedItem(
@@ -26,11 +27,11 @@ void main() {
     name: name,
     categoryId: categoryId,
     expiresOn: d(expiresOn),
-    anchorDate: d(expiresOn),
+    anchorDate: d(anchorDate ?? expiresOn),
     cycle: cycle,
     amountMinor: amountMinor,
     currency: amountMinor == null ? null : currency,
-    trialStart: trialStart,
+    inTrial: inTrial,
     state: state,
     paused: paused,
   );
@@ -72,19 +73,28 @@ void main() {
       expect(month.items, isEmpty);
     });
 
-    // The amount on a trial is what the user *will* pay. Putting a figure
-    // nobody has been charged into "this month" makes the total a different
-    // number from the one that will leave their account.
-    test('a trial is listed separately, never in the total', () {
+    // A trial gets its own section while it is still free, naming the day it
+    // stops being free and what it will cost then.
+    test('a trial still running is listed on its own', () {
       final month = view([
         item('Netflix'),
-        item('Claude Pro', trialStart: d('2026-08-10'), amountMinor: 520000),
+        item('Claude Pro', inTrial: true, amountMinor: 520000),
       ], MoneySpan.month);
 
-      expect(month.items.map((i) => i.name), ['Netflix']);
       expect(month.trials.single.name, 'Claude Pro');
       expect(month.trials.single.cost, '520,000 ₫');
       expect(month.trials.single.startsCharging, '20/08');
+    });
+
+    // The trial covers the months *before* the first charge, not the item. The
+    // charge itself lands on 20/08 and is August's money like any other.
+    test('the month the first charge lands in counts it', () {
+      final month = view([
+        item('Claude Pro', inTrial: true, amountMinor: 520000),
+      ], MoneySpan.month);
+
+      expect(month.items.single.name, 'Claude Pro');
+      expect(month.total.approximateBase!.minor, 520000);
     });
 
     // A service switched off is still being charged: the switch stops
@@ -406,19 +416,70 @@ void main() {
       expect(chart[7].minor, converted.minor);
     });
 
-    // A trial is free until it converts, and the total above the chart says so
-    // in as many words.
-    test('a trial is not counted', () {
-      expect(
-        bars([
-          item(
-            'Claude Pro',
-            expiresOn: '2026-08-26',
-            trialStart: d('2026-08-12'),
-          ),
-        ]),
-        isEmpty,
+    // Nothing was taken in the free months, so the columns behind the first
+    // charge are empty and the ones from it on are full.
+    test('a trial empties the months before its first charge', () {
+      final chart = bars([
+        item(
+          'Claude Pro',
+          expiresOn: '2026-08-26',
+          anchorDate: '2026-02-26',
+          inTrial: true,
+          amountMinor: 520000,
+        ),
+      ]);
+
+      expect(chart.where((b) => b.minor > 0).map((b) => b.month), [
+        8,
+        9,
+        10,
+        11,
+        12,
+      ]);
+    });
+
+    // The flag says those months *were* free, which stays true after the date
+    // passes. Asking `isTrialOn` instead would refill February the morning
+    // after the charge landed and rewrite spending the user had already read.
+    test('the free months stay empty once the trial is over', () {
+      final over = MoneyPresenter.countedOccurrences(
+        item(
+          'Claude Pro',
+          expiresOn: '2026-08-26',
+          anchorDate: '2026-02-26',
+          inTrial: true,
+        ),
+        year: 2026,
       );
+
+      expect(over.map((on) => on.month), [8, 9, 10, 11, 12]);
+    });
+
+    // Same dates without the flag: nothing is dropped, because those months
+    // really were charged.
+    test('an item that was never a trial keeps every month', () {
+      final chart = bars([
+        item(
+          'Netflix',
+          expiresOn: '2026-08-26',
+          anchorDate: '2026-02-26',
+          amountMinor: 260000,
+        ),
+      ]);
+
+      expect(chart.where((b) => b.minor > 0).map((b) => b.month), [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+      ]);
     });
 
     test('an item with no amount on it is left out rather than guessed at', () {
@@ -524,27 +585,39 @@ void main() {
       expect(behind.singleWhere((bar) => bar.selected).ahead, isFalse);
     });
 
-    // A trial is listed under its own heading and never inside the total, on
-    // whichever month the card is showing. It used to be named a second time
-    // in a line under the figure, which appeared only on the month the user
-    // was in and moved the chart every time they left it.
-    test('a trial stays out of the total and in its own section', () {
+    // The section is on every month's card, not just the one the user is in.
+    // Which trials a person is running is a fact about them, and a line that
+    // came and went as they tapped along the chart would move the chart under
+    // their finger -- the same rule the dollar line follows.
+    test('the trial section is on every month', () {
       final items = [
         item('Netflix'),
         item(
           'Claude Pro',
           expiresOn: '2026-08-26',
-          trialStart: d('2026-08-12'),
+          anchorDate: '2026-02-26',
+          inTrial: true,
         ),
       ];
 
       for (final month in [3, 8]) {
         expect(at(month, items).trials.single.name, 'Claude Pro');
-        expect(
-          at(month, items).items.map((i) => i.name),
-          isNot(contains('Claude Pro')),
-        );
       }
+    });
+
+    // March was inside the free period; August is when the money starts.
+    test('a trial is missing from the months it was free in', () {
+      final items = [
+        item(
+          'Claude Pro',
+          expiresOn: '2026-08-26',
+          anchorDate: '2026-02-26',
+          inTrial: true,
+        ),
+      ];
+
+      expect(at(3, items).items, isEmpty);
+      expect(at(8, items).items.single.name, 'Claude Pro');
     });
 
     // Twice in one month is one subscription billed twice, not two

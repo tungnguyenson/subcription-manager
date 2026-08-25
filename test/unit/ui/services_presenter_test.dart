@@ -17,7 +17,7 @@ void main() {
     int? amountMinor = 260000,
     bool paused = false,
     ItemState state = ItemState.active,
-    LocalDate? trialStart,
+    bool inTrial = false,
     String? paymentSourceId,
   }) => TrackedItem(
     id: name,
@@ -30,7 +30,7 @@ void main() {
     currency: amountMinor == null ? null : 'VND',
     paused: paused,
     state: state,
-    trialStart: trialStart,
+    inTrial: inTrial,
     paymentSourceId: paymentSourceId,
   );
 
@@ -105,9 +105,7 @@ void main() {
     });
 
     test('a trial names the day the free period ends', () {
-      final groups = groupsOf([
-        item('Claude Pro', trialStart: d('2026-08-10')),
-      ]);
+      final groups = groupsOf([item('Claude Pro', inTrial: true)]);
 
       expect(
         groups.single.rows.single.subtitle,

@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import 'local_date.dart';
 import 'model.dart';
 
 /// What the user has narrowed the Upcoming list down to.
@@ -98,9 +99,13 @@ class UpcomingFilter {
 
   /// Whether [item] survives the narrowing conditions.
   ///
-  /// [mutedOnly] is not asked here -- it has already decided which items were
+  /// [mutedOnly] is not asked here — it has already decided which items were
   /// handed in. See its own doc comment.
-  bool matches(TrackedItem item) {
+  ///
+  /// Takes the date for one condition: a free trial stops being one the day
+  /// the charge lands, so `Free trials` has to be asked against a day rather
+  /// than against the item alone.
+  bool matches(TrackedItem item, LocalDate today) {
     if (categoryIds.isNotEmpty && !categoryIds.contains(item.categoryId)) {
       return false;
     }
@@ -110,14 +115,14 @@ class UpcomingFilter {
     if (sourceIds.isNotEmpty && !sourceIds.contains(sourceKeyOf(item))) {
       return false;
     }
-    if (trialOnly && !item.isTrial) return false;
+    if (trialOnly && !item.isTrialOn(today)) return false;
     if (noPriceOnly && item.money != null) return false;
     return true;
   }
 
   /// [pool] and [matches] in one pass, which is what every caller wants.
-  List<TrackedItem> apply(List<TrackedItem> items) =>
-      pool(items).where(matches).toList();
+  List<TrackedItem> apply(List<TrackedItem> items, LocalDate today) =>
+      pool(items).where((i) => matches(i, today)).toList();
 
   UpcomingFilter toggleCategory(String id) =>
       _copy(categoryIds: _toggled(categoryIds, id));

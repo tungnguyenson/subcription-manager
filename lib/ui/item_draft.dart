@@ -34,12 +34,12 @@ class DraftItem {
   /// link and the note, neither of which the form asks for.
   final CatalogEntry? matched;
 
-  /// The day a free trial began, or null for an item being paid for.
+  /// The user said this one is not being paid for yet.
   ///
-  /// There is no separate trial-end field, and there must not be: the end of
-  /// the free period is the day the first charge lands, which is [expiresOn].
-  /// Two fields for one date is two things that can disagree.
-  final LocalDate? trialStart;
+  /// A flag, and it has no dates of its own. The end of the free period is the
+  /// day the first charge lands, which is [expiresOn]; a second field for that
+  /// date would be two things that can disagree.
+  final bool inTrial;
 
   /// Which source pays for this, or null for "not said".
   final String? paymentSourceId;
@@ -55,7 +55,7 @@ class DraftItem {
     this.currency,
     this.leadDays = const [Reminders.defaultLead],
     this.matched,
-    this.trialStart,
+    this.inTrial = false,
     this.paymentSourceId,
   });
 
@@ -74,7 +74,7 @@ class DraftItem {
     amountMinor: item.amountMinor,
     currency: item.currency,
     leadDays: item.leadDays,
-    trialStart: item.trialStart,
+    inTrial: item.inTrial,
     paymentSourceId: item.paymentSourceId,
   );
 
@@ -115,7 +115,7 @@ class DraftItem {
       snoozedUntil: dateChanged ? () => null : null,
       actionUrl: entry == null ? null : () => entry.cancelUrl,
       note: entry == null ? null : () => entry.noteVi,
-      trialStart: () => trialStart,
+      inTrial: inTrial,
       paymentSourceId: () => paymentSourceId,
     );
   }

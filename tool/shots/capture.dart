@@ -83,7 +83,7 @@ void main() {
       int? amountMinor,
       String? currency = 'VND',
       Cycle? cycle = Cycle.monthly,
-      LocalDate? trialStart,
+      bool inTrial = false,
       String? sourceId,
     }) => repository.upsert(
       TrackedItem(
@@ -95,7 +95,7 @@ void main() {
         cycle: cycle,
         amountMinor: amountMinor,
         currency: amountMinor == null ? null : currency,
-        trialStart: trialStart,
+        inTrial: inTrial,
         paymentSourceId: sourceId,
       ),
       now,
@@ -123,7 +123,7 @@ void main() {
       expires: plus(2),
       amountMinor: 2000,
       currency: 'USD',
-      trialStart: plus(-5),
+      inTrial: true,
     );
     await put(
       'spotify',

@@ -42,9 +42,11 @@ abstract final class UpcomingPresenter {
     // narrow it: "Reminders off" is the one way back to those items from here,
     // and no predicate over this list could ever reach them.
     final pool = filter.pool(items);
-    final shown = filter.isEmpty ? pool : pool.where(filter.matches).toList();
+    final shown = filter.isEmpty
+        ? pool
+        : pool.where((i) => filter.matches(i, today)).toList();
 
-    final rows = shown.map((item) => _Row.item(item, sources)).toList()
+    final rows = shown.map((item) => _Row.item(item, sources, today)).toList()
       ..sort((a, b) => a.actBy.compareTo(b.actBy));
 
     final overdue = <UpcomingEntry>[];
@@ -175,16 +177,19 @@ class _Row {
     this.trial = false,
   });
 
-  factory _Row.item(TrackedItem item, Map<String, PaymentSource> sources) =>
-      _Row(
-        id: item.id,
-        name: item.name,
-        subtitle: subtitleOf(item),
-        sourceName: sources[item.paymentSourceId]?.name,
-        iconName: item.iconName,
-        actBy: item.actBy,
-        trial: item.isTrial,
-      );
+  factory _Row.item(
+    TrackedItem item,
+    Map<String, PaymentSource> sources,
+    LocalDate today,
+  ) => _Row(
+    id: item.id,
+    name: item.name,
+    subtitle: subtitleOf(item, today),
+    sourceName: sources[item.paymentSourceId]?.name,
+    iconName: item.iconName,
+    actBy: item.actBy,
+    trial: item.isTrialOn(today),
+  );
 
   /// The second line: what it costs, and which instalment this is.
   ///
@@ -195,14 +200,14 @@ class _Row {
   /// A trial says the amount is not being charged yet. "260,000 đ" on a row
   /// whose whole point is that nothing has been taken is the one wrong thing
   /// this line could say.
-  static String? subtitleOf(TrackedItem item) {
+  static String? subtitleOf(TrackedItem item, LocalDate today) {
     final money = item.money;
 
-    if (item.isTrial) {
-      return money == null
-          ? 'Free now'
-          : 'Free now · then ${MoneyFormat.full(money)}';
-    }
+    // if (item.isTrialOn(today)) {
+    //   return money == null
+    //       ? 'Free now'
+    //       : 'Free now · then ${MoneyFormat.full(money)}';
+    // }
 
     final parts = <String>[];
     if (money != null) parts.add(MoneyFormat.full(money));

@@ -45,7 +45,7 @@ abstract final class ServicesPresenter {
             ServiceToggle(
               id: item.id,
               name: item.name,
-              subtitle: _subtitle(item),
+              subtitle: _subtitle(item, today),
               iconName: item.iconName,
               on: !item.paused,
             ),
@@ -76,11 +76,11 @@ abstract final class ServicesPresenter {
   /// paused item's next date is not a fact about the future any more — nothing
   /// will happen on it — so showing it beside the word "off" would be showing
   /// two contradictory things on one line.
-  static String _subtitle(TrackedItem item) {
+  static String _subtitle(TrackedItem item, LocalDate today) {
     if (item.paused) return 'Off · no reminders';
 
     final parts = <String>[
-      if (item.isTrial)
+      if (item.isTrialOn(today))
         'Trial ends ${MoneyFormat.shortDate(item.expiresOn)}'
       else
         'Next ${MoneyFormat.shortDate(item.expiresOn)}',

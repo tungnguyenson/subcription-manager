@@ -202,7 +202,7 @@ void main() {
               context,
               filter: current,
               options: FilterPresenter.options(items, book),
-              countFor: (f) => f.apply(items).length,
+              countFor: (f) => f.apply(items, today).length,
               onChanged: (f) {
                 current = f;
                 emitted.add(f);

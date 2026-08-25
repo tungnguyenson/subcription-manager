@@ -97,7 +97,7 @@ extension ItemRowMapper on ItemRowData {
       purchaseChannel,
       PurchaseChannel.unknown,
     ),
-    trialStart: trialStart == null ? null : LocalDate.parse(trialStart!),
+    inTrial: inTrial,
     paymentSourceId: paymentSourceId,
     paused: paused,
     // Undecided is the safe fallback: an unrecognised value shows the

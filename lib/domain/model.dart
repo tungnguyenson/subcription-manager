@@ -448,14 +448,19 @@ class TrackedItem {
   /// Where this one was bought. See [PurchaseChannel].
   final PurchaseChannel purchaseChannel;
 
-  /// The day a free trial began, or null for an item being paid for.
+  /// The user said this one is not being paid for yet.
   ///
-  /// The trial's *end* is [expiresOn]: the day the free period stops is the day
-  /// the first charge lands, and they cannot be allowed to disagree. Every
+  /// A flag and nothing more. The trial's *end* is [expiresOn] — the day the
+  /// free period stops is the day the first charge lands — so there is no
+  /// second date to store and no way for two of them to disagree. Every
   /// reminder in the app already fires ahead of [expiresOn], which is exactly
-  /// the promise a trial reminder makes — warn me while cancelling is still
+  /// the promise a trial reminder makes: warn me while cancelling is still
   /// free.
-  final LocalDate? trialStart;
+  ///
+  /// Stays set after that day passes, and is meant to. It records that the
+  /// months before the first charge were free, which stays true forever — see
+  /// [isTrialOn] for the part that does expire.
+  final bool inTrial;
 
   /// Which source pays for this, or null for "not said". See [PaymentSource].
   final String? paymentSourceId;
@@ -493,7 +498,7 @@ class TrackedItem {
     this.snoozedUntil,
     this.state = ItemState.active,
     this.purchaseChannel = PurchaseChannel.unknown,
-    this.trialStart,
+    this.inTrial = false,
     this.paymentSourceId,
     this.paused = false,
     this.yearlyChoice = YearlyChoice.undecided,
@@ -534,7 +539,7 @@ class TrackedItem {
     LocalDate? snoozedUntil,
     ItemState state = ItemState.active,
     PurchaseChannel purchaseChannel = PurchaseChannel.unknown,
-    LocalDate? trialStart,
+    bool inTrial = false,
     String? paymentSourceId,
     bool paused = false,
     YearlyChoice yearlyChoice = YearlyChoice.undecided,
@@ -567,7 +572,7 @@ class TrackedItem {
     snoozedUntil: snoozedUntil,
     state: state,
     purchaseChannel: purchaseChannel,
-    trialStart: trialStart,
+    inTrial: inTrial,
     paymentSourceId: paymentSourceId,
     paused: paused,
     yearlyChoice: yearlyChoice,
@@ -581,11 +586,18 @@ class TrackedItem {
   /// lead time.
   LocalDate get actBy => Recurrence.actBy(expiresOn, actByOffsetDays);
 
-  /// In a free trial right now.
-  bool get isTrial => trialStart != null;
-
-  /// How many free days the trial runs for, or null when it is not a trial.
-  int? get trialLengthDays => trialStart?.daysUntil(expiresOn);
+  /// In a free trial *right now*, which is the question the badge and the
+  /// "Free now" subtitle are asking.
+  ///
+  /// Takes the date because [inTrial] on its own never stops being true. The
+  /// free period ends when [expiresOn] arrives, whether or not anyone came
+  /// back to the app to say so, and a row still badged FREE TRIAL a week after
+  /// the money left is the app claiming to know something it does not.
+  ///
+  /// Recording the payment clears [inTrial] outright — see `ItemActions
+  /// .advanced` — which is what stops the badge coming back when [expiresOn]
+  /// rolls on to next month.
+  bool isTrialOn(LocalDate today) => inTrial && today < expiresOn;
 
   /// Whether this belongs in a spend total, given the shelf it sits on.
   ///
@@ -593,12 +605,12 @@ class TrackedItem {
   /// passport fee is real money that must not land in a monthly subscription
   /// total, and only the shelf says so.
   ///
-  /// A trial is excluded for the same reason from the other direction: the
-  /// amount on it is what the user *will* pay, and putting a figure nobody has
-  /// been charged into "this month" makes the total answer a different
-  /// question. The trial is reported separately, as "not counted yet".
+  /// A trial is *not* excluded here, because a trial is not a property of the
+  /// item so much as of the months before its first charge. It is those months
+  /// that carry no money, and only an occurrence knows which month it is in —
+  /// see `MoneyPresenter.countedOccurrences`.
   bool countsTowardSpend(Category category) =>
-      money != null && category.countsTowardSpend && !isTrial;
+      money != null && category.countsTowardSpend;
 
   /// Whether reminders should be scheduled and whether the item belongs on
   /// Upcoming. The one predicate for both, so the list and the notifications
@@ -629,7 +641,7 @@ class TrackedItem {
     LocalDate? Function()? snoozedUntil,
     ItemState? state,
     PurchaseChannel? purchaseChannel,
-    LocalDate? Function()? trialStart,
+    bool? inTrial,
     String? Function()? paymentSourceId,
     bool? paused,
     YearlyChoice? yearlyChoice,
@@ -662,7 +674,7 @@ class TrackedItem {
       snoozedUntil: snoozedUntil != null ? snoozedUntil() : this.snoozedUntil,
       state: state ?? this.state,
       purchaseChannel: purchaseChannel ?? this.purchaseChannel,
-      trialStart: trialStart != null ? trialStart() : this.trialStart,
+      inTrial: inTrial ?? this.inTrial,
       paymentSourceId: paymentSourceId != null
           ? paymentSourceId()
           : this.paymentSourceId,

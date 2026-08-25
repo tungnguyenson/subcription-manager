@@ -7,6 +7,9 @@ import 'package:subdock/domain/upcoming_filter.dart';
 void main() {
   LocalDate d(String iso) => LocalDate.parse(iso);
 
+  // Every item below is due 2026-09-01, so this is a day inside the trial.
+  final today = d('2026-08-15');
+
   TrackedItem item(
     String id, {
     String categoryId = 'STREAMING',
@@ -14,7 +17,7 @@ void main() {
     int? amountMinor,
     String? currency,
     String? paymentSourceId,
-    LocalDate? trialStart,
+    bool inTrial = false,
     bool paused = false,
     ItemState state = ItemState.active,
   }) => TrackedItem(
@@ -27,7 +30,7 @@ void main() {
     amountMinor: amountMinor,
     currency: currency,
     paymentSourceId: paymentSourceId,
-    trialStart: trialStart,
+    inTrial: inTrial,
     paused: paused,
     state: state,
   );
@@ -81,14 +84,17 @@ void main() {
 
   group('matching', () {
     test('an empty group constrains nothing', () {
-      expect(UpcomingFilter.none.matches(item('any')), isTrue);
+      expect(UpcomingFilter.none.matches(item('any'), today), isTrue);
     });
 
     test('within a group the keys are or-ed', () {
       const filter = UpcomingFilter(categoryIds: {'STREAMING', 'PHONE'});
-      expect(filter.matches(item('a', categoryId: 'STREAMING')), isTrue);
-      expect(filter.matches(item('b', categoryId: 'PHONE')), isTrue);
-      expect(filter.matches(item('c', categoryId: 'INSURANCE')), isFalse);
+      expect(filter.matches(item('a', categoryId: 'STREAMING'), today), isTrue);
+      expect(filter.matches(item('b', categoryId: 'PHONE'), today), isTrue);
+      expect(
+        filter.matches(item('c', categoryId: 'INSURANCE'), today),
+        isFalse,
+      );
     });
 
     test('between groups they are and-ed', () {
@@ -99,12 +105,14 @@ void main() {
       expect(
         filter.matches(
           item('both', categoryId: 'STREAMING', cycle: Cycle.monthly),
+          today,
         ),
         isTrue,
       );
       expect(
         filter.matches(
           item('half', categoryId: 'STREAMING', cycle: Cycle.yearly),
+          today,
         ),
         isFalse,
       );
@@ -114,39 +122,57 @@ void main() {
     // wants to be able to ask for.
     test('a one-off matches the Once key', () {
       const filter = UpcomingFilter(cycleKeys: {UpcomingFilter.onceKey});
-      expect(filter.matches(item('once')), isTrue);
-      expect(filter.matches(item('monthly', cycle: Cycle.monthly)), isFalse);
+      expect(filter.matches(item('once'), today), isTrue);
+      expect(
+        filter.matches(item('monthly', cycle: Cycle.monthly), today),
+        isFalse,
+      );
     });
 
     test('a custom interval matches by its own wire name', () {
       final every5Months = Cycle.every(5, CycleField.month);
       final filter = UpcomingFilter(cycleKeys: {every5Months.wireName});
-      expect(filter.matches(item('custom', cycle: every5Months)), isTrue);
-      expect(filter.matches(item('yearly', cycle: Cycle.yearly)), isFalse);
+      expect(
+        filter.matches(item('custom', cycle: every5Months), today),
+        isTrue,
+      );
+      expect(
+        filter.matches(item('yearly', cycle: Cycle.yearly), today),
+        isFalse,
+      );
     });
 
     test('an item with no source said matches the No source chip', () {
       const filter = UpcomingFilter(sourceIds: {UpcomingFilter.noSourceKey});
-      expect(filter.matches(item('unsaid')), isTrue);
-      expect(filter.matches(item('vcb', paymentSourceId: 'vcb')), isFalse);
+      expect(filter.matches(item('unsaid'), today), isTrue);
+      expect(
+        filter.matches(item('vcb', paymentSourceId: 'vcb'), today),
+        isFalse,
+      );
     });
 
+    // "Right now" is the whole condition. The flag alone survives the day the
+    // charge lands, so asking it without a date would keep an item on this chip
+    // after the money had already gone.
     test('Free trials keeps only what is in a trial right now', () {
       final filter = UpcomingFilter(trialOnly: true);
-      expect(
-        filter.matches(item('trial', trialStart: d('2026-08-20'))),
-        isTrue,
-      );
-      expect(filter.matches(item('paid')), isFalse);
+      final trial = item('trial', inTrial: true);
+
+      expect(filter.matches(trial, today), isTrue);
+      expect(filter.matches(trial, d('2026-09-02')), isFalse);
+      expect(filter.matches(item('paid'), today), isFalse);
     });
 
     // The point of the chip is finding the rows to fill in, so it keeps the
     // ones with nothing on them rather than the ones with something.
     test('No price keeps only the rows missing an amount', () {
       const filter = UpcomingFilter(noPriceOnly: true);
-      expect(filter.matches(item('blank')), isTrue);
+      expect(filter.matches(item('blank'), today), isTrue);
       expect(
-        filter.matches(item('priced', amountMinor: 26000000, currency: 'VND')),
+        filter.matches(
+          item('priced', amountMinor: 26000000, currency: 'VND'),
+          today,
+        ),
         isFalse,
       );
     });

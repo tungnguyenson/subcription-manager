@@ -80,7 +80,12 @@ class SpendBar {
   });
 }
 
-/// A trial, listed but not counted.
+/// A trial that is still free today, and the day that stops.
+///
+/// Listed on every month's card, because which trials a person is running is a
+/// fact about them rather than about March. The money is not repeated here:
+/// the first charge is counted in the month it lands in, and the free months
+/// before it are empty in the chart above.
 @immutable
 class TrialSpend {
   final String name;
@@ -195,7 +200,7 @@ abstract final class MoneyPresenter {
 
     final trials = [
       for (final item in live)
-        if (item.isTrial)
+        if (item.isTrialOn(today))
           TrialSpend(
             name: item.name,
             startsCharging: MoneyFormat.shortDate(item.expiresOn),
@@ -353,27 +358,37 @@ abstract final class MoneyPresenter {
     for (final item in live) {
       if (!item.countsTowardSpend(categories[item.categoryId])) continue;
 
-      for (final on in _occurrences(item, year: year)) {
+      for (final on in countedOccurrences(item, year: year)) {
         (charges[on.month] ??= []).add(item);
       }
     }
     return charges;
   }
 
-  /// Every occurrence of [item] that falls inside [year], oldest first.
+  /// Every occurrence of [item] that costs money and falls inside [year],
+  /// oldest first.
   ///
   /// Walks forward from the anchor rather than back from the due date, because
   /// the anchor is the date cycle maths is defined against — stepping back a
   /// month at a time from the 31st loses the 31st for good. A counted plan
   /// stops at its last instalment: rolling it on would draw a payment the user
   /// does not owe.
-  static Iterable<LocalDate> _occurrences(
+  ///
+  /// A free trial drops the occurrences before its first charge. That first
+  /// charge is [TrackedItem.expiresOn], so what the trial actually says is
+  /// "the months before this date were free" — which is why the test is
+  /// `inTrial` and not `isTrialOn(today)`. Those months stay free once the day
+  /// passes; asking against today would refill them the morning after and
+  /// rewrite spending the user had already read.
+  @visibleForTesting
+  static Iterable<LocalDate> countedOccurrences(
     TrackedItem item, {
     required int year,
   }) sync* {
     final cycle = item.cycle;
     if (cycle == null) {
-      // A one-off happens on its own date and never again.
+      // A one-off happens on its own date and never again. A trial one-off is
+      // charged on that same date, so there is nothing before it to drop.
       if (item.expiresOn.year == year) yield item.expiresOn;
       return;
     }
@@ -382,6 +397,7 @@ abstract final class MoneyPresenter {
     for (var n = 0; instalments == null || n < instalments; n++) {
       final on = Recurrence.occurrenceAfter(item.anchorDate, cycle, n);
       if (on.year > year) return;
+      if (item.inTrial && on < item.expiresOn) continue;
       if (on.year == year) yield on;
     }
   }
