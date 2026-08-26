@@ -196,7 +196,13 @@ abstract final class SubdockSpacing {
   static const double labelToControl = 8;
 
   /// Between two blocks of a form.
-  static const double formBlock = 26;
+  ///
+  /// One number for every gap on the add form, and the form adds nothing on
+  /// top of it. It used to be 26 with ad-hoc margins layered over it, which
+  /// made the real gaps 14, 26 and 40 depending on which two blocks you were
+  /// looking at -- a rhythm the reader feels as "this belongs together" and
+  /// "this does not", saying things the form did not mean.
+  static const double formBlock = 22;
 
   /// The last thing on a screen to the tab bar under it.
   ///

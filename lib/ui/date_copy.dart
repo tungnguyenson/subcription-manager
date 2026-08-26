@@ -49,6 +49,22 @@ abstract final class DateCopy {
   static String longDate(LocalDate date) =>
       '${weekday(date)}, ${MoneyFormat.date(date)}';
 
+  /// How far off a date is, in words: `Today`, `In 12 days`, `9 days ago`.
+  ///
+  /// The second line of the date field, under the date itself. The two say the
+  /// same thing in the two ways a person checks it — a calendar date is what
+  /// they compare against their provider, and "in 12 days" is what tells them
+  /// at a glance whether they picked the wrong month.
+  static String relative(LocalDate today, LocalDate date) {
+    final days = today.daysUntil(date);
+    if (days == 0) return 'Today';
+    if (days == 1) return 'Tomorrow';
+    if (days == -1) return 'Yesterday';
+    final count = days.abs();
+    final unit = count == 1 ? '1 day' : '$count days';
+    return days > 0 ? 'In $unit' : '$unit ago';
+  }
+
   /// `Saturday 16 August`, the way a lock screen writes it.
   static String lockScreenDate(LocalDate date) =>
       '${weekday(date)} ${date.day} ${month(date.month)}';

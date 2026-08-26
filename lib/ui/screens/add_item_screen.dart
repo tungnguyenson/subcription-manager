@@ -104,7 +104,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   CatalogEntry? _matched;
   LocalDate? _expiresOn;
-  late Category _category = widget.categories.fallback;
+
+  /// The shelf, once somebody has said which one.
+  ///
+  /// Null until then, and the field reads `Pick a category` rather than
+  /// showing a shelf nobody chose. The old rail lit its fallback chip on the
+  /// first frame, which is the form answering its own question and then asking
+  /// the user to confirm it.
+  Category? _chosen;
+
   String? _iconName;
   Cycle? _cycle = Cycle.monthly;
   int? _repeatCount;
@@ -116,12 +124,20 @@ class _AddItemScreenState extends State<AddItemScreen> {
   /// row would be offering to undo the thing the user came here to change.
   bool _picking = true;
 
-  /// The catalogue tier whose price is in the cost field, or null once the user
-  /// has typed their own amount. Only ever set alongside [_matched].
+  /// The [PlanOption.id] whose price is in the cost field, or null once the
+  /// user has typed their own amount. Only ever set alongside [_matched].
   String? _planTier;
 
   bool _inTrial = false;
   String? _sourceId;
+
+  /// Whether the row of less common cycles is open under the tray.
+  ///
+  /// Opened by the third segment and left open once a cycle from it is
+  /// chosen, because the segment then reads `Quarterly` and a reader who
+  /// wanted `Weekly` would otherwise have to work out that the way to change
+  /// their answer is to tap the answer.
+  bool _cycleOther = false;
 
   /// True once the user has picked a suggestion or explicitly declined one.
   /// Until then the suggestion list stays open, because tapping a known service
@@ -130,6 +146,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
   bool _nameSettled = false;
 
   bool get _isEdit => widget.initial != null;
+
+  /// The shelf the item will be saved on: the chosen one, or the fallback.
+  ///
+  /// Nothing downstream takes a null category -- an item is always on a shelf
+  /// -- so the null lives only as far as this getter and the placeholder that
+  /// reads it back.
+  Category get _category => _chosen ?? widget.categories.fallback;
 
   /// Whether the cost field is on screen while a plan grid is also on screen.
   ///
@@ -206,12 +229,18 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     _name.text = initial.name;
     _expiresOn = initial.expiresOn;
-    _category = initial.category;
+    _chosen = initial.category;
     _iconName = initial.iconName;
     _cycle = initial.cycle;
     _repeatCount = initial.repeatCount;
     _count.text = initial.repeatCount == null ? '' : '${initial.repeatCount}';
     final cycle = initial.cycle;
+    // An item that is neither monthly nor yearly opens with the row showing,
+    // for the same reason it stays showing after a pick: the third segment is
+    // the only thing naming the cycle, and a reader has to be able to see
+    // what else was on offer.
+    _cycleOther =
+        cycle != null && cycle != Cycle.monthly && cycle != Cycle.yearly;
     if (cycle != null && !cycle.isPreset) {
       final (count, field) = cycle.inLargestField;
       _every.text = '$count';
@@ -341,33 +370,35 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 const SizedBox(height: 12),
                 _gutter(_suggestionList()),
               ],
-              // Part of the name block, not a block of its own: it sits
-              // eight pixels under the field rather than twenty-six, because
-              // what a thing is called and what kind of thing it is are one
-              // answer given twice.
-              const SizedBox(height: 9),
-              if (_categorySettled)
-                _gutter(
-                  Field(
-                    // Labelled, unlike the rail. A rail of shelf names reads
-                    // as shelf names on sight; a single row saying `Streaming`
-                    // could be anything.
-                    label: 'Category',
-                    child: PickerField(
-                      value: _category.label,
-                      onTap: _pickCategory,
-                    ),
+              // A block of its own, with its own gap above it. It used to be
+              // pulled up tight under the name field on the grounds that what
+              // a thing is called and what kind of thing it is are one answer
+              // given twice -- but a form whose gaps vary from block to block
+              // reads as groupings that were never meant, so this one takes
+              // the same 22 as every other.
+              const SizedBox(height: SubdockSpacing.formBlock),
+              _gutter(
+                Field(
+                  // One row, never a rail. Twenty-two shelves scrolling
+                  // sideways is a browsing control on a form whose other
+                  // eleven blocks all answer in place, and the one thing it
+                  // did better -- showing what the choices are -- is what the
+                  // sheet behind this row does with the whole screen.
+                  label: 'Category',
+                  child: PickerField(
+                    value: _chosen?.label ?? 'Pick a category',
+                    placeholder: _chosen == null,
+                    onTap: _pickCategory,
                   ),
-                )
-              else
-                Field(label: null, bleed: true, child: _categoryRail()),
+                ),
+              ),
               // The provider's own page, where the two answers this form is
               // waiting for actually live. Someone adding a service they have
               // never looked up does not know the renewal date or the amount,
               // and this is the one place in the app that can send them to
               // where both are written down.
               if (_manageUrl case final url?) ...[
-                const SizedBox(height: 10),
+                const SizedBox(height: 14),
                 _gutter(_manageLink(url)),
               ],
               // The plans of the chosen service. Above the cost field, and
@@ -378,46 +409,21 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 _gutter(
                   Field(
                     label: 'Plan',
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        PlanGrid(
-                          options: plans,
-                          selected: _planTier,
-                          onSelect: _pickPlan,
-                        ),
-                        // The way past the grid, and the reason the cost
-                        // field below is folded away: a user who recognises
-                        // their plan on a tile never needs a number pad, and
-                        // a field standing open under the tiles asks them to
-                        // check whether the tile they just tapped was right.
-                        if (!_costOpen) ...[
-                          const SizedBox(height: 10),
-                          Row(
-                            children: [
-                              // Flexible, because the sentence and the link
-                              // have to share one line at any text scale.
-                              const Flexible(
-                                child: Text(
-                                  'Paying a different amount?',
-                                  style: SubdockText.summary,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              InkWell(
-                                onTap: () => setState(() => _costOpen = true),
-                                child: const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 4),
-                                  child: Text(
-                                    'Enter it',
-                                    style: SubdockText.quietAction,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ],
+                    child: PlanGrid(
+                      options: plans,
+                      selected: _planTier,
+                      onSelect: _pickPlan,
+                      // The way past the grid, as the last tile in it. The
+                      // provenance line that used to sit under here -- "listed
+                      // prices, checked 30 Jul 2026" -- is gone with it: the
+                      // tiles are a shortcut to a number the user can
+                      // overwrite in the field below, and a caveat about
+                      // staleness under every one of them charged the reader
+                      // for a doubt they can settle by looking at their own
+                      // statement.
+                      onOther: _costOpen
+                          ? null
+                          : () => setState(() => _costOpen = true),
                     ),
                   ),
                 ),
@@ -437,9 +443,14 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   child: _cycleField(),
                 ),
               ),
-              // The interval nothing on the list covers, typed out. A sub-block
-              // of the dropdown above rather than a block of its own: it is the
-              // second half of one answer.
+              // The cycles nobody bills on often enough to earn a segment.
+              // A sub-block of the tray above rather than a block of its own:
+              // it is the second half of one answer.
+              if (_cycleOther) ...[
+                const SizedBox(height: 9),
+                _gutter(_otherCycles()),
+              ],
+              // The interval nothing on the list covers, typed out.
               if (_isCustomCycle) ...[
                 const SizedBox(height: 9),
                 _gutter(_everyRow()),
@@ -449,11 +460,11 @@ class _AddItemScreenState extends State<AddItemScreen> {
               // lands -- see the trial card's own note.
               const SizedBox(height: SubdockSpacing.formBlock),
               Field(
-                // No heading on a new item. The field itself reads `Choose a
-                // date`, so a `NEXT PAYMENT` label over it is the screen
-                // asking the same question twice. An edit gets one, because
-                // there the field holds a date rather than a prompt.
-                label: _isEdit ? 'Next date' : null,
+                // No heading, on either form. The card says `Next payment
+                // date` while it is still a prompt and shows the date itself
+                // once it has one, so an uppercase `NEXT PAYMENT` above it is
+                // the screen saying the same thing twice in two type sizes.
+                label: null,
                 bleed: true,
                 child: _dateField(),
               ),
@@ -520,16 +531,21 @@ class _AddItemScreenState extends State<AddItemScreen> {
     );
   }
 
-  /// The chosen service's tiers at the cycle currently selected.
+  /// The chosen service's tiers, at every cycle the vendor sells them on.
   ///
   /// Empty for a manually entered item, and empty for a service the catalogue
   /// has no priced plans for — which is two thirds of it. An empty grid is not
   /// a failure state, it is the normal one, so the block simply does not appear.
+  ///
+  /// Not filtered by [_cycle] any more. The grid used to show only the tiles
+  /// matching whatever the tray happened to be set to, which hid a vendor's
+  /// yearly prices behind a control the user had not touched — and the yearly
+  /// figure is the one most worth seeing before committing. Every tile now
+  /// carries its own `/ mo` or `/ yr`, and tapping one sets the tray.
   List<PlanOption> get _planOptions {
     final entry = _matched;
-    final cycle = _cycle;
-    if (entry == null || cycle == null) return const [];
-    return PlanGrid.optionsFor(entry, cycle);
+    if (entry == null) return const [];
+    return PlanGrid.optionsFor(entry);
   }
 
   /// The last amount the app wrote into the cost field, as opposed to typed.
@@ -539,8 +555,14 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   void _pickPlan(PlanOption plan) {
     setState(() {
-      _planTier = plan.tier;
+      _planTier = plan.id;
       _currency = plan.price.currency;
+      // The tile says `/ mo` or `/ yr`, so the tray under it has to agree.
+      // Filling the amount and leaving the cycle alone is how a yearly price
+      // would end up saved as a monthly charge -- twelve times the money, with
+      // nothing on screen contradicting it.
+      _cycle = plan.cycle;
+      _cycleOther = false;
       _fillAmount(plan.price.minor);
     });
   }
@@ -557,14 +579,17 @@ class _AddItemScreenState extends State<AddItemScreen> {
     setState(() {
       _picking = false;
       // Preselect the vendor's own default tier, so the commonest plan is
-      // already lit and its price already in the cost field.
-      _planTier = entry.defaultPlan;
-      final cycle = _cycle;
-      if (cycle == null) return;
-      final plans = PlanGrid.optionsFor(entry, cycle);
+      // already lit and its price already in the cost field. The shortest
+      // cycle of that tier, because the grid is sorted that way and a vendor
+      // who prices one plan monthly and yearly bills it monthly by default.
+      final plans = PlanGrid.optionsFor(entry);
       final pick = plans.where((p) => p.tier == entry.defaultPlan).firstOrNull;
+      _planTier = pick?.id;
       if (pick != null) {
         _currency = pick.price.currency;
+        // The tier decides the cycle, not the entry's default: a service whose
+        // default plan is a yearly one is billed yearly.
+        _cycle = pick.cycle;
         _fillAmount(pick.price.minor);
       }
     });
@@ -575,61 +600,83 @@ class _AddItemScreenState extends State<AddItemScreen> {
     child: child,
   );
 
+  /// The two ways out on one line, and the item's own name under them.
+  ///
+  /// `Back` and `Cancel` are both escapes and they belong in the same band at
+  /// the top of the screen, pushed to opposite ends: one goes back a step, the
+  /// other abandons the whole thing, and stacking them made the second look
+  /// like a heading action on the first.
+  ///
+  /// The title is the name being typed, live. It contradicts what this comment
+  /// used to say -- that a heading rewriting itself stops answering "which
+  /// item is this" -- and the design is right: on the add form the heading has
+  /// no other job, and watching it become `Netflix` as you type is the clearest
+  /// signal in the app that the name took. An edit keeps `Edit item` and names
+  /// the item on the mono line under it, because there the heading does have
+  /// another job: saying that this screen changes something that already
+  /// exists.
   Widget _header() {
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Back to step one, and only when there is a step one to go back
-              // to. An edit has no picker behind it, and a back link that
-              // dropped the user into a service browser would look like the
-              // app had lost the item they were editing.
-              if (!_isEdit)
-                InkWell(
-                  onTap: () => setState(() => _picking = true),
-                  child: const Padding(
-                    padding: EdgeInsets.only(bottom: 10),
-                    child: Text('‹ Back', style: SubdockText.quietAction),
-                  ),
+        Row(
+          children: [
+            // Back to step one, and only when there is a step one to go back
+            // to. An edit has no picker behind it, and a back link that
+            // dropped the user into a service browser would look like the
+            // app had lost the item they were editing.
+            if (!_isEdit)
+              InkWell(
+                onTap: () => setState(() => _picking = true),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4),
+                  child: Text('\u2039 Back', style: SubdockText.quietAction),
                 ),
-              Text(
-                _isEdit ? 'Edit item' : (_matched?.name ?? 'New item'),
-                style: SubdockText.editorTitle,
               ),
-              // Only the editor carries a mono line under the title, and it
-              // names the item, because `Edit item` alone does not say which
-              // of forty was opened. The add form's title is already the
-              // service's own name, so a `Step 2 of 2` under it counts steps
-              // at the reader instead of telling them anything.
-              if (_isEdit) ...[
-                const SizedBox(height: 6),
-                Text('Editing $_editingName', style: SubdockText.monoInline),
-              ],
+            const Spacer(),
+            if (widget.onScan != null) ...[
+              InkWell(
+                onTap: widget.onScan,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4),
+                  child: Text('Scan', style: SubdockText.quietAction),
+                ),
+              ),
+              const SizedBox(width: 16),
             ],
-          ),
-        ),
-        if (widget.onScan != null) ...[
-          InkWell(
-            onTap: widget.onScan,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 4),
-              child: Text('Scan', style: SubdockText.quietAction),
+            InkWell(
+              onTap: widget.onCancel ?? () => Navigator.of(context).maybePop(),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 4),
+                child: Text('Cancel', style: SubdockText.quietAction),
+              ),
             ),
-          ),
-          const SizedBox(width: 16),
-        ],
-        InkWell(
-          onTap: widget.onCancel ?? () => Navigator.of(context).maybePop(),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 4),
-            child: Text('Cancel', style: SubdockText.quietAction),
-          ),
+          ],
         ),
+        const SizedBox(height: 10),
+        Text(
+          _isEdit ? 'Edit item' : _title,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: SubdockText.editorTitle,
+        ),
+        // Only the editor carries a mono line under the title, and it
+        // names the item, because `Edit item` alone does not say which
+        // of forty was opened.
+        if (_isEdit) ...[
+          const SizedBox(height: 6),
+          Text('Editing $_editingName', style: SubdockText.monoInline),
+        ],
       ],
     );
+  }
+
+  /// What the add form calls itself: the name being typed, the service that
+  /// was picked, or nothing yet.
+  String get _title {
+    final typed = _name.text.trim();
+    if (typed.isNotEmpty) return typed;
+    return _matched?.name ?? 'New item';
   }
 
   /// When the series stops, in the two ways a person says it.
@@ -817,17 +864,19 @@ class _AddItemScreenState extends State<AddItemScreen> {
           // settled flag left standing would keep the catalogue quiet through
           // whatever they type next.
           if (_name.text.isNotEmpty)
-            InkWell(
+            InkResponse(
               onTap: () {
                 _name.clear();
                 _nameSettled = false;
                 _nameFocus.requestFocus();
               },
-              child: const Padding(
-                padding: EdgeInsets.all(4),
+              radius: 20,
+              child: const SizedBox(
+                width: 28,
+                height: 28,
                 child: Icon(
                   Icons.close_rounded,
-                  size: 18,
+                  size: 19,
                   color: SubdockColors.inkMuted,
                 ),
               ),
@@ -878,17 +927,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
     return url == null || url.isEmpty ? null : url;
   }
 
-  /// Whether the shelf is already decided, and so needs a row rather than a
-  /// rail.
-  ///
-  /// A catalogue row carries its own shelf, and an item being edited has had
-  /// one since the day it was made. In both cases the answer is on screen and
-  /// right, and twenty-two chips scrolling sideways under it is a question
-  /// being asked after it was answered. Someone entering a service by hand has
-  /// genuinely not chosen yet, and for them the rail is still the fastest way
-  /// to see what the choices are.
-  bool get _categorySettled => _isEdit || _matched != null;
-
   Future<void> _pickCategory() async {
     // A sheet behind the keyboard opens half covered.
     FocusScope.of(context).unfocus();
@@ -902,7 +940,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       selected: _category.id,
     );
     if (picked != null && mounted) {
-      setState(() => _category = widget.categories[picked]);
+      setState(() => _chosen = widget.categories[picked]);
     }
   }
 
@@ -913,7 +951,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
   /// to go and check something, which is what the `Enter it` link under the
   /// plan grid is too.
   Widget _manageLink(String url) {
-    final name = _entry?.name ?? _name.text;
     return Align(
       alignment: Alignment.centerLeft,
       child: InkWell(
@@ -936,9 +973,14 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 color: SubdockColors.accent,
               ),
               const SizedBox(width: 6),
-              Flexible(
+              const Flexible(
                 child: Text(
-                  'Open $name account',
+                  // Not `Open Netflix account`, the way the detail screen
+                  // words it. There the item exists and the sentence is about
+                  // that item; here it is a way out to go and read a number
+                  // off a page, and the vendor's name is already the heading
+                  // of this screen.
+                  'Open subscription page',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: SubdockText.quietAction,
@@ -948,19 +990,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _categoryRail() {
-    return ChipRail(
-      children: [
-        for (final category in widget.categories.all)
-          ChoiceChipPill(
-            category.label,
-            selected: _category.id == category.id,
-            onTap: () => setState(() => _category = category),
-          ),
-      ],
     );
   }
 
@@ -979,17 +1008,25 @@ class _AddItemScreenState extends State<AddItemScreen> {
       children: [
         _gutter(
           PickerField(
+            // `Next payment date`, not `Choose a date`: the label above this
+            // card is gone, so the prompt is now the only thing naming what
+            // the date is for.
             value: expiresOn == null
-                ? 'Choose a date'
+                ? 'Next payment date'
                 : DateCopy.longDate(expiresOn),
             placeholder: expiresOn == null,
-            // Only while the field is still a prompt. Once it holds a date the
-            // second line would be explaining a control the user has used.
-            hint: expiresOn == null ? 'Tap to open the calendar' : null,
+            // Two lines either way, so the card never changes height under
+            // the thumb. Empty, the second line says what tapping does; full,
+            // it says how far off the date is -- which is the half of the
+            // answer a calendar date does not give at a glance, and the half
+            // that catches a month picked wrong.
+            hint: expiresOn == null
+                ? 'Tap to open the calendar'
+                : DateCopy.relative(widget.today, expiresOn),
             onTap: _pickDate,
           ),
         ),
-        const SizedBox(height: 9),
+        const SizedBox(height: 10),
         ChipRail(
           children: [
             for (final shortcut in DateCopy.shortcuts)
@@ -1179,19 +1216,17 @@ class _AddItemScreenState extends State<AddItemScreen> {
     _setRepeatCount(_defaultRepeatCount);
   }
 
-  /// The name of a cycle as the dropdown shows it.
-  ///
   /// The two cycles nearly every subscription uses, and a way to the rest.
   ///
   /// Monthly and yearly cover almost everything a person pays for, and both of
   /// them used to cost a sheet: open it, read seven options, tap one, watch it
-  /// close. A tray answers the common case in one tap and keeps the seven
+  /// close. A tray answers the common case in one tap and keeps the rest
   /// behind the third segment.
   ///
   /// The third segment says what was chosen rather than `Other` whenever
   /// something was. A tray reading `Other` on a quarterly plan hides the
   /// answer on the one control whose whole job is to show it, and the reader
-  /// would have to reopen the sheet to find out what their own item does.
+  /// would have to reopen the list to find out what their own item does.
   Widget _cycleField() {
     final cycle = _cycle;
     final monthly = cycle == Cycle.monthly;
@@ -1213,11 +1248,79 @@ class _AddItemScreenState extends State<AddItemScreen> {
           : 2,
       onSelect: (index) {
         if (index == 2) {
-          unawaited(_pickCycle());
+          // A row on the form rather than a modal. The sheet it replaced put
+          // seven options over the whole screen, hid the tray that had just
+          // been tapped, and cost a second tap to dismiss -- for a question
+          // whose answers are four short words.
+          setState(() => _cycleOther = true);
           return;
         }
-        setState(() => _cycle = index == 0 ? Cycle.monthly : Cycle.yearly);
+        setState(() {
+          _cycle = index == 0 ? Cycle.monthly : Cycle.yearly;
+          _cycleOther = false;
+        });
       },
+    );
+  }
+
+  /// The cycles behind the third segment, and the line that says the row is
+  /// still live once one of them is showing on it.
+  ///
+  /// `Custom…` does not open a modal either. It sets an interval and reveals
+  /// the `Every n …` row underneath, which is where the number is then edited
+  /// in place — a real contract renews on a schedule somebody else chose, and
+  /// "my plan runs 5 months" must not turn into "make it a one-off and re-date
+  /// it by hand five times a year".
+  Widget _otherCycles() {
+    final cycle = _cycle;
+    final custom = _isCustomCycle;
+    final named =
+        cycle != null && cycle != Cycle.monthly && cycle != Cycle.yearly;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            for (final preset in Cycle.values)
+              if (preset != Cycle.monthly && preset != Cycle.yearly)
+                ChoiceChipPill(
+                  ItemPresenter.cycleLabel(preset),
+                  selected: cycle == preset,
+                  onTap: () => setState(() => _cycle = preset),
+                ),
+            ChoiceChipPill(
+              'One-off',
+              selected: cycle == null,
+              onTap: () => setState(() {
+                _cycle = null;
+                // Nothing to end when there is only one payment, and the
+                // block that asks about it is about to disappear.
+                _repeatCount = null;
+              }),
+            ),
+            ChoiceChipPill(
+              'Every…',
+              selected: custom,
+              // Two months, not one: one month is already a segment above, so
+              // a user who came this far means something else. An interval
+              // already custom is left alone -- tapping the chip that is
+              // already lit must not reset the number underneath it.
+              onTap: () => custom ? null : _setCustomCycle(2, CycleField.month),
+            ),
+          ],
+        ),
+        if (named) ...[
+          const SizedBox(height: 8),
+          Text(
+            'Currently ${_cycleLabel(cycle).toLowerCase()} — tap another to '
+            'change it.',
+            style: SubdockText.caption.copyWith(fontSize: 13.5),
+          ),
+        ],
+      ],
     );
   }
 
@@ -1228,53 +1331,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
   /// wording — the field is full width, so `Every 2 months` fits.
   static String _cycleLabel(Cycle? cycle) =>
       cycle == null ? 'One-off' : ItemPresenter.cycleLabel(cycle);
-
-  /// The list behind the dropdown: every preset, the one-off, and the way out
-  /// to an interval the app does not have a name for.
-  ///
-  /// `Custom…` does not open a second modal. It sets an interval and reveals
-  /// the `Every n …` row underneath, which is where the number is then edited
-  /// in place — a real contract renews on a schedule somebody else chose, and
-  /// "my plan runs 5 months" must not turn into "make it a one-off and re-date
-  /// it by hand five times a year".
-  Future<void> _pickCycle() async {
-    const once = 'ONCE';
-    const custom = 'CUSTOM';
-
-    final cycle = _cycle;
-    final isCustom = _isCustomCycle;
-
-    final picked = await chooseOption<String>(
-      context,
-      title: 'Billing cycle',
-      options: [
-        for (final preset in Cycle.values)
-          (preset.wireName, ItemPresenter.cycleLabel(preset)),
-        (once, 'One-off'),
-        (
-          custom,
-          isCustom
-              ? 'Every ${ItemPresenter.cycleEvery(cycle!)}…'
-              : 'Every N days, weeks, months…',
-        ),
-      ],
-      selected: isCustom ? custom : (cycle?.wireName ?? once),
-    );
-    if (picked == null || !mounted) return;
-
-    if (picked == custom) {
-      // Two months, not one: one month is already on the list above, so a user
-      // who came this far means something else. An interval already custom is
-      // left alone — reopening the list to check what it says must not reset it.
-      if (!isCustom) _setCustomCycle(2, CycleField.month);
-      return;
-    }
-
-    setState(() {
-      _cycle = picked == once ? null : CycleWire.fromWire(picked);
-      if (_cycle == null) _repeatCount = null;
-    });
-  }
 
   /// The same figure in the other currency.
   ///
@@ -1355,8 +1411,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
       _matched = entry;
       _name.text = entry.name;
       _nameSettled = true;
-      _category = widget.categories[entry.categoryId];
+      _chosen = widget.categories[entry.categoryId];
       _cycle = entry.defaultCycle;
+      // A catalogue row prices its plans on its own cycle, and the grid now
+      // shows every cycle at once, so the tray closes: the answer is on the
+      // segment, or one tap away on a tile.
+      _cycleOther = false;
       if (_cycle == null) _repeatCount = null;
       final minor = entry.typicalAmountMinor;
       if (minor != null) {

@@ -39,6 +39,10 @@ class SourceField extends StatefulWidget {
   State<SourceField> createState() => _SourceFieldState();
 }
 
+/// The one rule this field exists to state, in the two places a user could
+/// still be about to break it.
+const String _noCardNumbers = 'A name you recognise. Never a card number.';
+
 class _SourceFieldState extends State<SourceField> {
   final TextEditingController _name = TextEditingController();
   final FocusNode _nameFocus = FocusNode();
@@ -154,11 +158,15 @@ class _SourceFieldState extends State<SourceField> {
             ],
           ),
         ),
-        const SizedBox(height: 5),
-        const Text(
-          'A name you recognise. Never a card number.',
-          style: SubdockText.caption,
-        ),
+        // Only while there is nothing to pick from. Once the user has named
+        // a card, the chips below are the answer and this line is a caption
+        // on a control they have already used -- and it is repeated inside
+        // the panel anyway, which is the one place someone could still be
+        // about to type a card number.
+        if (_offered.isEmpty) ...[
+          const SizedBox(height: 5),
+          const Text(_noCardNumbers, style: SubdockText.caption),
+        ],
         const SizedBox(height: 10),
         Wrap(
           spacing: 9,
@@ -187,8 +195,8 @@ class _SourceFieldState extends State<SourceField> {
             padding: const EdgeInsets.all(14),
             children: [
               Wrap(
-                spacing: 6,
-                runSpacing: 6,
+                spacing: 8,
+                runSpacing: 8,
                 children: [
                   for (final (label, glyph) in SourcePresets.all)
                     ChoiceChipPill(
@@ -263,6 +271,12 @@ class _SourceFieldState extends State<SourceField> {
                   ],
                 ),
               ),
+              // Here, where someone is looking at an empty box wondering what
+              // to put in it. The label above the chips says it too when there
+              // are no sources yet; this is the same sentence at the moment it
+              // is actually load-bearing.
+              const SizedBox(height: 8),
+              const Text(_noCardNumbers, style: SubdockText.caption),
               const SizedBox(height: 10),
               Row(
                 children: [

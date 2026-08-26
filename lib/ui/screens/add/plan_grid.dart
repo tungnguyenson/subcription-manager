@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/domain/money.dart';
 import 'package:subdock/domain/recurrence.dart';
+import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/theme.dart';
 
-/// One tier of a service, at the cycle the form is set to.
+/// One tier of a service, at the cycle the vendor sells it on.
 @immutable
 class PlanOption {
   /// The catalogue's [CatalogPlan.tier]: a slug, and what a selection is
@@ -22,6 +23,16 @@ class PlanOption {
 
   final Money price;
 
+  /// The cycle the price is quoted for.
+  ///
+  /// Carried per option rather than passed to the grid because the grid now
+  /// shows every cycle at once: a vendor's monthly and yearly tiers sit side
+  /// by side, told apart by the `/ mo` and `/ yr` under the price, and tapping
+  /// one sets the form's billing cycle as well as its amount. Filtering the
+  /// grid by the cycle the form happened to be on hid half the price list
+  /// behind a control the user had not touched yet.
+  final Cycle cycle;
+
   /// The day the price was read off the vendor's page.
   final String checkedAt;
 
@@ -29,8 +40,21 @@ class PlanOption {
     required this.tier,
     required this.label,
     required this.price,
+    required this.cycle,
     required this.checkedAt,
   });
+
+  /// `/ mo`, `/ yr` — the unit that turns a bare figure into a price.
+  String? get per => ItemPresenter.cyclePer(cycle);
+
+  /// What a lit tile is remembered as.
+  ///
+  /// The tier alone is not enough now that the grid holds every cycle at
+  /// once: a vendor selling one plan two ways gives both tiles the same
+  /// slug — Disney+ ships `premium` monthly and `premium` yearly — and
+  /// matching on the slug lit both of them, which said the user had chosen
+  /// two prices at once.
+  String get id => '$tier·${cycle.unit.name}${cycle.step}';
 }
 
 /// The published tiers of one service, as tappable tiles.
@@ -42,56 +66,78 @@ class PlanOption {
 ///
 /// Every price here has a vendor page and a date behind it — that is a hard rule
 /// on [CatalogPlan] — but it is still a *listed* price, not the user's. Tapping
-/// a tile fills the cost field, which the user can then overwrite; the
-/// provenance line under the grid says where the number came from so a
-/// disagreement reads as "my price differs" rather than "the app is wrong".
+/// a tile fills the cost field and sets the cycle, both of which the user can
+/// then overwrite; the way out is the last tile rather than a line of prose
+/// under the grid, so "none of these" is answered in the same gesture as "this
+/// one".
 class PlanGrid extends StatelessWidget {
   final List<PlanOption> options;
 
-  /// The chosen tier, or null when the user has typed their own amount.
+  /// The chosen tile's [PlanOption.id], or null when the user has typed their
+  /// own amount.
   final String? selected;
 
   final ValueChanged<PlanOption> onSelect;
+
+  /// Opens the cost field. Null leaves the tile off the grid.
+  final VoidCallback? onOther;
 
   const PlanGrid({
     super.key,
     required this.options,
     required this.selected,
     required this.onSelect,
+    this.onOther,
   });
 
-  /// The tiers of [entry] for one region and cycle, cheapest first.
+  /// The tiers of [entry] for one region, cheapest cycle first.
   ///
   /// Region falls back the way the rest of the app does: Vietnam first, because
   /// that is the money that actually leaves a card here, then global. Mixing the
   /// two would put a dong price beside a dollar one and invite the user to
   /// compare them.
-  static List<PlanOption> optionsFor(CatalogEntry entry, Cycle cycle) {
+  ///
+  /// Every cycle the vendor publishes, not just the one the form is set to.
+  /// The `/ mo` and `/ yr` on the tiles are what keeps the two readable side by
+  /// side, and a yearly tier is the one number a monthly-billed user most wants
+  /// to see before they commit.
+  static List<PlanOption> optionsFor(CatalogEntry entry) {
     for (final region in const ['VN', 'GLOBAL']) {
-      final plans =
-          entry.plans
-              .where((p) => p.region == region && p.cycle == cycle)
-              .toList()
-            ..sort((a, b) => a.amountMinor.compareTo(b.amountMinor));
+      final plans = entry.plans.where((p) => p.region == region).toList()
+        ..sort((a, b) {
+          // Short cycles first, so `/ mo` tiles group above `/ yr` ones rather
+          // than interleaving by price -- a yearly figure is ten times a
+          // monthly one and would otherwise sink to the bottom of the grid
+          // whatever tier it is.
+          final byCycle = _cycleDays(a.cycle).compareTo(_cycleDays(b.cycle));
+          if (byCycle != 0) return byCycle;
+          return a.amountMinor.compareTo(b.amountMinor);
+        });
       if (plans.isEmpty) continue;
 
-      // One tile per tier. A vendor listing the same tier twice in one region
-      // and cycle is a data error, and showing both would make the grid look
-      // like the service has two identical plans.
+      // One tile per tier and cycle. A vendor listing the same tier twice in
+      // one region and cycle is a data error, and showing both would make the
+      // grid look like the service has two identical plans.
       final seen = <String>{};
       return [
         for (final plan in plans)
-          if (seen.add(plan.tier))
+          if (seen.add('${plan.tier}·${plan.cycle}'))
             PlanOption(
               tier: plan.tier,
               label: plan.name,
               price: Money(plan.amountMinor, plan.currency),
+              cycle: plan.cycle,
               checkedAt: plan.checkedAt,
             ),
       ];
     }
     return const [];
   }
+
+  /// Roughly how long a cycle is, for ordering only. A month counts as thirty
+  /// days, which is wrong by a day or two and right about the order.
+  static int _cycleDays(Cycle cycle) =>
+      cycle.unit == CycleUnit.day ? cycle.step : cycle.step * 30;
 
   /// Vertical padding, the price line, the gap, the tier line.
   ///
@@ -106,6 +152,9 @@ class PlanGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (options.isEmpty) return const SizedBox.shrink();
+
+    final other = onOther;
+    final count = options.length + (other == null ? 0 : 1);
 
     return GridView.builder(
       shrinkWrap: true,
@@ -125,12 +174,20 @@ class PlanGrid extends StatelessWidget {
         // tier the same way.
         mainAxisExtent: _tileHeight(context),
       ),
-      itemCount: options.length,
-      itemBuilder: (context, i) => _PlanTile(
-        option: options[i],
-        selected: options[i].tier == selected,
-        onTap: () => onSelect(options[i]),
-      ),
+      itemCount: count,
+      itemBuilder: (context, i) {
+        if (i == options.length) {
+          // Armed while no tile is lit, which is also when it is the only way
+          // forward: a service the catalogue prices but this user pays a
+          // different amount for.
+          return _OtherTile(armed: selected == null, onTap: other!);
+        }
+        return _PlanTile(
+          option: options[i],
+          selected: options[i].id == selected,
+          onTap: () => onSelect(options[i]),
+        );
+      },
     );
   }
 }
@@ -148,6 +205,8 @@ class _PlanTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ink = selected ? SubdockColors.accent : SubdockColors.inkSecondary;
+
     return Container(
       decoration: BoxDecoration(
         color: SubdockColors.card,
@@ -167,15 +226,29 @@ class _PlanTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  MoneyFormat.full(option.price),
+                Text.rich(
+                  TextSpan(
+                    text: MoneyFormat.full(option.price),
+                    children: [
+                      // The unit, not a second figure: two tiles reading
+                      // 260,000 and 2,600,000 are the same plan billed two
+                      // ways, and without `/ mo` beside one of them the grid
+                      // looks like a tenfold price rise.
+                      if (option.per case final per?)
+                        TextSpan(
+                          text: '  $per',
+                          style: SubdockText.monoValue.copyWith(
+                            fontSize: 12.5,
+                            color: SubdockColors.inkMuted,
+                          ),
+                        ),
+                    ],
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: SubdockText.monoValue.copyWith(
                     fontSize: 15.5,
-                    color: selected
-                        ? SubdockColors.accent
-                        : SubdockColors.inkSecondary,
+                    color: ink,
                   ),
                 ),
                 const SizedBox(height: 5),
@@ -188,6 +261,78 @@ class _PlanTile extends StatelessWidget {
                     fontSize: 13,
                     height: 1.3,
                     color: SubdockColors.ink,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The way past the grid, as a tile in it.
+///
+/// It used to be a sentence under the grid — "Paying a different amount?
+/// Enter it" — which put the answer to "none of these" in a different shape,
+/// a different place and a different weight from the answer to "this one". A
+/// tile is the same gesture as every other option here.
+///
+/// Drawn unfilled so it never reads as a plan: no card behind it, and an inset
+/// rule instead of a border. The rule is the accent while nothing is chosen,
+/// because then this is the only live way forward, and drops back to the
+/// separator once a tile is lit.
+class _OtherTile extends StatelessWidget {
+  final bool armed;
+  final VoidCallback onTap;
+
+  const _OtherTile({required this.armed, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(SubdockRadius.card),
+        border: Border.all(
+          color: armed ? SubdockColors.accent : SubdockColors.hairline,
+          width: 1.5,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        color: const Color(0x00000000),
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Other amount',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: SubdockText.family,
+                    fontSize: 15.5,
+                    height: 1.2,
+                    fontWeight: SubdockWeight.medium,
+                    color: armed
+                        ? SubdockColors.accent
+                        : SubdockColors.inkSecondary,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                const Text(
+                  'Type it yourself',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: SubdockText.family,
+                    fontSize: 13,
+                    height: 1.3,
+                    color: SubdockColors.inkMuted,
                   ),
                 ),
               ],

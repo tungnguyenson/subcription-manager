@@ -934,7 +934,6 @@ void main() {
       // The date field does not go away when the trial comes on: for a trial
       // that date *is* the first charge, and the summary at the foot of the
       // form goes on reading it back.
-      expect(find.textContaining('Badged FREE TRIAL'), findsOneWidget);
       expect(find.textContaining('Free until Saturday'), findsOneWidget);
 
       await tester.ensureVisible(find.text('Save item'));
@@ -1309,13 +1308,13 @@ void main() {
       // The vendor's own default tier arrives already lit.
       expect(
         tester.widget<PlanGrid>(find.byType(PlanGrid)).selected,
-        'premium',
+        'premium·month1',
       );
 
       // The cost field is folded away behind the grid until the user says
       // their price differs, so the amount is only readable once it is open.
       expect(find.text('260,000'), findsNothing);
-      await tester.tap(find.text('Enter it'));
+      await tester.tap(find.text('Other amount'));
       await tester.pumpAndSettle();
       expect(find.text('260,000'), findsOneWidget);
 
@@ -1326,10 +1325,142 @@ void main() {
 
       expect(
         tester.widget<PlanGrid>(find.byType(PlanGrid)).selected,
-        'standard',
+        'standard·month1',
         reason: 'the tap must survive its own write to the cost field',
       );
       expect(find.text('220,000'), findsOneWidget);
+    });
+
+    // The grid shows what the vendor sells, not what the tray happens to be
+    // set to -- and the yearly figure is the one worth seeing before
+    // committing. Which means a tile can disagree with the tray, and the tile
+    // wins: a yearly price saved against a monthly cycle is twelve times the
+    // money, with nothing on screen contradicting it.
+    testWidgets('a yearly tile sets the yearly cycle', (tester) async {
+      final priced = ServiceCatalog([
+        CatalogEntry(
+          id: 'adobe',
+          name: 'Adobe Photography',
+          aliases: const ['adobe'],
+          categoryId: 'STREAMING',
+          defaultCycle: Cycle.monthly,
+          defaultPlan: 'plan',
+          plans: const [
+            CatalogPlan(
+              tier: 'plan',
+              name: 'Photography',
+              region: 'VN',
+              currency: 'VND',
+              cycle: Cycle.monthly,
+              amountMinor: 250000,
+              source: 'https://adobe.com/vn/plans',
+              checkedAt: '2026-07-30',
+            ),
+            CatalogPlan(
+              // The same slug as the monthly one, the way Disney+ ships it:
+              // one plan sold two ways.
+              tier: 'plan',
+              name: 'Photography, a year',
+              region: 'VN',
+              currency: 'VND',
+              cycle: Cycle.yearly,
+              amountMinor: 2500000,
+              source: 'https://adobe.com/vn/plans',
+              checkedAt: '2026-07-30',
+            ),
+          ],
+        ),
+      ]);
+
+      DraftItem? saved;
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: priced,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (draft) => saved = draft,
+        ),
+      );
+
+      await tester.tap(find.text('Adobe Photography'));
+      await tester.pumpAndSettle();
+
+      // Both cycles on the grid at once, told apart by the unit under the
+      // price rather than by a control the user has not touched yet.
+      expect(find.textContaining('/ mo'), findsOneWidget);
+      expect(find.textContaining('/ yr'), findsOneWidget);
+
+      // One slug, two prices: a tile lit by its slug alone would light both,
+      // which reads as the user having chosen two amounts at once.
+      await tester.tap(find.text('Photography, a year'));
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<PlanGrid>(find.byType(PlanGrid)).selected,
+        'plan·month12',
+      );
+
+      await tester.ensureVisible(find.text('Today'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Save item'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save item'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.cycle, Cycle.yearly);
+      expect(saved?.amountMinor, 2500000);
+    });
+
+    // Nobody picked a shelf, so the row says so -- and the save still lands on
+    // one, because there is nowhere else for an item to go.
+    testWidgets('an untouched category still saves onto the fallback shelf', (
+      tester,
+    ) async {
+      DraftItem? saved;
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (draft) => saved = draft,
+        ),
+      );
+
+      expect(find.text('Pick a category'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField).first, 'Gym');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save item'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.category.id, CategoryBook.shipped.fallback.id);
+    });
+
+    // The heading is the only thing on the add form whose job is to say what
+    // is being added, so it follows the name as it is typed.
+    testWidgets('the heading follows the name being typed', (tester) async {
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+        ),
+      );
+
+      expect(find.text('New item'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField).first, 'Gym');
+      await tester.pumpAndSettle();
+
+      // Once in the heading, once in the field it was typed into.
+      expect(find.text('Gym'), findsNWidgets(2));
+      expect(find.text('New item'), findsNothing);
     });
 
     // Typing over the price does unlatch it: the grid would otherwise claim a
@@ -1370,10 +1501,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(
         tester.widget<PlanGrid>(find.byType(PlanGrid)).selected,
-        'premium',
+        'premium·month1',
       );
 
-      await tester.tap(find.text('Enter it'));
+      await tester.tap(find.text('Other amount'));
       await tester.pumpAndSettle();
       await tester.enterText(find.text('260,000'), '190000');
       await tester.pumpAndSettle();
@@ -1427,7 +1558,7 @@ void main() {
       await tester.tap(find.text('Netflix Premium').last);
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Open Netflix Premium account'));
+      await tester.tap(find.text('Open subscription page'));
       await tester.pumpAndSettle();
 
       expect(opened, 'https://netflix.com/account');
@@ -1452,7 +1583,7 @@ void main() {
       await tester.tap(find.text('VinaPhone plan').last);
       await tester.pumpAndSettle();
 
-      expect(find.textContaining('account'), findsNothing);
+      expect(find.text('Open subscription page'), findsNothing);
     });
 
     // An edit never goes through the picker, so the entry has to be found from
@@ -1473,7 +1604,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('Open Netflix Premium account'));
+      await tester.tap(find.text('Open subscription page'));
       await tester.pumpAndSettle();
 
       expect(opened, 'https://netflix.com/account');
@@ -1541,9 +1672,11 @@ void main() {
       expect(saved?.category.id, 'UTILITIES');
     });
 
-    // Nobody has answered for someone entering a service by hand, so the rail
-    // stays: it is the fastest way to see what the choices even are.
-    testWidgets('a hand-typed service keeps the rail', (tester) async {
+    // Nobody has answered for someone entering a service by hand either, and
+    // the row says so rather than lighting a shelf they never picked.
+    testWidgets('a hand-typed service gets the same row, unanswered', (
+      tester,
+    ) async {
       await showForm(
         tester,
         AddItemScreen(
@@ -1553,9 +1686,10 @@ void main() {
         ),
       );
 
-      // Every shelf on screen at once, which is what a rail is for.
-      expect(find.text('Insurance'), findsOneWidget);
-      expect(find.text('CATEGORY'), findsNothing);
+      // No rail: the shelves live in the sheet behind the row.
+      expect(find.text('Insurance'), findsNothing);
+      expect(find.text('CATEGORY'), findsOneWidget);
+      expect(find.text('Pick a category'), findsOneWidget);
     });
 
     // The keyboard covers half the screen, and everything the user actually
@@ -1636,17 +1770,19 @@ void main() {
         ),
       );
 
-      expect(find.text('Choose a date'), findsOneWidget);
+      expect(find.text('Next payment date'), findsOneWidget);
       expect(find.text('Tap to open the calendar'), findsOneWidget);
-      await tester.tap(find.text('Choose a date'));
+      await tester.tap(find.text('Next payment date'));
       await tester.pumpAndSettle();
 
       // The row now carries the date it was used to pick, rather than sending
-      // the reader to a separate line to find out what was chosen. The prompt
-      // under it goes with it: it explained a control that has now been used.
-      expect(find.text('Choose a date'), findsNothing);
+      // the reader to a separate line to find out what was chosen. The second
+      // line stays -- the card is the same height either way -- and turns from
+      // an instruction into how far off the date is.
+      expect(find.text('Next payment date'), findsNothing);
       expect(find.text('Tap to open the calendar'), findsNothing);
       expect(find.text('Tuesday, 09/03/2027'), findsOneWidget);
+      expect(find.text('In 206 days'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField).first, 'Passport');
       await tester.pumpAndSettle();
@@ -1680,7 +1816,7 @@ void main() {
       // No sheet in between.
       await tester.tap(find.text('Yearly'));
       await tester.pumpAndSettle();
-      expect(find.text('Every N days, weeks, months…'), findsNothing);
+      expect(find.text('Every…'), findsNothing);
 
       await tester.enterText(find.byType(TextField).first, 'Adobe');
       await tester.pumpAndSettle();
@@ -1759,7 +1895,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Every N days, weeks, months…'));
+      await tester.tap(find.text('Every…'));
       await tester.pumpAndSettle();
 
       // No second modal: the row is now on the form, under the tray, and the
@@ -1804,7 +1940,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Every N days, weeks, months…'));
+      await tester.tap(find.text('Every…'));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextField).last, '45');
@@ -2013,7 +2149,17 @@ void main() {
 
       final saved = await edit(tester, quarterly);
 
-      expect(find.text('Quarterly'), findsOneWidget);
+      // On the segment, and on the chip under it that put it there -- the row
+      // opens with the item because the segment is the only thing naming the
+      // cycle, and a reader has to be able to see what else was on offer.
+      expect(
+        find.descendant(
+          of: find.byType(SegmentedRow),
+          matching: find.text('Quarterly'),
+        ),
+        findsOneWidget,
+      );
+      expect(find.textContaining('Currently quarterly'), findsOneWidget);
       expect(saved?.cycle, Cycle.quarterly);
     });
 

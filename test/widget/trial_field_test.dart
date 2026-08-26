@@ -3,7 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:subdock/ui/screens/add/trial_field.dart';
 import 'package:subdock/ui/theme.dart';
 
-/// The control is one switch, and it has to work with nothing else filled in.
+/// The control is one switch and nothing else, and it has to work with nothing
+/// else on the form filled in.
 /// A trial has no dates of its own — the day the free period ends is the day
 /// the charge lands, which is the form's own date field — so there is nothing
 /// here for the user to answer before the flag can be set.
@@ -43,21 +44,15 @@ void main() {
     expect(await show(tester, start: true), isFalse);
   });
 
-  // The note is the only thing that says what the flag bought, and it says the
-  // two things the user can check afterwards.
-  testWidgets('on, it says what the flag changes', (tester) async {
+  // No caption under the switch, on or off. It explained a control the user
+  // has already understood by the time they could read it, and both things it
+  // promised -- the badge on the list, and nothing counting as spent -- show
+  // up on their own within a screen of tapping it.
+  testWidgets('says nothing under the switch, either way', (tester) async {
     await show(tester);
+    expect(find.textContaining('Badged FREE TRIAL'), findsNothing);
 
-    expect(find.textContaining('Badged FREE TRIAL'), findsOneWidget);
-    expect(find.textContaining('Nothing counts as spent'), findsOneWidget);
-  });
-
-  // It names no date. The summary block at the foot of the form already reads
-  // the charge date back, and saying it twice is the form answering one
-  // question twice.
-  testWidgets('off, it says nothing at all', (tester) async {
     await show(tester, start: true);
-
     expect(find.textContaining('Badged FREE TRIAL'), findsNothing);
   });
 }

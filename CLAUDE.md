@@ -86,7 +86,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Ba mươi cái bẫy đã vấp, đừng vấp lại
+## Ba mươi ba cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -538,6 +538,27 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     `trialOnly` mà sheet lọc đang có, không phải một trạng thái thứ hai. Nó đếm trên tập
     nguồn chứ không đếm trên danh sách đang hiện, để con số không nhảy khi chính nó bị
     bấm.
+
+32. **Lưới Plan bày mọi chu kỳ cùng lúc, và một ô nhớ bằng cả tier lẫn chu kỳ.** Trước
+    đây lưới lọc theo `_cycle` đang chọn, nên bảng giá năm của hãng nằm sau một cái
+    nút người dùng chưa hề chạm vào, mà con số năm mới là con số đáng xem trước khi
+    quyết. Nay `PlanGrid.optionsFor` trả về mọi kỳ hạn của một vùng, mỗi ô ghi thêm
+    `/ mo` hay `/ yr` cạnh giá, và bấm một ô là **đặt luôn chu kỳ** chứ không chỉ đặt
+    giá. Bỏ phần đặt chu kỳ đi là một giá năm được lưu thành khoản trừ hàng tháng, gấp
+    mười hai lần số tiền, mà trên màn hình không có gì nói ngược lại.
+
+    Hệ quả bắt buộc: `selected` của lưới so bằng `PlanOption.id`, tức là tier cộng chu
+    kỳ, **không so bằng tier trơn**. Disney+ bán đúng một gói `premium` theo hai kiểu,
+    nên so bằng tier là hai ô cùng sáng, đọc ra thành người dùng đã chọn hai giá một
+    lúc. Ô `Other amount` nằm cuối lưới thay cho dòng chữ `Paying a different amount?
+    Enter it` cũ: câu trả lời "không cái nào" phải cùng một cử chỉ với "cái này".
+
+33. **Hàng chip kỳ hạn của segment thứ ba mở tại chỗ và ở nguyên đó.** Nó thay cái
+    sheet cũ, và nó **không đóng lại** sau khi người dùng chọn: lúc đó segment thứ ba
+    đang hiện tên kỳ hạn vừa chọn, nên ai muốn đổi sang cái khác sẽ phải tự đoán rằng
+    đường đổi câu trả lời là bấm vào chính câu trả lời. Dòng `Currently quarterly` dưới
+    hàng chip nói ra điều đó. Mở sẵn cả khi vào màn Edit của một mục không phải hàng
+    tháng hay hàng năm, cùng một lý do.
 
 ## Viết tài liệu
 
