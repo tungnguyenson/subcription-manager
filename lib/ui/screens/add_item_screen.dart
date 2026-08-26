@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/domain/category_book.dart';
@@ -441,10 +443,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   // them differently and both readings are right: one is a
                   // fact about the item, the other is a choice being made.
                   label: _isEdit ? 'Repeats' : 'Billing cycle',
-                  child: PickerField(
-                    value: _cycleLabel(_cycle),
-                    onTap: _pickCycle,
-                  ),
+                  child: _cycleField(),
                 ),
               ),
               // The interval nothing on the list covers, typed out. A sub-block
@@ -1212,6 +1211,46 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   /// The name of a cycle as the dropdown shows it.
   ///
+  /// The two cycles nearly every subscription uses, and a way to the rest.
+  ///
+  /// Monthly and yearly cover almost everything a person pays for, and both of
+  /// them used to cost a sheet: open it, read seven options, tap one, watch it
+  /// close. A tray answers the common case in one tap and keeps the seven
+  /// behind the third segment.
+  ///
+  /// The third segment says what was chosen rather than `Other` whenever
+  /// something was. A tray reading `Other` on a quarterly plan hides the
+  /// answer on the one control whose whole job is to show it, and the reader
+  /// would have to reopen the sheet to find out what their own item does.
+  Widget _cycleField() {
+    final cycle = _cycle;
+    final monthly = cycle == Cycle.monthly;
+    final yearly = cycle == Cycle.yearly;
+
+    return SegmentedRow(
+      labels: [
+        'Monthly',
+        'Yearly',
+        monthly || yearly ? 'Other' : _cycleLabel(cycle),
+      ],
+      // Weighted, because `Every 2 months` beside `Yearly` in equal thirds
+      // truncates the one segment carrying information the other two do not.
+      weighted: true,
+      selected: monthly
+          ? 0
+          : yearly
+          ? 1
+          : 2,
+      onSelect: (index) {
+        if (index == 2) {
+          unawaited(_pickCycle());
+          return;
+        }
+        setState(() => _cycle = index == 0 ? Cycle.monthly : Cycle.yearly);
+      },
+    );
+  }
+
   /// [ItemPresenter.cycleLabel] with one word changed: `One-off` rather than
   /// `Once`, because this field is a list of billing cycles and `Once` beside
   /// `Monthly` reads like a frequency where `One-off` reads like a kind of

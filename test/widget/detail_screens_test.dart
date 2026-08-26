@@ -1658,6 +1658,78 @@ void main() {
 
     // "My plan runs 5 months" cannot be answered with "then make it a one-off
     // and re-date it by hand five times a year".
+    // Monthly and yearly cover nearly everything a person pays for, and both
+    // used to cost a sheet: open it, read seven options, tap one, close it.
+    testWidgets('the two common cycles are one tap, the rest are behind one', (
+      tester,
+    ) async {
+      DraftItem? saved;
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (draft) => saved = draft,
+        ),
+      );
+
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+
+      // No sheet in between.
+      await tester.tap(find.text('Yearly'));
+      await tester.pumpAndSettle();
+      expect(find.text('Every N days, weeks, months…'), findsNothing);
+
+      await tester.enterText(find.byType(TextField).first, 'Adobe');
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.text('Save item'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save item'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.cycle, Cycle.yearly);
+    });
+
+    // A tray reading `Other` on a quarterly plan hides the answer on the one
+    // control whose job is to show it.
+    testWidgets('the third segment names what it is holding', (tester) async {
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+        ),
+      );
+
+      await tester.tap(
+        find.descendant(
+          of: find.byType(SegmentedRow),
+          matching: find.text('Other'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Quarterly').last);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(SegmentedRow),
+          matching: find.text('Quarterly'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(SegmentedRow),
+          matching: find.text('Other'),
+        ),
+        findsNothing,
+      );
+    });
+
     testWidgets('an interval the app has no name for can still be typed', (
       tester,
     ) async {
@@ -1677,14 +1749,21 @@ void main() {
       await tester.tap(find.text('Today'));
       await tester.pumpAndSettle();
 
-      // The cycle dropdown, which names the cycle it is on.
-      await tester.tap(find.text('Monthly'));
+      // The third segment, which is where everything that is not monthly or
+      // yearly lives.
+      await tester.tap(
+        find.descendant(
+          // `Other` is a shelf name too, and the rail is on screen.
+          of: find.byType(SegmentedRow),
+          matching: find.text('Other'),
+        ),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Every N days, weeks, months…'));
       await tester.pumpAndSettle();
 
-      // No second modal: the row is now on the form, under the dropdown, and
-      // the dropdown reads back what it holds.
+      // No second modal: the row is now on the form, under the tray, and the
+      // third segment reads back what it holds instead of saying `Other`.
       expect(find.text('Every 2 months'), findsOneWidget);
       expect(find.text('Every'), findsOneWidget);
 
@@ -1717,7 +1796,13 @@ void main() {
       await tester.tap(find.text('Today'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Monthly'));
+      await tester.tap(
+        find.descendant(
+          // `Other` is a shelf name too, and the rail is on screen.
+          of: find.byType(SegmentedRow),
+          matching: find.text('Other'),
+        ),
+      );
       await tester.pumpAndSettle();
       await tester.tap(find.text('Every N days, weeks, months…'));
       await tester.pumpAndSettle();
