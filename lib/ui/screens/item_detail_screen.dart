@@ -9,9 +9,11 @@ import 'package:subdock/ui/date_copy.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/manage_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
+import 'package:subdock/ui/reminder_timeline.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/ui/widgets/reminder_timeline_card.dart';
 
 class ItemDetailScreen extends StatelessWidget {
   final TrackedItem item;
@@ -27,8 +29,15 @@ class ItemDetailScreen extends StatelessWidget {
   /// the delete button, because deleting also silently removes them.
   final int scheduledCount;
 
-  /// The next reminder, already worded. Null when nothing is pending.
-  final String? nextReminder;
+  /// Everything still coming for this item, deadline included, already built
+  /// from the live plan. Null only where the caller has no plan to hand over,
+  /// which is a widget test rather than the app.
+  ///
+  /// Not a single "next reminder" string any more. That line could only name
+  /// the soonest alert, and the one action on this screen that most needs
+  /// explaining -- *Remind me again in 3 days* -- adds an alert rather than
+  /// moving the ladder. One line said nothing about the rungs still standing.
+  final ReminderTimeline? timeline;
 
   /// The catalog row this item's name matches exactly, when it matches one.
   ///
@@ -73,7 +82,7 @@ class ItemDetailScreen extends StatelessWidget {
     required this.today,
     this.history = const [],
     this.scheduledCount = 0,
-    this.nextReminder,
+    this.timeline,
     this.catalogEntry,
     this.onBack,
     this.onEdit,
@@ -232,15 +241,17 @@ class ItemDetailScreen extends StatelessWidget {
               onPressed: () => onOpenManage?.call(alternate),
             ),
         ],
+        if (timeline case final timeline?) ...[
+          const SectionLabel('What happens next'),
+          ReminderTimelineCard(timeline: timeline, today: today),
+        ],
         const SectionLabel('Actions'),
         PrimaryButton(_markLabel(position), onPressed: onMarkPaid),
         const SizedBox(height: 10),
-        SecondaryButton(
-          nextReminder == null
-              ? 'Edit reminders'
-              : 'Next reminder $nextReminder',
-          onPressed: onEditReminders,
-        ),
+        // Plain wording again. It used to carry the next reminder's date,
+        // which was the only place on the screen that date appeared; the
+        // timeline above says it now, along with the four it could not fit.
+        SecondaryButton('Edit reminders', onPressed: onEditReminders),
         const SizedBox(height: 10),
         // Named for what it does, not for the mechanism. "Snooze" is a word
         // about the app; "remind me again in 3 days" is a sentence about the

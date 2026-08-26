@@ -1,0 +1,297 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:subdock/domain/category_book.dart';
+import 'package:subdock/domain/item_actions.dart';
+import 'package:subdock/domain/local_date.dart';
+import 'package:subdock/domain/model.dart';
+import 'package:subdock/domain/notification_planner.dart';
+import 'package:subdock/domain/reminders.dart';
+import 'package:subdock/ui/reminder_timeline.dart';
+
+/// Driven through the real planner rather than a hand-built alert list.
+///
+/// The bug this block exists to prevent is a disagreement between what the app
+/// schedules and what it says it scheduled, so a test that invents its own
+/// alerts cannot see it.
+void main() {
+  final today = LocalDate.parse('2026-08-26');
+  final now = LocalDateTime(today, const LocalTime(0, 0));
+  LocalDate d(String iso) => LocalDate.parse(iso);
+
+  final streaming = CategoryBook.shipped['STREAMING'];
+
+  TrackedItem item({
+    required String expiresOn,
+    Category? category,
+    List<int> leadDays = const [3, 1],
+    NagPolicy nag = NagPolicy.none,
+    int actByOffsetDays = 0,
+    int? verifyEveryDays,
+    bool paused = false,
+    ItemState state = ItemState.active,
+    LocalDate? snoozedUntil,
+  }) {
+    final shelf = category ?? streaming;
+    return TrackedItem(
+      id: 'i1',
+      name: 'Netflix',
+      categoryId: shelf.id,
+      expiresOn: d(expiresOn),
+      anchorDate: d(expiresOn),
+      actByOffsetDays: actByOffsetDays,
+      leadDays: leadDays,
+      nagAfterDue: nag,
+      verifyEveryDays: verifyEveryDays,
+      remindAt: Reminders.defaultRemindAt,
+      paused: paused,
+      state: state,
+      snoozedUntil: snoozedUntil,
+    );
+  }
+
+  ReminderTimeline build(TrackedItem it, {Category? category}) {
+    final plan = NotificationPlanner.plan([it], CategoryBook.shipped, now);
+    return ReminderTimelinePresenter.of(
+      item: it,
+      category: category ?? streaming,
+      alerts: plan.alerts,
+      dropped: plan.dropped,
+      today: today,
+    );
+  }
+
+  // The whole reason this widget replaced a one-line "next reminder". Snoozing
+  // adds an alert; it does not move the ladder, and a user who cannot see the
+  // rungs still standing has no way to learn that.
+  test('a snooze is added beside the lead rungs, not instead of them', () {
+    final before = item(expiresOn: '2026-08-28');
+    final after = ItemActions.snoozed(before, d('2026-08-29'));
+
+    final plain = build(before);
+    final snoozed = build(after);
+
+    expect(
+      plain.stops
+          .where((s) => s.kind == TimelineKind.lead)
+          .map((s) => s.date)
+          .toList(),
+      [d('2026-08-27')],
+    );
+
+    // The 1-day rung is still there afterwards, at the same date.
+    expect(
+      snoozed.stops
+          .where((s) => s.kind == TimelineKind.lead)
+          .map((s) => s.date)
+          .toList(),
+      [d('2026-08-27')],
+    );
+    expect(
+      snoozed.stops.where((s) => s.kind == TimelineKind.snoozed).single.date,
+      d('2026-08-29'),
+    );
+  });
+
+  // The other half of the same story, and the part no wording on a single line
+  // could ever carry: three days from now is after the money goes.
+  test('a snooze past the deadline is drawn after the deadline', () {
+    final it = ItemActions.snoozed(
+      item(expiresOn: '2026-08-28'),
+      d('2026-08-29'),
+    );
+
+    final kinds = build(it).stops.map((s) => s.kind).toList();
+
+    expect(kinds, [
+      TimelineKind.lead, // 27/08
+      TimelineKind.deadline, // 28/08
+      TimelineKind.snoozed, // 29/08
+    ]);
+  });
+
+  test('the deadline marker follows an alert that fires on its own day', () {
+    final it = item(expiresOn: '2026-08-28', leadDays: [0]);
+
+    final stops = build(it).stops;
+
+    expect(stops.map((s) => s.date).toList(), [
+      d('2026-08-28'),
+      d('2026-08-28'),
+    ]);
+    expect(stops.first.kind, TimelineKind.lead);
+    expect(stops.last.kind, TimelineKind.deadline);
+  });
+
+  // A daily nag enumerates one alert per day to the 60-day horizon. Drawn
+  // literally it would bury every row worth reading.
+  test('a nag run collapses to one row that states its cadence', () {
+    final it = item(
+      expiresOn: '2026-08-28',
+      leadDays: const [],
+      nag: NagPolicy.daily,
+    );
+
+    final nags = build(it).stops.where((s) => s.kind == TimelineKind.nag);
+
+    expect(nags.length, 1);
+    expect(nags.single.date, d('2026-08-29'));
+    expect(nags.single.label, 'Then every day until you mark it as paid');
+  });
+
+  test('a weekly nag says weekly', () {
+    final it = item(
+      expiresOn: '2026-08-28',
+      leadDays: const [],
+      nag: NagPolicy.weekly,
+    );
+
+    expect(
+      build(it).stops.where((s) => s.kind == TimelineKind.nag).single.label,
+      'Then every 7 days until you mark it as paid',
+    );
+  });
+
+  test(
+    'the soonest notification is marked next, and the deadline never is',
+    () {
+      final it = item(expiresOn: '2026-08-28', leadDays: [3, 1]);
+
+      final stops = build(it).stops;
+
+      expect(stops.where((s) => s.isNext).length, 1);
+      expect(stops.firstWhere((s) => s.isNext).kind, TimelineKind.lead);
+      expect(
+        stops
+            .where((s) => s.kind == TimelineKind.deadline)
+            .every((s) => !s.isNext),
+        isTrue,
+      );
+    },
+  );
+
+  // A deadline already behind us still belongs on the timeline: the nags that
+  // follow it make no sense without it.
+  test('an overdue deadline stays on the timeline, marked past', () {
+    final it = item(
+      expiresOn: '2026-08-20',
+      leadDays: const [],
+      nag: NagPolicy.daily,
+    );
+
+    final stops = build(it).stops;
+    final marker = stops.firstWhere((s) => s.kind == TimelineKind.deadline);
+
+    expect(marker.date, d('2026-08-20'));
+    expect(marker.isPast, isTrue);
+    expect(stops.last.kind, TimelineKind.nag);
+  });
+
+  test('an act-by date earlier than expiry gets its own marker', () {
+    final it = item(
+      expiresOn: '2026-09-10',
+      actByOffsetDays: 5,
+      leadDays: const [],
+    );
+
+    final markers = build(it).stops
+        .where((s) => s.kind == TimelineKind.deadline);
+
+    expect(markers.map((s) => s.date).toList(), [
+      d('2026-09-05'),
+      d('2026-09-10'),
+    ]);
+    expect(markers.first.label, 'Act by this day');
+  });
+
+  test('the marker is worded by the shelf, not by the item', () {
+    final expiring = CategoryBook.shipped['PHONE'];
+    final it = item(
+      expiresOn: '2026-09-10',
+      category: expiring,
+      leadDays: const [],
+      nag: NagPolicy.none,
+    );
+
+    expect(
+      build(
+        it,
+        category: expiring,
+      ).stops.firstWhere((s) => s.kind == TimelineKind.deadline).label,
+      'Expires',
+    );
+    expect(
+      build(item(expiresOn: '2026-09-10', leadDays: const [])).stops
+          .firstWhere((s) => s.kind == TimelineKind.deadline)
+          .label,
+      'Payment due',
+    );
+  });
+
+  test('a verify prompt appears as its own stop', () {
+    final it = item(
+      expiresOn: '2026-09-30',
+      leadDays: const [],
+      verifyEveryDays: 10,
+    );
+
+    expect(
+      build(it).stops.where((s) => s.kind == TimelineKind.verify).single.label,
+      'Check the date is still right',
+    );
+  });
+
+  group('nothing scheduled', () {
+    // The deadline row survives even with every reminder gone. It is the one
+    // fact on this block the user is still held to.
+    test('an item with reminders switched off keeps its deadline row', () {
+      final timeline = build(
+        item(expiresOn: '2026-09-30', paused: true, leadDays: const []),
+      );
+
+      expect(timeline.stops.single.kind, TimelineKind.deadline);
+      expect(timeline.silence, contains('Reminders are off'));
+      expect(timeline.note, contains('Reminders are off'));
+    });
+
+    test('a closed item says so', () {
+      final timeline = build(
+        item(
+          expiresOn: '2026-09-30',
+          state: ItemState.archived,
+          leadDays: const [],
+        ),
+      );
+
+      expect(timeline.silence, contains('closed'));
+    });
+
+    test('a live item whose ladder has run out says that instead', () {
+      final timeline = build(
+        item(expiresOn: '2026-08-27', leadDays: const [30]),
+      );
+
+      expect(timeline.silence, contains('already passed'));
+    });
+
+    test('nothing is said while any reminder is still coming', () {
+      expect(build(item(expiresOn: '2026-08-28')).silence, isNull);
+    });
+  });
+
+  group('dates', () {
+    test('this year is day and month only', () {
+      expect(
+        ReminderTimelinePresenter.dateLabel(d('2026-08-27'), today),
+        '27/08',
+      );
+    });
+
+    // A passport can be five years out, and `27/08` on such a row reads as
+    // this coming Thursday.
+    test('another year carries the year', () {
+      expect(
+        ReminderTimelinePresenter.dateLabel(d('2031-08-27'), today),
+        '27/08/2031',
+      );
+    });
+  });
+}

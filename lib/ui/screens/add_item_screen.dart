@@ -261,7 +261,18 @@ class _AddItemScreenState extends State<AddItemScreen> {
     return typed.isEmpty ? 'Untitled item' : typed;
   }
 
-  bool get _canSave => _dueDate != null;
+  bool get _canSave => _dueDate != null && !_saved;
+
+  /// Latched by the first tap on Save, never unlatched.
+  ///
+  /// [_save] hands the draft to a caller that writes to SQLite before it pops
+  /// this route, so the form and its enabled button stay on screen for the
+  /// length of that write. A second tap inside that window writes a second row
+  /// with a second id -- two identical items, and the caller pops twice, which
+  /// takes the notification sheet the first save had just opened down with it.
+  /// Nothing unlatches it because there is no path back to this form: every
+  /// caller either pops it or replaces it.
+  bool _saved = false;
 
   /// True while the cycle is an interval the app has no name for.
   bool get _isCustomCycle => _cycle != null && !_cycle!.isPreset;
@@ -1309,6 +1320,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
   /// reminder query below them are non-null, so a dateless item needs a
   /// migration and a nullable column, not a different button state.
   void _save() {
+    if (_saved) return;
+    setState(() => _saved = true);
+
     final amount = MoneyFormat.parseMajor(_amount.text, _currency);
     final initial = widget.initial;
 

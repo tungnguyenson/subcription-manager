@@ -86,7 +86,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Hai mươi tám cái bẫy đã vấp, đừng vấp lại
+## Ba mươi cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -420,6 +420,72 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     hợp. Chốt chặn thật là `integration_test/delete_test.dart`, phải chạy trên máy ảo
     (`flutter test integration_test/delete_test.dart -d <simulator-id>`).
 
+29. **Snooze cộng thêm một nhắc hạn, nó không dời cái ladder.** `ItemActions.snoozed`
+    chỉ ghi một trường `snoozedUntil`; `expiresOn`, `anchorDate` và `cycle` không hề bị
+    đụng tới, và trong `NotificationPlanner._alertsFor` cái ngày đó sinh ra **một alert
+    nằm cạnh** các alert lead chứ không thay thế chúng. Bấm "Remind me again in 3 days"
+    vào ngày 26 khi hạn là 28 thì nhắc ngày 27 vẫn bắn như thường.
+
+    Chỗ này từng nói dối, và cái nói dối là giao diện chứ không phải logic. Màn Detail có
+    đúng một dòng `Next reminder 29/08 at 08:30`, mà một dòng thì chỉ gọi tên được alert
+    sớm nhất. Người dùng vừa bấm xong đọc dòng đó ra thành "app đã dời sang ngày 29", và
+    không có chỗ nào khác trên màn hình nói ngược lại. Màn Reminders con cũng không cứu
+    được: `RemindersPresenter.ladder` dựng lại thang **từ `item.leadDays`**, nên nó không
+    nhìn thấy snooze, không thấy nag, không thấy verify, và không biết nấc 08:30 hôm nay
+    đã bắn rồi.
+
+    Nay khối `What happens next` trên màn Detail vẽ nguyên cái plan thành một cột theo
+    ngày, và nó **đọc từ `NotificationPlan`**, không dựng lại từ `leadDays`. Đó là điều
+    kiện bắt buộc: plan là thứ thật sự đang chờ trên máy, mọi thứ suy lại đều là một câu
+    chuyện thứ hai có thể khác câu chuyện thứ nhất.
+
+    Ba quyết định trong `lib/ui/reminder_timeline.dart`, đừng đảo lại mà không đọc:
+
+    - **Mốc hạn nằm trong cùng cột với các nhắc hạn, không nằm ở dòng tiêu đề phía trên.**
+      Đó là toàn bộ lý do khối này tồn tại: hạn còn hai ngày mà bấm "remind me in 3 days"
+      thì nhắc rơi vào **sau** ngày tiền bị trừ, và chỉ khi hai thứ xếp chung một cột theo
+      thứ tự thời gian thì người dùng mới thấy. Alert trùng ngày với mốc hạn thì xếp
+      **trên** mốc, vì nhắc 08:30 đúng là tới trước khi hết ngày.
+    - **Nag gộp thành một dòng.** Nag hằng ngày liệt kê một alert mỗi ngày tới hết chân
+      trời 60 ngày, vẽ thật là năm mươi dòng giống hệt nhau đè chết ba dòng đáng đọc.
+      Nhịp lặp đọc từ khoảng cách giữa hai alert đầu tiên chứ không đọc từ `NagPolicy`, để
+      dòng chữ không bao giờ khai một nhịp mà plan không giữ.
+    - **Nag bị ngân sách cắt thì không đếm vào footnote.** Một mục quá hạn có nag hằng
+      ngày tự nó đã tràn ngân sách 50, nên footnote "10 further reminders did not fit"
+      hiện ngay dưới dòng hứa nhắc mỗi ngày. Cả hai đều đúng, vì planner chạy lại khi các
+      mốc gần trôi qua và nhặt nag về. Còn lead, snooze hay verify bị cắt thì đếm: mỗi cái
+      gọi tên đúng một ngày và không có lần thứ hai để gửi.
+
+    Mốc hạn ở lại trên cột **kể cả khi không còn nhắc hạn nào**, và lý do im lặng thì nói
+    ra ở footnote (`ReminderTimeline.silence`). Ba lý do khác nhau và người dùng chỉ sửa
+    được hai: mục đang tắt nhắc, mục đã đóng, và thang đã chạy hết. Bỏ luôn cả khối trong
+    trường hợp đó là vứt đi cái dòng duy nhất còn đáng đọc.
+
+30. **Nút Save của form chốt lại sau cú bấm đầu, và nó bắt buộc phải chốt.** `_saveDraft`
+    trong `app.dart` ghi xuống SQLite **trước** khi pop cái route, nên suốt thời gian ghi
+    đó form vẫn nằm trên màn hình với nút Save vẫn bật. Bấm lần thứ hai trong khoảng đó
+    thì `_saveDraft` chạy song song lần nữa, `id` lấy từ `microsecondsSinceEpoch` nên hai
+    lần ra hai id khác nhau: hai mục giống hệt nhau trong danh sách.
+
+    Mất mát thật không nằm ở cái mục thừa, nó nằm ở chỗ khác. Lần lưu thứ nhất mở sheet
+    xin quyền thông báo, còn lần thứ hai gọi `maybePop()`, mà `maybePop` lấy route trên
+    cùng nên nó **pop chính cái sheet đó**. Sheet đóng trả về `null`, và `null` được đọc
+    là "để sau", nên `_declinedAtSave` bị đặt luôn. Kết quả: người dùng chưa từng thấy câu
+    hỏi nào, mà app thì im tiếp cho tới lần lưu thứ tư. Với một app mà toàn bộ công việc
+    là gửi nhắc hạn thì đó là hỏng hẳn, không phải phiền nhẹ.
+
+    Cái chốt là `_saved` trong `add_item_screen.dart`, và nó **không bao giờ mở lại**: mọi
+    đường ra khỏi form đều pop hoặc thay nó, không có đường nào quay lại. Bấm lúc chưa có
+    ngày thì không tiêu mất cú bấm, vì lúc đó nút đang tắt. `_saveEdit` dùng chung nút này
+    và cần chốt hơn nữa: nó pop hai route rồi mở lại màn Detail, chạy hai lần là bốn route
+    rơi khỏi stack.
+
+    Chốt chặn là bài `a second tap on Save does not save a second item` trong
+    `test/widget/detail_screens_test.dart`. Hệ quả cho test: một form chỉ lưu được một
+    lần, nên bài nào cần hai lần lưu phải dựng hai form, và **form thứ hai phải có `key`**
+    vì `pumpWidget` đặt một widget cùng kiểu vào đúng chỗ cũ sẽ giữ nguyên `State`, tức là
+    giữ nguyên cái chốt đã tiêu.
+
 ## Viết tài liệu
 
 Tài liệu trong repo viết bằng **tiếng Việt**, chữ trên giao diện app viết bằng **tiếng
@@ -440,6 +506,7 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | Danh mục dịch vụ | `docs/research/README.md` |
 | Nhóm dịch vụ (category) | `lib/domain/default_categories.dart` cho 22 nhóm dựng sẵn, `lib/domain/category_book.dart` cho cách tra |
 | Icon | `docs/icon-credits.md` |
+| Cái gì sắp xảy ra với một mục | `lib/ui/reminder_timeline.dart` cho phép dựng, `lib/ui/widgets/reminder_timeline_card.dart` cho khối trên màn Detail |
 | Bộ lọc màn Upcoming | `lib/domain/upcoming_filter.dart` cho luật khớp, `lib/ui/filter_presenter.dart` cho danh sách chip và dòng tóm tắt, `lib/ui/widgets/filter_sheet.dart` cho sheet |
 | Việc còn dang dở | `data/services/_verify.md` |
 | Khối so sánh gói năm và nút trang thuê bao | `docs/design-spec-annual-saving.md`, đã dựng, logic ở `lib/ui/annual_saving_presenter.dart` và `lib/ui/manage_presenter.dart` |

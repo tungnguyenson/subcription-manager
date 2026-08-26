@@ -21,6 +21,7 @@ import 'package:subdock/ui/screens/reminder_rules_screen.dart';
 import 'package:subdock/ui/screens/reminders_screen.dart';
 import 'package:subdock/ui/screens/review_extraction_screen.dart';
 import 'package:subdock/ui/manage_presenter.dart';
+import 'package:subdock/ui/reminder_timeline.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/ui/widgets/source_mark.dart';
@@ -122,6 +123,104 @@ void main() {
         ),
       );
       expect(find.text('from memory'), findsOneWidget);
+    });
+
+    // The block that replaced a one-line "Next reminder 18/08 at 08:30". The
+    // line could name only the soonest alert, so pressing "Remind me again in
+    // 3 days" -- which adds an alert and moves nothing -- looked exactly like
+    // a reschedule. See trap 29 in CLAUDE.md.
+    group('what happens next', () {
+      ReminderTimeline timelineFor(TrackedItem item) {
+        final plan = NotificationPlanner.plan(
+          [item],
+          CategoryBook.shipped,
+          LocalDateTime(today, const LocalTime(0, 0)),
+        );
+        return ReminderTimelinePresenter.of(
+          item: item,
+          category: CategoryBook.shipped[item.categoryId],
+          alerts: plan.alerts,
+          dropped: plan.dropped,
+          today: today,
+        );
+      }
+
+      testWidgets('a snoozed item still shows the rung it did not move', (
+        tester,
+      ) async {
+        // Act-by is 16/08, so the 1-day rung lands on 15/08 -- today, before
+        // the 08:30 send time. Snoozing puts one more alert on 18/08.
+        final snoozed = claude.copyWith(snoozedUntil: () => d('2026-08-18'));
+
+        await show(
+          tester,
+          ItemDetailScreen(
+            item: snoozed,
+            category: CategoryBook.shipped[snoozed.categoryId],
+            today: today,
+            timeline: timelineFor(snoozed),
+          ),
+        );
+
+        expect(find.text('1 day before'), findsOneWidget);
+        expect(find.text('You asked to be reminded'), findsOneWidget);
+        expect(find.text('18/08'), findsOneWidget);
+      });
+
+      // The reason the deadline shares the column with the reminders rather
+      // than sitting in a header above them.
+      testWidgets('the deadline is a row like any other', (tester) async {
+        await show(
+          tester,
+          ItemDetailScreen(
+            item: claude,
+            category: CategoryBook.shipped[claude.categoryId],
+            today: today,
+            timeline: timelineFor(claude),
+          ),
+        );
+
+        expect(find.text('Act by this day'), findsOneWidget);
+        expect(find.text('Payment due'), findsOneWidget);
+      });
+
+      // A screen with no plan behind it -- every other test in this file --
+      // must not sprout an empty section header.
+      testWidgets('no block at all without a timeline', (tester) async {
+        await show(
+          tester,
+          ItemDetailScreen(
+            item: claude,
+            category: CategoryBook.shipped[claude.categoryId],
+            today: today,
+          ),
+        );
+
+        expect(find.text('WHAT HAPPENS NEXT'), findsNothing);
+        expect(find.text('Edit reminders'), findsOneWidget);
+      });
+
+      testWidgets('an item with reminders off says so under the block', (
+        tester,
+      ) async {
+        final off = claude.copyWith(paused: true);
+
+        await show(
+          tester,
+          ItemDetailScreen(
+            item: off,
+            category: CategoryBook.shipped[off.categoryId],
+            today: today,
+            timeline: timelineFor(off),
+          ),
+        );
+
+        expect(
+          find.textContaining('Reminders are off for this item'),
+          findsOneWidget,
+        );
+        expect(find.text('Payment due'), findsOneWidget);
+      });
     });
 
     // Deleting also removes pending reminders the user cannot see.
@@ -759,6 +858,43 @@ void main() {
       expect(saved!.expiresOn, today);
     });
 
+    // The caller writes to SQLite before it pops this route, so the form and
+    // its enabled button stay on screen for the length of that write. A second
+    // tap in that window used to write a second row with a second id: two
+    // identical items, and the caller popped twice, which took the notification
+    // sheet the first save had just opened down with it -- so the app never
+    // asked for the permission its whole job depends on, and then went quiet
+    // for two more saves because the dismissed sheet read as a decline.
+    testWidgets('a second tap on Save does not save a second item', (
+      tester,
+    ) async {
+      var saves = 0;
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (_) => saves++,
+        ),
+      );
+
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save item'));
+      await tester.pumpAndSettle();
+
+      // Twice without settling between: the real second tap lands while the
+      // write from the first is still in flight and nothing has popped yet.
+      await tester.tap(find.text('Save item'));
+      await tester.pump();
+      await tester.tap(find.text('Save item'));
+      await tester.pumpAndSettle();
+
+      expect(saves, 1);
+    });
+
     // The form is a pushed route, built once with whatever source list the app
     // held at the time. Nothing rebuilds it when the database gains a row, so a
     // source created from inside the form has to appear from the field's own
@@ -969,6 +1105,11 @@ void main() {
     // The date is the only thing that gates the button. A missing name is not
     // a reason to refuse a save -- it becomes `Untitled item`, which the user
     // fixes in one tap, where refusing would lose the date they just set.
+    //
+    // Two forms rather than three taps on one: the Save button latches after
+    // the first tap that goes through, so a form only ever saves once. A tap
+    // while the date is still missing does not latch it -- the button is
+    // disabled then, and a disabled button has nothing to spend.
     testWidgets('save waits for a date, not for a name', (tester) async {
       DraftItem? saved;
       await showForm(
@@ -997,6 +1138,25 @@ void main() {
       expect(saved?.name, 'Untitled item');
       expect(saved?.expiresOn, d('2026-09-14'));
 
+      saved = null;
+      // A key, because `pumpWidget` over a screen of the same type at the same
+      // spot keeps the old State -- and the old State is the one that has
+      // already spent its save.
+      await showForm(
+        tester,
+        AddItemScreen(
+          key: const ValueKey('second form'),
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (draft) => saved = draft,
+        ),
+      );
+
+      await tester.ensureVisible(find.text('+30'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('+30'));
+      await tester.pumpAndSettle();
       await tester.enterText(find.byType(TextField).first, 'Spotify');
       await tester.pumpAndSettle();
       await tester.tap(find.text('Save item'));

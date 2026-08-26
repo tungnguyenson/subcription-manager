@@ -20,6 +20,7 @@ import 'package:subdock/ui/app_shell.dart';
 import 'package:subdock/ui/filter_presenter.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/manage_presenter.dart';
+import 'package:subdock/ui/reminder_timeline.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/screens/add_item_screen.dart';
 import 'package:subdock/ui/screens/history_screen.dart';
@@ -545,19 +546,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   void _openItem(TrackedItem item) {
     final held = _plan.alerts.where((a) => a.itemId == item.id).length;
-    final next = _plan.alerts
-        .where((a) => a.itemId == item.id)
-        .map((a) => '${MoneyFormat.shortDate(a.date)} at ${a.time}')
-        .firstOrNull;
+    final category = _categories[item.categoryId];
+    // Built from the plan, so it shows what is actually pending rather than
+    // what the ladder would imply. A snooze, a nag and a dropped alert are all
+    // invisible to `item.leadDays` and all visible here.
+    final timeline = ReminderTimelinePresenter.of(
+      item: item,
+      category: category,
+      alerts: _plan.alerts,
+      dropped: _plan.dropped,
+      today: LocalDate.today(),
+    );
 
     _push(
       ItemDetailScreen(
         item: item,
-        category: _categories[item.categoryId],
+        category: category,
         today: LocalDate.today(),
         history: _history.where((e) => e.itemId == item.id).toList(),
         scheduledCount: held,
-        nextReminder: next,
+        timeline: timeline,
         onEdit: () => _openEdit(item),
         onMarkPaid: () => _markPaid(item),
         onSnooze: () => _snooze(item, 3),
