@@ -1397,6 +1397,85 @@ void main() {
       expect(find.text('260,000'), findsOneWidget);
     });
 
+    // Twenty-two chips scrolling sideways under an answer the catalogue
+    // already gave is a question being asked after it was answered.
+    testWidgets('a picked service turns the shelf rail into one row', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField).first, 'net');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Netflix Premium').last);
+      await tester.pumpAndSettle();
+
+      // The rail would have every shelf on it; the row has only the one.
+      expect(find.text('Insurance'), findsNothing);
+      expect(find.text('CATEGORY'), findsOneWidget);
+      expect(find.text('Streaming'), findsOneWidget);
+    });
+
+    testWidgets('and the row opens a sheet that changes it', (tester) async {
+      DraftItem? saved;
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (draft) => saved = draft,
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField).first, 'net');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Netflix Premium').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Streaming'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Bills and utilities').last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Bills and utilities'), findsOneWidget);
+
+      await tester.ensureVisible(find.text('Today'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save item'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save item'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.category.id, 'UTILITIES');
+    });
+
+    // Nobody has answered for someone entering a service by hand, so the rail
+    // stays: it is the fastest way to see what the choices even are.
+    testWidgets('a hand-typed service keeps the rail', (tester) async {
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+        ),
+      );
+
+      // Every shelf on screen at once, which is what a rail is for.
+      expect(find.text('Insurance'), findsOneWidget);
+      expect(find.text('CATEGORY'), findsNothing);
+    });
+
     // The keyboard covers half the screen, and everything the user actually
     // came to fill in -- the date, the cost, the cycle -- is under it. A name
     // that arrived filled in is not the question the form is asking.

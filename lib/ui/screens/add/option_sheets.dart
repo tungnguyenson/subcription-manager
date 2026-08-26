@@ -66,6 +66,15 @@ Future<T?> chooseOption<T>(
     context: context,
     backgroundColor: SubdockColors.canvas,
     showDragHandle: true,
+    // The list sizes to its own contents either way; this only lifts the
+    // ceiling a default sheet puts on it at about half the screen. Most of
+    // these are five or six options and never reach it. The shelf list is
+    // twenty-two, and half a screen turns picking one into a scroll through a
+    // window four rows tall.
+    isScrollControlled: true,
+    constraints: BoxConstraints(
+      maxHeight: MediaQuery.sizeOf(context).height * 0.75,
+    ),
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(SubdockRadius.placard),

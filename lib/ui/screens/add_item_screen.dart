@@ -329,16 +329,26 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 const SizedBox(height: 12),
                 _gutter(_suggestionList()),
               ],
-              // Part of the name block, not a block of its own: the chips are
+              // Part of the name block, not a block of its own: it sits
               // eight pixels under the field rather than twenty-six, because
               // what a thing is called and what kind of thing it is are one
               // answer given twice.
               const SizedBox(height: 9),
-              Field(
-                label: _isEdit ? 'Category' : null,
-                bleed: true,
-                child: _categoryRail(),
-              ),
+              if (_categorySettled)
+                _gutter(
+                  Field(
+                    // Labelled, unlike the rail. A rail of shelf names reads
+                    // as shelf names on sight; a single row saying `Streaming`
+                    // could be anything.
+                    label: 'Category',
+                    child: PickerField(
+                      value: _category.label,
+                      onTap: _pickCategory,
+                    ),
+                  ),
+                )
+              else
+                Field(label: null, bleed: true, child: _categoryRail()),
               // The plans of the chosen service. Above the cost field, and
               // above the cycle: picking a tile fills both of them, so a user
               // who recognises their plan never reads the two blocks below.
@@ -855,6 +865,34 @@ class _AddItemScreenState extends State<AddItemScreen> {
         ),
       ],
     );
+  }
+
+  /// Whether the shelf is already decided, and so needs a row rather than a
+  /// rail.
+  ///
+  /// A catalogue row carries its own shelf, and an item being edited has had
+  /// one since the day it was made. In both cases the answer is on screen and
+  /// right, and twenty-two chips scrolling sideways under it is a question
+  /// being asked after it was answered. Someone entering a service by hand has
+  /// genuinely not chosen yet, and for them the rail is still the fastest way
+  /// to see what the choices are.
+  bool get _categorySettled => _isEdit || _matched != null;
+
+  Future<void> _pickCategory() async {
+    // A sheet behind the keyboard opens half covered.
+    FocusScope.of(context).unfocus();
+    final picked = await chooseOption<String>(
+      context,
+      title: 'Category',
+      options: [
+        for (final category in widget.categories.all)
+          (category.id, category.label),
+      ],
+      selected: _category.id,
+    );
+    if (picked != null && mounted) {
+      setState(() => _category = widget.categories[picked]);
+    }
   }
 
   Widget _categoryRail() {
