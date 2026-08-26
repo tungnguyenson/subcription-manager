@@ -176,6 +176,28 @@ void main() {
 
       expect(rows.map((r) => r.source.name), ['VCB 4412', 'Momo']);
     });
+
+    test('one row is flagged as where a new item starts', () {
+      final rows = ServicesPresenter.sourceRows(
+        [vcb, momo],
+        const [],
+        defaultId: momo.id,
+      );
+
+      expect(rows.map((r) => r.isDefault), [false, true]);
+    });
+
+    // The stored id can name a source that has since been removed. The flag
+    // simply goes off every row rather than the list refusing to build.
+    test('a default that no longer exists flags nothing', () {
+      final rows = ServicesPresenter.sourceRows(
+        [vcb],
+        const [],
+        defaultId: 'gone',
+      );
+
+      expect(rows.single.isDefault, isFalse);
+    });
   });
 
   // A lapsed prepaid number cannot be bought back, so its shelf must not sit

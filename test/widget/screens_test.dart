@@ -10,6 +10,8 @@ import 'package:subdock/ui/calendar_presenter.dart';
 import 'package:subdock/ui/money_presenter.dart';
 import 'package:subdock/ui/screens/money_screen.dart';
 import 'package:subdock/ui/screens/settings_screen.dart';
+import 'package:subdock/ui/screens/sources_screen.dart';
+import 'package:subdock/ui/services_presenter.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/ui/backup_presenter.dart';
@@ -710,6 +712,71 @@ void main() {
         tester.getRect(find.text('VND')).right,
         greaterThan(tester.getRect(find.text('Currency')).right),
       );
+    });
+  });
+
+  group('Payment sources', () {
+    const vcb = PaymentSource(id: 'vcb', name: 'VCB 4412');
+    const momo = PaymentSource(id: 'momo', name: 'Momo');
+
+    List<SourceRow> rows({String? defaultId}) => ServicesPresenter.sourceRows(
+      [vcb, momo],
+      const [],
+      defaultId: defaultId,
+    );
+
+    // Someone who has just switched cards cannot say so while the app is
+    // guessing from a count: the old card goes on winning until enough items
+    // have moved. This row is where they say it.
+    testWidgets('says which source a new item starts on, and changes it', (
+      tester,
+    ) async {
+      String? chosen;
+      await show(
+        tester,
+        SourcesScreen(
+          rows: rows(defaultId: 'vcb'),
+          onSetDefault: (id) => chosen = id,
+        ),
+      );
+
+      expect(find.text('Starts on'), findsOneWidget);
+      expect(find.text('VCB 4412'), findsWidgets);
+
+      await tester.tap(find.text('Starts on'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Momo').last);
+      await tester.pumpAndSettle();
+
+      expect(chosen, 'momo');
+    });
+
+    // The list says it too. Scanning three cards should not mean reading a row
+    // further up to work out which one a new item lands on.
+    testWidgets('the list marks the default row', (tester) async {
+      await show(
+        tester,
+        SourcesScreen(
+          rows: rows(defaultId: 'momo'),
+          onSetDefault: (_) {},
+        ),
+      );
+
+      expect(find.textContaining('Default · Not used yet'), findsOneWidget);
+    });
+
+    // One source is not a choice, and a row offering to pick between one thing
+    // is a control that cannot do anything.
+    testWidgets('no picker while there is only one source', (tester) async {
+      await show(
+        tester,
+        SourcesScreen(
+          rows: ServicesPresenter.sourceRows([vcb], const [], defaultId: 'vcb'),
+          onSetDefault: (_) {},
+        ),
+      );
+
+      expect(find.text('Starts on'), findsNothing);
     });
   });
 

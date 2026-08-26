@@ -629,12 +629,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     for (final source in _sources) source.id: source,
   };
 
-  /// The last source the user chose, for the add form's default.
+  /// Which source a new item starts on.
   ///
-  /// Read off the items rather than stored as a preference: whatever most of
-  /// their subscriptions already pay from is a better guess than the one they
-  /// happened to pick last, and it needs no extra state to be right.
-  String? get _lastUsedSourceId {
+  /// The stored preference when it still names a source that exists, and the
+  /// commonest one otherwise. Checked here rather than cleaned up on delete
+  /// because there is no moment where cleaning up is guaranteed to run: a
+  /// source can go while this screen is not the one on top, and a dangling id
+  /// would preselect a chip that is not there.
+  String? get _defaultSourceId {
+    final chosen = _settings.defaultSourceId;
+    if (chosen != null && _sources.any((s) => s.id == chosen)) return chosen;
+    return _mostUsedSourceId;
+  }
+
+  /// The source most of the user's items already point at.
+  ///
+  /// The fallback, not the answer. It is a good guess and an unstateable one:
+  /// someone who has just switched cards cannot say so, because the old card
+  /// goes on winning the count until enough items have moved.
+  String? get _mostUsedSourceId {
     final counts = <String, int>{};
     for (final item in _items) {
       final id = item.paymentSourceId;
@@ -732,7 +745,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         sources: _sources,
         onCreateSource: _createSource,
         onOpenLink: _openLink,
-        defaultSourceId: _lastUsedSourceId,
+        defaultSourceId: _defaultSourceId,
       ),
     );
   }
@@ -873,9 +886,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       builder: (context, snapshot) {
         final sources = snapshot.data ?? const <PaymentSource>[];
         return SourcesScreen(
-          rows: ServicesPresenter.sourceRows(sources, _items),
+          rows: ServicesPresenter.sourceRows(
+            sources,
+            _items,
+            defaultId: _defaultSourceId,
+          ),
           onAdd: (name, glyph) => unawaited(_createSource(name, glyph)),
           onRemove: (id) => unawaited(widget.repository.deleteSource(id)),
+          onSetDefault: (id) =>
+              unawaited(widget.settings.save(_settings.withDefaultSource(id))),
         );
       },
     ),
@@ -888,10 +907,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// twice in one microsecond is not a case worth a uuid dependency.
   Future<String?> _createSource(String name, SourceGlyph glyph) async {
     final id = 'src${DateTime.now().microsecondsSinceEpoch}';
+    final first = _sources.isEmpty;
     await widget.repository.upsertSource(
       PaymentSource(id: id, name: name, glyph: glyph),
       DateTime.now().millisecondsSinceEpoch ~/ 1000,
     );
+    // The first one is the answer by elimination, so it is written down rather
+    // than left to be inferred. Only the first: a second card added later is
+    // an addition, not a replacement, and silently moving every future item
+    // onto it would be the app deciding something the user did not say.
+    if (first) {
+      await widget.settings.save(_settings.withDefaultSource(id));
+    }
     return id;
   }
 

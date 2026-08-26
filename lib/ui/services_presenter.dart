@@ -97,8 +97,13 @@ abstract final class ServicesPresenter {
   /// "Netflix Premium" does not.
   static List<SourceRow> sourceRows(
     List<PaymentSource> sources,
-    List<TrackedItem> items,
-  ) => [
+    List<TrackedItem> items, {
+
+    /// The source a new item starts on. Absent, or naming one that has since
+    /// been removed, leaves the flag off every row and the screen falls back
+    /// to the first.
+    String? defaultId,
+  }) => [
     for (final source in sources)
       () {
         final used = items
@@ -107,6 +112,7 @@ abstract final class ServicesPresenter {
         return SourceRow(
           source: source,
           itemCount: used.length,
+          isDefault: source.id == defaultId,
           usage: switch (used.length) {
             0 => 'Not used yet',
             1 => used.single.name,

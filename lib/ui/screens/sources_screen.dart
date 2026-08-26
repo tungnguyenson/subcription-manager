@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/ui/screens/add/option_sheets.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
@@ -18,10 +19,14 @@ class SourceRow {
   /// How many items point here. Zero means Remove costs nothing.
   final int itemCount;
 
+  /// The one a new item starts on.
+  final bool isDefault;
+
   const SourceRow({
     required this.source,
     required this.usage,
     required this.itemCount,
+    this.isDefault = false,
   });
 }
 
@@ -39,6 +44,10 @@ class SourcesScreen extends StatefulWidget {
 
   final void Function(String name, SourceGlyph glyph)? onAdd;
   final void Function(String id)? onRemove;
+
+  /// Changes which source a new item starts on.
+  final void Function(String id)? onSetDefault;
+
   final VoidCallback? onBack;
 
   const SourcesScreen({
@@ -46,6 +55,7 @@ class SourcesScreen extends StatefulWidget {
     required this.rows,
     this.onAdd,
     this.onRemove,
+    this.onSetDefault,
     this.onBack,
   });
 
@@ -64,6 +74,29 @@ class _SourcesScreenState extends State<SourcesScreen> {
   }
 
   bool get _canAdd => _name.text.trim().isNotEmpty;
+
+  SourceRow? get _defaultRow =>
+      widget.rows.where((r) => r.isDefault).firstOrNull;
+
+  /// The name on the row, or the first source's.
+  ///
+  /// Never `None`. There is always a source a new item will land on once one
+  /// exists, and this row has to say which -- reporting `None` beside a list
+  /// of three would be the screen disclaiming a choice it is making anyway.
+  String get _defaultName => (_defaultRow ?? widget.rows.first).source.name;
+
+  Future<void> _pickDefault() async {
+    final picked = await chooseOption<String>(
+      context,
+      title: 'Starts on',
+      options: [
+        for (final row in widget.rows) (row.source.id, row.source.name),
+      ],
+      selected: (_defaultRow ?? widget.rows.first).source.id,
+    );
+    if (picked == null || !mounted) return;
+    widget.onSetDefault?.call(picked);
+  }
 
   void _pickPreset(String label, SourceGlyph glyph) {
     setState(() {
@@ -98,6 +131,23 @@ class _SourcesScreenState extends State<SourcesScreen> {
           'account is about to be charged. Nothing is connected to your bank.',
           style: SubdockText.summary,
         ),
+        // A control of its own rather than an action on every row. The list
+        // rows already carry Remove, and a second link beside it would leave
+        // the name they both act on about a third of the row wide; this also
+        // puts the setting where the reader is looking when they wonder why a
+        // new item arrived pointing at one of these.
+        if (widget.rows.length > 1) ...[
+          const SectionLabel('New items'),
+          GroupedCard(
+            children: [
+              DetailRow(
+                label: 'Starts on',
+                value: _defaultName,
+                onTap: widget.onSetDefault == null ? null : _pickDefault,
+              ),
+            ],
+          ),
+        ],
         if (widget.rows.isNotEmpty) ...[
           const SectionLabel('Your sources'),
           GroupedCard(
@@ -234,7 +284,10 @@ class _SourceListRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  row.usage,
+                  // The list says which one it is too. Someone scanning three
+                  // cards should not have to read a row further up to work out
+                  // which of them a new item lands on.
+                  row.isDefault ? 'Default · ${row.usage}' : row.usage,
                   style: SubdockText.caption.copyWith(fontSize: 13.5),
                 ),
               ],
