@@ -785,11 +785,16 @@ class _AddItemScreenState extends State<AddItemScreen> {
             child: TextField(
               controller: _name,
               focusNode: _nameFocus,
-              // An empty form is asking for a name and nothing else, so it
-              // opens with the keyboard up. A form that is already full is
-              // asking which field to change, and answering that from behind
-              // a keyboard means dismissing it first.
-              autofocus: !_isEdit,
+              // The keyboard comes up only when this field is the question.
+              //
+              // An empty name is one: there is nothing else to do on the form
+              // until it is answered. A name that arrived filled in is not,
+              // whether it came from a catalogue row, from the search box on
+              // step one, or from the item being edited. The keyboard covers
+              // half the screen, and what is under it -- the date, the cost,
+              // the cycle -- is what the user actually came to fill in, while
+              // the name it opened over is already right.
+              autofocus: _name.text.isEmpty,
               style: SubdockText.fieldValue,
               cursorColor: SubdockColors.accent,
               onChanged: (_) => _nameSettled = false,

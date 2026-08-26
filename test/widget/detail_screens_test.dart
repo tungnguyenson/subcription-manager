@@ -1397,6 +1397,48 @@ void main() {
       expect(find.text('260,000'), findsOneWidget);
     });
 
+    // The keyboard covers half the screen, and everything the user actually
+    // came to fill in -- the date, the cost, the cycle -- is under it. A name
+    // that arrived filled in is not the question the form is asking.
+    testWidgets('picking a service does not open the keyboard on the name', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField).first, 'net');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Netflix Premium').last);
+      await tester.pumpAndSettle();
+
+      final name = tester.widget<TextField>(find.byType(TextField).first);
+      expect(name.controller?.text, 'Netflix Premium');
+      expect(name.focusNode?.hasFocus, isFalse);
+    });
+
+    // And the other way round: a form with nothing in the name field *is*
+    // asking for one, so it opens with the keyboard up.
+    testWidgets('an empty name still opens the keyboard', (tester) async {
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+        ),
+      );
+
+      final name = tester.widget<TextField>(find.byType(TextField).first);
+      expect(name.controller?.text, isEmpty);
+      expect(name.focusNode?.hasFocus, isTrue);
+    });
+
     // A relative shortcut the user cannot verify is a date they will have to
     // re-check against their provider anyway.
     testWidgets('the picked date is echoed back as a real date', (
