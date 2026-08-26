@@ -208,16 +208,32 @@ void main() {
   // The date under `Last backup` in Settings. It has to stand for a file that
   // actually left the phone, which is why the caller writes it and not `read`.
   group('the last backup date', () {
-    test('starts as never', () async {
-      expect(await backups.lastSaved(), isNull);
+    test('starts as never on both channels', () async {
+      final saved = await backups.lastSaved();
+      expect(saved.file, isNull);
+      expect(saved.cloud, isNull);
+      expect(saved.any, isFalse);
     });
 
     test('comes back once recorded, and survives being overwritten', () async {
       await backups.markSaved(d('2026-08-25'));
-      expect(await backups.lastSaved(), d('2026-08-25'));
+      expect((await backups.lastSaved()).file, d('2026-08-25'));
 
       await backups.markSaved(d('2026-08-26'));
-      expect(await backups.lastSaved(), d('2026-08-26'));
+      expect((await backups.lastSaved()).file, d('2026-08-26'));
+    });
+
+    // A file the user exported in May sits where they put it whatever happens
+    // afterwards; the copy in iCloud is only as recent as the last write that
+    // landed. One date covering both would report the newer of the two beside
+    // whichever row the reader looked at.
+    test('the two channels are recorded apart', () async {
+      await backups.markSaved(d('2026-08-25'), BackupChannel.file);
+      await backups.markSaved(d('2026-05-01'), BackupChannel.cloud);
+
+      final saved = await backups.lastSaved();
+      expect(saved.file, d('2026-08-25'));
+      expect(saved.cloud, d('2026-05-01'));
     });
 
     // Reading the whole database out is not a backup. Nothing has left the
@@ -227,7 +243,7 @@ void main() {
       await repo.upsert(item(), 1);
       await backups.read();
 
-      expect(await backups.lastSaved(), isNull);
+      expect((await backups.lastSaved()).any, isFalse);
     });
 
     // Not today. Someone pulling back a copy taken three months ago has a
@@ -240,7 +256,20 @@ void main() {
       await backups.markSaved(d('2026-08-25'));
       await backups.restore(taken);
 
-      expect(await backups.lastSaved(), d('2026-05-25'));
+      expect((await backups.lastSaved()).file, d('2026-05-25'));
+    });
+
+    // A copy pulled out of iCloud says iCloud is up to date, not that a file
+    // exists on disk.
+    test('a restore stamps the channel it came off', () async {
+      await repo.upsert(item(), 1);
+      final taken = await backups.read(clock: DateTime.utc(2026, 5, 25, 4));
+
+      await backups.restore(taken, from: BackupChannel.cloud);
+
+      final saved = await backups.lastSaved();
+      expect(saved.cloud, d('2026-05-25'));
+      expect(saved.file, isNull);
     });
 
     // A hand-written file, or one from a build older than this field.
@@ -257,7 +286,7 @@ void main() {
         ),
       );
 
-      expect(await backups.lastSaved(), isNull);
+      expect((await backups.lastSaved()).file, isNull);
     });
 
     test('the stream carries the change to whoever is watching', () async {
@@ -266,7 +295,9 @@ void main() {
       // this test about drift instead of about the date.
       final done = expectLater(
         backups.observeLastSaved(),
-        emitsThrough(d('2026-08-25')),
+        emitsThrough(
+          predicate<LastBackups>((saved) => saved.file == d('2026-08-25')),
+        ),
       );
       await backups.markSaved(d('2026-08-25'));
       await done;

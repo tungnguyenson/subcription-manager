@@ -40,6 +40,7 @@ import 'package:subdock/ui/screens/sources_screen.dart';
 import 'package:subdock/ui/screens/onboarding_screen.dart';
 import 'package:subdock/ui/screens/reminder_rules_screen.dart';
 import 'package:subdock/ui/screens/reminders_screen.dart';
+import 'package:subdock/ui/screens/backup_screen.dart';
 import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/ui/theme.dart';
@@ -174,14 +175,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   StreamSubscription<List<Category>>? _categorySubscription;
   StreamSubscription<List<HandledEvent>>? _historySubscription;
   StreamSubscription<AppSettings>? _settingsSubscription;
-  StreamSubscription<LocalDate?>? _lastBackupSubscription;
+  StreamSubscription<LastBackups>? _lastBackupSubscription;
 
   bool _loaded = false;
   bool _onboardingDismissed = false;
   bool _notificationsGranted = false;
 
   /// How the last write to the user's own cloud went.
-  CloudResult _cloud = CloudResult.idle;
+  ///
+  /// Starts as `unsupported` off iOS rather than `idle`. `idle` reads as
+  /// `Waiting for a change`, which put an iCloud row on the Android Settings
+  /// screen reporting on a thing that does not exist there -- and now that the
+  /// row leads somewhere, it would open a page about it.
+  late CloudResult _cloud = widget.cloud.isSupported
+      ? CloudResult.idle
+      : CloudResult.unsupported;
 
   /// Holds the cloud write back until the edits stop.
   ///
@@ -191,7 +199,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Timer? _cloudDebounce;
 
   /// When a backup last actually left the device, or null if never.
-  LocalDate? _lastBackupOn;
+  LastBackups _lastBackupOn = LastBackups.none;
 
   /// Null until the first read, and null for good on any platform that does
   /// not gate exact alarms behind their own permission.
@@ -610,7 +618,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           sourcesLine: _sources.isEmpty ? 'None' : '${_sources.length}',
           backup: BackupPresenter.build(
             items: _items,
-            lastSavedOn: _lastBackupOn,
+            saved: _lastBackupOn,
             device: _deviceBackup,
             cloud: _cloud,
           ),
@@ -618,9 +626,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           onOpenSources: _openSources,
           onOpenReminders: _openReminderRules,
           onOpenHistory: _openHistory,
+          // Still wired: the warning banner at the top of Settings offers an
+          // export, and someone told their list has never been copied
+          // anywhere should not have to find the right screen first.
           onExport: () => unawaited(_exportBackup()),
-          onImport: () => unawaited(_importBackup()),
-          onImportFromCloud: () => unawaited(_importFromCloud()),
+          onOpenCloudBackup: _openCloudBackup,
+          onOpenFileBackup: _openFileBackup,
         );
     }
   }
@@ -905,6 +916,38 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// The id is the microsecond clock, matching how items are keyed. Two sources
   /// created in the same microsecond would collide; a user tapping "Add source"
   /// twice in one microsecond is not a case worth a uuid dependency.
+  /// The two backup channels, each on its own screen.
+  ///
+  /// Rebuilt from the live state on every frame of the route rather than
+  /// captured when it opens: the status here changes while the screen is up --
+  /// a write lands, iCloud comes back -- and a snapshot would go on reporting
+  /// what was true when the row was tapped.
+  void _openCloudBackup() => _push(
+    Builder(
+      builder: (_) {
+        final page = BackupPresenter.cloudPage(
+          saved: _lastBackupOn,
+          cloud: _cloud,
+        );
+        if (page == null) return const SizedBox.shrink();
+        return BackupScreen(
+          page: page,
+          onRestore: () => unawaited(_importFromCloud()),
+        );
+      },
+    ),
+  );
+
+  void _openFileBackup() => _push(
+    Builder(
+      builder: (_) => BackupScreen(
+        page: BackupPresenter.filePage(saved: _lastBackupOn),
+        onBackUp: () => unawaited(_exportBackup()),
+        onRestore: () => unawaited(_importBackup()),
+      ),
+    ),
+  );
+
   Future<String?> _createSource(String name, SourceGlyph glyph) async {
     final id = 'src${DateTime.now().microsecondsSinceEpoch}';
     final first = _sources.isEmpty;
@@ -1320,7 +1363,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       final fetch = await widget.cloud.latest();
       if (!mounted) return;
       if (fetch.copy case final copy?) {
-        await _restoreFrom(copy.contents);
+        await _restoreFrom(copy.contents, from: BackupChannel.cloud);
         return;
       }
     }
@@ -1352,7 +1395,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     final copy = fetch.copy;
     if (copy == null) return;
-    await _restoreFrom(copy.contents);
+    await _restoreFrom(copy.contents, from: BackupChannel.cloud);
   }
 
   /// Reads a backup back in, replacing everything.
@@ -1378,7 +1421,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// Shared on purpose. A copy out of iCloud and a copy off a file the user
   /// picked destroy exactly the same rows, so they must ask exactly the same
   /// question first; two paths would eventually grow two different warnings.
-  Future<void> _restoreFrom(String text) async {
+  Future<void> _restoreFrom(
+    String text, {
+
+    /// Which channel the bytes came off, so the date it stamps lands on the
+    /// row that is about it. A copy pulled out of iCloud says iCloud is up to
+    /// date, not that a file exists on disk.
+    BackupChannel from = BackupChannel.file,
+  }) async {
     final Backup backup;
     try {
       backup = BackupCodec.decode(text);
@@ -1403,7 +1453,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (confirmed != true || !mounted) return;
 
     try {
-      await widget.backups.restore(backup);
+      await widget.backups.restore(backup, from: from);
     } on Exception catch (error) {
       if (mounted) _confirm('Could not restore: $error');
       return;

@@ -9,11 +9,13 @@ import 'package:subdock/ui/app_shell.dart';
 import 'package:subdock/ui/calendar_presenter.dart';
 import 'package:subdock/ui/money_presenter.dart';
 import 'package:subdock/ui/screens/money_screen.dart';
+import 'package:subdock/ui/screens/backup_screen.dart';
 import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/sources_screen.dart';
 import 'package:subdock/ui/services_presenter.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/platform/cloud_backup.dart';
+import 'package:subdock/data/backup_store.dart';
 import 'package:subdock/ui/backup_presenter.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/ui/widgets/restore_ask.dart';
@@ -533,109 +535,85 @@ void main() {
       expect(find.text('VND'), findsOneWidget);
       expect(find.text('English'), findsOneWidget);
       expect(find.text('Not yet'), findsOneWidget);
-      expect(find.text('›'), findsNWidgets(7));
+      // Four destinations, About, and the one backup channel that exists
+      // without a cloud behind it.
+      expect(find.text('›'), findsNWidgets(6));
     });
 
     // The only copy of anything is on the phone, and no other screen says so.
-    // The two rows below this footnote are the only answer to a lost phone.
-    testWidgets('backup rows say why they are there', (tester) async {
-      var exported = 0;
-      var imported = 0;
+    // Two rows, not five. The section used to carry a status, a date and three
+    // actions, two of which replace the whole list.
+    testWidgets('the two channels are two rows, each with its own date', (
+      tester,
+    ) async {
+      var cloud = 0;
+      var file = 0;
       await showTall(
         tester,
         SettingsScreen(
           backup: BackupPresenter.build(
             items: const [],
-            lastSavedOn: null,
+            saved: LastBackups(file: d('2026-08-11')),
             device: DeviceBackup.wholeDeviceOnly,
+            cloud: const CloudResult(CloudState.saved),
           ),
-          onExport: () => exported++,
-          onImport: () => imported++,
+          onOpenCloudBackup: () => cloud++,
+          onOpenFileBackup: () => file++,
         ),
       );
 
       expect(find.textContaining('no account and no server'), findsOneWidget);
+      // The file has a copy; iCloud has written nothing yet. One date beside
+      // both rows would have reported the file's date next to iCloud.
+      expect(find.text('11/08/2026'), findsOneWidget);
+      expect(find.text('Never'), findsOneWidget);
 
-      await tester.tap(find.text('Export a backup'));
-      await tester.tap(find.text('Restore from a backup'));
+      await tester.tap(find.text('iCloud'));
+      await tester.tap(find.text('File'));
       await tester.pumpAndSettle();
 
-      expect((exported, imported), (1, 1));
+      expect((cloud, file), (1, 1));
     });
 
-    // Both rows destroy the same rows, so the user has to be certain WHICH
-    // copy they are taking. One row that silently prefers a source decides
-    // that for them.
-    testWidgets('the two sources of a restore are named separately', (
-      tester,
-    ) async {
-      var fromCloud = 0;
-      var fromFile = 0;
+    // A date beside an iCloud that has been signed out since July is the app
+    // reporting a copy it stopped keeping.
+    testWidgets('a cloud problem outranks the cloud date', (tester) async {
       await showTall(
         tester,
         SettingsScreen(
           backup: BackupPresenter.build(
             items: const [],
-            lastSavedOn: null,
+            saved: LastBackups(cloud: d('2026-06-25')),
             device: DeviceBackup.wholeDeviceOnly,
-            cloud: const CloudResult(CloudState.saved),
+            cloud: const CloudResult(CloudState.signedOut),
           ),
-          onImportFromCloud: () => fromCloud++,
-          onImport: () => fromFile++,
+          onOpenCloudBackup: () {},
+          onOpenFileBackup: () {},
         ),
       );
 
-      await tester.tap(find.text('Restore from iCloud'));
-      await tester.tap(find.text('Restore from a file'));
-      await tester.pumpAndSettle();
-
-      expect((fromCloud, fromFile), (1, 1));
+      expect(find.text('Sign in to iCloud'), findsOneWidget);
+      expect(find.text('25/06/2026'), findsNothing);
     });
 
-    // Where there is no cloud, naming the file is naming a distinction that
-    // does not exist.
-    testWidgets('with no cloud there is one restore, unqualified', (
-      tester,
-    ) async {
+    // Off iOS the system already carries the database to the next phone, so a
+    // row about iCloud would report a gap that does not exist.
+    testWidgets('with no cloud there is one row', (tester) async {
       await showTall(
         tester,
         SettingsScreen(
           backup: BackupPresenter.build(
             items: const [],
-            lastSavedOn: null,
+            saved: LastBackups.none,
             device: DeviceBackup.perAppUnverifiable,
           ),
-          onImportFromCloud: () {},
-          onImport: () {},
+          onOpenCloudBackup: () {},
+          onOpenFileBackup: () {},
         ),
       );
 
-      expect(find.text('Restore from iCloud'), findsNothing);
-      expect(find.text('Restore from a file'), findsNothing);
-      expect(find.text('Restore from a backup'), findsOneWidget);
-    });
-
-    // `Never` sitting next to a list of real items is the whole warning. No
-    // sentence on this screen tells the user what to do about it.
-    testWidgets('the last backup is state, not advice', (tester) async {
-      await showTall(
-        tester,
-        SettingsScreen(
-          backup: BackupPresenter.build(
-            items: const [],
-            lastSavedOn: null,
-            device: DeviceBackup.wholeDeviceOnly,
-          ),
-        ),
-      );
-
-      expect(find.text('Last backup'), findsOneWidget);
-      expect(find.text('Never'), findsOneWidget);
-      expect(
-        find.textContaining('should'),
-        findsNothing,
-        reason: 'the row reports, it does not recommend',
-      );
+      expect(find.text('iCloud'), findsNothing);
+      expect(find.text('File'), findsOneWidget);
     });
 
     // The banner exists because Settings is where you go if you already know
@@ -658,7 +636,7 @@ void main() {
                 dateSource: DateSource.userConfirmed,
               ),
             ],
-            lastSavedOn: null,
+            saved: LastBackups.none,
             device: DeviceBackup.wholeDeviceOnly,
           ),
           onExport: () => exported++,
@@ -688,7 +666,7 @@ void main() {
                 dateSource: DateSource.userConfirmed,
               ),
             ],
-            lastSavedOn: d('2026-08-25'),
+            saved: LastBackups(file: d('2026-08-25')),
             device: DeviceBackup.wholeDeviceOnly,
           ),
         ),
@@ -713,6 +691,87 @@ void main() {
       expect(
         tester.getRect(find.text('VND')).right,
         greaterThan(tester.getRect(find.text('Currency')).right),
+      );
+    });
+  });
+
+  group('A backup channel', () {
+    // The two are genuinely different promises -- one the app keeps by itself,
+    // one the user keeps by hand -- and the copy is most of what says so.
+    testWidgets('iCloud has nothing to press for the copy itself', (
+      tester,
+    ) async {
+      var restored = 0;
+      final page = BackupPresenter.cloudPage(
+        saved: LastBackups(cloud: d('2026-08-11')),
+        cloud: const CloudResult(CloudState.saved),
+      );
+
+      await show(
+        tester,
+        BackupScreen(page: page!, onRestore: () => restored++),
+      );
+
+      expect(find.text('iCloud'), findsOneWidget);
+      expect(find.text('Saved'), findsOneWidget);
+      expect(find.text('11/08/2026'), findsOneWidget);
+      // The app writes on its own; a button would suggest it does not.
+      expect(find.text('Export a backup'), findsNothing);
+
+      await tester.tap(find.text('Restore from iCloud'));
+      await tester.pumpAndSettle();
+      expect(restored, 1);
+    });
+
+    testWidgets('a file is written and read back by hand', (tester) async {
+      var exported = 0;
+      var restored = 0;
+      await show(
+        tester,
+        BackupScreen(
+          page: BackupPresenter.filePage(saved: LastBackups.none),
+          onBackUp: () => exported++,
+          onRestore: () => restored++,
+        ),
+      );
+
+      expect(find.text('Never'), findsOneWidget);
+      await tester.tap(find.text('Export a backup'));
+      await tester.tap(find.text('Restore from a file'));
+      await tester.pumpAndSettle();
+
+      expect((exported, restored), (1, 1));
+    });
+
+    // Restoring replaces the list and there is nowhere to undo it from. The
+    // screen says so under the actions rather than leaving it to the sheet.
+    testWidgets('both say a restore replaces rather than merges', (
+      tester,
+    ) async {
+      for (final page in [
+        BackupPresenter.cloudPage(
+          saved: LastBackups.none,
+          cloud: const CloudResult(CloudState.saved),
+        )!,
+        BackupPresenter.filePage(saved: LastBackups.none),
+      ]) {
+        await show(tester, BackupScreen(key: ValueKey(page.title), page: page));
+        expect(
+          find.textContaining('does not merge'),
+          findsOneWidget,
+          reason: page.title,
+        );
+      }
+    });
+
+    // Off iOS there is no such page to open.
+    testWidgets('no iCloud page where there is no iCloud', (tester) async {
+      expect(
+        BackupPresenter.cloudPage(
+          saved: LastBackups.none,
+          cloud: CloudResult.unsupported,
+        ),
+        isNull,
       );
     });
   });

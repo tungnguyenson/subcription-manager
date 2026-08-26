@@ -37,20 +37,20 @@ class SettingsScreen extends StatelessWidget {
   final VoidCallback? onOpenHistory;
 
   /// Hands the whole list to the system share sheet as one file.
+  ///
+  /// Still here because the warning banner offers it: someone told their list
+  /// has never been copied anywhere should not have to find the right screen
+  /// first.
   final VoidCallback? onExport;
 
-  /// Reads one back off a file the user picks, replacing everything.
-  /// Destructive, and the confirmation that says so belongs to whoever wires
-  /// this up, not to a settings row.
-  final VoidCallback? onImport;
-
-  /// Reads back the copy the app keeps in the user's own cloud.
+  /// The two channels, each on its own screen.
   ///
-  /// Its own row rather than a branch inside [onImport]. Both rows restore and
-  /// both destroy what is there, so the one thing the user must be certain of
-  /// before tapping is *which copy* they are about to take; a single row that
-  /// silently prefers one source decides that for them.
-  final VoidCallback? onImportFromCloud;
+  /// Two rows rather than five. The section used to hold a status, a date and
+  /// three actions, two of which replace the whole list; under one heading
+  /// that gave the destructive pair the same weight as the date above them,
+  /// and neither date said which copy it was about.
+  final VoidCallback? onOpenCloudBackup;
+  final VoidCallback? onOpenFileBackup;
 
   final VoidCallback? onAbout;
 
@@ -67,8 +67,8 @@ class SettingsScreen extends StatelessWidget {
     this.onOpenReminders,
     this.onOpenHistory,
     this.onExport,
-    this.onImport,
-    this.onImportFromCloud,
+    this.onOpenCloudBackup,
+    this.onOpenFileBackup,
     this.onAbout,
   });
 
@@ -141,29 +141,24 @@ class SettingsScreen extends StatelessWidget {
         const SectionLabel('Backup'),
         GroupedCard(
           children: [
-            // A value row, not a destination, for the same reason Currency and
-            // Language are: it reports state and leads nowhere. `Never` beside
-            // a list of twelve items is the whole warning, which is why no
-            // sentence here tells the user what to do about it.
-            // Above `Last backup`, because it answers the bigger question.
-            // A date means nothing to someone whose iCloud is signed out.
-            if (backup?.cloud case final cloud?)
-              DetailRow(label: 'iCloud', value: cloud),
-            if (backup case final view?)
-              DetailRow(label: 'Last backup', value: view.lastBackup),
-            DetailRow.nav(label: 'Export a backup', onTap: onExport),
-            // Only where there is a cloud to read from, which is the same
-            // condition that puts the iCloud row above on screen.
-            if (backup?.cloud != null && onImportFromCloud != null)
+            // Each row carries its own date, and they are different dates: a
+            // file exported in May sits where the user put it whatever happens
+            // afterwards, while the copy in iCloud is only as recent as the
+            // last write that landed. One date beside both rows would report
+            // the newer of the two next to whichever the reader looked at.
+            //
+            // iCloud first, and absent entirely off iOS, where the system
+            // already carries the database to the next phone.
+            if (backup?.cloud != null)
               DetailRow.nav(
-                label: 'Restore from iCloud',
-                onTap: onImportFromCloud,
+                label: 'iCloud',
+                value: backup?.cloudLine,
+                onTap: onOpenCloudBackup,
               ),
             DetailRow.nav(
-              label: backup?.cloud == null
-                  ? 'Restore from a backup'
-                  : 'Restore from a file',
-              onTap: onImport,
+              label: 'File',
+              value: backup?.fileLine,
+              onTap: onOpenFileBackup,
             ),
           ],
         ),

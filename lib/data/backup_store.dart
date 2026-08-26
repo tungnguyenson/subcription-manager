@@ -8,6 +8,31 @@ import 'item_repository.dart';
 import 'mappers.dart';
 import 'settings_store.dart';
 
+/// Where a copy went, or came from.
+///
+/// The two are recorded separately because they answer different questions and
+/// fail in different ways. A file the user exported in May sits wherever they
+/// put it whatever the app does afterwards; the copy in iCloud is only as
+/// recent as the last write that landed. One date covering both would report
+/// the newer of the two beside whichever row the reader happened to look at.
+enum BackupChannel { file, cloud }
+
+/// The last date a copy existed on each channel.
+class LastBackups {
+  /// The newest export the user took to a file.
+  final LocalDate? file;
+
+  /// The newest write to the user's own cloud that landed.
+  final LocalDate? cloud;
+
+  const LastBackups({this.file, this.cloud});
+
+  static const none = LastBackups();
+
+  /// Whether any copy exists at all, which is what the warning turns on.
+  bool get any => file != null || cloud != null;
+}
+
 /// Reads the whole database out as a [Backup], and writes one back in.
 ///
 /// Its own class rather than two more methods on [ItemRepository], because
@@ -61,7 +86,13 @@ class BackupStore {
   /// items pointing at categories that had not been written yet, which is a
   /// database the app cannot open a list from -- and the user's original data
   /// is already gone by then, so there is nothing to fall back to.
-  Future<void> restore(Backup backup) => _db.transaction(() async {
+  /// [from] is the channel the file came off, and is what gets stamped: a copy
+  /// pulled out of iCloud says iCloud is up to date, not that a file exists on
+  /// disk.
+  Future<void> restore(
+    Backup backup, {
+    BackupChannel from = BackupChannel.file,
+  }) => _db.transaction(() async {
     // Children first, then parents: `itemRow.category` references
     // `categoryRow`, and `handledEventRow.itemId` references `itemRow`.
     await _db.delete(_db.handledEventRow).go();
@@ -115,8 +146,8 @@ class BackupStore {
     // would say no copy exists while the user is holding one.
     final takenOn = DateTime.tryParse(backup.exportedAt);
     await (takenOn == null
-        ? _clearSaved()
-        : markSaved(LocalDate.fromDateTime(takenOn.toLocal())));
+        ? _clearSaved(from)
+        : markSaved(LocalDate.fromDateTime(takenOn.toLocal()), from));
   });
 
   /// The key the last backup's date lives under, in `settingRow`.
@@ -126,6 +157,16 @@ class BackupStore {
   /// changes should have been a decision. This is neither: it is a record of
   /// something that happened, and the class that owns backups should own it.
   static const String _lastSavedKey = 'last_backup_on';
+
+  /// The cloud's own date. A second key rather than a second table: the whole
+  /// record is one date per channel, and the key the file already used stays
+  /// what it was so an existing install keeps its date.
+  static const String _lastCloudKey = 'last_cloud_backup_on';
+
+  static String _keyFor(BackupChannel channel) => switch (channel) {
+    BackupChannel.file => _lastSavedKey,
+    BackupChannel.cloud => _lastCloudKey,
+  };
 
   /// The newest date on which a file existed holding this list, or null if
   /// there has never been one.
@@ -139,10 +180,10 @@ class BackupStore {
   ///
   /// A stream so the Settings screen redraws the moment an export lands,
   /// without anyone having to remember to refresh it.
-  Stream<LocalDate?> observeLastSaved() =>
+  Stream<LastBackups> observeLastSaved() =>
       _db.selectAllSettings().watch().map(_readLastSaved);
 
-  Future<LocalDate?> lastSaved() async =>
+  Future<LastBackups> lastSaved() async =>
       _readLastSaved(await _db.selectAllSettings().get());
 
   /// Records that a file holding this list exists, as of [on].
@@ -151,29 +192,37 @@ class BackupStore {
   /// somewhere. A user who opened the sheet and closed it again has no backup,
   /// and writing a date here would put something on screen that stands for
   /// nothing.
-  Future<void> markSaved(LocalDate on) => _db
+  Future<void> markSaved(
+    LocalDate on, [
+    BackupChannel channel = BackupChannel.file,
+  ]) => _db
       .into(_db.settingRow)
       .insert(
         SettingRowCompanion(
-          settingKey: const Value(_lastSavedKey),
+          settingKey: Value(_keyFor(channel)),
           value: Value(on.toString()),
         ),
         mode: InsertMode.insertOrReplace,
       );
 
   /// Forgets the date, for a restored file that does not carry one.
-  Future<void> _clearSaved() => (_db.delete(
+  Future<void> _clearSaved(BackupChannel channel) => (_db.delete(
     _db.settingRow,
-  )..where((t) => t.settingKey.equals(_lastSavedKey))).go();
+  )..where((t) => t.settingKey.equals(_keyFor(channel)))).go();
 
   /// Falls back to null rather than throwing, the same as every other read out
   /// of this table. A corrupted value reads as "never backed up", which is the
   /// pessimistic answer and therefore the safe one.
-  static LocalDate? _readLastSaved(List<SettingRowData> rows) {
+  static LastBackups _readLastSaved(List<SettingRowData> rows) {
+    LocalDate? file;
+    LocalDate? cloud;
     for (final row in rows) {
-      if (row.settingKey == _lastSavedKey) return LocalDate.tryParse(row.value);
+      if (row.settingKey == _lastSavedKey) file = LocalDate.tryParse(row.value);
+      if (row.settingKey == _lastCloudKey) {
+        cloud = LocalDate.tryParse(row.value);
+      }
     }
-    return null;
+    return LastBackups(file: file, cloud: cloud);
   }
 
   /// The name the exported file is offered under.

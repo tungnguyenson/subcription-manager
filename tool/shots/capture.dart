@@ -343,6 +343,12 @@ void main() {
     await shot('reminders');
     await pop();
 
+    // The backup channel that exists off iOS. iCloud is unsupported in this
+    // harness, so its row is absent, which is the correct Android screen.
+    await tapText('File');
+    await shot('backup-file');
+    await pop();
+
     await tapText('History');
     await shot('history');
     await pop();

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/platform/cloud_backup.dart';
+import 'package:subdock/data/backup_store.dart';
 import 'package:subdock/ui/backup_presenter.dart';
 
 void main() {
@@ -24,11 +25,12 @@ void main() {
   BackupView build({
     List<TrackedItem> items = const [],
     LocalDate? lastSavedOn,
+    LocalDate? lastCloudOn,
     DeviceBackup device = DeviceBackup.wholeDeviceOnly,
     CloudResult cloud = CloudResult.unsupported,
   }) => BackupPresenter.build(
     items: items,
-    lastSavedOn: lastSavedOn,
+    saved: LastBackups(file: lastSavedOn, cloud: lastCloudOn),
     device: device,
     cloud: cloud,
   );
