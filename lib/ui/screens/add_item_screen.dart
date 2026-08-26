@@ -386,15 +386,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
                           selected: _planTier,
                           onSelect: _pickPlan,
                         ),
-                        const SizedBox(height: 8),
-                        // Kept, though the build file has no line here. A
-                        // price with no page and no date behind it is a
-                        // rumour, and this grid is the one place in the app
-                        // that shows figures the user did not type.
-                        Text(
-                          _planProvenance(plans),
-                          style: SubdockText.caption,
-                        ),
                         // The way past the grid, and the reason the cost
                         // field below is folded away: a user who recognises
                         // their plan on a tile never needs a number pad, and
@@ -539,27 +530,6 @@ class _AddItemScreenState extends State<AddItemScreen> {
     final cycle = _cycle;
     if (entry == null || cycle == null) return const [];
     return PlanGrid.optionsFor(entry, cycle);
-  }
-
-  /// Where the prices in the grid came from, and when.
-  ///
-  /// Never omitted. A grid of amounts with no provenance reads as the app
-  /// knowing what the user pays, and it does not — these are the vendor's list
-  /// prices, and a promotion, a legacy tier or a family plan split four ways all
-  /// make them wrong for this particular person.
-  String _planProvenance(List<PlanOption> plans) {
-    final checked = plans
-        .map((p) => p.checkedAt)
-        .reduce(
-          // The oldest of them: the block is only as fresh as its weakest row, and
-          // quoting the newest would overstate how current it is.
-          (a, b) => a.compareTo(b) <= 0 ? a : b,
-        );
-    final date = LocalDate.tryParse(checked);
-    return date == null
-        ? 'Listed prices from the vendor. Yours may differ.'
-        : 'Listed prices, checked ${DateCopy.listedDate(date)}. '
-              'Yours may differ.';
   }
 
   /// The last amount the app wrote into the cost field, as opposed to typed.
