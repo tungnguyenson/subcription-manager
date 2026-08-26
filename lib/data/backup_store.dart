@@ -40,6 +40,7 @@ class BackupStore {
       history: [for (final row in history) row.toDomain()],
       defaultLeadDays: settings.defaultLeadDays,
       remindAt: settings.remindAt,
+      defaultSourceId: settings.defaultSourceId,
       exportedAt: (clock ?? DateTime.now()).toUtc().toIso8601String(),
       createdAt: {
         for (final row in sources) row.id: row.createdAt,
@@ -104,6 +105,7 @@ class BackupStore {
       AppSettings(
         defaultLeadDays: backup.defaultLeadDays,
         remindAt: backup.remindAt,
+        defaultSourceId: backup.defaultSourceId,
       ),
     );
 

@@ -86,6 +86,7 @@ void main() {
     history: [event],
     defaultLeadDays: const [7, 1],
     remindAt: const LocalTime(6, 45),
+    defaultSourceId: 'card-1',
     exportedAt: '2026-08-25T11:40:00.000Z',
     createdAt: const {'sim': 1700000000, 'card-1': 1690000000},
   );
@@ -186,6 +187,9 @@ void main() {
 
       expect(out.defaultLeadDays, [7, 1]);
       expect(out.remindAt, const LocalTime(6, 45));
+      // The sources come with the file and keep their ids, so this one still
+      // names something on the other side.
+      expect(out.defaultSourceId, 'card-1');
     });
 
     test('a custom cycle survives as itself', () {
@@ -270,6 +274,7 @@ void main() {
       expect(item.yearlyChoice, YearlyChoice.undecided);
       expect(out.defaultLeadDays, const [3, 0]);
       expect(out.remindAt, const LocalTime(8, 30));
+      expect(out.defaultSourceId, isNull);
     });
 
     // The anchor is what every cycle counts from. Falling back to today would

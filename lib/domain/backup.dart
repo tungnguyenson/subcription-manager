@@ -45,6 +45,14 @@ class Backup {
   final List<int> defaultLeadDays;
   final LocalTime remindAt;
 
+  /// Which payment source a new item starts on.
+  ///
+  /// Carried because the sources come with the file and keep their ids, so the
+  /// id still names something after a restore. Absent in a file written before
+  /// the setting existed, which reads back as null and leaves the app falling
+  /// back to whichever source most items already point at.
+  final String? defaultSourceId;
+
   /// When the file was written, as an ISO-8601 instant in UTC.
   ///
   /// For the person reading a folder of these, not for the app: nothing in the
@@ -68,6 +76,7 @@ class Backup {
     required this.history,
     this.defaultLeadDays = const [3, 0],
     this.remindAt = Reminders.defaultRemindAt,
+    this.defaultSourceId,
     required this.exportedAt,
     this.createdAt = const {},
   });
@@ -147,6 +156,7 @@ abstract final class BackupCodec {
       history: _list(parsed['history']).map(_event).toList(),
       defaultLeadDays: _leadDefaults(parsed['settings']),
       remindAt: _remindAt(parsed['settings']),
+      defaultSourceId: _defaultSource(parsed['settings']),
       exportedAt: _string(parsed['exportedAt']) ?? '',
       createdAt: {
         for (final row in [
@@ -165,6 +175,7 @@ abstract final class BackupCodec {
     'settings': {
       'defaultLeadDays': backup.defaultLeadDays,
       'remindAt': backup.remindAt.toString(),
+      'defaultSourceId': backup.defaultSourceId,
     },
     'categories': [for (final c in backup.categories) _categoryJson(c)],
     'paymentSources': [
@@ -376,6 +387,12 @@ abstract final class BackupCodec {
     if (raw is! Map<String, dynamic>) return fallback;
     final leads = _ints(raw['defaultLeadDays']);
     return leads.isEmpty ? fallback : leads;
+  }
+
+  static String? _defaultSource(Object? raw) {
+    if (raw is! Map) return null;
+    final id = _string(raw['defaultSourceId']);
+    return id == null || id.isEmpty ? null : id;
   }
 
   static LocalTime _remindAt(Object? raw) {
