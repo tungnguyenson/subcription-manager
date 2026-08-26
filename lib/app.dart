@@ -38,6 +38,7 @@ import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
+import 'package:subdock/ui/widgets/delete_ask.dart';
 import 'package:subdock/ui/widgets/restore_ask.dart';
 import 'package:subdock/ui/widgets/filter_sheet.dart';
 import 'package:subdock/ui/widgets/glass.dart';
@@ -756,7 +757,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (item != null) _openItem(item);
   }
 
-  void _deleteById(String id) => unawaited(widget.repository.delete(id));
+  /// Deletes from a list, where the row that was tapped is the only thing
+  /// naming what is about to go. Goes through the same ask as the detail
+  /// screen: the button that opens it sits under "Cancelled", and a cancelled
+  /// service is exactly the one whose recorded payments still matter.
+  Future<void> _deleteById(String id) async {
+    final item = _items.where((i) => i.id == id).firstOrNull;
+    if (item == null) return;
+    await _delete(item, pop: false);
+  }
 
   /// Leaves for the page where a service is actually cancelled.
   ///
@@ -1240,8 +1249,23 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (mounted) Navigator.of(context).maybePop();
   }
 
-  Future<void> _delete(TrackedItem item) async {
+  /// Deletes an item, once the user has said so on a sheet that named the
+  /// cost.
+  ///
+  /// Asking is not politeness here. The row carries payments the user typed in
+  /// by hand and `ON DELETE CASCADE` takes them with it, and there is no
+  /// account, no server and no undo to get them back from — a stray tap on a
+  /// quiet button is the whole loss.
+  Future<void> _delete(TrackedItem item, {bool pop = true}) async {
+    final confirmed = await DeleteAsk.show(
+      context,
+      name: item.name,
+      reminderCount: _plan.alerts.where((a) => a.itemId == item.id).length,
+      paymentCount: _history.where((e) => e.itemId == item.id).length,
+    );
+    if (confirmed != true) return;
+
     await widget.repository.delete(item.id);
-    if (mounted) Navigator.of(context).maybePop();
+    if (pop && mounted) Navigator.of(context).maybePop();
   }
 }

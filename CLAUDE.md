@@ -86,7 +86,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Hai mươi bảy cái bẫy đã vấp, đừng vấp lại
+## Hai mươi tám cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -390,6 +390,35 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     slug nên nó viết `standard`, `50gb`; giờ mới đúng là `Standard`, `50GB`. Hai:
     `data/manage-urls.json` còn bảy id nhà mạng nay không mục nào nhận, vì một mục chỉ có
     một `manageUrl`. Muốn nối lại thì phải cho `manageUrl` xuống mức tier.
+
+28. **Xoá một mục đi qua `DeleteAsk`, và cái footnote cũ dưới nút thì nói dối.** Trước
+    đây nút `Delete this item` gọi thẳng `repository.delete`, không hỏi gì. Mất mát ở đây
+    là toàn phần: `handledEventRow` mang `ON DELETE CASCADE`, nên mọi lần trả tiền người
+    dùng tự tay ghi lại đi theo cái mục đó, mà app thì không có tài khoản, không có máy
+    chủ, không có gì để lùi về. Nút lại nằm cùng một màn hình đang trượt với
+    `Mark as paid`.
+
+    Tệ hơn cả việc không hỏi: dòng `ItemPresenter.deleteConsequence` ngay dưới nút kết
+    thúc bằng *"What you have already paid stays under Spending"*, và câu đó sai hai lần.
+    Một, lịch sử trả tiền bị cascade xoá cùng. Hai, màn Money đã không đọc bảng đó từ lúc
+    nó chuyển sang suy ra theo chu kỳ, xem bẫy 22. Một dòng hứa hẹn tấm lưới an toàn
+    không tồn tại thì tệ hơn là không có dòng nào, vì nó được đọc ngay trước cú bấm.
+    Chốt chặn là bài `the delete warning does not promise the payments survive` trong
+    `test/unit/ui/item_presenter_test.dart`.
+
+    `DeleteAsk` cùng hình dạng với `RestoreAsk`, cùng lý do ở bẫy 26: nút tô đầy là nút
+    **không** xoá. Nó đếm hai thứ, và cả hai đều cần thiết. Số lần trả tiền là thứ người
+    dùng nhìn thấy được ở màn Detail; số nhắc hạn đang chờ thì **không hiện ở đâu khác
+    trong app**, nên nếu sheet không nói thì không ai nói.
+
+    Cả hai đường xoá đều đi qua nó: nút ở màn Detail, và nút `Cancelled` ở tab Cancel
+    của màn Savings. Đường thứ hai truyền `pop: false` vì nó xoá từ một danh sách chứ
+    không phải từ màn của chính mục đó.
+
+    Sheet nằm trong `app.dart`, tức là **không một widget test nào thấy được nó**: màn
+    Detail nhận `onDelete` như một callback do test tự cấp, nên nó bắn trong mọi trường
+    hợp. Chốt chặn thật là `integration_test/delete_test.dart`, phải chạy trên máy ảo
+    (`flutter test integration_test/delete_test.dart -d <simulator-id>`).
 
 ## Viết tài liệu
 

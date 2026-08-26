@@ -250,15 +250,23 @@ void main() {
       ItemPresenter.deleteConsequence(4),
       contains('Removes 4 pending reminders'),
     );
-    expect(
-      ItemPresenter.deleteConsequence(4),
-      contains('stays under Spending'),
-    );
     expect(ItemPresenter.deleteConsequence(1), contains('1 pending reminder.'));
     expect(
       ItemPresenter.deleteConsequence(0),
       contains('No reminders are pending'),
     );
+  });
+
+  // The old wording ended with "What you have already paid stays under
+  // Spending", and the schema says otherwise: handledEventRow cascades away
+  // with the item. A line that promises a safety net which is not there is
+  // worse than no line, because it is read right before the tap.
+  test('the delete warning does not promise the payments survive', () {
+    for (final count in [0, 1, 4]) {
+      final line = ItemPresenter.deleteConsequence(count);
+      expect(line, isNot(contains('stays under Spending')));
+      expect(line, contains('recorded payments go too'));
+    }
   });
 
   // A SIM is the case the whole app exists for: letting a prepaid one lapse

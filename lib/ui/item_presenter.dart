@@ -153,12 +153,19 @@ abstract final class ItemPresenter {
     final days => '$days days before',
   };
 
-  /// The line under the delete button. Names the consequences so the
-  /// confirmation is informed rather than reflexive.
+  /// What deleting actually costs, said next to the button rather than only on
+  /// the sheet that asks.
+  ///
+  /// This used to end with "What you have already paid stays under Spending",
+  /// and that was wrong twice over: `handledEventRow` carries
+  /// `ON DELETE CASCADE`, so the payments the user typed in go with the item,
+  /// and Spending stopped reading that table when it started deriving months
+  /// from the cycle. Both halves pointed at a safety net that is not there.
   static String deleteConsequence(int reminderCount) {
     final reminders = reminderCount == 0
         ? 'No reminders are pending.'
         : 'Removes $reminderCount pending ${reminderCount == 1 ? "reminder" : "reminders"}.';
-    return '$reminders What you have already paid stays under Spending.';
+    return '$reminders Its recorded payments go too, and Spending stops '
+        'counting it.';
   }
 }
