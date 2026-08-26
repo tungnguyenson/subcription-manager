@@ -57,6 +57,15 @@ class AddItemScreen extends StatefulWidget {
   final Future<String?> Function(String name, SourceGlyph glyph)?
   onCreateSource;
 
+  /// Opens the provider's own account page in a browser.
+  ///
+  /// A plain open, unlike the button on the detail screen: that one also
+  /// records where the subscription was bought and offers to write down the
+  /// renewal date on the way back. Neither belongs on a form that has not
+  /// saved an item yet, and a prompt landing on top of half-typed fields would
+  /// be worse than not asking.
+  final void Function(String url)? onOpenLink;
+
   /// Which source to preselect on a new item.
   ///
   /// The last one used, supplied by the caller. Most people pay for nearly
@@ -77,6 +86,7 @@ class AddItemScreen extends StatefulWidget {
     this.onPickDate,
     this.sources = const [],
     this.onCreateSource,
+    this.onOpenLink,
     this.defaultSourceId,
   });
 
@@ -349,6 +359,15 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 )
               else
                 Field(label: null, bleed: true, child: _categoryRail()),
+              // The provider's own page, where the two answers this form is
+              // waiting for actually live. Someone adding a service they have
+              // never looked up does not know the renewal date or the amount,
+              // and this is the one place in the app that can send them to
+              // where both are written down.
+              if (_manageUrl case final url?) ...[
+                const SizedBox(height: 10),
+                _gutter(_manageLink(url)),
+              ],
               // The plans of the chosen service. Above the cost field, and
               // above the cycle: picking a tile fills both of them, so a user
               // who recognises their plan never reads the two blocks below.
@@ -867,6 +886,29 @@ class _AddItemScreenState extends State<AddItemScreen> {
     );
   }
 
+  /// The catalogue row this form is about, for the things that only read from
+  /// it.
+  ///
+  /// Falls back to the name on an edit, which never goes through the picker
+  /// and so never sets [_matched]. Kept separate from [_matched] on purpose:
+  /// that one is written into the draft and decides what gets *saved*, and a
+  /// name that happens to match must not start putting a vendor's cancel URL
+  /// on an item the user typed by hand. This one only decides what is drawn.
+  CatalogEntry? get _entry =>
+      _matched ?? (_isEdit ? widget.catalog.matchByName(_name.text) : null);
+
+  /// The provider's own billing page, when the catalogue has one.
+  ///
+  /// Only 25 of 223 catalogue rows carry a cancel URL and not many more carry
+  /// this one, so the row is absent far more often than it is present. That is
+  /// the honest state rather than a gap: a link to a page the app guessed at
+  /// is worse than no link, which is the same reason the Cancel tab says
+  /// outright when it does not know.
+  String? get _manageUrl {
+    final url = _entry?.manageUrl;
+    return url == null || url.isEmpty ? null : url;
+  }
+
   /// Whether the shelf is already decided, and so needs a row rather than a
   /// rail.
   ///
@@ -893,6 +935,51 @@ class _AddItemScreenState extends State<AddItemScreen> {
     if (picked != null && mounted) {
       setState(() => _category = widget.categories[picked]);
     }
+  }
+
+  /// A quiet link rather than a button.
+  ///
+  /// The only filled button on this screen is Save, and a second one here
+  /// would compete with it for the tap that ends the task. This is a way out
+  /// to go and check something, which is what the `Enter it` link under the
+  /// plan grid is too.
+  Widget _manageLink(String url) {
+    final name = _entry?.name ?? _name.text;
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: InkWell(
+        onTap: widget.onOpenLink == null
+            ? null
+            : () {
+                // The browser opens over whatever has focus, and a keyboard
+                // left up is a keyboard still there on the way back.
+                FocusScope.of(context).unfocus();
+                widget.onOpenLink!(url);
+              },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 4),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.open_in_new_rounded,
+                size: 15,
+                color: SubdockColors.accent,
+              ),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  'Open $name account',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: SubdockText.quietAction,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _categoryRail() {

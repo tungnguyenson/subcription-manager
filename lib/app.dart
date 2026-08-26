@@ -731,6 +731,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         onPickDate: _pickDate,
         sources: _sources,
         onCreateSource: _createSource,
+        onOpenLink: _openLink,
         defaultSourceId: _lastUsedSourceId,
       ),
     );
@@ -749,6 +750,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         onPickDate: _pickDate,
         sources: _sources,
         onCreateSource: _createSource,
+        onOpenLink: _openLink,
       ),
     );
   }
@@ -913,6 +915,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final item = _items.where((i) => i.id == id).firstOrNull;
     if (item == null) return;
     await _delete(item, pop: false);
+  }
+
+  /// Opens a link and says so when nothing on the device will take it.
+  ///
+  /// Deliberately without [_openedProviderPageFor]: this one is tapped from
+  /// the item form, and the prompt that hook arms would come back on top of a
+  /// half-filled form offering to write down a date the user is in the middle
+  /// of typing.
+  Future<void> _openLink(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (opened || !mounted) return;
+    _confirm('Could not open that page.');
   }
 
   /// Leaves for the page where a service is actually cancelled.

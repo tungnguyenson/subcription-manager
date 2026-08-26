@@ -892,6 +892,16 @@ void main() {
         defaultCycle: Cycle.monthly,
         typicalAmountMinor: 260000,
         currency: 'VND',
+        manageUrl: 'https://netflix.com/account',
+      ),
+      // No manage URL, which is the commoner case: most catalogue rows carry
+      // no account page at all.
+      const CatalogEntry(
+        id: 'vinaphone',
+        name: 'VinaPhone plan',
+        aliases: ['vinaphone'],
+        categoryId: 'PHONE',
+        defaultCycle: Cycle.monthly,
       ),
     ]);
 
@@ -1395,6 +1405,78 @@ void main() {
       // In major units, grouped, the way the catalog row itself showed it —
       // not the 260000 that minor units would put in a dong field.
       expect(find.text('260,000'), findsOneWidget);
+    });
+
+    // The form is waiting for a renewal date and an amount, and someone adding
+    // a service they have never looked up knows neither. This is the one place
+    // in the app that can send them to where both are written down.
+    testWidgets('a picked service offers its own account page', (tester) async {
+      String? opened;
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onOpenLink: (url) => opened = url,
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField).first, 'net');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Netflix Premium').last);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Open Netflix Premium account'));
+      await tester.pumpAndSettle();
+
+      expect(opened, 'https://netflix.com/account');
+    });
+
+    // A link to a page the app guessed at is worse than no link.
+    testWidgets('and no link at all when the catalogue has none', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onOpenLink: (_) {},
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField).first, 'vina');
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('VinaPhone plan').last);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('account'), findsNothing);
+    });
+
+    // An edit never goes through the picker, so the entry has to be found from
+    // the name the item already carries.
+    testWidgets('the edit form finds the page from the name', (tester) async {
+      String? opened;
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          initial: DraftItem.of(
+            claude.copyWith(name: 'Netflix Premium'),
+            CategoryBook.shipped,
+          ),
+          onOpenLink: (url) => opened = url,
+        ),
+      );
+
+      await tester.tap(find.text('Open Netflix Premium account'));
+      await tester.pumpAndSettle();
+
+      expect(opened, 'https://netflix.com/account');
     });
 
     // Twenty-two chips scrolling sideways under an answer the catalogue
