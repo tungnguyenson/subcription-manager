@@ -161,6 +161,29 @@ flutter install -d <device-id>       # cài bản vừa build
 > Export a backup), hoặc dùng `flutter run -d <device-id>` để Xcode cài đè thay vì
 > gỡ. Chỉ dùng `flutter install` khi mất dữ liệu trên máy đó là chuyện không sao.
 
+**Máy khoá màn hình thì `flutter run` hỏng ở khâu cuối**, kèm một dòng lỗi không nói ra
+lý do:
+
+```
+Could not run build/ios/iphoneos/Runner.app on <device-id>.
+Try launching Xcode and selecting "Product > Run" to fix the problem
+```
+
+Thủ phạm thường là máy đang khoá chứ không phải bản build. Cài được vào máy khoá, nhưng
+**mở app thì không**, và `flutter run` làm cả hai việc nên nó báo hỏng cả cụm. Qua wifi
+thì còn dễ gặp hơn vì máy tự khoá trong lúc chờ build.
+
+Tách hai việc ra để thấy rõ. Lệnh này cài đè, không gỡ gì cả, và chạy được cả khi máy
+đang khoá:
+
+```bash
+flutter build ios --release --device-id <device-id>
+xcrun devicectl device install app --device <device-id> build/ios/iphoneos/Runner.app
+```
+
+Rồi mở khoá máy và tự bấm vào app. Muốn mở bằng lệnh thì `xcrun devicectl device process
+launch --device <device-id> space.subdock.subdock`, nhưng nó chỉ chạy khi máy đã mở khoá.
+
 ## 4. Nạp dữ liệu mẫu để xem giao diện
 
 App mới cài thì trống, và màn hình đầu tiên là phần giới thiệu. Muốn xem danh sách với nội dung thật mà không phải gõ tay, ghi thẳng vào cơ sở dữ liệu của máy ảo:

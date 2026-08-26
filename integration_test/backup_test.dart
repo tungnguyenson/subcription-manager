@@ -150,6 +150,79 @@ void main() {
     );
   });
 
+  // The loop that no widget test can see: an export writes a date, the date
+  // rides a stream back through the presenter, and the banner it was raising
+  // goes away. Every piece of that is wired in app.dart.
+  testWidgets('exporting answers the warning it was raising', (tester) async {
+    await repo.upsert(
+      TrackedItem(
+        id: 'sim',
+        name: 'Viettel',
+        categoryId: 'PHONE',
+        expiresOn: d('2027-01-01'),
+        anchorDate: d('2027-01-01'),
+        // The expensive kind: this date cost a call to a hotline.
+        dateSource: DateSource.userConfirmed,
+      ),
+      1,
+    );
+    await launch(tester);
+    await openSettings(tester);
+
+    expect(find.text('Nothing has been backed up'), findsOneWidget);
+    expect(find.text('Never'), findsOneWidget);
+
+    // The banner carries the fix, so this taps the banner's own action.
+    await tester.tap(find.text('Export a backup').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nothing has been backed up'), findsNothing);
+    expect(find.text('Never'), findsNothing);
+  });
+
+  // Dates typed from memory are annoying to retype. Dates read off a
+  // provider's own record are phone calls. Only the second raises the banner.
+  testWidgets('a list nobody had to phone for raises nothing', (tester) async {
+    await seed();
+    await launch(tester);
+    await openSettings(tester);
+
+    expect(find.text('Nothing has been backed up'), findsNothing);
+    expect(find.text('Never'), findsOneWidget);
+  });
+
+  // The moment a backup is worth having is the moment someone reinstalls, and
+  // that person is looking at the onboarding screen, not at Settings.
+  testWidgets('a fresh install can restore before it has anything', (
+    tester,
+  ) async {
+    await seed();
+    await launch(tester);
+    await openSettings(tester);
+    await tester.tap(find.text('Export a backup'));
+    await tester.pumpAndSettle();
+
+    // Let the confirmation snackbar expire. It floats over the bottom of the
+    // screen, which is where the onboarding buttons live; in the app the two
+    // never meet, because reaching onboarding again means reinstalling.
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
+
+    // Wipe it the way an uninstall does, then reopen on an empty database.
+    await db.delete(db.handledEventRow).go();
+    await db.delete(db.itemRow).go();
+    await tester.pumpAndSettle();
+    expect(find.text('Never miss a due date again.'), findsOneWidget);
+
+    files.toPick = files.saved;
+    await tester.tap(find.text('I already have a backup'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Restore'));
+    await tester.pumpAndSettle();
+
+    expect((await db.selectAll().get()).length, 2);
+  });
+
   // The user can walk away at the sheet, and walking away has to be free.
   testWidgets('declining the sheet changes nothing', (tester) async {
     await seed();

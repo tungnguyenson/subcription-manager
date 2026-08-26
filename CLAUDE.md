@@ -525,5 +525,6 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | Icon | `docs/icon-credits.md` |
 | Cái gì sắp xảy ra với một mục | `lib/ui/reminder_timeline.dart` cho phép dựng, `lib/ui/widgets/reminder_timeline_card.dart` cho khối trên màn Detail |
 | Bộ lọc màn Upcoming | `lib/domain/upcoming_filter.dart` cho luật khớp, `lib/ui/filter_presenter.dart` cho danh sách chip và dòng tóm tắt, `lib/ui/widgets/filter_sheet.dart` cho sheet |
+| Sao lưu, khôi phục, và câu hỏi đồng bộ | `docs/backup-and-sync.md` |
 | Việc còn dang dở | `data/services/_verify.md` |
 | Khối so sánh gói năm và nút trang thuê bao | `docs/design-spec-annual-saving.md`, đã dựng, logic ở `lib/ui/annual_saving_presenter.dart` và `lib/ui/manage_presenter.dart` |

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:subdock/domain/notification_planner.dart';
+import 'package:subdock/ui/backup_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/item_row.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
@@ -22,6 +23,14 @@ class SettingsScreen extends StatelessWidget {
   /// `3`, or `None`.
   final String? sourcesLine;
 
+  /// What the backup card says: when the last one was, whether the device
+  /// keeps a copy of its own, and whether that is worth warning about.
+  ///
+  /// Null only where a caller has nothing to say, which in practice is a test
+  /// building this screen for some other reason. The card still draws its two
+  /// actions; it just cannot report state it was not given.
+  final BackupView? backup;
+
   final VoidCallback? onOpenServices;
   final VoidCallback? onOpenSources;
   final VoidCallback? onOpenReminders;
@@ -43,6 +52,7 @@ class SettingsScreen extends StatelessWidget {
     this.languageLabel = 'English',
     this.servicesLine,
     this.sourcesLine,
+    this.backup,
     this.onOpenServices,
     this.onOpenSources,
     this.onOpenReminders,
@@ -67,6 +77,19 @@ class SettingsScreen extends StatelessWidget {
                 'This app schedules at most '
                 '${NotificationPlanner.budget} reminders at a time. '
                 'Left out: ${droppedReminders.join(", ")}.',
+          ),
+        ],
+        // Under the reminder banner rather than above it. That one is about
+        // dates that will not arrive; this one is about a list that has not
+        // been copied anywhere. Both are things the user cannot find out from
+        // any other screen, which is why both are here and not in a footnote.
+        if (backup?.warningTitle case final title?) ...[
+          const SizedBox(height: 18),
+          AlertBanner(
+            title: title,
+            body: backup?.warningBody ?? '',
+            actionLabel: 'Export a backup',
+            onAction: onExport,
           ),
         ],
         const SizedBox(height: 20),
@@ -108,18 +131,22 @@ class SettingsScreen extends StatelessWidget {
         const SectionLabel('Backup'),
         GroupedCard(
           children: [
+            // A value row, not a destination, for the same reason Currency and
+            // Language are: it reports state and leads nowhere. `Never` beside
+            // a list of twelve items is the whole warning, which is why no
+            // sentence here tells the user what to do about it.
+            if (backup case final view?)
+              DetailRow(label: 'Last backup', value: view.lastBackup),
             DetailRow.nav(label: 'Export a backup', onTap: onExport),
             DetailRow.nav(label: 'Restore from a backup', onTap: onImport),
           ],
         ),
         // State, not a tutorial — the same rule the reminder screen follows.
-        // That there is no copy anywhere else is not something the user can
-        // see from any other screen, and it is the whole reason these two rows
-        // exist. Deleting the app takes the list with it and iOS does not ask.
-        const Footnote(
-          'Subdock has no account and no server. What you see in the app is '
-          'the only copy, and removing the app removes it.',
-        ),
+        // Answers section 11.2 of the product spec: say whether the database
+        // is in the device's own backup, so the user knows what they are
+        // trusting. The sentence differs per platform because the truth does;
+        // see [DeviceBackup].
+        if (backup case final view?) Footnote(view.note),
       ],
     );
   }

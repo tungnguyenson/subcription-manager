@@ -10,6 +10,7 @@ import 'package:subdock/ui/money_presenter.dart';
 import 'package:subdock/ui/screens/money_screen.dart';
 import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
+import 'package:subdock/ui/backup_presenter.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/ui/widgets/restore_ask.dart';
 import 'package:subdock/ui/theme.dart';
@@ -413,6 +414,16 @@ void main() {
   });
 
   group('Settings', () {
+    // A taller surface than the 800px default. The backup card and its
+    // footnote sit below the fold on a short viewport, and a ListView child
+    // that was never built is a child no finder can see.
+    Future<void> showTall(WidgetTester tester, Widget child) async {
+      tester.view.physicalSize = const Size(1170, 4000);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      await show(tester, child);
+    }
+
     testWidgets('dropped reminders are surfaced, not buried', (tester) async {
       await show(
         tester,
@@ -447,9 +458,17 @@ void main() {
     testWidgets('backup rows say why they are there', (tester) async {
       var exported = 0;
       var imported = 0;
-      await show(
+      await showTall(
         tester,
-        SettingsScreen(onExport: () => exported++, onImport: () => imported++),
+        SettingsScreen(
+          backup: BackupPresenter.build(
+            items: const [],
+            lastSavedOn: null,
+            device: DeviceBackup.wholeDeviceOnly,
+          ),
+          onExport: () => exported++,
+          onImport: () => imported++,
+        ),
       );
 
       expect(find.textContaining('no account and no server'), findsOneWidget);
@@ -459,6 +478,89 @@ void main() {
       await tester.pumpAndSettle();
 
       expect((exported, imported), (1, 1));
+    });
+
+    // `Never` sitting next to a list of real items is the whole warning. No
+    // sentence on this screen tells the user what to do about it.
+    testWidgets('the last backup is state, not advice', (tester) async {
+      await showTall(
+        tester,
+        SettingsScreen(
+          backup: BackupPresenter.build(
+            items: const [],
+            lastSavedOn: null,
+            device: DeviceBackup.wholeDeviceOnly,
+          ),
+        ),
+      );
+
+      expect(find.text('Last backup'), findsOneWidget);
+      expect(find.text('Never'), findsOneWidget);
+      expect(
+        find.textContaining('should'),
+        findsNothing,
+        reason: 'the row reports, it does not recommend',
+      );
+    });
+
+    // The banner exists because Settings is where you go if you already know
+    // to worry. It fires on the cost of rebuilding the list, not its length.
+    testWidgets('a list of confirmed dates and no backup raises a banner', (
+      tester,
+    ) async {
+      var exported = 0;
+      await showTall(
+        tester,
+        SettingsScreen(
+          backup: BackupPresenter.build(
+            items: [
+              TrackedItem(
+                id: 'sim',
+                name: 'Viettel',
+                categoryId: 'PHONE',
+                expiresOn: d('2026-09-01'),
+                anchorDate: d('2026-09-01'),
+                dateSource: DateSource.userConfirmed,
+              ),
+            ],
+            lastSavedOn: null,
+            device: DeviceBackup.wholeDeviceOnly,
+          ),
+          onExport: () => exported++,
+        ),
+      );
+
+      expect(find.text('Nothing has been backed up'), findsOneWidget);
+
+      // The banner carries the fix, so nobody has to hunt for the row below.
+      await tester.tap(find.text('Export a backup').first);
+      await tester.pumpAndSettle();
+      expect(exported, 1);
+    });
+
+    testWidgets('no banner once a backup exists', (tester) async {
+      await showTall(
+        tester,
+        SettingsScreen(
+          backup: BackupPresenter.build(
+            items: [
+              TrackedItem(
+                id: 'sim',
+                name: 'Viettel',
+                categoryId: 'PHONE',
+                expiresOn: d('2026-09-01'),
+                anchorDate: d('2026-09-01'),
+                dateSource: DateSource.userConfirmed,
+              ),
+            ],
+            lastSavedOn: d('2026-08-25'),
+            device: DeviceBackup.wholeDeviceOnly,
+          ),
+        ),
+      );
+
+      expect(find.byType(AlertBanner), findsNothing);
+      expect(find.text('25/08/2026'), findsOneWidget);
     });
 
     // A value sitting at the end of its own half of the row reads as a second

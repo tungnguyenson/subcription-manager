@@ -1,4 +1,7 @@
+import 'package:drift/drift.dart';
+
 import 'package:subdock/domain/backup.dart';
+import 'package:subdock/domain/local_date.dart';
 
 import 'database.dart';
 import 'item_repository.dart';
@@ -103,7 +106,73 @@ class BackupStore {
         remindAt: backup.remindAt,
       ),
     );
+
+    // The list on screen is now the file's list, so the date beside
+    // `Last backup` has to be the file's date. Leaving the old one would say
+    // this list is backed up as of a day it did not exist on, and clearing it
+    // would say no copy exists while the user is holding one.
+    final takenOn = DateTime.tryParse(backup.exportedAt);
+    await (takenOn == null
+        ? _clearSaved()
+        : markSaved(LocalDate.fromDateTime(takenOn.toLocal())));
   });
+
+  /// The key the last backup's date lives under, in `settingRow`.
+  ///
+  /// Kept here rather than folded into [AppSettings], which says of itself that
+  /// every value in it has to be worth a screen and that a preference nobody
+  /// changes should have been a decision. This is neither: it is a record of
+  /// something that happened, and the class that owns backups should own it.
+  static const String _lastSavedKey = 'last_backup_on';
+
+  /// The newest date on which a file existed holding this list, or null if
+  /// there has never been one.
+  ///
+  /// Not "when the user last tapped Export". Restoring counts too, and it
+  /// counts as *the restored file's* date rather than today: someone who has
+  /// just pulled back a copy taken three months ago should read
+  /// `Last backup — 25/05/2026` and know their file is three months stale.
+  /// Stamping it today would tell them the opposite of the truth at the one
+  /// moment they are thinking about backups.
+  ///
+  /// A stream so the Settings screen redraws the moment an export lands,
+  /// without anyone having to remember to refresh it.
+  Stream<LocalDate?> observeLastSaved() =>
+      _db.selectAllSettings().watch().map(_readLastSaved);
+
+  Future<LocalDate?> lastSaved() async =>
+      _readLastSaved(await _db.selectAllSettings().get());
+
+  /// Records that a file holding this list exists, as of [on].
+  ///
+  /// After an export, called only when the share sheet reports the file went
+  /// somewhere. A user who opened the sheet and closed it again has no backup,
+  /// and writing a date here would put something on screen that stands for
+  /// nothing.
+  Future<void> markSaved(LocalDate on) => _db
+      .into(_db.settingRow)
+      .insert(
+        SettingRowCompanion(
+          settingKey: const Value(_lastSavedKey),
+          value: Value(on.toString()),
+        ),
+        mode: InsertMode.insertOrReplace,
+      );
+
+  /// Forgets the date, for a restored file that does not carry one.
+  Future<void> _clearSaved() => (_db.delete(
+    _db.settingRow,
+  )..where((t) => t.settingKey.equals(_lastSavedKey))).go();
+
+  /// Falls back to null rather than throwing, the same as every other read out
+  /// of this table. A corrupted value reads as "never backed up", which is the
+  /// pessimistic answer and therefore the safe one.
+  static LocalDate? _readLastSaved(List<SettingRowData> rows) {
+    for (final row in rows) {
+      if (row.settingKey == _lastSavedKey) return LocalDate.tryParse(row.value);
+    }
+    return null;
+  }
 
   /// The name the exported file is offered under.
   ///

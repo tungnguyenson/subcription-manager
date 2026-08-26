@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart'
+    show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/filter_store.dart';
@@ -21,6 +23,7 @@ import 'package:subdock/ui/filter_presenter.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/manage_presenter.dart';
 import 'package:subdock/ui/reminder_timeline.dart';
+import 'package:subdock/ui/backup_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/screens/add_item_screen.dart';
 import 'package:subdock/ui/screens/history_screen.dart';
@@ -147,10 +150,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   StreamSubscription<List<Category>>? _categorySubscription;
   StreamSubscription<List<HandledEvent>>? _historySubscription;
   StreamSubscription<AppSettings>? _settingsSubscription;
+  StreamSubscription<LocalDate?>? _lastBackupSubscription;
 
   bool _loaded = false;
   bool _onboardingDismissed = false;
   bool _notificationsGranted = false;
+
+  /// When a backup last actually left the device, or null if never.
+  LocalDate? _lastBackupOn;
 
   /// Null until the first read, and null for good on any platform that does
   /// not gate exact alarms behind their own permission.
@@ -238,6 +245,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       setState(() => _settings = settings);
     });
 
+    _lastBackupSubscription = widget.backups.observeLastSaved().listen((on) {
+      if (!mounted) return;
+      setState(() => _lastBackupOn = on);
+    });
+
     unawaited(_refreshPermission());
     unawaited(_restoreFilter());
   }
@@ -288,6 +300,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _sourceSubscription?.cancel();
     _historySubscription?.cancel();
     _settingsSubscription?.cancel();
+    _lastBackupSubscription?.cancel();
     super.dispose();
   }
 
@@ -385,6 +398,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               notificationsGranted: _notificationsGranted,
               onAllowNotifications: _requestNotifications,
               onStart: () => setState(() => _onboardingDismissed = true),
+              // Same call the Settings row makes. Someone who has just
+              // reinstalled is looking at this screen, not at Settings.
+              onRestore: () => unawaited(_importBackup()),
             ),
           ),
         ),
@@ -487,6 +503,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               .toList(),
           servicesLine: _servicesLine,
           sourcesLine: _sources.isEmpty ? 'None' : '${_sources.length}',
+          backup: BackupPresenter.build(
+            items: _items,
+            lastSavedOn: _lastBackupOn,
+            device: _deviceBackup,
+          ),
           onOpenServices: _openServices,
           onOpenSources: _openSources,
           onOpenReminders: _openReminderRules,
@@ -667,6 +688,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       onPickTime: _pickRemindTime,
     ),
   );
+
+  /// Which of the two true answers about the device's own backup applies here.
+  ///
+  /// Read from [defaultTargetPlatform] rather than from `dart:io`, so a test
+  /// can put the screen in either platform and check both sentences. Both are
+  /// facts the app can stand behind; see [DeviceBackup] for why this is not
+  /// the same case as the reminder budget, which prints one number everywhere.
+  DeviceBackup get _deviceBackup => switch (defaultTargetPlatform) {
+    TargetPlatform.iOS => DeviceBackup.wholeDeviceOnly,
+    TargetPlatform.android => DeviceBackup.perAppUnverifiable,
+    _ => DeviceBackup.unknown,
+  };
 
   /// Puts one notification on the device so the user can watch it arrive.
   ///
@@ -1113,9 +1146,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         BackupStore.fileNameFor(at),
         origin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
       );
-      // Nothing said on a dismissal. The user closed the sheet without picking
-      // anywhere, and "Saved" would be a lie about a file that went nowhere.
-      if (mounted && saved) _confirm('Backed up ${backup.summary}.');
+      // Nothing said on a dismissal, and nothing recorded either. The user
+      // closed the sheet without picking anywhere, so no file left the phone;
+      // both a "Saved" message and a date under `Last backup` would stand for
+      // something that did not happen.
+      if (!saved) return;
+      await widget.backups.markSaved(LocalDate.fromDateTime(at));
+      if (mounted) _confirm('Backed up ${backup.summary}.');
     } on Exception catch (error) {
       if (mounted) _confirm('Could not export: $error');
     }

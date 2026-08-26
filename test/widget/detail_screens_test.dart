@@ -829,6 +829,39 @@ void main() {
       expect(find.text('Allow notifications'), findsNothing);
       expect(find.text('Notifications are on'), findsOneWidget);
     });
+
+    // This screen is what someone sees after reinstalling or on a new phone,
+    // which is exactly the moment a backup is worth having. Leaving the only
+    // way in under Settings makes the person who needs it most walk past a
+    // screen about adding their first item.
+    testWidgets('someone reinstalling can restore without going in first', (
+      tester,
+    ) async {
+      var restored = 0;
+      var started = 0;
+      await show(
+        tester,
+        OnboardingScreen(onStart: () => started++, onRestore: () => restored++),
+      );
+
+      await tester.tap(find.text('I already have a backup'));
+      await tester.pumpAndSettle();
+
+      expect((restored, started), (1, 0));
+    });
+
+    // Most people opening this screen are starting from nothing, and a second
+    // filled button would make the restore look like half the point.
+    testWidgets('the restore is quiet, and absent when nothing wires it', (
+      tester,
+    ) async {
+      await show(tester, OnboardingScreen(onRestore: () {}));
+      expect(find.byType(PrimaryButton), findsOneWidget);
+      expect(find.byType(QuietButton), findsOneWidget);
+
+      await show(tester, const OnboardingScreen());
+      expect(find.text('I already have a backup'), findsNothing);
+    });
   });
 
   group('Add item', () {

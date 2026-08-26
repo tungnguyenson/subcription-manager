@@ -14,11 +14,20 @@ class OnboardingScreen extends StatelessWidget {
   final VoidCallback? onAllowNotifications;
   final VoidCallback? onStart;
 
+  /// Reads a backup file back in, without going through the app first.
+  ///
+  /// This screen is what someone sees after reinstalling, or on a new phone,
+  /// which is exactly the moment a backup is worth having. Leaving the only
+  /// way in buried under Settings means the person who needs it most has to
+  /// walk past a screen about adding their first item to reach it.
+  final VoidCallback? onRestore;
+
   const OnboardingScreen({
     super.key,
     this.notificationsGranted = false,
     this.onAllowNotifications,
     this.onStart,
+    this.onRestore,
   });
 
   @override
@@ -67,7 +76,20 @@ class OnboardingScreen extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(22, 12, 22, 26),
-          child: PrimaryButton('Get started', onPressed: onStart),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              PrimaryButton('Get started', onPressed: onStart),
+              // Quiet, not a second filled button. Most people opening this
+              // screen are starting from nothing and the restore is not for
+              // them; the ones it is for are looking for it and will find it.
+              if (onRestore != null) ...[
+                const SizedBox(height: 4),
+                QuietButton('I already have a backup', onPressed: onRestore),
+              ],
+            ],
+          ),
         ),
       ],
     );

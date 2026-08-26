@@ -205,6 +205,74 @@ void main() {
     expect(await db.selectAll().get(), isEmpty);
   });
 
+  // The date under `Last backup` in Settings. It has to stand for a file that
+  // actually left the phone, which is why the caller writes it and not `read`.
+  group('the last backup date', () {
+    test('starts as never', () async {
+      expect(await backups.lastSaved(), isNull);
+    });
+
+    test('comes back once recorded, and survives being overwritten', () async {
+      await backups.markSaved(d('2026-08-25'));
+      expect(await backups.lastSaved(), d('2026-08-25'));
+
+      await backups.markSaved(d('2026-08-26'));
+      expect(await backups.lastSaved(), d('2026-08-26'));
+    });
+
+    // Reading the whole database out is not a backup. Nothing has left the
+    // phone until the share sheet says it did, and putting a date on screen
+    // for a file that went nowhere is the one thing this row must never do.
+    test('reading a backup does not count as taking one', () async {
+      await repo.upsert(item(), 1);
+      await backups.read();
+
+      expect(await backups.lastSaved(), isNull);
+    });
+
+    // Not today. Someone pulling back a copy taken three months ago has a
+    // three-month-old backup, and the row has to say so at the one moment they
+    // are thinking about it.
+    test('a restore takes the date off the file, not off the clock', () async {
+      await repo.upsert(item(), 1);
+      final taken = await backups.read(clock: DateTime.utc(2026, 5, 25, 4));
+
+      await backups.markSaved(d('2026-08-25'));
+      await backups.restore(taken);
+
+      expect(await backups.lastSaved(), d('2026-05-25'));
+    });
+
+    // A hand-written file, or one from a build older than this field.
+    test('a restore from a file with no date reads as never', () async {
+      await backups.markSaved(d('2026-08-25'));
+
+      await backups.restore(
+        const Backup(
+          categories: [],
+          sources: [],
+          items: [],
+          history: [],
+          exportedAt: '',
+        ),
+      );
+
+      expect(await backups.lastSaved(), isNull);
+    });
+
+    test('the stream carries the change to whoever is watching', () async {
+      // `emitsThrough` rather than a fixed sequence: drift decides for itself
+      // how many times a watched query re-runs, and pinning that would make
+      // this test about drift instead of about the date.
+      final done = expectLater(
+        backups.observeLastSaved(),
+        emitsThrough(d('2026-08-25')),
+      );
+      await backups.markSaved(d('2026-08-25'));
+      await done;
+    });
+  });
+
   group('the file name', () {
     // Local, not UTC. Someone in Vietnam taking a backup at 1am picks it out of
     // a folder by the day they remember, and UTC files it under the day before.
