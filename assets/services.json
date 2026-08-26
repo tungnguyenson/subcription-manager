@@ -1,6 +1,6 @@
 {
   "schemaVersion": 3,
-  "generatedAt": "2026-08-24",
+  "generatedAt": "2026-08-25",
   "entries": [
     {
       "id": "character-ai",
@@ -3409,18 +3409,43 @@
       "currency": "USD"
     },
     {
-      "id": "goi-cuoc-data",
-      "name": "Gói cước data",
+      "id": "goi-cuoc-dien-thoai",
+      "name": "Mobile plan",
       "aliases": [
+        "viettel",
+        "sim viettel",
+        "vinaphone",
+        "vina",
+        "sim vinaphone",
+        "mobifone",
+        "mobi",
+        "sim mobifone",
+        "vietnamobile",
+        "vnmb",
+        "sim vietnamobile",
+        "itel",
+        "sim itel",
+        "wintel",
+        "reddi",
+        "sim wintel",
+        "vnsky",
+        "sim vnsky",
         "goi cuoc",
         "data",
         "4g",
         "5g",
-        "goi data"
+        "goi data",
+        "sim",
+        "goi cuoc dien thoai",
+        "nha mang",
+        "mobile",
+        "mobile plan",
+        "phone plan",
+        "dien thoai"
       ],
       "category": "PHONE",
       "defaultCycle": "MONTHLY",
-      "noteVi": "Mục chung cho gói data không thuộc nhà mạng cụ thể trong danh sách trên; giá rất khác nhau theo nhà mạng và dung lượng nên không đặt giá chuẩn.",
+      "noteVi": "Mục chung cho gói cước di động của mọi nhà mạng, thay cho bảy mục SIM riêng trước đây. Hết hạn mà không nạp thì mất số, đặt mức quan trọng cao. Không có giá dựng sẵn: mỗi nhà mạng một bảng giá, và mỗi người một gói, nên bất kỳ con số nào ở đây cũng là app đoán hộ. Người dùng tự gõ số họ thật sự trả.",
       "plans": []
     },
     {
@@ -3521,156 +3546,6 @@
       "currency": "VND"
     },
     {
-      "id": "sim-itel",
-      "name": "SIM iTel",
-      "aliases": [
-        "itel",
-        "sim itel"
-      ],
-      "category": "PHONE",
-      "defaultCycle": "MONTHLY",
-      "defaultPlan": "itel99",
-      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
-      "plans": [
-        {
-          "tier": "itel99",
-          "name": "ITEL99",
-          "region": "VN",
-          "currency": "VND",
-          "cycle": "MONTHLY",
-          "amountMinor": 99000,
-          "note": "5GB/ngày data tốc độ cao, 30 ngày",
-          "source": "https://itel.vn/tin-tuc/tin-tuc-itel/cac-goi-cuoc-4g-itel-1-thang-uu-dai-data-va-thoai.html",
-          "checkedAt": "2026-08-23"
-        }
-      ],
-      "typicalAmountMinor": 99000,
-      "currency": "VND"
-    },
-    {
-      "id": "sim-mobifone",
-      "name": "SIM MobiFone",
-      "aliases": [
-        "mobifone",
-        "mobi",
-        "sim mobifone"
-      ],
-      "category": "PHONE",
-      "defaultCycle": "MONTHLY",
-      "defaultPlan": "hd70",
-      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
-      "plans": [
-        {
-          "tier": "hd70",
-          "name": "HD70",
-          "region": "VN",
-          "currency": "VND",
-          "cycle": "MONTHLY",
-          "amountMinor": 70000,
-          "note": "6GB data/tháng, 30 ngày",
-          "source": "https://noidungsohanoi.mobifone.vn/products/goi-hd70",
-          "checkedAt": "2026-08-23"
-        }
-      ],
-      "typicalAmountMinor": 70000,
-      "currency": "VND"
-    },
-    {
-      "id": "sim-vietnamobile",
-      "name": "SIM Vietnamobile",
-      "aliases": [
-        "vietnamobile",
-        "vnmb",
-        "sim vietnamobile"
-      ],
-      "category": "PHONE",
-      "defaultCycle": "MONTHLY",
-      "defaultPlan": "d50",
-      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
-      "plans": [
-        {
-          "tier": "d50",
-          "name": "D50",
-          "region": "VN",
-          "currency": "VND",
-          "cycle": "MONTHLY",
-          "amountMinor": 60000,
-          "note": "3GB/ngày, miễn phí gọi nội mạng, 30 ngày",
-          "source": "https://www.vietnamobile.com.vn/4gvnm",
-          "checkedAt": "2026-08-23"
-        }
-      ],
-      "typicalAmountMinor": 60000,
-      "currency": "VND"
-    },
-    {
-      "id": "sim-viettel",
-      "name": "SIM Viettel",
-      "aliases": [
-        "viettel",
-        "sim viettel"
-      ],
-      "category": "PHONE",
-      "defaultCycle": "MONTHLY",
-      "defaultPlan": "5g150",
-      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
-      "plans": [
-        {
-          "tier": "5g150",
-          "name": "5G150",
-          "region": "VN",
-          "currency": "VND",
-          "cycle": "MONTHLY",
-          "amountMinor": 150000,
-          "note": "6GB/ngày, 30 ngày, kèm TV360 Basic và 30GB Mybox",
-          "source": "https://data.viettel.vn",
-          "checkedAt": "2026-08-23"
-        }
-      ],
-      "typicalAmountMinor": 150000,
-      "currency": "VND"
-    },
-    {
-      "id": "sim-vinaphone",
-      "name": "SIM VinaPhone",
-      "aliases": [
-        "vinaphone",
-        "vina",
-        "sim vinaphone"
-      ],
-      "category": "PHONE",
-      "defaultCycle": "MONTHLY",
-      "defaultPlan": "5g150",
-      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao.",
-      "plans": [
-        {
-          "tier": "5g150",
-          "name": "5G150",
-          "region": "VN",
-          "currency": "VND",
-          "cycle": "MONTHLY",
-          "amountMinor": 150000,
-          "note": "7GB/ngày tốc độ cao, 30 ngày",
-          "source": "https://vnpt.vn/4g",
-          "checkedAt": "2026-08-23"
-        }
-      ],
-      "typicalAmountMinor": 150000,
-      "currency": "VND"
-    },
-    {
-      "id": "sim-wintel",
-      "name": "SIM Wintel",
-      "aliases": [
-        "wintel",
-        "reddi",
-        "sim wintel"
-      ],
-      "category": "PHONE",
-      "noteVi": "Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao. Trình duyệt thật mở được wintel.vn (không còn bị 403), nhưng trang /goi-cuoc là công cụ tự thiết kế gói cước (\"Gói cước tự do trải nghiệm\" - tự chọn data/phút gọi/SMS), không phải bảng giá cố định theo tier, nên không có một mức giá phổ biến để ghi.",
-      "plans": []
-    },
-    {
       "id": "truyen-hinh-cap",
       "name": "Truyền hình cáp",
       "aliases": [
@@ -3682,33 +3557,6 @@
       "defaultCycle": "MONTHLY",
       "noteVi": "Mục chung cho các gói truyền hình cáp/K+ theo từng nhà cung cấp và combo khác nhau nên không đặt giá chuẩn.",
       "plans": []
-    },
-    {
-      "id": "vnsky",
-      "name": "VNSKY",
-      "aliases": [
-        "vnsky",
-        "sim vnsky"
-      ],
-      "category": "PHONE",
-      "defaultCycle": "MONTHLY",
-      "defaultPlan": "sky69d",
-      "noteVi": "Nhà mạng ảo (Mobicast) thuộc hệ sinh thái VNPAY. Hết hạn mà không nạp thì mất số.",
-      "plans": [
-        {
-          "tier": "sky69d",
-          "name": "SKY69D",
-          "region": "VN",
-          "currency": "VND",
-          "cycle": "MONTHLY",
-          "amountMinor": 69000,
-          "note": "3GB/ngày tốc độ cao chu kỳ đầu, các chu kỳ gia hạn sau còn 2GB/ngày",
-          "source": "https://vnsky.vn/tin-tuc/he-bung-no-sim-5g-vnsky-data-cuc-chay-toi-7g-ngay",
-          "checkedAt": "2026-08-23"
-        }
-      ],
-      "typicalAmountMinor": 69000,
-      "currency": "VND"
     },
     {
       "id": "adobe-cc",

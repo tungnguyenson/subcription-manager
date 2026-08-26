@@ -9,8 +9,16 @@ import 'package:subdock/ui/theme.dart';
 /// One tier of a service, at the cycle the form is set to.
 @immutable
 class PlanOption {
-  /// `Premium`, `Individual`, `200 GB`.
+  /// The catalogue's [CatalogPlan.tier]: a slug, and what a selection is
+  /// stored and compared as. Not what the tile says.
   final String tier;
+
+  /// What the tile says: `Premium`, `Individual`, `200 GB`. The catalogue
+  /// carries this beside the slug because the two differ — `50gb` against
+  /// `50GB`, and on the merged phone-plan entry `viettel-5g150` against
+  /// `Viettel 5G150`, where the tier has to spell out the carrier because one
+  /// entry now holds six of them.
+  final String label;
 
   final Money price;
 
@@ -19,6 +27,7 @@ class PlanOption {
 
   const PlanOption({
     required this.tier,
+    required this.label,
     required this.price,
     required this.checkedAt,
   });
@@ -75,6 +84,7 @@ class PlanGrid extends StatelessWidget {
           if (seen.add(plan.tier))
             PlanOption(
               tier: plan.tier,
+              label: plan.name,
               price: Money(plan.amountMinor, plan.currency),
               checkedAt: plan.checkedAt,
             ),
@@ -170,7 +180,7 @@ class _PlanTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  option.tier,
+                  option.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(

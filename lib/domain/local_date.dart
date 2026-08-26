@@ -176,6 +176,11 @@ class LocalTime implements Comparable<LocalTime> {
   @override
   int compareTo(LocalTime other) => minuteOfDay.compareTo(other.minuteOfDay);
 
+  bool operator <(LocalTime other) => minuteOfDay < other.minuteOfDay;
+  bool operator <=(LocalTime other) => minuteOfDay <= other.minuteOfDay;
+  bool operator >(LocalTime other) => minuteOfDay > other.minuteOfDay;
+  bool operator >=(LocalTime other) => minuteOfDay >= other.minuteOfDay;
+
   @override
   bool operator ==(Object other) =>
       other is LocalTime && other.hour == hour && other.minute == minute;
@@ -197,6 +202,20 @@ class LocalDateTime {
   final LocalTime time;
 
   const LocalDateTime(this.date, this.time);
+
+  /// Now on the device's clock, to the minute.
+  ///
+  /// Seconds are dropped rather than rounded. The only consumer is the
+  /// planner, which compares this against a reminder time that has no seconds
+  /// either, and truncating means an alert set for this very minute still
+  /// counts as one that has not happened yet.
+  factory LocalDateTime.now([DateTime? clock]) {
+    final at = clock ?? DateTime.now();
+    return LocalDateTime(
+      LocalDate.fromDateTime(at),
+      LocalTime(at.hour, at.minute),
+    );
+  }
 
   /// Resolves to an instant in the device's current zone.
   DateTime toLocalDateTime() =>

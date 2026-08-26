@@ -130,7 +130,7 @@ class _Feature extends StatelessWidget {
                         title,
                         style: const TextStyle(
                           fontFamily: SubdockText.family,
-                          fontSize: 14,
+                          fontSize: 16,
                           height: 1.35,
                           fontWeight: SubdockWeight.medium,
                           letterSpacing: -0.14,
@@ -140,7 +140,10 @@ class _Feature extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         body,
-                        style: SubdockText.itemSubtitle.copyWith(height: 1.5),
+                        style: SubdockText.itemSubtitle.copyWith(
+                          height: 1.5,
+                          fontSize: 14,
+                        ),
                       ),
                     ],
                   ),

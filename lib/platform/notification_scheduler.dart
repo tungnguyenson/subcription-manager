@@ -1,5 +1,7 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:meta/meta.dart';
+import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/notification_planner.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
@@ -17,6 +19,32 @@ abstract final class NotificationAction {
 abstract final class NotificationCategory {
   static const String actionable = 'subdock.actionable';
   static const String informational = 'subdock.info';
+}
+
+/// What [NotificationScheduler.sendTest] set up.
+///
+/// Reported back rather than swallowed because the screen has to say what it
+/// did. "A test was sent" is not checkable: the user stares at a phone for a
+/// while and learns nothing from silence. A time and a zone they can hold
+/// against their own clock is.
+@immutable
+class TestDelivery {
+  /// When it should land, on the device's wall clock.
+  final LocalTime at;
+
+  /// The zone that time was computed in, e.g. `Asia/Ho_Chi_Minh`.
+  ///
+  /// Named on screen because a wrong zone is the failure this app has already
+  /// had: without a loaded timezone database an 08:30 reminder arrives at
+  /// 15:30 in Vietnam, and the only visible symptom is a time that looks
+  /// almost right.
+  final String zone;
+
+  /// Whether it was scheduled to the minute. Null off Android -- see
+  /// [NotificationScheduler.hasExactTiming].
+  final bool? exact;
+
+  const TestDelivery({required this.at, required this.zone, this.exact});
 }
 
 /// Puts the planned alerts on the device.
@@ -190,8 +218,12 @@ class NotificationScheduler {
   /// degrade -- `zonedSchedule` throws, and one throw aborts the whole
   /// `apply` loop, leaving the user with no reminders at all. So ask first
   /// and drop to inexact, which costs a delivery window of some minutes.
-  Future<AndroidScheduleMode> _scheduleMode() async {
-    final exact = await hasExactTiming();
+  Future<AndroidScheduleMode> _scheduleMode() async =>
+      _modeFor(await hasExactTiming());
+
+  /// Split from [_scheduleMode] so a caller that already asked the question
+  /// does not pay for a second platform channel round trip to ask it again.
+  AndroidScheduleMode _modeFor(bool? exact) {
     if (exact == null) return AndroidScheduleMode.exactAllowWhileIdle;
 
     return exact
@@ -219,6 +251,75 @@ class NotificationScheduler {
   }
 
   Future<void> cancelAll() => _plugin.cancelAll();
+
+  /// How far out [sendTest] puts its notification.
+  ///
+  /// Long enough to background the app and watch it land, short enough that
+  /// nobody gives up waiting.
+  static const Duration testDelay = Duration(seconds: 10);
+
+  /// The id [sendTest] uses.
+  ///
+  /// A fixed number rather than a hash, so a second test replaces the first
+  /// instead of stacking. It shares a namespace with [PlannedAlert.numericId],
+  /// and a collision is possible but harmless: the worst case is that one
+  /// pending alert is overwritten, and the next [apply] puts it back.
+  static const int testId = 1;
+
+  /// Schedules one notification a few seconds out, attached to nothing.
+  ///
+  /// Goes through [zonedSchedule] rather than the plugin's `show`, and takes
+  /// the same timezone conversion, schedule mode and channel a real reminder
+  /// takes. That is the whole point of it. An instant `show` proves only that
+  /// permission is granted, while every way this app has actually failed to
+  /// deliver -- an unloaded timezone database, exact alarms denied, the
+  /// manufacturer's battery saver dropping the alarm -- lives on the
+  /// scheduling path. A test that skips that path passes on a phone that never
+  /// delivers a single reminder.
+  ///
+  /// Sent on the loud channel deliberately. The reminders worth testing are
+  /// the ones for a deadline the user cannot undo, and if that channel has
+  /// been muted then the test failing to make a sound is the correct answer,
+  /// not a flaw in the test.
+  ///
+  /// Not protected from [apply], which cancels everything pending including
+  /// this. In practice the two do not collide: the plan only re-applies when
+  /// it differs, and nothing about backgrounding the app to watch the test
+  /// land changes it.
+  Future<TestDelivery> sendTest() async {
+    await _ensureTimezone();
+
+    final exact = await hasExactTiming();
+    final when = tz.TZDateTime.now(tz.local).add(testDelay);
+
+    await _plugin.zonedSchedule(
+      id: testId,
+      title: 'Test reminder',
+      body: 'Delivery works. Nothing on your list is due.',
+      scheduledDate: when,
+      androidScheduleMode: _modeFor(exact),
+      notificationDetails: const NotificationDetails(
+        android: AndroidNotificationDetails(
+          NotificationCategory.actionable,
+          'Deadlines',
+          importance: Importance.high,
+          priority: Priority.high,
+        ),
+        iOS: DarwinNotificationDetails(
+          categoryIdentifier: NotificationCategory.actionable,
+          interruptionLevel: InterruptionLevel.timeSensitive,
+        ),
+      ),
+      // No payload: tapping it must not try to open an item that does not
+      // exist.
+    );
+
+    return TestDelivery(
+      at: LocalTime(when.hour, when.minute),
+      zone: tz.local.name,
+      exact: exact,
+    );
+  }
 
   Future<int> pendingCount() async =>
       (await _plugin.pendingNotificationRequests()).length;

@@ -15,7 +15,9 @@ import 'package:subdock/catalog/bundled_data.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/database.dart';
 import 'package:subdock/data/item_repository.dart';
+import 'package:subdock/data/backup_store.dart';
 import 'package:subdock/data/filter_store.dart';
+import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/data/settings_store.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
@@ -222,6 +224,8 @@ void main() {
         filters: FilterStore(db),
         scheduler: _StubScheduler(),
         catalog: catalog,
+        backups: BackupStore(db, repository, settings),
+        files: BackupFiles(),
       ),
     );
     await tester.pumpAndSettle();

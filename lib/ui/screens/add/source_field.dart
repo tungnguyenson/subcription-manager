@@ -212,29 +212,55 @@ class _SourceFieldState extends State<SourceField> {
                   color: SubdockColors.hairline,
                   borderRadius: BorderRadius.circular(SubdockRadius.chip),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 11),
-                child: TextField(
-                  controller: _name,
-                  focusNode: _nameFocus,
-                  // The card opened because the user asked to name something,
-                  // so it opens with the keyboard up rather than asking for a
-                  // second tap on the only field in it.
-                  autofocus: true,
-                  onChanged: (_) => setState(() {}),
-                  onSubmitted: (_) => _create(),
-                  textInputAction: TextInputAction.done,
-                  style: SubdockText.fieldValue,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 11),
-                    hintText: 'e.g. VCB 4412',
-                    hintStyle: TextStyle(
-                      fontFamily: SubdockText.family,
-                      fontSize: 15.5,
-                      color: SubdockColors.inkMuted,
+                padding: const EdgeInsets.only(left: 11),
+                child: Row(
+                  children: [
+                    // The mark for the kind of money picked above, in front of
+                    // the name being typed. The preset chips scroll out of
+                    // thumb's reach once the keyboard is up, so without this
+                    // the only record of which one is armed is a chip the user
+                    // may not be able to see — and the glyph is what the saved
+                    // chip will carry from then on.
+                    SourceMark(glyph: _glyph, size: 18),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _name,
+                        focusNode: _nameFocus,
+                        // The card opened because the user asked to name
+                        // something, so it opens with the keyboard up rather
+                        // than asking for a second tap on the only field in it.
+                        autofocus: true,
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) => _create(),
+                        textInputAction: TextInputAction.done,
+                        style: SubdockText.fieldValue,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 11),
+                          hintText: 'e.g. VCB 4412',
+                          hintStyle: TextStyle(
+                            fontFamily: SubdockText.family,
+                            fontSize: 15.5,
+                            color: SubdockColors.inkMuted,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    // Clearing by hand costs one backspace per character of a
+                    // name a preset just filled in for them, which is the most
+                    // likely thing to want gone.
+                    if (_name.text.isNotEmpty)
+                      _ClearButton(
+                        onTap: () => setState(() {
+                          _name.clear();
+                          _nameFocus.requestFocus();
+                        }),
+                      )
+                    else
+                      const SizedBox(width: 11),
+                  ],
                 ),
               ),
               const SizedBox(height: 10),
@@ -260,6 +286,37 @@ class _SourceFieldState extends State<SourceField> {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// The "x" at the end of the name field.
+///
+/// Drawn rather than handed to [InputDecoration.suffixIcon] because that pulls
+/// in Material's 48px icon-button metrics and pushes the field taller than the
+/// chips above it.
+class _ClearButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ClearButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Clear name',
+      child: InkResponse(
+        onTap: onTap,
+        radius: 20,
+        child: const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 11, vertical: 11),
+          child: Icon(
+            Icons.cancel_rounded,
+            size: 17,
+            color: SubdockColors.inkMuted,
+          ),
+        ),
+      ),
     );
   }
 }

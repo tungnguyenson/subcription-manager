@@ -126,5 +126,25 @@ void main() {
       );
       expect(const LocalTime(8, 30).minuteOfDay, 510);
     });
+
+    test('compares with operators, like LocalDate', () {
+      const half8 = LocalTime(8, 30);
+      expect(half8 < const LocalTime(8, 31), isTrue);
+      expect(half8 <= half8, isTrue);
+      expect(half8 > const LocalTime(8, 29), isTrue);
+      expect(half8 >= half8, isTrue);
+      expect(half8 < half8, isFalse);
+    });
+  });
+
+  group('LocalDateTime', () {
+    // Truncated, not rounded. The planner compares this against a reminder
+    // time that has no seconds either, and rounding up would call an alert set
+    // for this very minute one that has already gone.
+    test('now drops the seconds off the clock', () {
+      final at = LocalDateTime.now(DateTime(2026, 8, 25, 18, 40, 59));
+      expect(at.date, LocalDate.parse('2026-08-25'));
+      expect(at.time, const LocalTime(18, 40));
+    });
   });
 }

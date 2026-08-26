@@ -86,7 +86,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Hai mươi bốn cái bẫy đã vấp, đừng vấp lại
+## Hai mươi bảy cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -284,6 +284,112 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     Đó là tham số `restate` của `MoneyPresenter.alternateTotal`.
     Dấu `≈` trên con số lớn thì vẫn theo bẫy 23, tức là chỉ có khi tháng đó thật sự có
     quy đổi. Nó là một ký tự nằm cùng dòng, không thêm bớt dòng nào.
+
+25. **Giờ trong ngày là đầu vào của `NotificationPlanner.plan`, không phải trang trí.**
+    Nó nhận `LocalDateTime now` chứ không nhận `LocalDate today`. Trước đây lọc bằng
+    `isBetween(today, horizon)`, mà cả ngày hôm nay đều lọt qua, nên một mục gửi lúc
+    08:30 vẫn giữ nguyên cái nhắc đó tới tận đêm: màn Detail viết "Next reminder 25/08 at
+    08:30" vào lúc 18:40, và bộ lập lịch nhận một mốc thời gian đã qua. iOS không bao giờ
+    bắn một trigger nằm ở quá khứ, Android thì bắn ngay lập tức, và cả hai đều tiêu mất
+    một suất trong ngân sách 50.
+
+    Mốc chặn là `earliest`, tính **theo từng mục** vì giờ gửi là của từng mục: lúc 18:40
+    một mục hẹn 08:30 đã hết chuyện để nói trong ngày, còn mục hẹn 21:00 thì chưa. So
+    sánh phải là **nhỏ hơn hẳn** (`now.time < item.remindAt`): `LocalTime` không có
+    giây, nên một nhắc hạn trùng đúng phút hiện tại có thể đã bắn bốn mươi giây trước, và
+    đặt lại nó là bắn thêm một bản thứ hai.
+
+    Hai nhóm alert cư xử khác nhau ở đây, đừng gộp:
+
+    | Loại | Cách dùng `earliest` | Vì sao |
+    |---|---|---|
+    | `lead`, `snoozed` | `isBetween(earliest, horizon)`, qua rồi thì **mất** | Một nấc lead gọi tên một ngày cụ thể so với hạn. Đẩy sang mai là nói "3 ngày trước" vào ngày còn hai ngày |
+    | `nag`, `verify` | `LocalDate.max(x, earliest)`, qua rồi thì **trượt sang mai** | "Vẫn chưa xong" thì mai vẫn đúng. Bỏ nó đi là mục quá hạn im tiếng nốt cái ngày nó quá hạn |
+
+    Hệ quả thứ hai: **đồng hồ chạy mà không có dòng nào trong cơ sở dữ liệu đổi.** Plan
+    trước đây chỉ được tính lại trong listener của các stream, nên nó cũ dần suốt phiên
+    làm việc. Giờ có `_replan()` trong `app.dart`, chạy cả ở stream lẫn lúc app resume,
+    và lúc resume cũng gọi luôn `_refreshPermission()` vì hai quyền của Android được cấp
+    ở màn hình cài đặt hệ thống mà app không quan sát được.
+    Chưa có hẹn giờ qua nửa đêm: mở app để im từ hôm trước sang hôm sau thì plan vẫn cũ
+    cho tới lần resume kế tiếp.
+
+    Nút **Send a test reminder** ở màn Reminders đi qua `zonedSchedule` với độ trễ 10
+    giây chứ không gọi `show` của plugin, và đó là chủ ý. `show` chỉ chứng minh là đã có
+    quyền; mọi kiểu hỏng thật của app đều nằm trên đường lập lịch, gồm timezone database
+    chưa nạp, exact alarm bị từ chối, và trình tiết kiệm pin của hãng nuốt mất alarm. Nó
+    báo lại giờ **kèm tên múi giờ**, vì múi giờ sai là lỗi repo này đã dính: không nạp
+    timezone database thì nhắc 08:30 tới lúc 15:30. Nó cũng gửi trên kênh Deadlines ồn
+    chứ không phải kênh im, vì thứ đáng kiểm tra là đường ồn.
+
+26. **Thêm một cột vào `itemRow` giờ phải sửa ba chỗ, không phải hai.** Ngoài hai
+    chỗ ở bẫy 1, còn `lib/domain/backup.dart`. Bỏ sót chỗ thứ ba thì không có gì đỏ
+    trên đường thường: app chạy đúng, test lược đồ xanh, và cái cột đó **lặng lẽ không
+    nằm trong file sao lưu**. Người dùng chỉ phát hiện ra vào hôm họ khôi phục.
+
+    Chốt chặn duy nhất là test `an item keeps every field it went in with` trong
+    `test/unit/domain/backup_test.dart`. Nó dựng một `TrackedItem` **điền hết mọi
+    trường nullable và đẩy mọi enum ra khỏi giá trị mặc định**, rồi so từng trường sau
+    một vòng mã hoá giải mã. Trường mới quên trong codec sẽ quay về mặc định và phép so
+    đó gãy. Vì vậy thêm trường vào `TrackedItem` thì **phải thêm luôn vào cái mẫu trong
+    test đó**, không thì chốt chặn vô nghĩa.
+
+    File sao lưu là bản chép của **model**, không phải bản dump SQLite. Đó là chủ ý:
+    một bản dump thì chính xác nhưng bản app nào có lược đồ đã đi tiếp cũng không đọc
+    nổi, mà đó là mọi bản trong tương lai. Đọc thiếu một trường thì rơi về đúng cái mặc
+    định một mục mới nhận được, nên file viết từ nhiều tháng trước vẫn khôi phục vào bản
+    app mới. Cùng luật giải mã dễ dãi mà `mappers.dart` đang theo.
+
+    Vài quyết định đi kèm, đừng đảo lại mà không đọc:
+
+    - **Chỉ từ chối file có `version` mới hơn.** File cũ hơn là trường hợp bình thường
+      của một bản sao lưu. File mới hơn chứa trường bản này không biểu diễn được, khôi
+      phục vào là mất im lặng.
+    - **`anchorDate` thiếu thì rơi về `expiresOn`, không rơi về hôm nay.** Mọi phép tính
+      chu kỳ đếm từ nó, nên hôm nay sẽ dời lại cả chuỗi sang ngày khôi phục.
+    - **Khôi phục là thay, không phải trộn.** Người mất điện thoại phải nhận đúng danh
+      sách họ từng có. Trộn theo id để lại mọi mục thêm sau bản sao lưu nằm trong một
+      danh sách chúng chưa từng thuộc về, mà không cách nào biết cái nào là cái nào.
+    - **Một mục trỏ vào nhóm mà file không mang theo vẫn được đặt xuống**, vào nhóm đầu
+      tiên trong file, thay vì để khoá ngoại giết cả lần khôi phục. Lúc đó dữ liệu cũ
+      của người dùng đã bị xoá rồi, không có gì để lùi về.
+    - **`BackupFiles.pick` đọc qua `readAsBytes`, không đọc theo đường dẫn.** File chọn
+      từ iCloud Drive hay Google Drive về dưới dạng content URI không có đường dẫn cục
+      bộ, tức là đọc theo đường dẫn sẽ hỏng đúng với người đã cất bản sao lưu ở chỗ an
+      toàn.
+    - **Trên sheet xác nhận, nút tô đầy là nút *không* làm gì.** Nút phá huỷ là chữ đỏ
+      nhạt, cùng hình dạng mà màn Detail dùng cho "Mark as paid" so với "Delete this
+      item". Nút đẹp nhất màn hình là nút được bấm bởi người không đọc.
+
+    Và **`flutter install` gỡ app trước khi cài** khi chữ ký hoặc bundle khác bản đang
+    có, tức là xoá sạch dữ liệu trên máy. Xem cảnh báo trong `docs/running.md` mục 3.3.
+
+27. **Bảy mục SIM của bảy nhà mạng đã gộp thành một mục `goi-cuoc-dien-thoai`, tên hiển
+    thị `Mobile plan`, và nó cố ý không mang giá nào.** `sim-viettel`, `sim-vinaphone`,
+    `sim-mobifone`, `sim-vietnamobile`, `sim-itel`, `sim-wintel`, `vnsky` và mục chung
+    `goi-cuoc-data` đều không còn. Lý do là app đi đường quốc tế: một mục cho mỗi nhà
+    cung cấp trong nước là sai mức, mục chung mới đúng.
+
+    `plans` để rỗng cũng là chủ ý, không phải chưa tra được. Mỗi nhà mạng một bảng giá và
+    mỗi người một gói, nên bất kỳ con số nào đặt sẵn ở đây cũng là app đoán hộ, mà đây
+    đúng là nhóm mà đoán sai thì mất số điện thoại chứ không phải mất một tháng xem phim.
+    Người dùng tự gõ số họ thật sự trả.
+
+    **Alias là thứ duy nhất còn giữ bảy cái tên đó.** Gõ `sim`, `mobifone`, `viettel`,
+    `vnsky`, `mobi`, `nha mang` hay `dien thoai` đều phải ra `Mobile plan`. Bỏ bớt một
+    alias là một người gõ đúng tên trên vỏ SIM cầm trong tay mà nhận về danh sách rỗng.
+    Chốt chặn là bài `typing SIM still finds it, under its English name` trong
+    `test/unit/catalog/service_catalog_test.dart`.
+
+    Luật icon phải là `mobile`, **không được là `phone`**: "iPhone 15 trả góp" là thứ
+    người ta gõ, và nó không phải cái SIM. Luật `mobile` cũng phải nằm dưới
+    `vietnamobile`, theo đúng bẫy 3.
+
+    Hai thứ đi kèm. Một: `PlanOption` giờ mang cả `tier` (slug, dùng để so và nhớ lựa
+    chọn) lẫn `label` (chữ trên tile, lấy từ `CatalogPlan.name`). Trước đây tile in thẳng
+    slug nên nó viết `standard`, `50gb`; giờ mới đúng là `Standard`, `50GB`. Hai:
+    `data/manage-urls.json` còn bảy id nhà mạng nay không mục nào nhận, vì một mục chỉ có
+    một `manageUrl`. Muốn nối lại thì phải cho `manageUrl` xuống mức tier.
 
 ## Viết tài liệu
 

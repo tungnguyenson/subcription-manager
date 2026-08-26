@@ -23,6 +23,7 @@ import 'package:subdock/ui/screens/review_extraction_screen.dart';
 import 'package:subdock/ui/manage_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/ui/widgets/source_mark.dart';
 
 void main() {
   final today = LocalDate.parse('2026-08-15');
@@ -447,6 +448,41 @@ void main() {
       expect(find.byType(Footnote), findsNothing);
     });
 
+    // Every other claim on this screen is untestable by the user: a reminder
+    // that never arrives looks exactly like one that is still coming.
+    testWidgets('the delivery path can be tried on demand', (tester) async {
+      var sent = 0;
+      await show(
+        tester,
+        ReminderRulesScreen(
+          settings: const AppSettings(),
+          pushGranted: true,
+          onSendTest: () => sent++,
+        ),
+      );
+
+      await tester.tap(find.text('Send a test reminder'));
+      await tester.pumpAndSettle();
+      expect(sent, 1);
+    });
+
+    // A button that fails on purpose teaches nothing the footnote does not
+    // already say.
+    testWidgets('no test button while nothing can be delivered', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        ReminderRulesScreen(
+          settings: const AppSettings(),
+          pushGranted: false,
+          onSendTest: () {},
+        ),
+      );
+
+      expect(find.text('Send a test reminder'), findsNothing);
+    });
+
     // Notifications off is the bigger fact and the only one shown; stacking a
     // second footnote about timing under it explains a delivery that is not
     // happening at all.
@@ -771,6 +807,86 @@ void main() {
       expect(saved?.paymentSourceId, 'src1');
     });
 
+    // The preset chips scroll under the keyboard once the field has focus, so
+    // the glyph in front of the name is the only thing left saying which kind
+    // of money is armed -- and it is the glyph the saved chip will carry.
+    testWidgets('the name field wears the glyph of the preset picked', (
+      tester,
+    ) async {
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (_) {},
+          onCreateSource: (name, glyph) async => 'src1',
+        ),
+      );
+
+      await tester.ensureVisible(find.text('New'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('New'));
+      await tester.pumpAndSettle();
+
+      // The field opens on the default before any preset is touched.
+      expect(
+        tester.widget<SourceMark>(find.byType(SourceMark)).glyph,
+        SourceGlyph.card,
+      );
+
+      await tester.tap(find.text('Cash'));
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.widget<SourceMark>(find.byType(SourceMark)).glyph,
+        SourceGlyph.cash,
+      );
+    });
+
+    // A preset fills the field for the user, so the most likely next thing
+    // they want is that word gone -- one tap rather than one backspace per
+    // character of a name they never typed.
+    testWidgets('the clear button empties the name field', (tester) async {
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (_) {},
+          onCreateSource: (name, glyph) async => 'src1',
+        ),
+      );
+
+      await tester.ensureVisible(find.text('New'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('New'));
+      await tester.pumpAndSettle();
+
+      // Nothing to clear yet, so nothing offers to.
+      expect(find.bySemanticsLabel('Clear name'), findsNothing);
+
+      await tester.tap(find.text('Wallet'));
+      await tester.pumpAndSettle();
+      expect(find.text('Wallet'), findsNWidgets(2)); // the chip and the field
+
+      await tester.tap(find.bySemanticsLabel('Clear name'));
+      await tester.pumpAndSettle();
+
+      // Only the chip is left, and `Add source` went back to being dead.
+      expect(find.text('Wallet'), findsOneWidget);
+      expect(find.bySemanticsLabel('Clear name'), findsNothing);
+      expect(
+        tester
+            .widget<PrimaryButton>(
+              find.widgetWithText(PrimaryButton, 'Add source'),
+            )
+            .onPressed,
+        isNull,
+      );
+    });
+
     // What someone typed into the picker's search box is an answer, not a
     // failed query. The catalogue holding 223 rows out of a world that has
     // more means a miss says nothing about the name -- so the name has to
@@ -954,7 +1070,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('260,000'), findsOneWidget);
 
-      await tester.tap(find.text('standard'));
+      // The tile is labelled with the plan's name, not its slug.
+      expect(find.text('standard'), findsNothing);
+      await tester.tap(find.text('Standard'));
       await tester.pumpAndSettle();
 
       expect(
@@ -1398,6 +1516,39 @@ void main() {
       // One Netflix Premium on screen: the name field. Not a second one in a
       // suggestion card underneath it.
       expect(find.text('Netflix Premium'), findsOneWidget);
+    });
+
+    testWidgets('the name can be emptied in one tap', (tester) async {
+      final netflix = TrackedItem(
+        id: 'netflix',
+        name: 'Netflix Premium',
+        categoryId: 'STREAMING',
+        expiresOn: d('2026-09-01'),
+        anchorDate: d('2026-09-01'),
+      );
+
+      await show(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          initial: DraftItem.of(netflix, CategoryBook.shipped),
+        ),
+      );
+
+      expect(find.widgetWithText(TextField, 'Netflix Premium'), findsOneWidget);
+
+      // The name field is the only thing on the form carrying a clear button:
+      // the form has no search box of its own.
+      final clear = find.byIcon(Icons.close_rounded);
+      expect(clear, findsOneWidget);
+      await tester.tap(clear);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Netflix Premium'), findsNothing);
+      // And it takes itself away once there is nothing left to clear.
+      expect(find.byIcon(Icons.close_rounded), findsNothing);
     });
   });
 

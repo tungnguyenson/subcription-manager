@@ -26,7 +26,14 @@ class SettingsScreen extends StatelessWidget {
   final VoidCallback? onOpenSources;
   final VoidCallback? onOpenReminders;
   final VoidCallback? onOpenHistory;
+
+  /// Hands the whole list to the system share sheet as one file.
   final VoidCallback? onExport;
+
+  /// Reads one back, replacing everything. Destructive, and the confirmation
+  /// that says so belongs to whoever wires this up, not to a settings row.
+  final VoidCallback? onImport;
+
   final VoidCallback? onAbout;
 
   const SettingsScreen({
@@ -41,6 +48,7 @@ class SettingsScreen extends StatelessWidget {
     this.onOpenReminders,
     this.onOpenHistory,
     this.onExport,
+    this.onImport,
     this.onAbout,
   });
 
@@ -94,9 +102,23 @@ class SettingsScreen extends StatelessWidget {
             // screen" without the user hunting for a setting that is not
             // there.
             const DetailRow(label: 'Widget', value: 'Not yet'),
-            DetailRow.nav(label: 'Export data', onTap: onExport),
             DetailRow.nav(label: 'About', onTap: onAbout),
           ],
+        ),
+        const SectionLabel('Backup'),
+        GroupedCard(
+          children: [
+            DetailRow.nav(label: 'Export a backup', onTap: onExport),
+            DetailRow.nav(label: 'Restore from a backup', onTap: onImport),
+          ],
+        ),
+        // State, not a tutorial — the same rule the reminder screen follows.
+        // That there is no copy anywhere else is not something the user can
+        // see from any other screen, and it is the whole reason these two rows
+        // exist. Deleting the app takes the list with it and iOS does not ask.
+        const Footnote(
+          'Subdock has no account and no server. What you see in the app is '
+          'the only copy, and removing the app removes it.',
         ),
       ],
     );

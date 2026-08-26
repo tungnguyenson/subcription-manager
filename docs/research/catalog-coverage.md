@@ -3,7 +3,7 @@
 Sinh tự động bằng `python3 tool/coverage_table.py`. Đừng sửa tay: chạy lại
 sau mỗi lần cập nhật danh mục thì bảng tự đúng.
 
-**223 dịch vụ | 166 có giá | 82 so được gói năm**
+**216 dịch vụ | 160 có giá | 82 so được gói năm**
 
 Cột **Giá** ghi số dòng giá thu được. Cột **Th+Năm** đánh dấu mục có đủ cả
 gói tháng lẫn gói năm của cùng một gói, tức là mục app tính được tiền tiết
@@ -156,26 +156,6 @@ cho mục không có giá.
 | Whoop | 1 | toàn cầu | · | hãng | · | · |  |
 | Zwift | 2 | toàn cầu | ✓ | hình + màu | · | · |  |
 
-## Di động & mạng (PHONE)
-
-13 mục, 9 có giá, 0 so được gói năm.
-
-| Dịch vụ | Giá | Vùng | Th+Năm | Icon | Link gói | Link huỷ | Vì sao trống |
-|---|---|---|---|---|---|---|---|
-| Gói cước data | · | · | · | hình xám | · | · | Mục chung cho gói data không thuộc nhà mạng cụ thể trong danh sách trê... |
-| Gói cước trả sau | · | · | · | hình xám | · | · | Mục chung cho gói cước trả sau, giá khác nhau theo nhà mạng và gói cụ ... |
-| Internet FPT | 1 | VN | · | hình + màu | · | · |  |
-| Internet Viettel | 1 | VN | · | hình + màu | · | · |  |
-| Internet VNPT | 1 | VN | · | hình + màu | · | · |  |
-| SIM iTel | 1 | VN | · | hình + màu | · | · |  |
-| SIM MobiFone | 1 | VN | · | hình + màu | · | · |  |
-| SIM Vietnamobile | 1 | VN | · | hình + màu | · | · |  |
-| SIM Viettel | 1 | VN | · | hình + màu | · | · |  |
-| SIM VinaPhone | 1 | VN | · | hình + màu | · | · |  |
-| SIM Wintel | · | · | · | hình + màu | · | · | Hết hạn mà không nạp thì mất số. Đặt mức quan trọng cao. Trình duyệt t... |
-| Truyền hình cáp | · | · | · | hình xám | · | · | Mục chung cho các gói truyền hình cáp/K+ theo từng nhà cung cấp và com... |
-| VNSKY | 1 | VN | · | hình + màu | · | · |  |
-
 ## Tài chính (FINANCE)
 
 12 mục, 5 có giá, 4 so được gói năm.
@@ -324,6 +304,19 @@ cho mục không có giá.
 | GrabUnlimited | 2 | VN | ✓ | hãng | · | · |  |
 | HelloFresh | · | · | · | hãng | · | · | HelloFresh không có một mức giá cố định: giá đổi theo số người ăn và s... |
 | Uber One | 2 | toàn cầu | ✓ | hãng | · | · |  |
+
+## Di động & mạng (PHONE)
+
+6 mục, 3 có giá, 0 so được gói năm.
+
+| Dịch vụ | Giá | Vùng | Th+Năm | Icon | Link gói | Link huỷ | Vì sao trống |
+|---|---|---|---|---|---|---|---|
+| Gói cước trả sau | · | · | · | hình xám | · | · | Mục chung cho gói cước trả sau, giá khác nhau theo nhà mạng và gói cụ ... |
+| Internet FPT | 1 | VN | · | hình + màu | · | · |  |
+| Internet Viettel | 1 | VN | · | hình + màu | · | · |  |
+| Internet VNPT | 1 | VN | · | hình + màu | · | · |  |
+| Mobile plan | · | · | · | hình xám | · | · | Mục chung cho gói cước di động của mọi nhà mạng, thay cho bảy mục SIM ... |
+| Truyền hình cáp | · | · | · | hình xám | · | · | Mục chung cho các gói truyền hình cáp/K+ theo từng nhà cung cấp và com... |
 
 ## Mạng xã hội (SOCIAL)
 

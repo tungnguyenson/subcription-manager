@@ -793,6 +793,31 @@ class _AddItemScreenState extends State<AddItemScreen> {
               ),
             ),
           ),
+          // Same clear button the search boxes carry, for the same reason: the
+          // field opens pre-filled -- from a catalogue row, from the search box
+          // on step one, or from the item being edited -- and someone who wants
+          // a different name would otherwise hold backspace down.
+          //
+          // It reopens the suggestions the way typing does. Clearing by hand is
+          // not the user settling on a name, it is them starting over, and a
+          // settled flag left standing would keep the catalogue quiet through
+          // whatever they type next.
+          if (_name.text.isNotEmpty)
+            InkWell(
+              onTap: () {
+                _name.clear();
+                _nameSettled = false;
+                _nameFocus.requestFocus();
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(4),
+                child: Icon(
+                  Icons.close_rounded,
+                  size: 18,
+                  color: SubdockColors.inkMuted,
+                ),
+              ),
+            ),
         ],
       ),
     );

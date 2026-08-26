@@ -3,9 +3,14 @@ import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/notification_planner.dart';
+import 'package:subdock/domain/reminders.dart';
 
 void main() {
   final today = LocalDate.parse('2026-08-15');
+
+  // Midnight, so nothing has fired yet and every alert dated today is still
+  // ahead. Tests about the clock set their own time; see the group at the end.
+  final now = LocalDateTime(today, const LocalTime(0, 0));
   LocalDate d(String iso) => LocalDate.parse(iso);
 
   TrackedItem item(
@@ -18,6 +23,7 @@ void main() {
     NagPolicy? nag,
     int? verifyEveryDays,
     String? lastVerifiedAt,
+    LocalTime remindAt = Reminders.defaultRemindAt,
     ItemState state = ItemState.active,
   }) {
     return TrackedItem(
@@ -34,6 +40,7 @@ void main() {
       // are exercised in their own tests.
       verifyEveryDays: verifyEveryDays,
       lastVerifiedAt: lastVerifiedAt == null ? null : d(lastVerifiedAt),
+      remindAt: remindAt,
       state: state,
     );
   }
@@ -50,7 +57,7 @@ void main() {
         ),
       ],
       CategoryBook.shipped,
-      today,
+      now,
     );
 
     final leads =
@@ -78,7 +85,7 @@ void main() {
         ),
       ],
       CategoryBook.shipped,
-      today,
+      now,
     );
     // act-by is 7 days before 14 Sep.
     expect(plan.alerts.map((a) => a.date), [d('2026-09-07')]);
@@ -96,7 +103,7 @@ void main() {
         ),
       ],
       CategoryBook.shipped,
-      today,
+      now,
     );
     expect(plan.alerts.every((a) => a.date >= today), isTrue);
   });
@@ -105,7 +112,7 @@ void main() {
     final plan = NotificationPlanner.plan(
       [item('far', CategoryBook.shipped['DOCUMENTS'], expiresOn: '2027-06-01')],
       CategoryBook.shipped,
-      today,
+      now,
     );
     expect(plan.alerts, isEmpty, reason: 'nothing within 60 days');
   });
@@ -121,7 +128,7 @@ void main() {
         ),
       ],
       CategoryBook.shipped,
-      today,
+      now,
     );
     expect(plan.alerts, isEmpty);
   });
@@ -138,7 +145,7 @@ void main() {
         ),
       ],
       CategoryBook.shipped,
-      today,
+      now,
       horizonDays: 5,
     );
 
@@ -163,7 +170,7 @@ void main() {
         ),
       ],
       CategoryBook.shipped,
-      today,
+      now,
     );
     expect(plan.alerts.any((a) => a.reason == AlertReason.nag), isFalse);
   });
@@ -182,7 +189,7 @@ void main() {
         ),
       ],
       CategoryBook.shipped,
-      today,
+      now,
     );
     // 1 Jul + 60 days = 30 Aug.
     expect(
@@ -207,7 +214,7 @@ void main() {
         ),
       ],
       CategoryBook.shipped,
-      today,
+      now,
     );
     expect(
       plan.alerts
@@ -239,7 +246,7 @@ void main() {
     final plan = NotificationPlanner.plan(
       [netflix, sim],
       CategoryBook.shipped,
-      today,
+      now,
       budget: 2,
     );
 
@@ -267,7 +274,7 @@ void main() {
     final plan = NotificationPlanner.plan(
       [a, b],
       CategoryBook.shipped,
-      today,
+      now,
       budget: 1,
     );
     expect(plan.alerts.map((e) => e.itemId), ['b']);
@@ -283,7 +290,7 @@ void main() {
           nag: NagPolicy.daily,
         ),
     ];
-    final plan = NotificationPlanner.plan(many, CategoryBook.shipped, today);
+    final plan = NotificationPlanner.plan(many, CategoryBook.shipped, now);
     expect(plan.alerts.length, lessThanOrEqualTo(NotificationPlanner.budget));
   });
 
@@ -299,7 +306,7 @@ void main() {
           nag: NagPolicy.daily,
         ),
     ];
-    final plan = NotificationPlanner.plan(many, CategoryBook.shipped, today);
+    final plan = NotificationPlanner.plan(many, CategoryBook.shipped, now);
     expect(plan.isTruncated, isTrue);
     expect(plan.dropped, isNotEmpty);
   });
@@ -315,7 +322,7 @@ void main() {
         ),
       ],
       CategoryBook.shipped,
-      today,
+      now,
     );
     expect(plan.isTruncated, isFalse);
   });
@@ -339,7 +346,7 @@ void main() {
         ),
       ],
       CategoryBook.shipped,
-      today,
+      now,
     );
     expect(
       plan.alerts
@@ -363,8 +370,8 @@ void main() {
       ),
       item('bill', CategoryBook.shipped['UTILITIES'], expiresOn: '2026-08-25'),
     ];
-    final first = NotificationPlanner.plan(items, CategoryBook.shipped, today);
-    final second = NotificationPlanner.plan(items, CategoryBook.shipped, today);
+    final first = NotificationPlanner.plan(items, CategoryBook.shipped, now);
+    final second = NotificationPlanner.plan(items, CategoryBook.shipped, now);
 
     expect(
       first.alerts.map((a) => a.identifier),
@@ -395,7 +402,7 @@ void main() {
           expiresOn: '2026-08-25',
         ),
       ];
-      final plan = NotificationPlanner.plan(items, CategoryBook.shipped, today);
+      final plan = NotificationPlanner.plan(items, CategoryBook.shipped, now);
 
       expect(plan.alerts.every((a) => a.numericId > 0), isTrue);
       expect(
@@ -469,5 +476,147 @@ void main() {
       netflix.countsTowardSpend(CategoryBook.shipped[netflix.categoryId]),
       isTrue,
     );
+  });
+
+  // The time of day is an input to the plan, not decoration on it. Before
+  // this, an item that sent at 08:30 kept offering that alert all day: the
+  // detail screen read "Next reminder 25/08 at 08:30" at half past six in the
+  // evening, and the scheduler was handed a trigger iOS never fires and
+  // Android fires on the spot.
+  group('the clock, not just the calendar day', () {
+    TrackedItem dueToday({
+      String id = 't',
+      LocalTime remindAt = Reminders.defaultRemindAt,
+    }) => item(
+      id,
+      CategoryBook.shipped['STREAMING'],
+      expiresOn: '2026-08-15',
+      leadDays: const [0],
+      nag: NagPolicy.none,
+      remindAt: remindAt,
+    );
+
+    test('an alert whose send time has passed is not planned', () {
+      final plan = NotificationPlanner.plan(
+        [dueToday()],
+        CategoryBook.shipped,
+        LocalDateTime(today, const LocalTime(18, 40)),
+      );
+
+      expect(plan.alerts, isEmpty);
+    });
+
+    test('the same alert an hour before its send time still is', () {
+      final plan = NotificationPlanner.plan(
+        [dueToday()],
+        CategoryBook.shipped,
+        LocalDateTime(today, const LocalTime(7, 30)),
+      );
+
+      expect(plan.alerts.map((a) => a.date), [today]);
+    });
+
+    // Per item, because the send time is per item. One clock reading splits
+    // the list in two.
+    test('an item that sends later in the day is untouched', () {
+      final plan = NotificationPlanner.plan(
+        [
+          dueToday(id: 'morning'),
+          dueToday(id: 'evening', remindAt: const LocalTime(21, 0)),
+        ],
+        CategoryBook.shipped,
+        LocalDateTime(today, const LocalTime(18, 40)),
+      );
+
+      expect(plan.alerts.map((a) => a.itemId), ['evening']);
+    });
+
+    // A lead rung names a day relative to the deadline. Sliding today's to
+    // tomorrow would say "3 days before" on the day that is two days before,
+    // so a rung that has passed is gone rather than moved.
+    test('a lead rung that has passed drops instead of sliding', () {
+      final plan = NotificationPlanner.plan(
+        [
+          item(
+            't',
+            CategoryBook.shipped['STREAMING'],
+            expiresOn: '2026-08-18',
+            leadDays: [3, 0],
+            nag: NagPolicy.none,
+          ),
+        ],
+        CategoryBook.shipped,
+        LocalDateTime(today, const LocalTime(18, 40)),
+      );
+
+      expect(plan.alerts.map((a) => (a.date, a.leadDays)), [
+        (d('2026-08-18'), 0),
+      ], reason: 'the 3-day rung was today and is not re-dated to tomorrow');
+    });
+
+    // Unlike a lead rung. "This is still not done" is as true tomorrow as it
+    // was at 08:30 today, so the one that passed slides rather than vanishing
+    // -- otherwise an overdue item goes quiet for the rest of the day it went
+    // overdue on.
+    test('a nag slides to the next day it can still be sent', () {
+      final plan = NotificationPlanner.plan(
+        [
+          item(
+            't',
+            CategoryBook.shipped['STREAMING'],
+            expiresOn: '2026-08-10',
+            leadDays: const [],
+            nag: NagPolicy.daily,
+          ),
+        ],
+        CategoryBook.shipped,
+        LocalDateTime(today, const LocalTime(18, 40)),
+      );
+
+      final nags = plan.alerts
+          .where((a) => a.reason == AlertReason.nag)
+          .map((a) => a.date)
+          .toList();
+      expect(nags.first, d('2026-08-16'));
+      expect(nags, isNot(contains(today)));
+    });
+
+    test('an overdue verify slides for the same reason', () {
+      final plan = NotificationPlanner.plan(
+        [
+          item(
+            't',
+            CategoryBook.shipped['STREAMING'],
+            expiresOn: '2027-01-01',
+            leadDays: const [],
+            nag: NagPolicy.none,
+            verifyEveryDays: 60,
+            lastVerifiedAt: '2026-01-01',
+          ),
+        ],
+        CategoryBook.shipped,
+        LocalDateTime(today, const LocalTime(18, 40)),
+      );
+
+      expect(
+        plan.alerts
+            .where((a) => a.reason == AlertReason.verify)
+            .map((a) => a.date),
+        [d('2026-08-16')],
+      );
+    });
+
+    // [LocalTime] has no seconds, so an alert whose minute is the current
+    // minute may have fired forty seconds ago. Re-scheduling it would fire a
+    // second copy on the spot.
+    test('the current minute counts as already sent', () {
+      final plan = NotificationPlanner.plan(
+        [dueToday()],
+        CategoryBook.shipped,
+        LocalDateTime(today, const LocalTime(8, 30)),
+      );
+
+      expect(plan.alerts, isEmpty);
+    });
   });
 }

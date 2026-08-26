@@ -198,6 +198,9 @@ abstract final class SubdockMarks {
     ('gói cước', GlyphSpec(CategoryGlyph.sim)),
     ('goi cuoc', GlyphSpec(CategoryGlyph.sim)),
     ('sim', GlyphSpec(CategoryGlyph.sim)),
+    // Below `vietnamobile`, which contains it. Deliberately not `phone`:
+    // "iPhone 15 trả góp" is a thing someone types, and it is not a SIM.
+    ('mobile', GlyphSpec(CategoryGlyph.sim)),
 
     // -- the flat ---------------------------------------------------------
     ('tiền điện', GlyphSpec(CategoryGlyph.power)),

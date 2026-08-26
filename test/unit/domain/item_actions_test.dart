@@ -9,6 +9,7 @@ import 'package:subdock/domain/recurrence.dart';
 void main() {
   LocalDate d(String iso) => LocalDate.parse(iso);
   final today = d('2026-08-15');
+  final now = LocalDateTime(today, const LocalTime(0, 0));
 
   TrackedItem item({
     String expiresOn = '2026-08-21',
@@ -41,7 +42,7 @@ void main() {
       final plan = NotificationPlanner.plan(
         [item(snoozedUntil: '2026-08-18')],
         CategoryBook.shipped,
-        today,
+        now,
       );
 
       final snoozed = plan.alerts.where((a) => a.reason == AlertReason.snoozed);
@@ -55,7 +56,7 @@ void main() {
       final plan = NotificationPlanner.plan(
         [item(snoozedUntil: '2026-08-01')],
         CategoryBook.shipped,
-        today,
+        now,
       );
 
       expect(
@@ -210,15 +211,11 @@ void main() {
       final plan = NotificationPlanner.plan(
         [item(paused: true)],
         CategoryBook.shipped,
-        today,
+        now,
       );
       expect(plan.alerts, isEmpty);
 
-      final on = NotificationPlanner.plan(
-        [item()],
-        CategoryBook.shipped,
-        today,
-      );
+      final on = NotificationPlanner.plan([item()], CategoryBook.shipped, now);
       expect(on.alerts, isNotEmpty);
     });
   });
@@ -231,12 +228,12 @@ void main() {
       final plain = NotificationPlanner.plan(
         [item()],
         CategoryBook.shipped,
-        today,
+        now,
       );
       final nudged = NotificationPlanner.plan(
         [item(yearlyChoice: YearlyChoice.remind)],
         CategoryBook.shipped,
-        today,
+        now,
       );
 
       expect(nudged.alerts, hasLength(plain.alerts.length));
@@ -252,7 +249,7 @@ void main() {
       final nudged = NotificationPlanner.plan(
         [item(expiresOn: '2026-08-10', yearlyChoice: YearlyChoice.remind)],
         CategoryBook.shipped,
-        today,
+        now,
       );
 
       final nags = nudged.alerts.where((a) => a.reason == AlertReason.nag);
@@ -264,7 +261,7 @@ void main() {
       final plain = NotificationPlanner.plan(
         [item()],
         CategoryBook.shipped,
-        today,
+        now,
       );
       expect(plain.alerts.every((a) => a.note == null), isTrue);
       expect(plain.alerts.first.body, 'Course');

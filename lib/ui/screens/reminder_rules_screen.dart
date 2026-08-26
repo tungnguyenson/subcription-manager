@@ -32,6 +32,16 @@ class ReminderRulesScreen extends StatelessWidget {
   final void Function(int lead, bool on)? onToggleLead;
   final VoidCallback? onPickTime;
   final VoidCallback? onEnablePush;
+
+  /// Sends one notification a few seconds out, to prove the path works.
+  ///
+  /// Everything else on this screen is a claim the app makes about delivery,
+  /// and the user has no way to check any of it. A reminder that never arrives
+  /// looks exactly like a reminder that is still coming, so without this the
+  /// only test available is to wait until the day of a real deadline and find
+  /// out then.
+  final VoidCallback? onSendTest;
+
   final VoidCallback? onBack;
 
   const ReminderRulesScreen({
@@ -42,6 +52,7 @@ class ReminderRulesScreen extends StatelessWidget {
     this.onToggleLead,
     this.onPickTime,
     this.onEnablePush,
+    this.onSendTest,
     this.onBack,
   });
 
@@ -90,6 +101,13 @@ class ReminderRulesScreen extends StatelessWidget {
             ),
           ],
         ),
+        // Only while push is granted. With it off the button cannot do
+        // anything, and a button that fails on purpose teaches the user
+        // nothing the footnote below does not already say.
+        if (pushGranted && onSendTest != null) ...[
+          const SizedBox(height: 10),
+          SecondaryButton('Send a test reminder', onPressed: onSendTest),
+        ],
         // Only the state, never the tutorial. That notifications are off is
         // something the user cannot see anywhere else on this screen; how the
         // defaults propagate is documentation, and documentation does not

@@ -10,6 +10,8 @@ import 'package:subdock/ui/money_presenter.dart';
 import 'package:subdock/ui/screens/money_screen.dart';
 import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
+import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/ui/widgets/restore_ask.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
 import 'package:subdock/ui/widgets/empty_placard.dart';
@@ -437,7 +439,26 @@ void main() {
       expect(find.text('VND'), findsOneWidget);
       expect(find.text('English'), findsOneWidget);
       expect(find.text('Not yet'), findsOneWidget);
-      expect(find.text('›'), findsNWidgets(6));
+      expect(find.text('›'), findsNWidgets(7));
+    });
+
+    // The only copy of anything is on the phone, and no other screen says so.
+    // The two rows below this footnote are the only answer to a lost phone.
+    testWidgets('backup rows say why they are there', (tester) async {
+      var exported = 0;
+      var imported = 0;
+      await show(
+        tester,
+        SettingsScreen(onExport: () => exported++, onImport: () => imported++),
+      );
+
+      expect(find.textContaining('no account and no server'), findsOneWidget);
+
+      await tester.tap(find.text('Export a backup'));
+      await tester.tap(find.text('Restore from a backup'));
+      await tester.pumpAndSettle();
+
+      expect((exported, imported), (1, 1));
     });
 
     // A value sitting at the end of its own half of the row reads as a second
@@ -538,6 +559,69 @@ void main() {
           reason: '$tab is not in the accent',
         );
       }
+    });
+  });
+
+  // Restoring deletes rows the user typed and there is nowhere to undo it
+  // from, so this sheet is the one place in the app whose job is to be read.
+  group('Restore confirmation', () {
+    testWidgets('names both sides of the trade', (tester) async {
+      await show(
+        tester,
+        const RestoreAsk(
+          incoming: '12 items, 40 payments',
+          existing: '3 items',
+          takenOn: 'taken 25/08/2026',
+        ),
+      );
+
+      expect(
+        find.textContaining('12 items, 40 payments'),
+        findsOneWidget,
+        reason: 'what arrives',
+      );
+      expect(find.text('3 items'), findsOneWidget, reason: 'what goes');
+      expect(find.textContaining('taken 25/08/2026'), findsOneWidget);
+    });
+
+    // The prettiest button on a sheet gets tapped by people who were not
+    // reading, so the filled one is the safe answer -- the same shape the item
+    // screen uses for "Mark as paid" against "Delete this item".
+    testWidgets('the filled button is the one that changes nothing', (
+      tester,
+    ) async {
+      var confirmed = 0;
+      var cancelled = 0;
+      await show(
+        tester,
+        RestoreAsk(
+          incoming: '12 items',
+          existing: '3 items',
+          onConfirm: () => confirmed++,
+          onCancel: () => cancelled++,
+        ),
+      );
+
+      await tester.tap(find.byType(PrimaryButton));
+      await tester.pumpAndSettle();
+      expect((confirmed, cancelled), (0, 1));
+
+      await tester.tap(find.text('Replace everything'));
+      await tester.pumpAndSettle();
+      expect((confirmed, cancelled), (1, 1));
+    });
+
+    // A fresh install is the common case for a restore, and there is nothing
+    // to lose on one. Shouting about deletion there teaches the user to tap
+    // through the warning that will matter later.
+    testWidgets('with nothing to lose it does not talk about losing', (
+      tester,
+    ) async {
+      await show(tester, const RestoreAsk(incoming: '12 items'));
+
+      expect(find.text('Restore this backup?'), findsOneWidget);
+      expect(find.text('Restore'), findsOneWidget);
+      expect(find.textContaining('Deleted from this phone'), findsNothing);
     });
   });
 }

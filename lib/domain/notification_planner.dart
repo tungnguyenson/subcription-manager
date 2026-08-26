@@ -115,14 +115,23 @@ abstract final class NotificationPlanner {
   /// them up.
   static const int horizonDays = 60;
 
+  /// [now] is the clock, not just the calendar day.
+  ///
+  /// The time of day is an input to the plan and not decoration on it. An
+  /// alert dated today at 08:30 stops being the next one at 08:31, and nothing
+  /// in the database changes at that minute -- so a planner given only a date
+  /// keeps offering an alert that has already been and gone. Handing that to
+  /// the scheduler is worse than cosmetic: iOS never fires a trigger whose
+  /// time is in the past, and Android fires it the instant it is set. Either
+  /// way it spends one of the [budget] slots on nothing.
   static NotificationPlan plan(
     List<TrackedItem> items,
     CategoryBook categories,
-    LocalDate today, {
+    LocalDateTime now, {
     int budget = NotificationPlanner.budget,
     int horizonDays = NotificationPlanner.horizonDays,
   }) {
-    final horizon = today.plusDays(horizonDays);
+    final horizon = now.date.plusDays(horizonDays);
 
     final candidates = <PlannedAlert>[
       for (final item in items)
@@ -131,7 +140,7 @@ abstract final class NotificationPlanner {
         // switch is that it stops sending reminders. One predicate for the
         // list and the planner, so they can never disagree about it.
         if (item.isLive && item.state == ItemState.active)
-          ..._alertsFor(item, categories[item.categoryId], today, horizon),
+          ..._alertsFor(item, categories[item.categoryId], now, horizon),
     ]..sort(_ranking);
 
     return NotificationPlan(
@@ -163,11 +172,22 @@ abstract final class NotificationPlanner {
   static List<PlannedAlert> _alertsFor(
     TrackedItem item,
     Category category,
-    LocalDate today,
+    LocalDateTime now,
     LocalDate horizon,
   ) {
     final out = <PlannedAlert>[];
     final actBy = item.actBy;
+
+    // The first day this item still has a reminder left to give. Per item,
+    // because the send time is per item: at 18:40 an item set to 08:30 is done
+    // for the day while one set to 21:00 is not.
+    //
+    // Strictly earlier, not "at or earlier". [LocalTime] has no seconds, so an
+    // alert whose minute is the current minute may already have fired forty
+    // seconds ago; re-scheduling it would fire a second copy immediately.
+    // Being one minute pessimistic costs nothing, being one minute optimistic
+    // costs the user a duplicate.
+    final earliest = now.time < item.remindAt ? now.date : now.date.plusDays(1);
 
     // The rider the user asked for on the Savings screen. It rides on the
     // lead reminders only: a nag fires *after* the money has gone, and telling
@@ -178,7 +198,11 @@ abstract final class NotificationPlanner {
 
     for (final lead in item.leadDays) {
       final fireOn = actBy.minusDays(lead);
-      if (fireOn.isBetween(today, horizon)) {
+      // Range check rather than a clamp: a lead rung names a specific day
+      // relative to the deadline. Once today's has passed it is gone, and
+      // moving it to tomorrow would tell the user "3 days before" on the day
+      // that is two days before.
+      if (fireOn.isBetween(earliest, horizon)) {
         out.add(
           _alert(item, category, fireOn, lead, AlertReason.lead, note: note),
         );
@@ -188,13 +212,13 @@ abstract final class NotificationPlanner {
     // A snooze is what the user asked for by name, so it is scheduled even
     // when the ladder for this item is empty.
     final snoozed = item.snoozedUntil;
-    if (snoozed != null && snoozed.isBetween(today, horizon)) {
+    if (snoozed != null && snoozed.isBetween(earliest, horizon)) {
       out.add(_alert(item, category, snoozed, 0, AlertReason.snoozed));
     }
 
-    out.addAll(_nagAlerts(item, category, actBy, today, horizon));
+    out.addAll(_nagAlerts(item, category, actBy, earliest, horizon));
 
-    final verify = _verifyAlert(item, category, today, horizon);
+    final verify = _verifyAlert(item, category, earliest, horizon);
     if (verify != null) out.add(verify);
 
     return out;
@@ -211,7 +235,7 @@ abstract final class NotificationPlanner {
     TrackedItem item,
     Category category,
     LocalDate actBy,
-    LocalDate today,
+    LocalDate earliest,
     LocalDate horizon,
   ) {
     final stepDays = switch (item.nagAfterDue) {
@@ -222,7 +246,10 @@ abstract final class NotificationPlanner {
     if (stepDays == null) return const [];
 
     final out = <PlannedAlert>[];
-    var at = LocalDate.max(actBy.plusDays(stepDays), today);
+    // Clamped rather than range-checked, unlike a lead rung. A nag says "this
+    // is still not done", which is as true tomorrow as it was at 08:30 today,
+    // so the one that passed slides forward instead of being lost.
+    var at = LocalDate.max(actBy.plusDays(stepDays), earliest);
     while (at <= horizon) {
       out.add(_alert(item, category, at, 0, AlertReason.nag));
       at = at.plusDays(stepDays);
@@ -236,7 +263,7 @@ abstract final class NotificationPlanner {
   static PlannedAlert? _verifyAlert(
     TrackedItem item,
     Category category,
-    LocalDate today,
+    LocalDate earliest,
     LocalDate horizon,
   ) {
     final every = item.verifyEveryDays;
@@ -244,7 +271,9 @@ abstract final class NotificationPlanner {
 
     final since = item.lastVerifiedAt ?? item.anchorDate;
     final due = since.plusDays(every);
-    final fireOn = LocalDate.max(due, today);
+    // Clamped for the same reason as a nag: a prompt to re-check a date keeps
+    // being worth sending, so a missed one moves rather than disappears.
+    final fireOn = LocalDate.max(due, earliest);
     return fireOn <= horizon
         ? _alert(item, category, fireOn, 0, AlertReason.verify)
         : null;

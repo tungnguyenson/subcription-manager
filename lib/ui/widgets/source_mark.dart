@@ -46,8 +46,12 @@ abstract final class SourcePresets {
   static const List<(String, SourceGlyph)> all = [
     ('Card', SourceGlyph.card),
     ('Bank transfer', SourceGlyph.bank),
-    ('Momo', SourceGlyph.wallet),
-    ('ZaloPay', SourceGlyph.wallet),
+    // One 'Wallet' rather than a row of named ones. Naming two of the dozen
+    // wallets in use here reads as a list of the wallets the app supports, and
+    // the user whose wallet is not on it concludes theirs is missing. The name
+    // is a free-text field anyway, so the preset only has to say what kind of
+    // money it is; the user types which one.
+    ('Wallet', SourceGlyph.wallet),
     ('Apple / Google Pay', SourceGlyph.contactless),
     ('Cash', SourceGlyph.cash),
   ];

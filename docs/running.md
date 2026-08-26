@@ -146,8 +146,20 @@ Muốn cài mà không cần giữ cửa sổ dòng lệnh:
 
 ```bash
 flutter build ipa --release          # tạo bản cài đặt
-flutter install -d <device-id>     # cài bản vừa build
+flutter install -d <device-id>       # cài bản vừa build
 ```
+
+> **`flutter install` có thể xoá sạch dữ liệu trên máy.** Khi chữ ký hoặc bundle
+> của bản đang có khác bản sắp cài, nó in `Uninstalling old version...` rồi gỡ app
+> trước. iOS gỡ app là xoá luôn container của app, tức là mất `subdock.sqlite`.
+> App này không có tài khoản và không có máy chủ, nên mọi thứ người dùng đã gõ vào
+> nằm hết trong tệp đó và không lấy lại được từ đâu cả.
+>
+> Đây là chuyện đã xảy ra thật, trên máy thật, và mất hết dữ liệu.
+>
+> Cài lên **máy đang dùng hàng ngày** thì xuất dữ liệu ra trước (Settings › Backup ›
+> Export a backup), hoặc dùng `flutter run -d <device-id>` để Xcode cài đè thay vì
+> gỡ. Chỉ dùng `flutter install` khi mất dữ liệu trên máy đó là chuyện không sao.
 
 ## 4. Nạp dữ liệu mẫu để xem giao diện
 

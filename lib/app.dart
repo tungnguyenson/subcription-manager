@@ -12,6 +12,9 @@ import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/domain/upcoming_filter.dart';
+import 'package:subdock/data/backup_store.dart';
+import 'package:subdock/domain/backup.dart';
+import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
 import 'package:subdock/ui/app_shell.dart';
 import 'package:subdock/ui/filter_presenter.dart';
@@ -35,6 +38,7 @@ import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
+import 'package:subdock/ui/widgets/restore_ask.dart';
 import 'package:subdock/ui/widgets/filter_sheet.dart';
 import 'package:subdock/ui/widgets/glass.dart';
 import 'package:subdock/ui/widgets/item_row.dart';
@@ -47,6 +51,8 @@ class SubdockApp extends StatelessWidget {
   final FilterStore filters;
   final NotificationScheduler scheduler;
   final ServiceCatalog catalog;
+  final BackupStore backups;
+  final BackupFiles files;
 
   const SubdockApp({
     super.key,
@@ -55,6 +61,8 @@ class SubdockApp extends StatelessWidget {
     required this.filters,
     required this.scheduler,
     required this.catalog,
+    required this.backups,
+    required this.files,
   });
 
   @override
@@ -64,6 +72,8 @@ class SubdockApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: buildSubdockTheme(),
       home: HomePage(
+        backups: backups,
+        files: files,
         repository: repository,
         settings: settings,
         filters: filters,
@@ -80,6 +90,8 @@ class HomePage extends StatefulWidget {
   final FilterStore filters;
   final NotificationScheduler scheduler;
   final ServiceCatalog catalog;
+  final BackupStore backups;
+  final BackupFiles files;
 
   const HomePage({
     super.key,
@@ -88,6 +100,8 @@ class HomePage extends StatefulWidget {
     required this.filters,
     required this.scheduler,
     required this.catalog,
+    required this.backups,
+    required this.files,
   });
 
   @override
@@ -187,15 +201,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       categories,
     ) {
       if (!mounted) return;
-      setState(() {
-        _categories = CategoryBook(categories);
-        _plan = NotificationPlanner.plan(
-          _items,
-          _categories,
-          LocalDate.today(),
-        );
-      });
-      unawaited(_applyPlan());
+      setState(() => _categories = CategoryBook(categories));
+      _replan();
     });
 
     _itemSubscription = widget.repository.observeAll().listen((items) {
@@ -203,9 +210,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       setState(() {
         _items = items;
         _loaded = true;
-        _plan = NotificationPlanner.plan(items, _categories, LocalDate.today());
       });
-      unawaited(_applyPlan());
+      _replan();
     });
 
     _historySubscription = widget.repository
@@ -291,6 +297,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state != AppLifecycleState.resumed) return;
 
+    // Both of these are stale by the time the app comes back, and neither
+    // arrives through a stream. The clock has moved, and the two Android
+    // permissions are granted on a system settings screen the app cannot
+    // observe -- `requestExactAlarmsPermission` only opens it, and the answer
+    // exists nowhere until someone asks again.
+    _replan();
+    unawaited(_refreshPermission());
+
     final itemId = _openedProviderPageFor;
     _openedProviderPageFor = null;
     if (itemId == null) return;
@@ -313,6 +327,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         _exactTiming = exact;
       });
     }
+  }
+
+  /// Recomputes the plan against the clock and puts it on the device.
+  ///
+  /// The clock is an input, not just the data. An alert set for 08:30 today is
+  /// the next one at 08:29 and is history at 08:31, and no database row
+  /// changes at that minute -- so this has to run on resume as well as on
+  /// every data change, or the app goes on offering a reminder that has
+  /// already been and gone. See [NotificationPlanner.plan].
+  void _replan() {
+    if (!mounted) return;
+    setState(() {
+      _plan = NotificationPlanner.plan(
+        _items,
+        _categories,
+        LocalDateTime.now(),
+      );
+    });
+    unawaited(_applyPlan());
   }
 
   Future<void> _applyPlan() async {
@@ -456,6 +489,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           onOpenSources: _openSources,
           onOpenReminders: _openReminderRules,
           onOpenHistory: _openHistory,
+          onExport: () => unawaited(_exportBackup()),
+          onImport: () => unawaited(_importBackup()),
         );
     }
   }
@@ -617,11 +652,39 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       pushGranted: _notificationsGranted,
       exactTiming: _exactTiming,
       onEnablePush: _requestNotifications,
+      onSendTest: () => unawaited(_sendTestNotification()),
       onToggleLead: (lead, on) =>
           widget.settings.save(_settings.withLead(lead, on)),
       onPickTime: _pickRemindTime,
     ),
   );
+
+  /// Puts one notification on the device so the user can watch it arrive.
+  ///
+  /// Reports the time and the zone rather than "sent". The user is about to
+  /// stare at a phone, and needs to know what they are waiting for and when to
+  /// stop waiting; a zone that is not theirs is the answer on a device where
+  /// reminders arrive at the wrong hour.
+  Future<void> _sendTestNotification() async {
+    final TestDelivery sent;
+    try {
+      sent = await widget.scheduler.sendTest();
+    } on Exception catch (error) {
+      // The failure worth catching is Android refusing an exact alarm, which
+      // throws rather than degrading. Saying so beats a button that looks like
+      // it worked.
+      if (mounted) _confirm('Could not schedule a test: $error');
+      return;
+    }
+    if (!mounted) return;
+
+    _confirm(
+      sent.exact == false
+          ? 'Test set for ${sent.at} ${sent.zone}, give or take a few '
+                'minutes — this device will not fire on the minute.'
+          : 'Test set for ${sent.at} ${sent.zone}.',
+    );
+  }
 
   /// The service list. Pushed rather than a tab: it is the answer to "where did
   /// my Netflix go", which is a question asked from Upcoming, and a fifth tab
@@ -1010,6 +1073,98 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     navigator.popUntil((route) => route.isFirst);
     _openItem(updated);
     _confirm('Saved ${MoneyFormat.date(picked)} as confirmed.');
+  }
+
+  /// Hands the whole database to the system share sheet as one JSON file.
+  ///
+  /// The app never chooses where it lands. There is no folder inside it and no
+  /// account behind it, so the only place a backup is safe is somewhere the
+  /// user already keeps things -- Files, iCloud, a chat with themselves -- and
+  /// the share sheet is the only thing that can put it there.
+  Future<void> _exportBackup() async {
+    final at = DateTime.now();
+    final backup = await widget.backups.read(clock: at);
+    if (!mounted) return;
+
+    // Anchors the popover on iPad, where a share sheet with nothing to point
+    // at is a crash rather than a centred dialog.
+    final box = context.findRenderObject() as RenderBox?;
+
+    try {
+      final saved = await widget.files.save(
+        BackupCodec.encode(backup),
+        BackupStore.fileNameFor(at),
+        origin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+      );
+      // Nothing said on a dismissal. The user closed the sheet without picking
+      // anywhere, and "Saved" would be a lie about a file that went nowhere.
+      if (mounted && saved) _confirm('Backed up ${backup.summary}.');
+    } on Exception catch (error) {
+      if (mounted) _confirm('Could not export: $error');
+    }
+  }
+
+  /// Reads a backup back in, replacing everything.
+  ///
+  /// Three steps that must stay in this order: read the file, then ask, then
+  /// write. Asking first would put a destructive question on screen before the
+  /// app knows whether the file is even readable, and the answer to "replace 12
+  /// items with what?" has to name what.
+  Future<void> _importBackup() async {
+    final String? text;
+    try {
+      text = await widget.files.pick();
+    } on Exception catch (error) {
+      if (mounted) _confirm('Could not open that file: $error');
+      return;
+    }
+    if (text == null || !mounted) return;
+
+    final Backup backup;
+    try {
+      backup = BackupCodec.decode(text);
+    } on BackupFormatException catch (error) {
+      _confirm(error.message);
+      return;
+    }
+
+    // Counted before the write, obviously, but also *named* on the sheet: the
+    // rows about to go are ones the user typed and there is nowhere to undo
+    // this from.
+    final losing = _items.isEmpty
+        ? null
+        : '${_items.length} ${_items.length == 1 ? "item" : "items"}';
+
+    final confirmed = await RestoreAsk.show(
+      context,
+      incoming: backup.summary,
+      existing: losing,
+      takenOn: _takenOn(backup.exportedAt),
+    );
+    if (confirmed != true || !mounted) return;
+
+    try {
+      await widget.backups.restore(backup);
+    } on Exception catch (error) {
+      if (mounted) _confirm('Could not restore: $error');
+      return;
+    }
+
+    // The reminders on the device were planned from rows that no longer exist.
+    // The streams re-plan on their own, but the signature guard would skip the
+    // re-apply whenever the new plan happens to match the old one.
+    _appliedSignature = '';
+    if (mounted) _confirm('Restored ${backup.summary}.');
+  }
+
+  /// `taken 25/08/2026`, or null when the file does not say.
+  ///
+  /// Shown because someone with three backups in a folder picks between them by
+  /// date, and the file name is not visible from inside the picker's result.
+  static String? _takenOn(String iso) {
+    final at = DateTime.tryParse(iso);
+    if (at == null) return null;
+    return 'taken ${MoneyFormat.date(LocalDate.fromDateTime(at.toLocal()))}';
   }
 
   void _confirm(String message) {

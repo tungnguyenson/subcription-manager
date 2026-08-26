@@ -374,7 +374,50 @@ void main() {
 
     test('aliases match so common shorthand works', () {
       expect(lookup.search('openai').first.id, 'chatgpt');
-      expect(lookup.search('mobi').first.id, 'sim-mobifone');
+      expect(lookup.search('mobi').first.id, 'goi-cuoc-dien-thoai');
+    });
+
+    // Every carrier that used to be its own entry still answers by name, and
+    // they all answer with the one entry that replaced them. This is the whole
+    // cost of the merge: type "mobifone" and the result reads "Gói cước điện
+    // thoại", so the carrier has to survive somewhere the user can see it --
+    // it does, as the tier they then tap.
+    test('a carrier name still finds the merged phone plan entry', () {
+      for (final term in [
+        'viettel',
+        'vinaphone',
+        'mobifone',
+        'vietnamobile',
+        'itel',
+        'wintel',
+        'vnsky',
+      ]) {
+        expect(
+          lookup.search(term).first.id,
+          'goi-cuoc-dien-thoai',
+          reason: '"$term" should still reach the merged entry',
+        );
+      }
+    });
+
+    // The word the entry used to be called. Seven entries starting with "SIM"
+    // are gone, so this is now the only thing standing between someone typing
+    // the word on the box in their hand and an empty result list.
+    test('typing SIM still finds it, under its English name', () {
+      final hit = lookup.search('sim').first;
+      expect(hit.id, 'goi-cuoc-dien-thoai');
+      expect(hit.name, 'Mobile plan');
+    });
+
+    test('the merged entry quotes no price at all', () {
+      final entry = lookup.byId('goi-cuoc-dien-thoai')!;
+      // Deliberately empty. Every carrier has its own table and every person
+      // is on a different plan, so any figure here would be the app guessing
+      // on their behalf — and this is the one shelf where being wrong costs a
+      // phone number rather than a month of streaming.
+      expect(entry.plans, isEmpty);
+      expect(entry.defaultPlan, isNull);
+      expect(entry.typicalAmountMinor, isNull);
     });
 
     test('an empty query suggests nothing rather than everything', () {
