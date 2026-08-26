@@ -5,7 +5,6 @@ import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/money.dart';
 import 'package:subdock/ui/annual_saving_presenter.dart';
-import 'package:subdock/ui/date_copy.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/manage_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
@@ -211,14 +210,6 @@ class ItemDetailScreen extends StatelessWidget {
             DetailRow(label: 'Note', value: item.note ?? '—'),
           ],
         ),
-        // The trial block comes before the yearly one, and before the manage
-        // button. On an item in a trial it is the only thing on the screen with
-        // a deadline attached: everything else here is about how much, and this
-        // is about how long.
-        if (item.isTrialOn(today)) ...[
-          const SizedBox(height: 12),
-          _TrialCard(item: item, today: today, remind: _remindLabel()),
-        ],
         // Both blocks answer "what about this one?", which is this screen's
         // question. Neither belongs on the list, which answers "what is coming
         // up?" -- see design-spec.md 2.2.
@@ -325,68 +316,6 @@ class ItemDetailScreen extends StatelessWidget {
 /// Three states rather than two. A plan the user is halfway through has a
 /// payment that is *due now*, and drawing it the same as one already made
 /// would tell them they are one further ahead than they are.
-/// A free trial, with the date it stops being free.
-///
-/// The one card on this screen with a deadline in it. Its wording is the app's
-/// core promise made specific: nothing has been charged, this is the day that
-/// changes, and here is when you will be warned. A trial block that said only
-/// "free trial" would be decoration — the date is the whole value.
-///
-/// Only ever built while the trial is still running, so it never has to word
-/// the past tense: `isTrialOn` has already gone false by the morning after.
-class _TrialCard extends StatelessWidget {
-  final TrackedItem item;
-  final LocalDate today;
-
-  /// The reminder ladder, already worded, so the promise names a real warning
-  /// rather than a generic one.
-  final String remind;
-
-  const _TrialCard({
-    required this.item,
-    required this.today,
-    required this.remind,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final money = item.money;
-    final left = today.daysUntil(item.expiresOn);
-
-    return GroupedCard(
-      decoration: SubdockSurface.accented(),
-      padding: const EdgeInsets.all(14),
-      children: [
-        Text(
-          // The countdown, not the date, as the headline. A date needs
-          // arithmetic before it means anything; "6 days left" does not.
-          left == 0
-              ? 'Free until today — it charges today'
-              : 'Free for $left more ${left == 1 ? "day" : "days"}',
-          style: const TextStyle(
-            fontFamily: SubdockText.family,
-            fontSize: 16,
-            height: 1.3,
-            fontWeight: SubdockWeight.medium,
-            color: SubdockColors.accent,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Text(
-          money == null
-              ? 'The first charge lands '
-                    '${DateCopy.longDate(item.expiresOn)}. You will be '
-                    'reminded ${remind.toLowerCase()}.'
-              : '${MoneyFormat.full(money)} is charged '
-                    '${DateCopy.longDate(item.expiresOn)}. You will be '
-                    'reminded ${remind.toLowerCase()}.',
-          style: SubdockText.footnote,
-        ),
-      ],
-    );
-  }
-}
-
 class _PaymentProgress extends StatelessWidget {
   final Instalments position;
 

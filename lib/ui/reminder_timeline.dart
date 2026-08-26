@@ -6,11 +6,13 @@ import 'package:subdock/ui/money_format.dart';
 
 /// What kind of thing a row on the timeline is.
 ///
-/// Only [deadline] is not a notification. It is on the timeline anyway, and it
-/// is the reason the timeline exists: a reminder dated after it is a reminder
-/// that arrives once the money is already gone, and no amount of wording on a
-/// single "next reminder" line can show that.
-enum TimelineKind { lead, deadline, snoozed, nag, verify }
+/// Two of these are not notifications. [deadline] is the reason the timeline
+/// exists: a reminder dated after it is a reminder that arrives once the money
+/// is already gone, and no amount of wording on a single "next reminder" line
+/// can show that. [trial] is the state the item is in today, and it is here so
+/// that "free now" and "charged on the 23rd" are read as one run of time
+/// rather than as two cards that happen to sit on the same screen.
+enum TimelineKind { trial, lead, deadline, snoozed, nag, verify }
 
 /// One row of "what happens next" for a single item.
 class TimelineStop {
@@ -25,6 +27,14 @@ class TimelineStop {
   /// The row's own words: `1 day before`, `You asked to be reminded`.
   final String label;
 
+  /// The second line, for the rows that are not notifications: the amount that
+  /// moves on a deadline, how much of a trial is left. Worded here rather than
+  /// in the widget because it is the answer to "which day takes how much", and
+  /// that answer has to be testable without pumping a screen.
+  ///
+  /// A notification row leaves this null and gets its send time instead.
+  final String? detail;
+
   /// The soonest notification still coming. The deadline marker never carries
   /// it, because it is not something the app will send.
   final bool isNext;
@@ -37,6 +47,7 @@ class TimelineStop {
     required this.date,
     required this.kind,
     required this.label,
+    this.detail,
     this.time,
     this.isNext = false,
     this.isPast = false,
@@ -121,6 +132,7 @@ abstract final class ReminderTimelinePresenter {
         .length;
 
     final stops = <TimelineStop>[
+      ..._trialStop(item, today),
       ..._markers(item, category, today),
       ..._alertStops(mine),
     ]..sort(_byDate);
@@ -148,6 +160,7 @@ abstract final class ReminderTimelinePresenter {
     final expires = item.expiresOn;
     final actBy = item.actBy;
     final expiring = category.wording == CategoryWording.expires;
+    final trial = item.isTrialOn(today);
 
     return [
       if (actBy != expires)
@@ -155,13 +168,76 @@ abstract final class ReminderTimelinePresenter {
           date: actBy,
           kind: TimelineKind.deadline,
           label: 'Act by this day',
+          detail: actBy < today ? 'already passed' : null,
           isPast: actBy < today,
         ),
       TimelineStop(
         date: expires,
         kind: TimelineKind.deadline,
-        label: expiring ? 'Expires' : 'Payment due',
+        // `First payment` while the trial is running, because on that item
+        // this day is not one charge among many -- it is the one the whole
+        // trial was counting down to.
+        label: expiring
+            ? 'Expires'
+            : trial
+            ? 'First payment'
+            : 'Payment due',
+        detail: _dueDetail(item, expiring: expiring, past: expires < today),
         isPast: expires < today,
+      ),
+    ];
+  }
+
+  /// How much moves on the deadline, and whether the day is behind us.
+  ///
+  /// The amount is what stops this row reading like the reminders above it. A
+  /// column where every row carries a date and a sentence leaves the user
+  /// counting rings to find the day the money actually goes.
+  ///
+  /// `charged` is only said on a shelf whose wording is *Due*, where somebody
+  /// else takes the money on the day. On an expiring shelf -- a prepaid SIM, a
+  /// licence -- the price is what renewing costs and no one debits it, so the
+  /// number stands alone. Past dates drop the verb entirely: the app has no
+  /// idea whether the charge went through, only that the day is gone.
+  static String? _dueDetail(
+    TrackedItem item, {
+    required bool expiring,
+    required bool past,
+  }) {
+    final money = item.money;
+    final amount = money == null ? null : MoneyFormat.full(money);
+    if (past) return [?amount, 'already passed'].join(' · ');
+    if (amount == null) return null;
+    return expiring ? amount : '$amount charged';
+  }
+
+  /// Today's row on an item in a free trial: the only fact in this block that
+  /// is about now rather than about a date still coming.
+  ///
+  /// This used to be a card of its own above the block. Three of the four
+  /// things it said -- the charge date, the amount, the reminder that is
+  /// coming -- are rows of this column already, said there by the plan itself
+  /// rather than by a second piece of wording that could drift from it. What
+  /// only the card could say is this: today is free, and for how much longer.
+  ///
+  /// Dated today because a trial has no date of its own. The day it ends is
+  /// `expiresOn`, which is the deadline row right below it. See trap 14.
+  static List<TimelineStop> _trialStop(TrackedItem item, LocalDate today) {
+    if (!item.isTrialOn(today)) return const [];
+
+    final left = today.daysUntil(item.expiresOn);
+    return [
+      TimelineStop(
+        date: today,
+        kind: TimelineKind.trial,
+        // The countdown as the headline, not the date. A date needs arithmetic
+        // before it means anything; `28 more days` does not, and the date is
+        // on the row below anyway.
+        //
+        // Never `0 more days`: `isTrialOn` is `today < expiresOn`, so this row
+        // is already gone on the morning of the charge.
+        label: 'Free for $left more ${left == 1 ? "day" : "days"}',
+        detail: 'nothing charged yet',
       ),
     ];
   }
@@ -228,10 +304,17 @@ abstract final class ReminderTimelinePresenter {
   static int _byDate(TimelineStop a, TimelineStop b) {
     final byDate = a.date.compareTo(b.date);
     if (byDate != 0) return byDate;
-    final aMarker = a.kind == TimelineKind.deadline ? 1 : 0;
-    final bMarker = b.kind == TimelineKind.deadline ? 1 : 0;
-    return aMarker.compareTo(bMarker);
+    return _rank(a).compareTo(_rank(b));
   }
+
+  /// Within one day: what is true already, then what the app will send, then
+  /// the day's own deadline. The trial row is first because it describes the
+  /// state the rest of that day is being read out of.
+  static int _rank(TimelineStop stop) => switch (stop.kind) {
+    TimelineKind.trial => 0,
+    TimelineKind.deadline => 2,
+    _ => 1,
+  };
 
   /// Marks the first row that is an actual notification. Done by mutation over
   /// the sorted list rather than during construction, because "next" is a fact
@@ -240,11 +323,13 @@ abstract final class ReminderTimelinePresenter {
     for (var i = 0; i < stops.length; i++) {
       final stop = stops[i];
       if (stop.kind == TimelineKind.deadline) continue;
+      if (stop.kind == TimelineKind.trial) continue;
       stops[i] = TimelineStop(
         date: stop.date,
         time: stop.time,
         kind: stop.kind,
         label: stop.label,
+        detail: stop.detail,
         isNext: true,
         isPast: stop.isPast,
       );

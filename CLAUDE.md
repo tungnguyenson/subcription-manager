@@ -455,6 +455,23 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
       hiện ngay dưới dòng hứa nhắc mỗi ngày. Cả hai đều đúng, vì planner chạy lại khi các
       mốc gần trôi qua và nhặt nag về. Còn lead, snooze hay verify bị cắt thì đếm: mỗi cái
       gọi tên đúng một ngày và không có lần thứ hai để gửi.
+    - **Mốc hạn mang theo số tiền, và dòng nhắc hạn tự xưng là nhắc hạn.** Cả cột trước
+      đây chỉ có ngày với một câu chữ, nên muốn biết dòng nào là thông báo app gửi và
+      dòng nào là ngày tiền đi thì phải nhìn cái vòng tròn 4px. Nay dòng nhắc ghi
+      `Reminder at 08:30`, mốc hạn ghi số tiền. Chữ `charged` chỉ được viết cho nhóm có
+      `wording` là *Due*, tức là nhóm mà có người tự trừ tiền trong ngày đó. Nhóm hết hạn
+      như SIM trả trước hay giấy phép thì con số đứng một mình, vì đó là giá gia hạn chứ
+      không ai trừ. Ngày đã qua thì bỏ hẳn động từ, vì app không biết khoản đó có đi hay
+      không, chỉ biết ngày đã qua.
+    - **Dùng thử là một dòng của cột này, không còn là card riêng nằm trên.** Card cũ nói
+      ba thứ mà cột đã nói rồi: ngày trừ tiền, số tiền, và nhắc hạn sắp tới. Nói lại bằng
+      một giọng thứ hai là mở đường cho hai giọng lệch nhau, trong khi giọng của cột đọc
+      thẳng từ plan. Thứ duy nhất chuyển sang là phần mà một cột toàn ngày tương lai không
+      tự nói được: hôm nay còn miễn phí, và còn mấy ngày. Dòng đó mang ngày hôm nay vì
+      bản thân kỳ dùng thử không có ngày riêng, xem bẫy 14, và nó không bao giờ được đánh
+      dấu `next` vì nó không phải thứ app sắp gửi. Ngày hết dùng thử đổi chữ thành
+      `First payment`. `isTrialOn` là `today < expiresOn` nên dòng này biến mất ngay sáng
+      ngày bị trừ tiền, tức là không bao giờ có chữ "Free for 0 more days".
 
     Mốc hạn ở lại trên cột **kể cả khi không còn nhắc hạn nào**, và lý do im lặng thì nói
     ra ở footnote (`ReminderTimeline.silence`). Ba lý do khác nhau và người dùng chỉ sửa

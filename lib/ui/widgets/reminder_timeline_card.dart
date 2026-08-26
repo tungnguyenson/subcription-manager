@@ -75,6 +75,7 @@ class _StopRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final marker = stop.kind == TimelineKind.deadline;
+    final trial = stop.kind == TimelineKind.trial;
     final muted = stop.isPast;
 
     return IntrinsicHeight(
@@ -106,7 +107,15 @@ class _StopRow extends StatelessWidget {
                 children: [
                   Text(
                     stop.label,
-                    style: marker
+                    // The trial row carries the accent, because it is the one
+                    // row that is true right now. The card it replaced was
+                    // accented all over for the same reason.
+                    style: trial
+                        ? SubdockText.rowLabel.copyWith(
+                            fontWeight: SubdockWeight.medium,
+                            color: SubdockColors.accent,
+                          )
+                        : marker
                         ? SubdockText.rowLabel.copyWith(
                             fontWeight: SubdockWeight.medium,
                             color: muted
@@ -135,17 +144,23 @@ class _StopRow extends StatelessWidget {
     );
   }
 
-  /// The second line: the send time, and whether this is the one coming up.
+  /// The second line: what kind of thing this row is.
   ///
-  /// A deadline gets no time and no "next" — it is a day the app is telling
-  /// the user about, not a notification it is promising to send.
+  /// The word *Reminder* is spelled out rather than left to a bare `08:30`,
+  /// and the deadline carries its amount, because those two together are the
+  /// only thing telling the user which of these dates sends a notification and
+  /// which one takes money. A column of dates and sentences alone left them
+  /// counting rings.
+  ///
+  /// A deadline and a trial row get their wording from the presenter: neither
+  /// is a notification, so neither has a send time to print or a "next" to be.
   String? _detail() {
-    if (stop.kind == TimelineKind.deadline) {
-      return stop.isPast ? 'already passed' : null;
+    if (stop.kind == TimelineKind.deadline || stop.kind == TimelineKind.trial) {
+      return stop.detail;
     }
     final at = stop.time;
-    if (at == null) return stop.isNext ? 'next' : null;
-    return stop.isNext ? '$at · next' : '$at';
+    if (at == null) return stop.isNext ? 'Reminder · next' : 'Reminder';
+    return stop.isNext ? 'Reminder at $at · next' : 'Reminder at $at';
   }
 }
 
@@ -168,8 +183,10 @@ class _Rail extends StatelessWidget {
       width: 14,
       child: CustomPaint(
         painter: _RailPainter(
-          filled: stop.isNext,
-          hollow: stop.kind == TimelineKind.deadline,
+          hollow:
+              stop.kind == TimelineKind.deadline ||
+              stop.kind == TimelineKind.trial,
+          accent: stop.isNext || stop.kind == TimelineKind.trial,
           muted: stop.isPast,
           top: !first,
           bottom: !last,
@@ -180,21 +197,23 @@ class _Rail extends StatelessWidget {
 }
 
 class _RailPainter extends CustomPainter {
-  /// The next notification, drawn solid in the accent colour. Exactly one row
-  /// can have it.
-  final bool filled;
-
-  /// A deadline marker: a ring, so it is legible as not-a-notification without
-  /// reading the words.
+  /// A ring rather than a dot: the two rows that are not notifications, so
+  /// they are legible as such without reading the words. A deadline and the
+  /// trial row both take it.
   final bool hollow;
+
+  /// The accent colour: the next notification, and the trial row. Solid dot or
+  /// ring is [hollow]'s business -- this is only the colour, so the one filled
+  /// accent dot still reads as the single thing coming up.
+  final bool accent;
 
   final bool muted;
   final bool top;
   final bool bottom;
 
   const _RailPainter({
-    required this.filled,
     required this.hollow,
+    required this.accent,
     required this.muted,
     required this.top,
     required this.bottom,
@@ -221,7 +240,7 @@ class _RailPainter extends CustomPainter {
 
     final colour = muted
         ? SubdockColors.inkMuted
-        : filled
+        : accent
         ? SubdockColors.accent
         : SubdockColors.inkSecondary;
 
@@ -241,7 +260,7 @@ class _RailPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RailPainter old) =>
-      old.filled != filled ||
+      old.accent != accent ||
       old.hollow != hollow ||
       old.muted != muted ||
       old.top != top ||

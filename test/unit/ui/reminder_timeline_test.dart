@@ -5,6 +5,7 @@ import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/domain/reminders.dart';
+import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/reminder_timeline.dart';
 
 /// Driven through the real planner rather than a hand-built alert list.
@@ -29,6 +30,9 @@ void main() {
     bool paused = false,
     ItemState state = ItemState.active,
     LocalDate? snoozedUntil,
+    int? amountMinor,
+    String currency = 'VND',
+    bool inTrial = false,
   }) {
     final shelf = category ?? streaming;
     return TrackedItem(
@@ -45,6 +49,9 @@ void main() {
       paused: paused,
       state: state,
       snoozedUntil: snoozedUntil,
+      amountMinor: amountMinor,
+      currency: amountMinor == null ? null : currency,
+      inTrial: inTrial,
     );
   }
 
@@ -274,6 +281,167 @@ void main() {
 
     test('nothing is said while any reminder is still coming', () {
       expect(build(item(expiresOn: '2026-08-28')).silence, isNull);
+    });
+  });
+
+  // Which day sends a notification and which day takes money. Without the
+  // amount every row here is a date and a sentence, and the user is left
+  // telling a deadline from a reminder by the shape of a 4px ring.
+  group('which day costs what', () {
+    test('the due row carries the amount that moves', () {
+      final it = item(
+        expiresOn: '2026-08-28',
+        leadDays: const [],
+        amountMinor: 231000,
+      );
+
+      expect(
+        build(it).stops.single.detail,
+        '${MoneyFormat.full(it.money!)} charged',
+      );
+    });
+
+    // Nobody debits a prepaid SIM on the day it dies. The price is what
+    // renewing costs, so the number is stated and the verb is not.
+    test('an expiring shelf states the price without claiming a charge', () {
+      final expiring = CategoryBook.shipped['PHONE'];
+      final it = item(
+        expiresOn: '2026-08-28',
+        category: expiring,
+        leadDays: const [],
+        nag: NagPolicy.none,
+        amountMinor: 9900000,
+      );
+
+      final marker = build(
+        it,
+        category: expiring,
+      ).stops.firstWhere((s) => s.kind == TimelineKind.deadline);
+
+      expect(marker.detail, MoneyFormat.full(it.money!));
+    });
+
+    test('an item with no price says nothing rather than a dash', () {
+      expect(
+        build(item(expiresOn: '2026-08-28', leadDays: const []))
+            .stops
+            .single
+            .detail,
+        isNull,
+      );
+    });
+
+    // Overdue is exactly when the amount matters most, so it stays. The verb
+    // goes: the app has no idea whether the charge went through.
+    test('a passed deadline keeps its amount and drops the verb', () {
+      final it = item(
+        expiresOn: '2026-08-20',
+        leadDays: const [],
+        amountMinor: 231000,
+      );
+
+      final marker = build(it).stops
+          .firstWhere((s) => s.kind == TimelineKind.deadline);
+
+      expect(marker.detail, '${MoneyFormat.full(it.money!)} · already passed');
+    });
+  });
+
+  // The trial card used to sit above this block saying the charge date, the
+  // amount and the reminder over again in a second voice. Those are rows here
+  // now; what moved across is the one thing they cannot say.
+  group('a free trial', () {
+    TrackedItem trialItem() => item(
+      expiresOn: '2026-09-23',
+      leadDays: const [3],
+      amountMinor: 231000,
+      inTrial: true,
+    );
+
+    test('today is the first row, and it counts the free days left', () {
+      final stops = build(trialItem()).stops;
+
+      expect(stops.first.kind, TimelineKind.trial);
+      expect(stops.first.date, today);
+      expect(stops.first.label, 'Free for 28 more days');
+      expect(stops.first.detail, 'nothing charged yet');
+    });
+
+    test('the day the trial ends is named as the first payment', () {
+      final marker = build(trialItem()).stops
+          .firstWhere((s) => s.kind == TimelineKind.deadline);
+
+      expect(marker.date, d('2026-09-23'));
+      expect(marker.label, 'First payment');
+      expect(marker.detail, '231,000 ₫ charged');
+    });
+
+    // `isTrialOn` is `today < expiresOn`, so the trial is already off on the
+    // morning of the charge: the money goes that day whether or not the user
+    // opens the app. The row is gone by then and the deadline is worded plainly.
+    test('the charge day itself has no trial row', () {
+      final it = item(
+        expiresOn: '2026-08-26',
+        leadDays: const [],
+        amountMinor: 231000,
+        inTrial: true,
+      );
+
+      final stops = build(it).stops;
+
+      expect(stops.where((s) => s.kind == TimelineKind.trial), isEmpty);
+      expect(stops.single.label, 'Payment due');
+    });
+
+    test('one day left is not pluralised', () {
+      final it = item(
+        expiresOn: '2026-08-27',
+        leadDays: const [],
+        amountMinor: 231000,
+        inTrial: true,
+      );
+
+      expect(build(it).stops.first.label, 'Free for 1 more day');
+    });
+
+    // The accent dot means "the next thing the app will send". The trial row
+    // is a state, not a send, and taking the mark would leave the reminder it
+    // belongs to unmarked.
+    test('the trial row is never the next notification', () {
+      final stops = build(trialItem()).stops;
+
+      expect(stops.first.isNext, isFalse);
+      expect(stops.firstWhere((s) => s.isNext).kind, TimelineKind.lead);
+    });
+
+    test('no trial row on an item that is not in one', () {
+      expect(
+        build(item(expiresOn: '2026-09-23', amountMinor: 231000)).stops
+            .where((s) => s.kind == TimelineKind.trial),
+        isEmpty,
+      );
+    });
+
+    // The flag stays on after the first charge -- it records that the months
+    // before it were free -- but the row is about today. See trap 14.
+    test('no trial row once the first charge is behind us', () {
+      final charged = item(
+        expiresOn: '2026-08-20',
+        leadDays: const [],
+        amountMinor: 231000,
+        inTrial: true,
+      );
+
+      expect(
+        build(charged).stops.where((s) => s.kind == TimelineKind.trial),
+        isEmpty,
+      );
+      expect(
+        build(charged).stops
+            .firstWhere((s) => s.kind == TimelineKind.deadline)
+            .label,
+        'Payment due',
+      );
     });
   });
 

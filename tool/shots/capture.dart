@@ -343,6 +343,14 @@ void main() {
     await tapText('Edit');
     await shot('edit');
     await pop();
+    await pop();
+
+    // The same screen on an item in a free trial. Its own shot because the
+    // trial is a row of "What happens next" now rather than a card above it,
+    // and that row is the only thing on the screen saying today is free.
+    await tapText('Claude Pro');
+    await shot('detail-trial');
+    await pop();
 
     // The add form, on a service with plans, with Forever unticked so the
     // "when does it stop" card is on screen.

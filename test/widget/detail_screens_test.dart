@@ -200,6 +200,52 @@ void main() {
         expect(find.text('Edit reminders'), findsOneWidget);
       });
 
+      // Which row sends a notification and which one takes money. The block
+      // is a column of dates and sentences otherwise, and the only thing
+      // separating a reminder from a charge was the shape of a 4px ring.
+      testWidgets('a reminder names itself, and the due day names the sum', (
+        tester,
+      ) async {
+        await show(
+          tester,
+          ItemDetailScreen(
+            item: claude,
+            category: CategoryBook.shipped[claude.categoryId],
+            today: today,
+            timeline: timelineFor(claude),
+          ),
+        );
+
+        expect(find.textContaining('Reminder at 08:30'), findsWidgets);
+        expect(find.text(r'$20.00 charged'), findsOneWidget);
+      });
+
+      // The trial used to be an accented card above this block, repeating the
+      // charge date, the amount and the reminder that are rows here already.
+      // Only the part a column of future dates cannot carry moved across.
+      testWidgets('a trial is a row of this block, not a card above it', (
+        tester,
+      ) async {
+        final trial = claude.copyWith(inTrial: true);
+
+        await show(
+          tester,
+          ItemDetailScreen(
+            item: trial,
+            category: CategoryBook.shipped[trial.categoryId],
+            today: today,
+            timeline: timelineFor(trial),
+          ),
+        );
+
+        expect(find.text('Free for 2 more days'), findsOneWidget);
+        expect(find.text('nothing charged yet'), findsOneWidget);
+        expect(find.text('First payment'), findsOneWidget);
+        expect(find.text(r'$20.00 charged'), findsOneWidget);
+        // The old card's own sentence, gone with it.
+        expect(find.textContaining('The first charge lands'), findsNothing);
+      });
+
       testWidgets('an item with reminders off says so under the block', (
         tester,
       ) async {
