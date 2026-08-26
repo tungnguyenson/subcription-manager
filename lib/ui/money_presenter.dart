@@ -103,6 +103,35 @@ class TrialSpend {
   });
 }
 
+/// One shelf's share of the card's total.
+///
+/// A share as well as a figure, because the question this answers is not "how
+/// much is streaming" -- the figure alone says that -- but "what is this money
+/// going on", and a proportion is what makes forty thousand beside two hundred
+/// thousand read at a glance.
+@immutable
+class CategorySpend {
+  final String label;
+  final Money total;
+
+  /// The figure went through a rate to get here.
+  final bool converted;
+
+  /// This row's part of the rows below it, 0 to 1.
+  ///
+  /// Of the rows rather than of [MoneyView.total]: anything the app could not
+  /// convert is missing from both, so the shares always add up to the whole
+  /// bar rather than to some fraction of it that nothing on screen explains.
+  final double share;
+
+  const CategorySpend({
+    required this.label,
+    required this.total,
+    required this.share,
+    this.converted = false,
+  });
+}
+
 @immutable
 class MoneyView {
   final MoneySpan span;
@@ -144,6 +173,14 @@ class MoneyView {
   /// Three bands, for the year view. Empty on the month view.
   final List<YearBand> bands;
 
+  /// The same total split by shelf, largest first. On both spans.
+  ///
+  /// Kept separate from [bands], which is the year view's three fixed kinds.
+  /// These are the user's own shelves and there can be twenty of them, so this
+  /// is a section of its own rather than another block on the total card --
+  /// see the note on the card holding the same number of lines in every month.
+  final List<CategorySpend> byCategory;
+
   /// Six columns of what each month costs, for the month view.
   ///
   /// Empty when no counted item has an occurrence anywhere in the window, and
@@ -167,6 +204,7 @@ class MoneyView {
     this.alternateTotal,
     this.items = const [],
     this.bands = const [],
+    this.byCategory = const [],
     this.bars = const [],
     this.trials = const [],
   });
@@ -288,6 +326,13 @@ abstract final class MoneyPresenter {
       today: today,
     );
 
+    // Per occurrence, exactly like the total above it: a weekly charge is four
+    // rows of the same shelf in a four-week month, and its share has to say so.
+    final perShelf = <String, List<Money>>{};
+    for (final item in counted) {
+      (perShelf[item.categoryId] ??= []).add(item.money!);
+    }
+
     return MoneyView(
       span: MoneySpan.month,
       showingMonth: showing,
@@ -301,9 +346,43 @@ abstract final class MoneyPresenter {
       // which months have not happened.
       alternateTotal: MoneyPresenter.alternateTotal(total, restate: restate),
       items: rows,
+      byCategory: _shelfRows(perShelf, categories, today),
       bars: _bars(charges: charges, today: today, showing: showing),
       trials: trials,
     );
+  }
+
+  /// Shelves as shares of themselves, largest first.
+  ///
+  /// A shelf whose money the app cannot convert is dropped rather than shown
+  /// at zero, and the shares are taken over what is left. A row reading `0%`
+  /// beside a real amount is the screen reporting a rate failure in the one
+  /// notation that looks like an answer.
+  static List<CategorySpend> _shelfRows(
+    Map<String, List<Money>> perShelf,
+    CategoryBook categories,
+    LocalDate today,
+  ) {
+    final totals = <String, MixedTotal>{};
+    var whole = 0;
+    for (final entry in perShelf.entries) {
+      final sum = Fx.total(entry.value, rate: Fx.bundledUsdVnd, today: today);
+      final base = sum.approximateBase;
+      if (base == null || base.minor <= 0) continue;
+      totals[entry.key] = sum;
+      whole += base.minor;
+    }
+    if (whole == 0) return const [];
+
+    return [
+      for (final entry in totals.entries)
+        CategorySpend(
+          label: categories[entry.key].label,
+          total: entry.value.approximateBase!,
+          converted: entry.value.converted,
+          share: entry.value.approximateBase!.minor / whole,
+        ),
+    ]..sort((a, b) => b.total.minor.compareTo(a.total.minor));
   }
 
   /// The twelve columns of [today]'s calendar year, January first.
@@ -416,12 +495,15 @@ abstract final class MoneyPresenter {
     final annual = <Money>[];
     final all = <Money>[];
 
+    final perShelf = <String, List<Money>>{};
+
     for (final item in live) {
       if (!item.countsTowardSpend(categories[item.categoryId])) continue;
       final yearly = annualised(item);
       if (yearly == null) continue;
 
       all.add(yearly);
+      (perShelf[item.categoryId] ??= []).add(yearly);
       if (_yearlyOrLonger(item.cycle)) {
         annual.add(yearly);
         // An obligation is an amount owed by a date. Filing one with
@@ -459,6 +541,7 @@ abstract final class MoneyPresenter {
             if (band.approximateBase case final Money total)
               YearBand(label: label, total: total, converted: band.converted),
       ],
+      byCategory: _shelfRows(perShelf, categories, today),
       trials: trials,
     );
   }

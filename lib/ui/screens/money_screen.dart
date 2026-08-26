@@ -70,11 +70,12 @@ class MoneyScreen extends StatelessWidget {
     return ListView(
       padding: SubdockSpacing.screenPadding(context),
       children: [
-        // `Money`, while the tab that opens it says `Spending`. Not a slip:
-        // the tab has to name the *act* — four verbs' worth of noun in a row
-        // of five — and the screen names what is on it, which includes what is
-        // not being spent. The hand-off screenshots settle it this way.
-        const Text('Money', style: SubdockText.screenTitle),
+        // The same word as the tab that opens it. The two used to differ --
+        // `Spending` on the tab, `Money` here -- on the argument that the tab
+        // names the act while the screen names its contents. In use it reads
+        // as two places: a reader who taps `Spending` and lands on `Money`
+        // has to check they got where they meant to go, every time.
+        const Text('Spending', style: SubdockText.screenTitle),
         const SizedBox(height: 18),
         _TotalCard(view: view, onSpan: onSpan, onMonth: onMonth),
         if (savings != null) ...[
@@ -141,6 +142,17 @@ class MoneyScreen extends StatelessWidget {
                     ],
                   ),
                 ),
+            ],
+          ),
+        ],
+        // Coarse before fine, and before the item list on the month view: the
+        // question a reader arrives with is what the money is going *on*, and
+        // twenty shelves answer that where forty rows do not.
+        if (view.byCategory.isNotEmpty) ...[
+          const SectionLabel('By category'),
+          GroupedCard(
+            children: [
+              for (final shelf in view.byCategory) _CategoryRow(shelf: shelf),
             ],
           ),
         ],
@@ -249,6 +261,62 @@ class _CardRow extends StatelessWidget {
           Text(value, style: SubdockText.monoValue.copyWith(fontSize: 15)),
         ],
       ],
+    );
+  }
+}
+
+/// One shelf: its name, its share as a bar, and what it comes to.
+///
+/// The bar rather than a percentage. A number beside a number is two things to
+/// compare; a bar is the comparison already done, and the figure on the right
+/// is still there for anyone who wants the exact amount. A percentage would be
+/// a third figure on a row that already has one.
+class _CategoryRow extends StatelessWidget {
+  final CategorySpend shelf;
+
+  const _CategoryRow({required this.shelf});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: SubdockSpacing.rowH,
+        vertical: 12,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  shelf.label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: SubdockText.rowLabel,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                shelf.converted
+                    ? '≈ ${MoneyFormat.full(shelf.total)}'
+                    : MoneyFormat.full(shelf.total),
+                style: SubdockText.monoValue,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(3),
+            child: LinearProgressIndicator(
+              value: shelf.share,
+              minHeight: 5,
+              backgroundColor: SubdockColors.accentTrack,
+              valueColor: const AlwaysStoppedAnimation(SubdockColors.accent),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

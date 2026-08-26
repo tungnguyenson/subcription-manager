@@ -339,9 +339,11 @@ void main() {
       );
       await show(tester, MoneyScreen(view: view(total)));
 
-      // `Money` on the screen, `Spending` on the tab that opens it. See the
-      // comment on the title in MoneyScreen.
-      expect(find.text('Money'), findsOneWidget);
+      // The same word as the tab that opens it. It used to read `Money`, and
+      // a reader who taps `Spending` and lands somewhere called something else
+      // has to check they got where they meant to go.
+      expect(find.text('Spending'), findsOneWidget);
+      expect(find.text('Money'), findsNothing);
       // 618,000 ₫ + $20 at 26,046, then the same figure back at the same rate.
       expect(find.textContaining('1,138,920 ₫'), findsOneWidget);
       expect(find.textContaining(r'$43.73'), findsOneWidget);

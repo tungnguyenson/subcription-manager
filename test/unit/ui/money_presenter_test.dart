@@ -114,6 +114,80 @@ void main() {
     });
   });
 
+  // The question a reader arrives with is what the money is going *on*, and
+  // twenty shelves answer that where forty item rows do not.
+  group('by category', () {
+    test('groups the month by shelf, largest first', () {
+      final month = view([
+        item('Netflix', categoryId: 'STREAMING', amountMinor: 260000),
+        item('Spotify', categoryId: 'MUSIC', amountMinor: 59000),
+        item('YouTube', categoryId: 'STREAMING', amountMinor: 69000),
+      ], MoneySpan.month);
+
+      expect(month.byCategory.map((c) => c.label), ['Streaming', 'Music']);
+      expect(month.byCategory.first.total, Money.vnd(329000));
+      expect(month.byCategory.last.total, Money.vnd(59000));
+    });
+
+    // Of the rows rather than of the card's total, so the bars always fill the
+    // width between them.
+    test('the shares add up to one', () {
+      final month = view([
+        item('Netflix', categoryId: 'STREAMING', amountMinor: 300000),
+        item('Spotify', categoryId: 'MUSIC', amountMinor: 100000),
+      ], MoneySpan.month);
+
+      expect(month.byCategory.map((c) => c.share), [0.75, 0.25]);
+    });
+
+    // Per occurrence, like the total above it: a weekly charge is four rows of
+    // the same shelf in a four-week month and its share has to say so.
+    test('a charge landing twice counts twice', () {
+      final fortnightly = view([
+        item(
+          'Rent',
+          categoryId: 'HOUSING',
+          anchorDate: '2026-08-06',
+          cycle: Cycle.every(2, CycleField.week),
+          amountMinor: 100000,
+        ),
+        item('Spotify', categoryId: 'MUSIC', amountMinor: 100000),
+      ], MoneySpan.month);
+
+      // 6, 20 August for the fortnightly one.
+      expect(fortnightly.byCategory.first.label, 'Home');
+      expect(fortnightly.byCategory.first.total, Money.vnd(200000));
+    });
+
+    test('the year view is split the same way', () {
+      final year = view([
+        item('Netflix', categoryId: 'STREAMING', amountMinor: 100000),
+        item(
+          'Adobe',
+          categoryId: 'PRODUCTIVITY',
+          cycle: Cycle.yearly,
+          amountMinor: 1200000,
+        ),
+      ], MoneySpan.year);
+
+      // Both come to 1,200,000 over twelve months, so neither can win on
+      // rounding and the split is a clean half each.
+      expect(
+        year.byCategory.map((c) => c.label),
+        containsAll(<String>['Streaming', 'Productivity']),
+      );
+      expect(year.byCategory.map((c) => c.share), [0.5, 0.5]);
+    });
+
+    test('nothing to split leaves the section off', () {
+      final month = view([
+        item('Passport', categoryId: 'DOCUMENTS', amountMinor: null),
+      ], MoneySpan.month);
+
+      expect(month.byCategory, isEmpty);
+    });
+  });
+
   group('next twelve months', () {
     test('a monthly charge is carried twelve times forward', () {
       final year = view([item('Netflix')], MoneySpan.year);
