@@ -192,16 +192,71 @@ thật sự chữa được chỗ đau.
 nhập sẵn ở tầng hệ điều hành. Không tài khoản, không máy chủ, không hoá đơn hạ tầng,
 không có kho dữ liệu tập trung nào để bị tấn công, và nó chạy mà không cần ai nhớ bấm gì.
 
-### 6.1 iOS
+### 6.1 iOS: đã dựng ngày 26/08/2026
 
 Chỗ vướng hôm 25/08 rất cụ thể: dữ liệu **có** trong bản sao lưu iCloud của máy, nhưng
 iOS không cho khôi phục riêng một app.
 
 Cách gỡ là ghi một tệp vào **iCloud Drive container của chính app**, để nó là một tệp
-độc lập lấy lại được riêng, thay vì một mẩu chìm trong bản sao lưu cả máy. Máy mới đăng
-nhập cùng tài khoản iCloud thì app tự tìm thấy tệp đó và mời khôi phục.
+độc lập lấy lại được riêng, thay vì một mẩu chìm trong bản sao lưu cả máy.
 
-Cần thêm entitlement iCloud vào target. Chưa khảo sát thư viện Flutter nào dùng được.
+Đã làm:
+
+- `ios/Runner/Runner.entitlements` khai container `iCloud.space.subdock.subdock`, và
+  `CODE_SIGN_ENTITLEMENTS` được thêm vào cả ba cấu hình của target Runner.
+- Gói `icloud_storage`, bọc sau `lib/platform/cloud_backup.dart` để đổi được về sau.
+- Ghi tự động sau mỗi thay đổi dữ liệu, hoãn 12 giây, và đẩy đi ngay khi app chuyển
+  xuống nền.
+- Dòng `iCloud` trên màn Settings nói ra trạng thái thật của lần ghi gần nhất.
+
+**Ký thành công không có nghĩa entitlement vào được.** Ký tự động có thể lặng lẽ bỏ một
+entitlement mà hồ sơ cấp phép không có, và build vẫn xanh. Cách kiểm duy nhất là đọc chữ
+ký của bản đã dựng:
+
+```bash
+codesign -d --entitlements :- build/ios/iphoneos/Runner.app
+```
+
+Ba khoá `icloud-container-identifiers`, `icloud-services` và `ubiquity-container-identifiers`
+phải nằm trong đó. Ngày 26/08 đã kiểm và có đủ.
+
+**Khôi phục: một chạm, và đó là bản sửa cho một lỗi đã lộ ra.**
+
+Bản đầu chỉ có ghi lên, còn lấy về thì bắt người dùng tự vào app Files tìm tệp. Thử trên
+máy thật xong, câu hỏi đầu tiên của chủ dự án là *"iCloud: Saved, nhưng restore thế
+nào?"*. Câu hỏi đó chính là lỗi: app nói nó đã cất, mà không nói được cất ở đâu và lấy
+lại kiểu gì, đúng cái kiểu tỏ ra chắc chắn hơn mức nó giúp được.
+
+Nên `CloudBackup` có thêm `latest()`, và giao diện có **hai dòng riêng** thay vì một dòng
+tự đoán nguồn:
+
+| Dòng | Nguồn |
+|---|---|
+| `Restore from iCloud` | Tệp app tự giữ. Chỉ hiện khi nền tảng có cloud |
+| `Restore from a file` | Tệp người dùng tự chọn. Tên rút về `Restore from a backup` khi không có dòng trên, vì lúc đó không có gì để phân biệt |
+
+Hai dòng chứ không phải một, vì **cả hai đều xoá đúng những hàng như nhau**, nên thứ
+người dùng phải chắc chắn trước khi bấm là *bản nào*. Một dòng lặng lẽ ưu tiên một nguồn
+là quyết định hộ họ. Cả hai đi qua cùng một `_restoreFrom`, nên chúng hỏi cùng một câu
+hỏi và không thể mọc ra hai cảnh báo khác nhau.
+
+Màn hình khi chưa có gì thì ngược lại: **một nút**, tìm iCloud trước rồi mới rơi xuống bộ
+chọn tệp. Ở đó không có danh sách nào để mất, nên đoán đúng nguồn khả dĩ nhất là tiết
+kiệm cho người đang vội một quyết định.
+
+`Info.plist` vẫn đặt `NSUbiquitousContainerIsDocumentScopePublic` để thư mục Subdock hiện
+trong app Files. Giờ nó không còn là đường khôi phục duy nhất nữa, nhưng vẫn đáng giữ:
+**người dùng nhìn thấy tệp sao lưu của chính mình** nên tin được là nó có thật. Một bản
+sao lưu không ai kiểm tra được là bản sao lưu chỉ phát hiện ra là rỗng vào đúng hôm cần
+tới nó.
+
+Một chi tiết của plugin phải nhớ: `download` trả về ngay khi *đặt lệnh tải*, không đợi
+tải xong. Tín hiệu duy nhất báo xong là luồng tiến độ đóng lại. `_download` chờ luồng đó
+tối đa 20 giây rồi **nuốt luôn cái quá hạn**, vì một tệp đã nằm sẵn dưới máy có thể về
+mà luồng không báo gì cả; chỗ gọi tự kiểm tệp thay vì tin vào tín hiệu.
+
+**Hệ quả lên cách build:** `icloud_storage` chưa hỗ trợ Swift Package Manager, nên dự án
+từ nay dùng cả SPM lẫn CocoaPods. Xem `docs/running.md` mục 1.
 
 ### 6.2 Android
 
@@ -219,15 +274,25 @@ Nếu hai nền tảng cho ra hai mức bảo đảm khác nhau thì **dòng `La
 chính là chỗ nói ra điều đó**. Đó là lý do Bước 0 phải xong trước Bước 1, chứ không chỉ
 vì nó nhỏ hơn.
 
-### 6.3 Còn phải quyết
+### 6.3 Đã quyết trong lúc dựng
 
-- Ghi lúc nào. Sau mỗi thay đổi thì quá dày, vì mỗi lần gõ một ký tự vào ô ghi chú cũng
-  là một lần ghi. Cần hoãn lại một khoảng rồi mới ghi.
-- Giữ bao nhiêu bản. Một bản mới nhất là đơn giản nhất, nhưng một bản duy nhất bị hỏng
-  là mất hết. Vài bản gần nhất thì an toàn hơn và tốn chỗ hơn.
+- **Ghi lúc nào:** hoãn 12 giây sau thay đổi cuối, và đẩy đi ngay khi app xuống nền. Mỗi
+  ký tự gõ vào ô ghi chú là một lần ghi cơ sở dữ liệu nên là một sự kiện stream; ghi
+  từng cái là tiêu pin và dữ liệu của người dùng cho ba mươi bản sao của một câu đang
+  được gõ dở. Lúc rời app mới là lúc chắc chắn họ đã ngừng sửa.
+- **Giữ bao nhiêu bản:** một, ghi đè. Container hiện ra trong app Files, và một thư mục
+  mọc thêm một tệp mỗi lần người dùng sửa một mục là thư mục họ sẽ xoá vì bực. Bản có
+  ngày tháng là bản họ tự lưu qua sheet chia sẻ.
+- **Chỉ ghi khi ghi được:** `last_backup_on` chỉ được cập nhật khi lần ghi thật sự
+  thành công. Ghi nhận cho một lần tải lên hỏng là đặt một cái ngày dưới `Last backup`
+  và gỡ cảnh báo khỏi màn hình, cho một tệp không tồn tại.
+
+Còn để ngỏ:
+
 - Xung đột. Hai máy cùng ghi vào một tệp thì xử lý ra sao. Đây là mầm mống của bài toán
-  đồng bộ, và là chỗ Bước 1 dễ trượt thành Bước 2 lúc nào không hay. Cần vạch ranh giới
-  rõ: **Bước 1 là sao lưu một chiều, không phải đồng bộ hai chiều.**
+  đồng bộ, và là chỗ Bước 1 dễ trượt thành Bước 2 lúc nào không hay. Ranh giới phải giữ:
+  **Bước 1 là sao lưu một chiều, không phải đồng bộ hai chiều.** `CloudBackup` chỉ có
+  `save`, không có `read`, đúng vì lý do này.
 
 ---
 

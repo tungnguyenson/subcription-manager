@@ -66,5 +66,24 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<!--
+	  Cho thu muc iCloud cua app hien ra trong app Files. Khong phai de trang tri:
+	  nguoi dung nhin thay tep sao luu cua chinh minh thi ho tin duoc la no co that,
+	  va nut "Restore from a backup" chon thang tep do qua bo chon he thong. Mot
+	  ban sao luu khong ai kiem tra duoc la ban sao luu chi phat hien ra la rong
+	  vao dung hom can toi no.
+	-->
+	<key>NSUbiquitousContainers</key>
+	<dict>
+		<key>iCloud.space.subdock.subdock</key>
+		<dict>
+			<key>NSUbiquitousContainerIsDocumentScopePublic</key>
+			<true/>
+			<key>NSUbiquitousContainerName</key>
+			<string>Subdock</string>
+			<key>NSUbiquitousContainerSupportedFolderLevels</key>
+			<string>Any</string>
+		</dict>
+	</dict>
 </dict>
 </plist>

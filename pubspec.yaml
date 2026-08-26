@@ -47,6 +47,7 @@ dependencies:
   url_launcher: ^6.3.2
   share_plus: ^13.3.0
   file_picker: ^12.1.0
+  icloud_storage: ^2.2.0
 
 dev_dependencies:
   flutter_test:

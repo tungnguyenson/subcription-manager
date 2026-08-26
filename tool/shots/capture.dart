@@ -18,6 +18,7 @@ import 'package:subdock/data/item_repository.dart';
 import 'package:subdock/data/backup_store.dart';
 import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/platform/backup_files.dart';
+import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/data/settings_store.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
@@ -226,6 +227,9 @@ void main() {
         catalog: catalog,
         backups: BackupStore(db, repository, settings),
         files: BackupFiles(),
+        // Off in tests: the host has no iCloud container, and a timer
+        // uploading in the background is not what any of these are about.
+        cloud: CloudBackup(TargetPlatform.android),
       ),
     );
     await tester.pumpAndSettle();

@@ -17,6 +17,7 @@ import 'package:subdock/domain/upcoming_filter.dart';
 import 'package:subdock/data/backup_store.dart';
 import 'package:subdock/domain/backup.dart';
 import 'package:subdock/platform/backup_files.dart';
+import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
 import 'package:subdock/ui/app_shell.dart';
 import 'package:subdock/ui/filter_presenter.dart';
@@ -58,6 +59,7 @@ class SubdockApp extends StatelessWidget {
   final ServiceCatalog catalog;
   final BackupStore backups;
   final BackupFiles files;
+  final CloudBackup cloud;
 
   const SubdockApp({
     super.key,
@@ -68,6 +70,7 @@ class SubdockApp extends StatelessWidget {
     required this.catalog,
     required this.backups,
     required this.files,
+    required this.cloud,
   });
 
   @override
@@ -79,6 +82,7 @@ class SubdockApp extends StatelessWidget {
       home: HomePage(
         backups: backups,
         files: files,
+        cloud: cloud,
         repository: repository,
         settings: settings,
         filters: filters,
@@ -97,6 +101,7 @@ class HomePage extends StatefulWidget {
   final ServiceCatalog catalog;
   final BackupStore backups;
   final BackupFiles files;
+  final CloudBackup cloud;
 
   const HomePage({
     super.key,
@@ -107,6 +112,7 @@ class HomePage extends StatefulWidget {
     required this.catalog,
     required this.backups,
     required this.files,
+    required this.cloud,
   });
 
   @override
@@ -155,6 +161,16 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool _loaded = false;
   bool _onboardingDismissed = false;
   bool _notificationsGranted = false;
+
+  /// How the last write to the user's own cloud went.
+  CloudResult _cloud = CloudResult.idle;
+
+  /// Holds the cloud write back until the edits stop.
+  ///
+  /// Every keystroke in the note field is a database write and therefore a
+  /// stream event. Uploading on each one would spend the user's battery and
+  /// their data on thirty copies of a sentence being typed.
+  Timer? _cloudDebounce;
 
   /// When a backup last actually left the device, or null if never.
   LocalDate? _lastBackupOn;
@@ -212,6 +228,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (!mounted) return;
       setState(() => _categories = CategoryBook(categories));
       _replan();
+      _scheduleCloudBackup();
     });
 
     _itemSubscription = widget.repository.observeAll().listen((items) {
@@ -221,6 +238,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         _loaded = true;
       });
       _replan();
+      _scheduleCloudBackup();
     });
 
     _historySubscription = widget.repository
@@ -301,6 +319,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _historySubscription?.cancel();
     _settingsSubscription?.cancel();
     _lastBackupSubscription?.cancel();
+    _cloudDebounce?.cancel();
     super.dispose();
   }
 
@@ -310,6 +329,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// user returns, so the trip has to be noticed here instead.
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Leaving the app is when the user has stopped editing, and it is the last
+    // moment the process is reliably alive. A pending cloud write goes now
+    // rather than waiting out a timer that may never fire.
+    if (state == AppLifecycleState.paused && _cloudDebounce?.isActive == true) {
+      unawaited(_runCloudBackup());
+    }
     if (state != AppLifecycleState.resumed) return;
 
     // Both of these are stale by the time the app comes back, and neither
@@ -342,6 +367,41 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         _exactTiming = exact;
       });
     }
+  }
+
+  /// Queues a cloud write for once the edits have stopped.
+  ///
+  /// Fired from the streams carrying the user's own rows, and deliberately not
+  /// from the settings stream: [BackupStore.markSaved] writes a settings row,
+  /// so listening there would have every upload schedule the next one.
+  void _scheduleCloudBackup() {
+    if (!widget.cloud.isSupported) return;
+    _cloudDebounce?.cancel();
+    _cloudDebounce = Timer(_cloudDelay, () => unawaited(_runCloudBackup()));
+  }
+
+  /// Long enough to swallow a form being filled in, short enough that closing
+  /// the app a minute later still leaves a copy behind. Backgrounding flushes
+  /// it early, which is the case that actually matters: leaving the app is
+  /// exactly when the user stops making changes.
+  static const Duration _cloudDelay = Duration(seconds: 12);
+
+  Future<void> _runCloudBackup() async {
+    _cloudDebounce?.cancel();
+    _cloudDebounce = null;
+    if (!widget.cloud.isSupported || !_loaded) return;
+
+    final at = DateTime.now();
+    final backup = await widget.backups.read(clock: at);
+    final result = await widget.cloud.save(BackupCodec.encode(backup));
+
+    // Only a write that landed counts as a backup. Recording one for a failed
+    // upload would put a date under `Last backup` and take the warning off the
+    // screen, for a file that is not there.
+    if (result.state == CloudState.saved) {
+      await widget.backups.markSaved(LocalDate.fromDateTime(at));
+    }
+    if (mounted) setState(() => _cloud = result);
   }
 
   /// Recomputes the plan against the clock and puts it on the device.
@@ -398,9 +458,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               notificationsGranted: _notificationsGranted,
               onAllowNotifications: _requestNotifications,
               onStart: () => setState(() => _onboardingDismissed = true),
-              // Same call the Settings row makes. Someone who has just
-              // reinstalled is looking at this screen, not at Settings.
-              onRestore: () => unawaited(_importBackup()),
+              // Tries iCloud first and falls back to the file picker. Unlike
+              // Settings, this screen gets one button rather than two: there
+              // is no list here to endanger, so guessing the likely source
+              // costs nothing and saves the one person in a hurry a decision.
+              onRestore: () => unawaited(_restoreOnArrival()),
             ),
           ),
         ),
@@ -507,6 +569,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             items: _items,
             lastSavedOn: _lastBackupOn,
             device: _deviceBackup,
+            cloud: _cloud,
           ),
           onOpenServices: _openServices,
           onOpenSources: _openSources,
@@ -514,6 +577,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           onOpenHistory: _openHistory,
           onExport: () => unawaited(_exportBackup()),
           onImport: () => unawaited(_importBackup()),
+          onImportFromCloud: () => unawaited(_importFromCloud()),
         );
     }
   }
@@ -1158,6 +1222,53 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
+  /// The restore offered on an empty database.
+  ///
+  /// Looks in the cloud first, because someone staring at this screen has just
+  /// reinstalled or moved phone, and the copy the app kept for them is the one
+  /// they are most likely to want. Anything other than finding it falls
+  /// through to the file picker rather than stopping with an explanation: they
+  /// came here to get their list back, not to hear about iCloud.
+  Future<void> _restoreOnArrival() async {
+    if (widget.cloud.isSupported) {
+      final fetch = await widget.cloud.latest();
+      if (!mounted) return;
+      if (fetch.copy case final copy?) {
+        await _restoreFrom(copy.contents);
+        return;
+      }
+    }
+    await _importBackup();
+  }
+
+  /// Restores the copy the app keeps in the user's own cloud.
+  ///
+  /// The answer to "it says Saved, so how do I get it back". A file sitting in
+  /// iCloud Drive that the user has to find in the Files app is a backup only
+  /// for people who already know it is there, and the app knew and did not say.
+  Future<void> _importFromCloud() async {
+    final fetch = await widget.cloud.latest();
+    if (!mounted) return;
+
+    switch (fetch.state) {
+      case CloudState.saved:
+        break;
+      case CloudState.missing:
+        _confirm('There is no copy in iCloud yet.');
+        return;
+      case CloudState.signedOut:
+        _confirm('Sign in to iCloud to reach the copy kept there.');
+        return;
+      default:
+        _confirm('Could not read iCloud: ${fetch.detail ?? "unknown error"}.');
+        return;
+    }
+
+    final copy = fetch.copy;
+    if (copy == null) return;
+    await _restoreFrom(copy.contents);
+  }
+
   /// Reads a backup back in, replacing everything.
   ///
   /// Three steps that must stay in this order: read the file, then ask, then
@@ -1173,7 +1284,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return;
     }
     if (text == null || !mounted) return;
+    await _restoreFrom(text);
+  }
 
+  /// Everything after the bytes arrive, whichever source handed them over.
+  ///
+  /// Shared on purpose. A copy out of iCloud and a copy off a file the user
+  /// picked destroy exactly the same rows, so they must ask exactly the same
+  /// question first; two paths would eventually grow two different warnings.
+  Future<void> _restoreFrom(String text) async {
     final Backup backup;
     try {
       backup = BackupCodec.decode(text);

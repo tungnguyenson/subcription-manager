@@ -13,6 +13,7 @@ import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/platform/backup_files.dart';
+import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
 
 /// Deleting an item, driven through the real app.
@@ -86,6 +87,9 @@ void main() {
         catalog: ServiceCatalog(const []),
         backups: BackupStore(db, repo, SettingsStore(db)),
         files: BackupFiles(),
+        // Off in tests: the host has no iCloud container, and a timer
+        // uploading in the background is not what any of these are about.
+        cloud: CloudBackup(TargetPlatform.android),
       ),
     );
     await tester.pumpAndSettle();

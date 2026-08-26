@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/ui/backup_presenter.dart';
 
 void main() {
@@ -24,10 +25,12 @@ void main() {
     List<TrackedItem> items = const [],
     LocalDate? lastSavedOn,
     DeviceBackup device = DeviceBackup.wholeDeviceOnly,
+    CloudResult cloud = CloudResult.unsupported,
   }) => BackupPresenter.build(
     items: items,
     lastSavedOn: lastSavedOn,
     device: device,
+    cloud: cloud,
   );
 
   group('the last backup row', () {
@@ -116,6 +119,54 @@ void main() {
       );
 
       expect(view.hasWarning, isTrue);
+    });
+  });
+
+  // There is no switch to report here. The app writes to iCloud whenever it
+  // can, so the only thing worth putting on screen is whether that worked.
+  group('the iCloud row', () {
+    test('is absent where the app writes to no cloud at all', () {
+      expect(build().cloud, isNull);
+    });
+
+    test('says it saved once a write landed', () {
+      expect(build(cloud: const CloudResult(CloudState.saved)).cloud, 'Saved');
+    });
+
+    // The fix is the user's and it lives in system settings, so the row sends
+    // them there. "Failed" would send them hunting for a bug in the app.
+    test('a signed-out account is named as the thing to fix', () {
+      expect(
+        build(cloud: const CloudResult(CloudState.signedOut)).cloud,
+        'Sign in to iCloud',
+      );
+    });
+
+    test('an unexplained failure still says something went wrong', () {
+      expect(
+        build(cloud: const CloudResult(CloudState.failed, detail: 'x')).cloud,
+        'Could not save',
+      );
+    });
+
+    test('before the first attempt it does not claim to have saved', () {
+      final cloud = build(cloud: CloudResult.idle).cloud;
+
+      expect(cloud, isNotNull);
+      expect(cloud, isNot('Saved'));
+    });
+
+    // The date belongs to a file that exists. A cloud write that failed must
+    // not leave one behind, which is enforced in app.dart; here the row simply
+    // has to be able to say both things at once.
+    test('a failed write can sit beside a date from an earlier one', () {
+      final view = build(
+        lastSavedOn: d('2026-08-25'),
+        cloud: const CloudResult(CloudState.signedOut),
+      );
+
+      expect(view.lastBackup, '25/08/2026');
+      expect(view.cloud, 'Sign in to iCloud');
     });
   });
 

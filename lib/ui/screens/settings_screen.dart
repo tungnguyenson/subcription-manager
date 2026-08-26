@@ -39,9 +39,18 @@ class SettingsScreen extends StatelessWidget {
   /// Hands the whole list to the system share sheet as one file.
   final VoidCallback? onExport;
 
-  /// Reads one back, replacing everything. Destructive, and the confirmation
-  /// that says so belongs to whoever wires this up, not to a settings row.
+  /// Reads one back off a file the user picks, replacing everything.
+  /// Destructive, and the confirmation that says so belongs to whoever wires
+  /// this up, not to a settings row.
   final VoidCallback? onImport;
+
+  /// Reads back the copy the app keeps in the user's own cloud.
+  ///
+  /// Its own row rather than a branch inside [onImport]. Both rows restore and
+  /// both destroy what is there, so the one thing the user must be certain of
+  /// before tapping is *which copy* they are about to take; a single row that
+  /// silently prefers one source decides that for them.
+  final VoidCallback? onImportFromCloud;
 
   final VoidCallback? onAbout;
 
@@ -59,6 +68,7 @@ class SettingsScreen extends StatelessWidget {
     this.onOpenHistory,
     this.onExport,
     this.onImport,
+    this.onImportFromCloud,
     this.onAbout,
   });
 
@@ -135,10 +145,26 @@ class SettingsScreen extends StatelessWidget {
             // Language are: it reports state and leads nowhere. `Never` beside
             // a list of twelve items is the whole warning, which is why no
             // sentence here tells the user what to do about it.
+            // Above `Last backup`, because it answers the bigger question.
+            // A date means nothing to someone whose iCloud is signed out.
+            if (backup?.cloud case final cloud?)
+              DetailRow(label: 'iCloud', value: cloud),
             if (backup case final view?)
               DetailRow(label: 'Last backup', value: view.lastBackup),
             DetailRow.nav(label: 'Export a backup', onTap: onExport),
-            DetailRow.nav(label: 'Restore from a backup', onTap: onImport),
+            // Only where there is a cloud to read from, which is the same
+            // condition that puts the iCloud row above on screen.
+            if (backup?.cloud != null && onImportFromCloud != null)
+              DetailRow.nav(
+                label: 'Restore from iCloud',
+                onTap: onImportFromCloud,
+              ),
+            DetailRow.nav(
+              label: backup?.cloud == null
+                  ? 'Restore from a backup'
+                  : 'Restore from a file',
+              onTap: onImport,
+            ),
           ],
         ),
         // State, not a tutorial — the same rule the reminder screen follows.

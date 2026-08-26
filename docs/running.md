@@ -31,7 +31,19 @@ dart run build_runner build
 
 Bỏ bước này thì trình biên dịch báo thiếu `database.g.dart`. Đó là lỗi cố ý để dễ thấy, hơn là để một tệp sinh cũ nằm cạnh lược đồ đã sửa rồi ánh xạ sai cột mà không báo gì.
 
-**Không cần CocoaPods.** Dự án dùng Swift Package Manager, nên không có tệp `Podfile` và không phải chạy `pod install`. Nếu có hướng dẫn nào bảo chạy `pod install`, hướng dẫn đó cũ.
+**Dự án dùng cả Swift Package Manager lẫn CocoaPods, từ 26/08/2026.** Trước đó chỉ có SPM
+và không có tệp `Podfile`. Gói `icloud_storage` chưa hỗ trợ SPM, nên Flutter tự bật lại
+CocoaPods và sinh ra `ios/Podfile` cùng `ios/Podfile.lock`. Nó tự chạy `pod install` khi
+cần, không phải gõ tay, nhưng lần build đầu sau khi clone sẽ lâu hơn vì phải tải pod về.
+
+Flutter in ra cảnh báo này ở mỗi lần build iOS, và nó chỉ là cảnh báo:
+
+```
+The following plugins do not support Swift Package Manager for ios:
+  - icloud_storage
+```
+
+Bỏ được cảnh báo khi gói đó chuyển sang SPM, hoặc khi thay nó bằng một plugin tự viết.
 
 ## 2. Chạy trên máy ảo
 

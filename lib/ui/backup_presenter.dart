@@ -2,6 +2,7 @@ import 'package:meta/meta.dart';
 
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/ui/money_format.dart';
 
 /// Where a copy of the list ends up without the user doing anything.
@@ -33,6 +34,13 @@ class BackupView {
   /// `Never`, or the date of the last export.
   final String lastBackup;
 
+  /// What the iCloud row says, or null where there is no such row.
+  ///
+  /// Null on Android, where the system already carries the database to the
+  /// next phone and the app adds nothing. A row reading `Not available` there
+  /// would report a gap that does not exist.
+  final String? cloud;
+
   /// The sentence under the backup card. Never null: that the app has no
   /// account and no server is true on every platform, and it is the fact the
   /// user cannot learn from any other screen.
@@ -46,6 +54,7 @@ class BackupView {
   const BackupView({
     required this.lastBackup,
     required this.note,
+    this.cloud,
     this.warningTitle,
     this.warningBody,
   });
@@ -63,12 +72,14 @@ abstract final class BackupPresenter {
     required List<TrackedItem> items,
     required LocalDate? lastSavedOn,
     required DeviceBackup device,
+    CloudResult cloud = CloudResult.unsupported,
   }) {
     final confirmed = confirmedDates(items);
 
     return BackupView(
       lastBackup: lastSavedOn == null ? 'Never' : MoneyFormat.date(lastSavedOn),
       note: _note(device),
+      cloud: _cloud(cloud),
       // Only when there is something to lose *and* nothing has been saved.
       // A warning that fires on an empty list is a warning the user learns to
       // scroll past before the day it means something.
@@ -101,6 +112,27 @@ abstract final class BackupPresenter {
             item.state != ItemState.archived,
       )
       .length;
+
+  /// What the iCloud row reads.
+  ///
+  /// Says what is true right now rather than what the setting is. There is no
+  /// switch here to report: the app writes to iCloud whenever it can, and the
+  /// only thing worth putting on screen is whether that is working. `On` beside
+  /// an account that is signed out would be the exact lie this app is built to
+  /// avoid.
+  static String? _cloud(CloudResult result) => switch (result.state) {
+    CloudState.unsupported => null,
+    CloudState.saved => 'Saved',
+    // Named so the user knows the fix is theirs and where it lives. "Failed"
+    // would send them looking for a bug in the app.
+    CloudState.signedOut => 'Sign in to iCloud',
+    CloudState.failed => 'Could not save',
+    CloudState.idle => 'Waiting for a change',
+    // Only ever comes back from a read, and this row reports the last write.
+    // Left explicit rather than folded into a wildcard so that adding a state
+    // to [CloudState] stays a compile error here.
+    CloudState.missing => 'Waiting for a change',
+  };
 
   /// Answers section 11.2 of the product spec: say in the interface whether
   /// the database is in the device's own backup, so the user knows what they

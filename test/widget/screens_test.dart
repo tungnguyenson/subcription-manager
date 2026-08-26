@@ -10,6 +10,7 @@ import 'package:subdock/ui/money_presenter.dart';
 import 'package:subdock/ui/screens/money_screen.dart';
 import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
+import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/ui/backup_presenter.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/ui/widgets/restore_ask.dart';
@@ -478,6 +479,58 @@ void main() {
       await tester.pumpAndSettle();
 
       expect((exported, imported), (1, 1));
+    });
+
+    // Both rows destroy the same rows, so the user has to be certain WHICH
+    // copy they are taking. One row that silently prefers a source decides
+    // that for them.
+    testWidgets('the two sources of a restore are named separately', (
+      tester,
+    ) async {
+      var fromCloud = 0;
+      var fromFile = 0;
+      await showTall(
+        tester,
+        SettingsScreen(
+          backup: BackupPresenter.build(
+            items: const [],
+            lastSavedOn: null,
+            device: DeviceBackup.wholeDeviceOnly,
+            cloud: const CloudResult(CloudState.saved),
+          ),
+          onImportFromCloud: () => fromCloud++,
+          onImport: () => fromFile++,
+        ),
+      );
+
+      await tester.tap(find.text('Restore from iCloud'));
+      await tester.tap(find.text('Restore from a file'));
+      await tester.pumpAndSettle();
+
+      expect((fromCloud, fromFile), (1, 1));
+    });
+
+    // Where there is no cloud, naming the file is naming a distinction that
+    // does not exist.
+    testWidgets('with no cloud there is one restore, unqualified', (
+      tester,
+    ) async {
+      await showTall(
+        tester,
+        SettingsScreen(
+          backup: BackupPresenter.build(
+            items: const [],
+            lastSavedOn: null,
+            device: DeviceBackup.perAppUnverifiable,
+          ),
+          onImportFromCloud: () {},
+          onImport: () {},
+        ),
+      );
+
+      expect(find.text('Restore from iCloud'), findsNothing);
+      expect(find.text('Restore from a file'), findsNothing);
+      expect(find.text('Restore from a backup'), findsOneWidget);
     });
 
     // `Never` sitting next to a list of real items is the whole warning. No
