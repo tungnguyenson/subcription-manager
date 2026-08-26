@@ -525,6 +525,13 @@ class ChoiceChipPill extends StatelessWidget {
   /// them is what says the row is about money rather than about a service.
   final Widget? icon;
 
+  /// A tally after the label, at 60% of the label's own colour.
+  ///
+  /// The same shape a section heading uses for its count, and dimmed for the
+  /// same reason: a two-digit number set as brightly as the word beside it
+  /// outranks the word, and the word is what the chip is for.
+  final int? count;
+
   const ChoiceChipPill(
     this.label, {
     super.key,
@@ -532,6 +539,7 @@ class ChoiceChipPill extends StatelessWidget {
     this.onTap,
     this.onField = false,
     this.icon,
+    this.count,
   });
 
   @override
@@ -578,9 +586,37 @@ class ChoiceChipPill extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                 ],
-                Text(
-                  label,
-                  style: selected ? SubdockText.chipSelected : SubdockText.chip,
+                Flexible(
+                  child: Builder(
+                    builder: (context) {
+                      final style = selected
+                          ? SubdockText.chipSelected
+                          : SubdockText.chip;
+                      return Text.rich(
+                        TextSpan(
+                          text: label,
+                          children: [
+                            if (count != null)
+                              TextSpan(
+                                text: '  $count',
+                                style: style.copyWith(
+                                  // Multiplied, not set: the unselected label
+                                  // is already a partly transparent ink, and
+                                  // setting .6 on it would come out brighter
+                                  // than the word it is meant to sit behind.
+                                  color: style.color?.withValues(
+                                    alpha: (style.color?.a ?? 1) * 0.6,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: style,
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
@@ -730,12 +766,28 @@ class SegmentedRow extends StatelessWidget {
   /// do: a segment whose label is cut off cannot be read before it is chosen.
   final bool weighted;
 
+  /// A mark before each label, one per segment. Only the Upcoming header uses
+  /// them: `List` and `Calendar` are two ways of drawing the same items rather
+  /// than two subsets of them, and the icon is what says so before the words
+  /// are read.
+  final List<IconData>? icons;
+
+  /// Size the tray to its labels instead of dividing the width it is given.
+  ///
+  /// Off by default: a tray of exhaustive options (Month / Year) filling its
+  /// row is what says the options are the whole set. On where the tray shares
+  /// a row with something else — the Upcoming header puts the filter controls
+  /// beside it — since a full-width tray there would push them off the screen.
+  final bool tight;
+
   const SegmentedRow({
     super.key,
     required this.labels,
     required this.selected,
     this.onSelect,
     this.weighted = false,
+    this.icons,
+    this.tight = false,
   });
 
   /// The horizontal padding inside one segment, both sides.
@@ -782,9 +834,11 @@ class SegmentedRow extends StatelessWidget {
               : null;
 
           return Row(
+            mainAxisSize: tight ? MainAxisSize.min : MainAxisSize.max,
             children: [
               for (var i = 0; i < labels.length; i++)
-                Expanded(
+                _sized(
+                  tight: tight,
                   // Flex is an int, so the measured widths are scaled up
                   // before rounding — at 1:1 a two-point difference between
                   // two segments would round away to nothing.
@@ -803,19 +857,38 @@ class SegmentedRow extends StatelessWidget {
                           vertical: 10,
                         ),
                         alignment: Alignment.center,
-                        child: Text(
-                          labels[i],
-                          // A segment is a third of a phone wide at most. A label
-                          // that does not fit has to clip on one line rather than
-                          // wrap and make this row taller than the one beside it.
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: _segmentStyle.copyWith(
-                            color: i == selected
-                                ? SubdockColors.ink
-                                : SubdockColors.inkMuted,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            if (icons != null) ...[
+                              Icon(
+                                icons![i],
+                                size: 16,
+                                color: i == selected
+                                    ? SubdockColors.ink
+                                    : SubdockColors.inkMuted,
+                              ),
+                              const SizedBox(width: 6),
+                            ],
+                            Flexible(
+                              child: Text(
+                                labels[i],
+                                // A segment is a third of a phone wide at most.
+                                // A label that does not fit has to clip on one
+                                // line rather than wrap and make this row taller
+                                // than the one beside it.
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: _segmentStyle.copyWith(
+                                  color: i == selected
+                                      ? SubdockColors.ink
+                                      : SubdockColors.inkMuted,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -827,6 +900,13 @@ class SegmentedRow extends StatelessWidget {
       ),
     );
   }
+
+  /// A segment takes its share of the row, or takes only what it needs.
+  static Widget _sized({
+    required bool tight,
+    required int flex,
+    required Widget child,
+  }) => tight ? child : Expanded(flex: flex, child: child);
 }
 
 /// The white box a field's contents sit in. One elevation below a card.

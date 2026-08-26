@@ -6,6 +6,7 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/money.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/ui/app_shell.dart';
+import 'package:subdock/ui/calendar_presenter.dart';
 import 'package:subdock/ui/money_presenter.dart';
 import 'package:subdock/ui/screens/money_screen.dart';
 import 'package:subdock/ui/screens/settings_screen.dart';
@@ -43,6 +44,7 @@ void main() {
     Cycle? cycle,
     int? repeatCount,
     String? anchorDate,
+    bool inTrial = false,
   }) => TrackedItem(
     id: name,
     name: name,
@@ -53,6 +55,7 @@ void main() {
     repeatCount: repeatCount,
     amountMinor: amountMinor,
     currency: currency,
+    inTrial: inTrial,
   );
 
   final sample = [
@@ -127,6 +130,81 @@ void main() {
       expect(find.text('Passport'), findsOneWidget);
       // Nothing to tap open, so nothing offering to be tapped open.
       expect(find.textContaining('1 item'), findsNothing);
+    });
+
+    // The header offers both layouts, and the calendar is a layout rather than
+    // a second list: the same items, laid out by date instead of by distance.
+    testWidgets('the calendar draws a grid and opens a day under it', (
+      tester,
+    ) async {
+      final calendar = CalendarPresenter.build(sample, today);
+      await show(
+        tester,
+        UpcomingScreen(
+          view: UpcomingPresenter.build(sample, today),
+          mode: UpcomingMode.calendar,
+          calendar: calendar,
+        ),
+      );
+
+      expect(find.text('Aug 2026'), findsOneWidget);
+      expect(find.text('MON'), findsOneWidget);
+      expect(find.text('SUN'), findsOneWidget);
+      // The soonest day with something on it, headed the way a section is.
+      expect(find.textContaining('MON 17 AUG 2026'), findsOneWidget);
+      expect(find.text('Claude Pro'), findsOneWidget);
+      // And none of the list's own headings, which would be the two layouts
+      // drawn at once.
+      expect(find.textContaining('NEXT 7 DAYS'), findsNothing);
+    });
+
+    // A day the reader taps that has nothing on it still gets its heading.
+    // Dropping the block would leave them with no sign the tap landed.
+    testWidgets('an empty day says so rather than vanishing', (tester) async {
+      await show(
+        tester,
+        UpcomingScreen(
+          view: UpcomingPresenter.build(sample, today),
+          mode: UpcomingMode.calendar,
+          calendar: CalendarPresenter.build(
+            sample,
+            today,
+            selected: d('2026-08-04'),
+          ),
+        ),
+      );
+
+      expect(find.textContaining('TUE 4 AUG 2026'), findsOneWidget);
+      expect(find.text('Nothing on this day.'), findsOneWidget);
+      // No `0` beside the heading: the line under it already said that.
+      expect(find.textContaining('TUE 4 AUG 2026  0'), findsNothing);
+    });
+
+    // The chip is a shortcut to the `Free trials` condition the sheet holds,
+    // and it is the only trace of trials left on this header now that they
+    // have no section of their own.
+    testWidgets('the trial chip appears only when there is a trial', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        UpcomingScreen(view: UpcomingPresenter.build(sample, today)),
+      );
+      expect(find.textContaining('Free trial'), findsNothing);
+
+      final withTrial = [
+        ...sample,
+        item('Claude Max', expiresOn: '2026-08-18', inTrial: true),
+      ];
+      await show(
+        tester,
+        UpcomingScreen(
+          key: const ValueKey('with-trial'),
+          view: UpcomingPresenter.build(withTrial, today),
+        ),
+      );
+      // Label and count share one span: `Free trial  1`.
+      expect(find.textContaining('Free trial'), findsOneWidget);
     });
 
     // The tab bar is drawn *over* the list, not above it, so a screen padded

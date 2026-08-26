@@ -289,6 +289,12 @@ void main() {
 
     await shot('upcoming');
 
+    // The calendar layout: the month grid, and the day open under it. Same
+    // items, same filter, laid out by date instead of by distance.
+    await tapText('Calendar');
+    await shot('upcoming-calendar');
+    await tapText('List');
+
     // The filter, in both of its states: the sheet open over the list, and the
     // list narrowed with the summary row under the title.
     await tester.tap(find.byIcon(Icons.filter_list_rounded));

@@ -1,11 +1,21 @@
 import 'package:flutter/material.dart';
 
 import 'package:subdock/domain/local_date.dart';
+import 'package:subdock/ui/calendar_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
 import 'package:subdock/ui/widgets/empty_placard.dart';
 import 'package:subdock/ui/widgets/item_row.dart';
+import 'package:subdock/ui/widgets/month_grid.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+
+/// The two ways Upcoming draws the same items.
+///
+/// Two layouts of one list, not two lists: every condition the filter holds
+/// applies to both, and an item hidden from one is hidden from the other. The
+/// list answers "what is next"; the calendar answers "what does August look
+/// like", which is the question a list ordered by distance cannot answer.
+enum UpcomingMode { list, calendar }
 
 /// A row's presentation, already resolved from the domain. The screen renders
 /// what it is handed and computes nothing, so the wording of "4 days" stays
@@ -69,6 +79,26 @@ class UpcomingScreen extends StatefulWidget {
   /// screen has neither.
   final String? filterSummary;
 
+  /// Which layout is drawn. See [UpcomingMode].
+  final UpcomingMode mode;
+
+  final ValueChanged<UpcomingMode>? onMode;
+
+  /// The month grid, built only while [mode] is [UpcomingMode.calendar].
+  final CalendarView? calendar;
+
+  /// A different month, as `(year, month)`.
+  final void Function((int, int) month)? onMonth;
+
+  final ValueChanged<LocalDate>? onSelectDay;
+
+  /// Turns the `Free trials` condition on and off from the header.
+  ///
+  /// The same condition the filter sheet holds, not a second one: a trial that
+  /// is filtered out by the sheet cannot be filtered back in from here.
+  final bool trialOnly;
+  final VoidCallback? onToggleTrial;
+
   const UpcomingScreen({
     super.key,
     required this.view,
@@ -79,6 +109,13 @@ class UpcomingScreen extends StatefulWidget {
     this.onOpenFilter,
     this.onClearFilter,
     this.filterSummary,
+    this.mode = UpcomingMode.list,
+    this.onMode,
+    this.calendar,
+    this.onMonth,
+    this.onSelectDay,
+    this.trialOnly = false,
+    this.onToggleTrial,
   });
 
   @override
@@ -103,10 +140,7 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _TitleRow(
-              onOpenServices: widget.onOpenServices,
-              onOpenFilter: widget.onOpenFilter,
-            ),
+            _TitleRow(onOpenServices: widget.onOpenServices),
             if (widget.banner != null) ...[
               const SizedBox(height: 18),
               widget.banner!,
@@ -122,10 +156,15 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
     return ListView(
       padding: SubdockSpacing.screenPadding(context),
       children: [
-        _TitleRow(
-          onOpenServices: widget.onOpenServices,
-          onOpenFilter: widget.onOpenFilter,
+        _TitleRow(onOpenServices: widget.onOpenServices),
+        _ControlRow(
+          mode: widget.mode,
+          onMode: widget.onMode,
+          trials: view.trials,
+          trialOnly: widget.trialOnly,
+          onToggleTrial: widget.onToggleTrial,
           filtering: view.filtering,
+          onOpenFilter: widget.onOpenFilter,
         ),
         if (view.filtering && widget.filterSummary != null)
           _FilterSummary(
@@ -144,52 +183,96 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
               onClear: widget.onClearFilter,
             ),
           ),
-        if (view.overdue.isNotEmpty)
-          _Section(
-            title: 'Overdue',
-            count: view.overdue.length,
-            tint: SubdockColors.danger,
-            entries: view.overdue,
-            onOpen: widget.onOpen,
-          ),
-        if (view.trials.isNotEmpty)
-          _Section(
-            // Says what the section *means*, not what is in it. "Trials" is a
-            // category; this is a promise — nothing here has taken money yet.
-            title: 'Free trial · not charged yet',
-            count: view.trials.length,
-            tint: SubdockColors.accent,
-            entries: view.trials,
-            onOpen: widget.onOpen,
-          ),
-        if (view.thisWeek.isNotEmpty)
-          _Section(
-            title: 'Next 7 days',
-            count: view.thisWeek.length,
-            entries: view.thisWeek,
-            onOpen: widget.onOpen,
-          ),
-        // The same section as the three above it, not a folded summary row.
-        // A bucket that arrives closed hides items behind a tap the user has
-        // no reason to expect, and the hand-off draws every group on this
-        // screen open. Anything further out is further down the scroll, which
-        // is the only ranking this list needs.
-        if (view.thisMonth.isNotEmpty)
-          _Section(
-            title: 'Next 30 days',
-            count: view.thisMonth.length,
-            entries: view.thisMonth,
-            onOpen: widget.onOpen,
-          ),
-        if (view.later.isNotEmpty)
-          _Section(
-            title: 'Later',
-            count: view.later.length,
-            entries: view.later,
-            onOpen: widget.onOpen,
-          ),
+        // Neither layout is drawn once the filter has emptied the list: an
+        // empty grid under a line explaining why the list is empty says the
+        // same thing twice, and the second time in a shape that looks broken.
+        if (!view.noMatches)
+          ...switch (widget.mode) {
+            UpcomingMode.list => _sections(view),
+            UpcomingMode.calendar => _month(),
+          },
       ],
     );
+  }
+
+  /// The dated groups: the list layout.
+  List<Widget> _sections(UpcomingView view) => [
+    if (view.overdue.isNotEmpty)
+      _Section(
+        title: 'Overdue',
+        count: view.overdue.length,
+        tint: SubdockColors.danger,
+        entries: view.overdue,
+        onOpen: widget.onOpen,
+      ),
+    // No section of its own for trials. One used to sit here, above the
+    // dated groups, and it cost the trial row the only thing this screen
+    // ranks by: a charge two days out and one two months out shared a
+    // block, while the item due tomorrow was read past on the way to them.
+    // The `FREE TRIAL` badge beside the name says the same thing from
+    // wherever the date puts the row, and the header chip is what gathers
+    // them when that is what the reader wants.
+    if (view.thisWeek.isNotEmpty)
+      _Section(
+        title: 'Next 7 days',
+        count: view.thisWeek.length,
+        entries: view.thisWeek,
+        onOpen: widget.onOpen,
+      ),
+    // The same section as the three above it, not a folded summary row.
+    // A bucket that arrives closed hides items behind a tap the user has
+    // no reason to expect, and the hand-off draws every group on this
+    // screen open. Anything further out is further down the scroll, which
+    // is the only ranking this list needs.
+    if (view.thisMonth.isNotEmpty)
+      _Section(
+        title: 'Next 30 days',
+        count: view.thisMonth.length,
+        entries: view.thisMonth,
+        onOpen: widget.onOpen,
+      ),
+    if (view.later.isNotEmpty)
+      _Section(
+        title: 'Later',
+        count: view.later.length,
+        entries: view.later,
+        onOpen: widget.onOpen,
+      ),
+  ];
+
+  /// The month grid, and the day open under it.
+  ///
+  /// The day's list is a section like any other, heading and all, so the two
+  /// layouts read as one screen: tapping the 20th and scrolling to `Next 7
+  /// days` put the same row in front of the reader in the same shape.
+  List<Widget> _month() {
+    final calendar = widget.calendar;
+    if (calendar == null) return const [];
+
+    return [
+      const SizedBox(height: 18),
+      MonthBar(
+        label: calendar.monthLabel,
+        onPrevious: widget.onMonth == null
+            ? null
+            : () => widget.onMonth!(calendar.previous),
+        onNext: widget.onMonth == null
+            ? null
+            : () => widget.onMonth!(calendar.next),
+      ),
+      const SizedBox(height: 10),
+      MonthGrid(view: calendar, onSelect: widget.onSelectDay),
+      _Section(
+        title: calendar.selectedLabel,
+        count: calendar.entries.length,
+        entries: calendar.entries,
+        onOpen: widget.onOpen,
+        // A day with nothing on it still gets its heading. Dropping the whole
+        // block would leave the reader who just tapped a date with no sign
+        // that the tap landed.
+        emptyLine: 'Nothing on this day.',
+      ),
+    ];
   }
 }
 
@@ -201,14 +284,8 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
 /// rest went.
 class _TitleRow extends StatelessWidget {
   final VoidCallback? onOpenServices;
-  final VoidCallback? onOpenFilter;
-  final bool filtering;
 
-  const _TitleRow({
-    this.onOpenServices,
-    this.onOpenFilter,
-    this.filtering = false,
-  });
+  const _TitleRow({this.onOpenServices});
 
   @override
   Widget build(BuildContext context) {
@@ -217,47 +294,125 @@ class _TitleRow extends StatelessWidget {
       textBaseline: TextBaseline.alphabetic,
       children: [
         const Expanded(child: Text('Upcoming', style: SubdockText.screenTitle)),
-        // The two actions sit in a row of their own, centred against each
-        // other, and only that row is baselined against the title. The filter
-        // button is a circle with no text in it and so has no baseline to
-        // offer; left in the outer row it would hang off the top of the line.
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (onOpenFilter != null) ...[
-              _FilterButton(active: filtering, onTap: onOpenFilter),
-              const SizedBox(width: 8),
-            ],
-            if (onOpenServices != null)
-              InkWell(
-                onTap: onOpenServices,
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.apps_rounded,
-                        size: 18,
-                        color: SubdockColors.accent,
-                      ),
-                      SizedBox(width: 5),
-                      Text(
-                        'All services',
-                        style: TextStyle(
-                          fontFamily: SubdockText.family,
-                          fontSize: 15,
-                          height: 1,
-                          fontWeight: SubdockWeight.medium,
-                          color: SubdockColors.accent,
-                        ),
-                      ),
-                    ],
+        // One link, and it is a link rather than a button: it leaves the
+        // screen. The controls that act *on* this screen -- the layout, the
+        // trial shortcut, the filter -- moved down to the row below, where
+        // they sit together and read as one set.
+        if (onOpenServices != null)
+          InkWell(
+            onTap: onOpenServices,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.apps_rounded,
+                    size: 18,
+                    color: SubdockColors.accent,
                   ),
-                ),
+                  SizedBox(width: 5),
+                  Text(
+                    'All services',
+                    style: TextStyle(
+                      fontFamily: SubdockText.family,
+                      fontSize: 15,
+                      height: 1,
+                      fontWeight: SubdockWeight.medium,
+                      color: SubdockColors.accent,
+                    ),
+                  ),
+                ],
               ),
-          ],
-        ),
+            ),
+          ),
       ],
+    );
+  }
+}
+
+/// The layout tray, the trial shortcut and the filter button, in one row.
+///
+/// Under the title rather than on it. Three controls that change what the list
+/// below shows, gathered where the reader's eye lands before the first row --
+/// and the title row keeps its whole width for the title, which is what stops
+/// `Upcoming` competing with a tray of buttons for the same line.
+class _ControlRow extends StatelessWidget {
+  final UpcomingMode mode;
+  final ValueChanged<UpcomingMode>? onMode;
+
+  /// How many items are in a trial today, over the unfiltered pool.
+  final int trials;
+  final bool trialOnly;
+  final VoidCallback? onToggleTrial;
+
+  final bool filtering;
+  final VoidCallback? onOpenFilter;
+
+  const _ControlRow({
+    required this.mode,
+    this.onMode,
+    this.trials = 0,
+    this.trialOnly = false,
+    this.onToggleTrial,
+    this.filtering = false,
+    this.onOpenFilter,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // The tray is the one thing here that gives way, and it gives way
+          // last: a loose Flexible takes its own width whenever that fits, so
+          // the gap between the two halves of this row is what absorbs a wide
+          // screen and the segment labels are what absorb a narrow one. A
+          // Spacer here instead would split the leftover with the chip and
+          // clip `Free trial` down to `Fre...` on every phone.
+          Flexible(
+            child: SegmentedRow(
+              labels: const ['List', 'Calendar'],
+              icons: const [
+                Icons.view_agenda_outlined,
+                Icons.calendar_month_outlined,
+              ],
+              tight: true,
+              selected: mode.index,
+              onSelect: onMode == null
+                  ? null
+                  : (i) => onMode!(UpcomingMode.values[i]),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Hidden at zero rather than drawn empty. `Free trial 0` is a
+              // control that does nothing beside a number that says so, on a
+              // header with no room to spare.
+              //
+              // Unless it is switched on, which is the case where the count
+              // reaching zero is the chip's own doing: the last trial was
+              // charged this morning. A control that vanishes while it is
+              // still filtering leaves the reader looking at an empty list
+              // with no visible cause.
+              if (trials > 0 || trialOnly) ...[
+                ChoiceChipPill(
+                  'Free trial',
+                  count: trials,
+                  selected: trialOnly,
+                  onTap: onToggleTrial,
+                ),
+                const SizedBox(width: 8),
+              ],
+              if (onOpenFilter != null)
+                _FilterButton(active: filtering, onTap: onOpenFilter),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -412,12 +567,18 @@ class _Section extends StatelessWidget {
   final List<UpcomingEntry> entries;
   final void Function(UpcomingEntry)? onOpen;
 
+  /// Drawn in place of the rows when there are none. Null means a section with
+  /// nothing in it is not drawn at all, which is what the dated groups want:
+  /// `Next 30 days  0` is a heading that reports on nothing.
+  final String? emptyLine;
+
   const _Section({
     required this.title,
     required this.count,
     required this.entries,
     this.tint,
     this.onOpen,
+    this.emptyLine,
   });
 
   @override
@@ -442,16 +603,24 @@ class _Section extends StatelessWidget {
                 // The count in the heading, at 60% of the heading's own colour.
                 // It answers "how many" without a second row, and dimming it is
                 // what stops a two-digit number outranking the word beside it.
-                TextSpan(
-                  text: '  $count',
-                  style: label.copyWith(
-                    color: label.color?.withValues(alpha: 0.6),
+                //
+                // Dropped at zero: the only heading that survives an empty
+                // section is the calendar's day, and the line under it already
+                // says the day is empty. `0` beside it is the same fact in a
+                // shape the reader has to decode.
+                if (count > 0)
+                  TextSpan(
+                    text: '  $count',
+                    style: label.copyWith(
+                      color: label.color?.withValues(alpha: 0.6),
+                    ),
                   ),
-                ),
               ],
             ),
           ),
         ),
+        if (entries.isEmpty && emptyLine != null)
+          Text(emptyLine!, style: SubdockText.summary),
         for (var i = 0; i < entries.length; i++) ...[
           if (i > 0) const SizedBox(height: SubdockSpacing.rowGap),
           ItemRow(

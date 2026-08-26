@@ -50,7 +50,6 @@ abstract final class UpcomingPresenter {
       ..sort((a, b) => a.actBy.compareTo(b.actBy));
 
     final overdue = <UpcomingEntry>[];
-    final trials = <UpcomingEntry>[];
     final thisWeek = <UpcomingEntry>[];
     final thisMonth = <UpcomingEntry>[];
     final later = <UpcomingEntry>[];
@@ -59,15 +58,15 @@ abstract final class UpcomingPresenter {
       final days = today.daysUntil(row.actBy);
       final entry = _entryOf(row, today);
 
-      // Overdue outranks everything, a trial outranks the calendar, and only
-      // then does the horizon decide. A trial two weeks out belongs beside the
-      // other trials rather than folded into "next 30 days": what makes it
-      // urgent is that cancelling is free until that date, which has nothing
-      // to do with how far away it is.
+      // Only overdue outranks the calendar. A trial used to get a section of
+      // its own above the dated ones, which took the one row whose date the
+      // reader most needs to place -- the day the free period turns into a
+      // charge -- and lifted it out of the only ordering this screen has. Two
+      // days and two months sat in the same block, and the item due tomorrow
+      // was read past on the way there. The `FREE TRIAL` badge on the row says
+      // the same thing without moving the row.
       if (days < 0) {
         overdue.add(entry);
-      } else if (row.trial) {
-        trials.add(entry);
       } else if (days <= weekHorizonDays) {
         thisWeek.add(entry);
       } else if (days <= monthHorizonDays) {
@@ -79,15 +78,34 @@ abstract final class UpcomingPresenter {
 
     return UpcomingView(
       overdue: overdue,
-      trials: trials,
       thisWeek: thisWeek,
       thisMonth: thisMonth,
       later: later,
       filtering: filter.isNotEmpty,
       shown: shown.length,
       total: pool.length,
+      // Counted over the pool rather than over what survived the filter, so
+      // the number on the header chip does not move when the chip beside it is
+      // pressed. `trialOnly` narrows through `matches`, which never touches
+      // the pool -- which is what makes this the one count that stays put
+      // under its own control.
+      trials: pool.where((i) => i.isTrialOn(today)).length,
     );
   }
+
+  /// One row, for an occurrence that is not necessarily the item's next one.
+  ///
+  /// The calendar needs this: it plots every act-by date inside the month it
+  /// is showing, and a September row has to count down to September rather
+  /// than to whatever `item.actBy` says is next. Built here rather than there
+  /// so the two views cannot drift into wording the same item differently --
+  /// the same reason the list and the scheduler share one `isLive`.
+  static UpcomingEntry entryFor(
+    TrackedItem item,
+    LocalDate today, {
+    Map<String, PaymentSource> sources = const {},
+    LocalDate? actBy,
+  }) => _entryOf(_Row.item(item, sources, today, actBy: actBy), today);
 
   static UpcomingEntry _entryOf(_Row row, LocalDate today) {
     final overdue = row.actBy < today;
@@ -115,7 +133,6 @@ abstract final class UpcomingPresenter {
 /// the screen at the cost of the first row's place on it.
 class UpcomingView {
   final List<UpcomingEntry> overdue;
-  final List<UpcomingEntry> trials;
   final List<UpcomingEntry> thisWeek;
   final List<UpcomingEntry> thisMonth;
   final List<UpcomingEntry> later;
@@ -134,23 +151,27 @@ class UpcomingView {
   final int shown;
   final int total;
 
+  /// How many tracked items are in a free trial today.
+  ///
+  /// On the header as a shortcut to the `Free trials` condition the sheet also
+  /// holds. Upcoming used to lift trials into a section of their own instead,
+  /// which cost them their place in the calendar order; a chip says the same
+  /// thing and leaves each row on the day it is due.
+  final int trials;
+
   const UpcomingView({
     this.overdue = const [],
-    this.trials = const [],
     this.thisWeek = const [],
     this.thisMonth = const [],
     this.later = const [],
     this.filtering = false,
     this.shown = 0,
     this.total = 0,
+    this.trials = 0,
   });
 
   bool get isEmpty =>
-      overdue.isEmpty &&
-      trials.isEmpty &&
-      thisWeek.isEmpty &&
-      thisMonth.isEmpty &&
-      later.isEmpty;
+      overdue.isEmpty && thisWeek.isEmpty && thisMonth.isEmpty && later.isEmpty;
 
   /// The filter is on and has left nothing. Distinct from [isEmpty] alone,
   /// which on an unfiltered list means the user has not tracked anything.
@@ -177,17 +198,22 @@ class _Row {
     this.trial = false,
   });
 
+  /// [actBy] overrides the item's next act-by date, for a view plotting an
+  /// occurrence further out. [trial] stays a fact about *today* either way:
+  /// whether the free period is running is not a property of a date in
+  /// October.
   factory _Row.item(
     TrackedItem item,
     Map<String, PaymentSource> sources,
-    LocalDate today,
-  ) => _Row(
+    LocalDate today, {
+    LocalDate? actBy,
+  }) => _Row(
     id: item.id,
     name: item.name,
     subtitle: subtitleOf(item, today),
     sourceName: sources[item.paymentSourceId]?.name,
     iconName: item.iconName,
-    actBy: item.actBy,
+    actBy: actBy ?? item.actBy,
     trial: item.isTrialOn(today),
   );
 

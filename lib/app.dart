@@ -20,6 +20,7 @@ import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
 import 'package:subdock/ui/app_shell.dart';
+import 'package:subdock/ui/calendar_presenter.dart';
 import 'package:subdock/ui/filter_presenter.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/manage_presenter.dart';
@@ -150,6 +151,23 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// What Upcoming is narrowed to. Held here for the same reason as [_span],
   /// and written to storage as well, so it also survives the app being killed.
   UpcomingFilter _filter = UpcomingFilter.none;
+
+  /// Which layout Upcoming is drawing, and what the calendar is pointed at.
+  ///
+  /// Here rather than in the screen for the same reason as [_span]: every data
+  /// change rebuilds the screen, and a month the user paged to has to survive
+  /// that. Not written to storage -- unlike the filter, none of this hides
+  /// anything, so arriving back on today's month costs nothing.
+  UpcomingMode _upcomingMode = UpcomingMode.list;
+
+  /// The month the grid is showing, as `(year, month)`. Null follows the
+  /// calendar, the same way [_monthShowing] does.
+  (int, int)? _calendarMonth;
+
+  /// The day open under the grid. Null lets [CalendarPresenter] choose, which
+  /// is what has to happen after a page: a selection in August is not a day
+  /// the September grid can show.
+  LocalDate? _calendarDay;
 
   StreamSubscription<List<PaymentSource>>? _sourceSubscription;
   StreamSubscription<List<TrackedItem>>? _itemSubscription;
@@ -488,6 +506,31 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         );
         return UpcomingScreen(
           view: upcoming,
+          mode: _upcomingMode,
+          onMode: (mode) => setState(() => _upcomingMode = mode),
+          calendar: _upcomingMode == UpcomingMode.calendar
+              ? CalendarPresenter.build(
+                  _items,
+                  today,
+                  year: _calendarMonth?.$1,
+                  month: _calendarMonth?.$2,
+                  selected: _calendarDay,
+                  sources: _sourcesById,
+                  filter: _filter,
+                )
+              : null,
+          // Paging drops the selected day rather than carrying it across.
+          // Keeping it would leave the list under the grid reporting on a date
+          // that is not in the grid, which is the one thing this pairing must
+          // never do.
+          onMonth: (month) => setState(() {
+            _calendarMonth = month;
+            _calendarDay = null;
+          }),
+          onSelectDay: (day) => setState(() => _calendarDay = day),
+          trialOnly: _filter.trialOnly,
+          onToggleTrial: () =>
+              _setFilter(_filter.withTrialOnly(!_filter.trialOnly)),
           filterSummary: _filter.isEmpty
               ? null
               : FilterPresenter.summary(

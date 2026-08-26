@@ -234,10 +234,24 @@ void main() {
         item('Claude Pro', expiresOn: '2026-08-17', inTrial: true),
       ], today);
 
-      expect(view.trials.single.when, '2d');
-      expect(view.trials.single.date, '17/08');
+      expect(view.thisWeek.single.when, '2d');
+      expect(view.thisWeek.single.date, '17/08');
       // The badge is what carries the state now, so the flag has to survive.
-      expect(view.trials.single.trial, isTrue);
+      expect(view.thisWeek.single.trial, isTrue);
+    });
+
+    // And it sits in the bucket its date puts it in, like every other row.
+    // Trials used to be lifted into a section of their own above the dated
+    // groups, which put a charge two days out and one two months out in the
+    // same block and pushed the item due tomorrow down the screen.
+    test('lands in the bucket its date puts it in', () {
+      final view = UpcomingPresenter.build([
+        item('soon', expiresOn: '2026-08-17', inTrial: true),
+        item('far', expiresOn: '2026-09-10', inTrial: true),
+      ], today);
+
+      expect(view.thisWeek.map((e) => e.id), ['soon']);
+      expect(view.thisMonth.map((e) => e.id), ['far']);
     });
 
     // A trial whose charge date has already gone by is late like anything
@@ -261,6 +275,47 @@ void main() {
 
       expect(view.overdue.single.trial, isFalse);
       expect(view.overdue.single.subtitle, isNot(contains('Free now')));
+    });
+  });
+
+  // The count on the header chip, which is what replaced the section trials
+  // used to get to themselves.
+  group('the trial count', () {
+    test('counts what is in a trial today', () {
+      final view = UpcomingPresenter.build([
+        item('claude', expiresOn: '2026-08-17', inTrial: true),
+        item('netflix', expiresOn: '2026-08-18'),
+      ], today);
+
+      expect(view.trials, 1);
+    });
+
+    // Counted over the pool, not over what survived the filter, so pressing
+    // the chip cannot move the number printed on it.
+    test('does not move when the chip beside it is pressed', () {
+      final items = [
+        item('claude', expiresOn: '2026-08-17', inTrial: true),
+        item('netflix', expiresOn: '2026-08-18'),
+      ];
+
+      expect(
+        UpcomingPresenter.build(
+          items,
+          today,
+          filter: const UpcomingFilter(trialOnly: true),
+        ).trials,
+        UpcomingPresenter.build(items, today).trials,
+      );
+    });
+
+    // The same rule the badge follows: money left on the due date whether the
+    // user came back to say so or not.
+    test('drops an item whose charge date has gone by', () {
+      final view = UpcomingPresenter.build([
+        item('claude', expiresOn: '2026-08-13', inTrial: true),
+      ], today);
+
+      expect(view.trials, 0);
     });
   });
 

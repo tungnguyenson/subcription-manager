@@ -503,6 +503,42 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     vì `pumpWidget` đặt một widget cùng kiểu vào đúng chỗ cũ sẽ giữ nguyên `State`, tức là
     giữ nguyên cái chốt đã tiêu.
 
+31. **Màn Upcoming có hai cách vẽ cùng một danh sách, và lịch không được nói khác danh
+    sách.** Tray `List / Calendar` ở hàng điều khiển dưới tiêu đề chỉ đổi cách xếp, không
+    đổi tập mục: `CalendarPresenter` gọi đúng `filter.pool` rồi `filter.matches` mà
+    `UpcomingPresenter` gọi. Bốn quyết định đi kèm, đừng đảo lại mà không đọc:
+
+    - **Lịch chấm theo `actBy`, không chấm theo `expiresOn`.** Danh sách chia nhóm theo
+      `actBy`, nên chấm theo ngày hết hạn là để một mục nằm ở hai ngày khác nhau tuỳ
+      người dùng đang xem cách vẽ nào. Cùng lý do với bẫy 16.
+    - **Lịch suy ra các kỳ từ chu kỳ, đi tới từ `anchorDate` và không bao giờ lùi trước
+      nó**, đúng như chart màn Money ở bẫy 22. Chỉ chấm `item.actBy` thì tháng sau trống
+      trơn dù người dùng có Netflix hàng tháng, tức là một cái lịch vô dụng. Hệ quả giống
+      bẫy 22: mục vừa nhập có quá khứ trống, đó là đúng chứ không phải thiếu.
+    - **Ngày đã qua không tự động tô đỏ.** Chỉ tô đỏ khi ngày đó đúng bằng `item.actBy`
+      hiện tại, tức là đúng cái mà danh sách gọi là Overdue. Một gói hàng tháng có
+      `anchorDate` từ năm ngoái sinh ra hàng chục kỳ trong quá khứ mà người dùng đã trả
+      đúng hạn; tô đỏ chúng là app vu cho họ nợ mười hai tháng.
+    - **Ô lịch cao cố định dù có dấu hay không.** Lưới co theo số dấu thì đổi tháng là
+      cái card dưới nó nhảy lên nhảy xuống ngay dưới ngón tay, cùng luật với bẫy 24. Một
+      ô chứa quá hai dấu thì vẽ một dấu kèm `+n`, chứ không vẽ hai rồi im: hai dấu và im
+      lặng là app báo thiếu trên đúng cái màn hình có việc là nói ra cái gì sắp tới.
+
+    Ngày mở sẵn là ngày gần nhất từ hôm nay trở đi có việc, và là hôm nay khi hôm nay có
+    việc. Mở lịch ra thấy `Nothing on this day` trong khi lưới đầy dấu là trả lời một câu
+    không ai hỏi, vì hôm nay vẫn được vẽ là hôm nay dù có được chọn hay không. Đổi tháng
+    thì `_calendarDay` trong `app.dart` phải xoá về null, không thì danh sách dưới lưới
+    báo cáo về một ngày không có trong lưới.
+
+    **Nhóm `Free trial · not charged yet` riêng trên Upcoming đã bỏ.** Một kỳ dùng thử
+    hết sau hai ngày và một kỳ hết sau hai tháng từng nằm chung một khối trên đầu màn,
+    đẩy mục đến hạn ngày mai xuống dưới, tức là mất đúng cái thứ tự duy nhất mà màn này
+    xếp theo. Badge `FREE TRIAL` trên dòng đã nói đủ, và chip `Free trial n` ở hàng điều
+    khiển là chỗ gom chúng lại khi người dùng thật sự muốn thế. Chip bật đúng điều kiện
+    `trialOnly` mà sheet lọc đang có, không phải một trạng thái thứ hai. Nó đếm trên tập
+    nguồn chứ không đếm trên danh sách đang hiện, để con số không nhảy khi chính nó bị
+    bấm.
+
 ## Viết tài liệu
 
 Tài liệu trong repo viết bằng **tiếng Việt**, chữ trên giao diện app viết bằng **tiếng
@@ -525,6 +561,7 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | Icon | `docs/icon-credits.md` |
 | Cái gì sắp xảy ra với một mục | `lib/ui/reminder_timeline.dart` cho phép dựng, `lib/ui/widgets/reminder_timeline_card.dart` cho khối trên màn Detail |
 | Bộ lọc màn Upcoming | `lib/domain/upcoming_filter.dart` cho luật khớp, `lib/ui/filter_presenter.dart` cho danh sách chip và dòng tóm tắt, `lib/ui/widgets/filter_sheet.dart` cho sheet |
+| Lịch tháng trên Upcoming | `lib/ui/calendar_presenter.dart` cho phép dựng lưới và luật chọn ngày, `lib/ui/widgets/month_grid.dart` cho cái card |
 | Sao lưu, khôi phục, và câu hỏi đồng bộ | `docs/backup-and-sync.md` |
 | Việc còn dang dở | `data/services/_verify.md` |
 | Khối so sánh gói năm và nút trang thuê bao | `docs/design-spec-annual-saving.md`, đã dựng, logic ở `lib/ui/annual_saving_presenter.dart` và `lib/ui/manage_presenter.dart` |
