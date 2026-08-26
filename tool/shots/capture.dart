@@ -349,6 +349,10 @@ void main() {
     await shot('backup-file');
     await pop();
 
+    await tapText('About');
+    await shot('about');
+    await pop();
+
     await tapText('History');
     await shot('history');
     await pop();

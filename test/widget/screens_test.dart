@@ -9,6 +9,7 @@ import 'package:subdock/ui/app_shell.dart';
 import 'package:subdock/ui/calendar_presenter.dart';
 import 'package:subdock/ui/money_presenter.dart';
 import 'package:subdock/ui/screens/money_screen.dart';
+import 'package:subdock/ui/screens/about_screen.dart';
 import 'package:subdock/ui/screens/backup_screen.dart';
 import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/sources_screen.dart';
@@ -535,8 +536,8 @@ void main() {
       expect(find.text('VND'), findsOneWidget);
       expect(find.text('English'), findsOneWidget);
       expect(find.text('Not yet'), findsOneWidget);
-      // Four destinations, About, and the one backup channel that exists
-      // without a cloud behind it.
+      // Four destinations, the one backup channel that exists without a cloud
+      // behind it, and About at the very bottom.
       expect(find.text('›'), findsNWidgets(6));
     });
 
@@ -692,6 +693,56 @@ void main() {
         tester.getRect(find.text('VND')).right,
         greaterThan(tester.getRect(find.text('Currency')).right),
       );
+    });
+  });
+
+  group('About', () {
+    // The one row nobody comes to Settings to find, so it is last. It is read
+    // once, by someone reporting a problem.
+    testWidgets('is the last row on Settings', (tester) async {
+      var opened = 0;
+      tester.view.physicalSize = const Size(1170, 4000);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+      await show(tester, SettingsScreen(onAbout: () => opened++));
+
+      final about = tester.getRect(find.text('About'));
+      for (final label in ['All services', 'Widget', 'File']) {
+        expect(
+          about.top,
+          greaterThan(tester.getRect(find.text(label)).top),
+          reason: '$label should come first',
+        );
+      }
+
+      await tester.tap(find.text('About'));
+      await tester.pumpAndSettle();
+      expect(opened, 1);
+    });
+
+    // The version is the reason the screen exists: it is what a person has to
+    // read off the app when they are describing a problem to someone else.
+    testWidgets('names the build, and what the app keeps', (tester) async {
+      await show(
+        tester,
+        const AboutScreen(version: '1.2.0', buildNumber: '47'),
+      );
+
+      expect(find.text('1.2.0'), findsOneWidget);
+      expect(find.text('47'), findsOneWidget);
+      expect(find.text('None'), findsNWidgets(2));
+      expect(find.text('On this phone'), findsOneWidget);
+    });
+
+    // A platform that will not answer gets a dash rather than a crash, and the
+    // rest of the screen is still worth reading.
+    testWidgets('a version nobody would say still draws the screen', (
+      tester,
+    ) async {
+      await show(tester, const AboutScreen(version: '—', buildNumber: '—'));
+
+      expect(find.text('—'), findsNWidgets(2));
+      expect(find.text('On this phone'), findsOneWidget);
     });
   });
 

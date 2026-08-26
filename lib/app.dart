@@ -40,6 +40,7 @@ import 'package:subdock/ui/screens/sources_screen.dart';
 import 'package:subdock/ui/screens/onboarding_screen.dart';
 import 'package:subdock/ui/screens/reminder_rules_screen.dart';
 import 'package:subdock/ui/screens/reminders_screen.dart';
+import 'package:subdock/ui/screens/about_screen.dart';
 import 'package:subdock/ui/screens/backup_screen.dart';
 import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
@@ -51,6 +52,7 @@ import 'package:subdock/ui/widgets/filter_sheet.dart';
 import 'package:subdock/ui/widgets/glass.dart';
 import 'package:subdock/ui/widgets/item_row.dart';
 import 'package:subdock/ui/widgets/notification_ask.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SubdockApp extends StatelessWidget {
@@ -181,6 +183,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   bool _onboardingDismissed = false;
   bool _notificationsGranted = false;
 
+  /// What About reports about this build.
+  ///
+  /// Read off the bundle rather than off a constant in the source: a constant
+  /// would be a second place the number lives, and the two would disagree the
+  /// first time someone bumped `pubspec.yaml` and shipped without touching
+  /// Dart.
+  ///
+  /// Read at startup rather than when the row is tapped, so the tap opens a
+  /// screen instead of waiting on a channel first. Dashes until it answers,
+  /// and dashes for good on a platform that will not: the rest of that screen
+  /// is still worth reading, and a missing version says exactly what it is.
+  String _version = '—';
+  String _buildNumber = '—';
+
   /// How the last write to the user's own cloud went.
   ///
   /// Starts as `unsupported` off iOS rather than `idle`. `idle` reads as
@@ -296,7 +312,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
     unawaited(_refreshPermission());
     unawaited(_restoreFilter());
+    unawaited(_readVersion());
   }
+
+  Future<void> _readVersion() async {
+    final PackageInfo info;
+    try {
+      info = await PackageInfo.fromPlatform();
+    } on Exception {
+      return;
+    }
+    if (!mounted) return;
+    setState(() {
+      _version = info.version;
+      _buildNumber = info.buildNumber;
+    });
+  }
+
+  void _openAbout() =>
+      _push(AboutScreen(version: _version, buildNumber: _buildNumber));
 
   /// Puts back the filter the last session left on Upcoming.
   ///
@@ -632,6 +666,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           onExport: () => unawaited(_exportBackup()),
           onOpenCloudBackup: _openCloudBackup,
           onOpenFileBackup: _openFileBackup,
+          onAbout: _openAbout,
         );
     }
   }

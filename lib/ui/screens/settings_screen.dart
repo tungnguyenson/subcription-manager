@@ -135,7 +135,6 @@ class SettingsScreen extends StatelessWidget {
             // screen" without the user hunting for a setting that is not
             // there.
             const DetailRow(label: 'Widget', value: 'Not yet'),
-            DetailRow.nav(label: 'About', onTap: onAbout),
           ],
         ),
         const SectionLabel('Backup'),
@@ -168,6 +167,13 @@ class SettingsScreen extends StatelessWidget {
         // trusting. The sentence differs per platform because the truth does;
         // see [DeviceBackup].
         if (backup case final view?) Footnote(view.note),
+        // Last on the screen. It is the one row nobody comes to Settings to
+        // find: it is read once, by someone reporting a problem, and every
+        // other row here is something a user actually came for.
+        const SectionLabel('App'),
+        GroupedCard(
+          children: [DetailRow.nav(label: 'About', onTap: onAbout)],
+        ),
       ],
     );
   }
