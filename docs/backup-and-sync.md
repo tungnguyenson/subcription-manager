@@ -153,14 +153,15 @@ Ngưỡng cụ thể còn để ngỏ, xem mục 8.
 
 **d. Đường khôi phục ở màn hình khi chưa có gì**
 
-Hiện `onboarding_screen.dart` chỉ có một lối đi: **"Get started"**. Cần thêm một lối
-thứ hai, đại ý **"I already have a backup"**, chạy thẳng vào cùng đường nhập tệp mà
-Settings đang gọi.
+> **Đã dựng rồi bỏ đi.** Onboarding từng có một lối thứ hai, chữ mờ dưới nút chính,
+> đại ý *"I already have a backup"*, chạy thẳng vào cùng đường nhập tệp mà Settings
+> gọi. Bản onboarding dựng lại theo design mới bỏ nó, theo yêu cầu của chủ dự án, và
+> mục này ở lại để người đọc sau biết cái nút đó đã từng có và vì sao nó đáng có.
 
-Đây là thay đổi rẻ nhất và đáng giá nhất trong cả Bước 0. Khoảnh khắc người ta cài lại
-app chính là khoảnh khắc họ cần khôi phục, mà hiện giờ đường đó nằm chôn trong Settings,
-sau một màn giới thiệu nói về chuyện thêm mục mới. Nếu nó có mặt hôm 25/08 thì đã không
-mất gì.
+Lập luận cũ vẫn đúng nguyên: khoảnh khắc người ta cài lại app chính là khoảnh khắc họ
+cần khôi phục, mà đường đó nay lại nằm trong Settings, sau một màn giới thiệu nói về
+chuyện thêm mục mới. Ai muốn dựng lại thì nút cũ nằm trong lịch sử git, và chỗ đặt nó
+là dưới nút chính của màn thứ hai.
 
 ### 5.3 Một việc dứt khoát không làm
 

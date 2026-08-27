@@ -49,6 +49,7 @@ này từ đâu ra, và giao diện có nói được điều đó không.**
 
 ```
 lib/domain/      Dart thuần, không import Flutter. Ngày, tiền, chu kỳ, nhắc hạn, nhóm
+lib/i18n/        Mọi chữ trên giao diện, hai bản tiếng Anh và tiếng Việt
 lib/data/        drift + SQLite. tables.drift là nguồn chuẩn của lược đồ
 lib/catalog/     Danh mục dịch vụ đóng gói sẵn
 lib/ui/          Màn hình và widget. Tự vẽ icon, không dùng icon font
@@ -73,6 +74,10 @@ flutter test test/golden/ --update-goldens                 # sau khi đổi icon
 
 SHOTS_DARK=1 flutter test tool/shots/capture.dart --update-goldens   # cùng chỗ đó,
                                                            # bản tối, ra out/dark_*.png
+SHOTS_VI=1 flutter test tool/shots/capture.dart --update-goldens     # bản tiếng Việt,
+                                                           # ra out/vi_*.png. Chạy lại
+                                                           # sau khi sửa chữ, vì tiếng
+                                                           # Việt dài hơn tiếng Anh
 
 flutter test tool/shots/capture.dart --update-goldens      # chụp lại 9 màn ở khung
                                                            # 390x844 vào tool/shots/out/
@@ -89,7 +94,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Ba mươi sáu cái bẫy đã vấp, đừng vấp lại
+## Bốn mươi hai cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -656,10 +661,101 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     badge` và `a trial with no amount says it is free rather than nothing` trong
     `test/unit/ui/upcoming_presenter_test.dart`.
 
+37. **Chữ trên giao diện không còn viết thẳng trong widget nữa.** Mọi câu người dùng
+    đọc nằm trong `lib/i18n/`, gọi ra bằng `S.t.tênChuỗi`, và có đúng hai bản:
+    `strings_en.dart` và `strings_vi.dart`. Giao diện `Strings` chia thành nhiều lớp
+    con theo vùng màn hình, mỗi lớp một file trong `lib/i18n/parts/`, để file phải mở
+    ra khi sửa chữ màn Money là file nói về màn Money.
+
+    Là phương thức chứ không phải bảng `Map<String, String>`: gõ sai một khoá trong
+    bảng là một ô trống lúc chạy, gõ sai ở đây là không biên dịch được. Và **bất cứ
+    chuỗi nào có số hoặc tên chèn vào phải là một phương thức**, để bản dịch cầm cả
+    câu. Tiếng Việt không đặt số nhiều ở chỗ tiếng Anh đặt, nên một bản dịch nhận về
+    `'$n days'` đã lắp sẵn thì không sửa được nữa.
+
+    Hệ quả cho `const`: **widget nào đọc `S.t` thì không `const` được**, đúng như
+    widget đọc token màu ở bẫy 34, và vì đúng cái lý do đó. Trình biên dịch chỉ ra
+    từng chỗ một.
+
+38. **Ngôn ngữ và loại tiền đi chung một scope với bảng màu, và luật `watch` ở bẫy 34
+    lo cả ba.** `SubdockTheme` giờ mang `palette`, `locale` và `currency`; nó đặt cả
+    ba biến toàn cục rồi phát chúng qua **một** `InheritedWidget`. Chọn một scope chứ
+    không phải ba, vì cả ba có cùng một vấn đề vẽ lại và cùng một cách sửa, còn ba
+    inherited widget là ba dòng mỗi màn phải nhớ. Màn nào đã theo luật màu thì theo
+    luôn hai cái kia, và màn nào quên thì hỏng cả ba cùng lúc, dễ thấy hơn nhiều so
+    với một màn đổi màu mà không đổi chữ.
+
+    Chốt chặn là bài `a screen pushed before the change follows it too` trong
+    `test/widget/locale_test.dart`, đối xứng với bài cùng tên bên `theme_test.dart`.
+
+39. **Tên nhóm dựng sẵn dịch lúc đọc, không dịch lúc seed.** `categoryRow` được đổ đầy
+    trong một bước migration, tức là rất lâu trước khi onboarding kịp hỏi người dùng
+    đọc bằng thứ tiếng nào. Vì vậy nhãn nằm trong cơ sở dữ liệu luôn là nhãn tiếng
+    Anh, và `Category.displayLabel` mới là thứ màn hình đọc.
+
+    Luật gói gọn trong một phép so: **một nhóm dựng sẵn còn mang đúng cái nhãn nó được
+    seed thì đi theo ngôn ngữ; đổi khác đi một chữ là nhãn của người dùng, giữ nguyên
+    ở cả hai thứ tiếng.** Nhóm do người dùng tự tạo không bao giờ được dịch.
+
+    Đừng gọi `category.label` để hiển thị. Nó là giá trị lưu xuống, và là thứ phép so
+    ở trên đối chiếu; `displayLabel` mới là thứ đọc lên. Chốt chặn nằm ở nhóm
+    `a shipped shelf name` trong `test/widget/locale_test.dart`.
+
+40. **Câu tiếng Việt dài hơn câu tiếng Anh, và có hai hàng trên màn hình không còn chỗ
+    thừa.** Hàng điều khiển của Upcoming (tray `List / Calendar`, chip dùng thử, nút
+    lọc) và tray hai đoạn trên màn Savings đều vỡ khi bản dịch dài thêm vài ký tự.
+    Vì vậy `SHOTS_VI=1` là một phần của việc sửa chữ, không phải việc dọn dẹp sau đó:
+    chạy nó và nhìn ảnh trước khi tin rằng một chuỗi mới vừa vào là xong.
+
+    Hai chỗ đã phải rút ngắn bản tiếng Việt cho vừa, và cả hai ghi lý do ngay tại chỗ:
+    chip `Dùng thử` (không phải `Đang dùng thử`) và tray `Sang gói năm` (không phải
+    `Chuyển sang gói năm`).
+
+    Riêng cột đếm ngược có một quyết định về nghĩa chứ không phải về chiều rộng: dòng
+    phụ của một mục quá hạn ghi `4 ngày` chứ không ghi `4 ngày trước`, vì viên thuốc
+    `Trễ` ngay trên nó đã nói rồi. Tiếng Anh vẫn giữ `4 days ago`, vì ở đó dòng này
+    đứng đúng chỗ mà mọi dòng khác mang một ngày tháng. Đó là `S.t.overdueAgo`, tách
+    khỏi `S.t.daysAgo` mà văn xuôi dùng.
+
+41. **Loại tiền app cộng tổng là một biến chạy được, không phải hằng số.** `Fx.base`
+    thay cho `Fx.baseCurrency` cũ, và onboarding là chỗ hỏi nó. Không một khoản
+    `Money` nào bị viết lại khi giá trị này đổi: mỗi khoản giữ nguyên loại tiền đã
+    nhập, mãi mãi, và cái đổi chỉ là loại tiền các phép cộng được phát biểu lại.
+
+    App mang đúng **một** tỉ giá, USD sang VND. `Fx.total` đọc nó theo cả hai chiều,
+    vì chọn đếm bằng đồng hay bằng đô là quyết định của người dùng chứ không phải của
+    tỉ giá. Chọn loại tiền thứ ba vẫn chạy, từng loại vẫn cộng riêng chính xác, chỉ là
+    không còn một con số tổng gộp chung, và `unconvertedCount` là chỗ giao diện nói ra
+    điều đó. Màn thứ hai của onboarding nói trước cả khi người dùng bấm.
+
+    `MoneyFormat` hết đoán bên đặt ký hiệu theo số chữ số thập phân. Luật cũ đặt ký
+    hiệu yên sau con số vì ký hiệu đồng nằm sau, mà `1,200 ¥` thì không ai viết. Bên
+    đặt ký hiệu giờ là một trường của từng loại tiền trong `CurrencyCatalog`, và loại
+    tiền nào không có ký hiệu riêng thì in ra chính mã của nó, cách một khoảng trắng.
+
+42. **Onboarding có hai màn, và cố ý không còn xin quyền thông báo lẫn khôi phục
+    backup.** Màn đầu ba card, mỗi card chạy một hình động dựng bằng chính widget của
+    app: dải mục trôi ngang dùng icon thương hiệu thật, mock màn khoá với thông báo
+    rơi xuống, chart chín cột mọc lên. Màn hai hỏi hai câu app không tự trả lời được,
+    loại tiền và ngôn ngữ.
+
+    Quyền thông báo vẫn hỏi ở `NotificationAsk`, lúc lưu mục đầu tiên, nơi sheet gọi
+    được tên cái ngày người dùng vừa gõ. Đó là chỗ đúng và không đổi. Khôi phục backup
+    thì chỉ còn đường qua Settings, và đó là một mất mát có thật: người vừa cài lại
+    máy phải tự đi tìm.
+
+    Ba hình động đều tôn trọng Reduce Motion, và đó không phải phép lịch sự thừa. Dải
+    trôi ngang và thông báo rơi xuống **lặp mãi**, nên `pumpAndSettle` không bao giờ
+    trả về. Mọi test và mọi lần chụp ảnh của màn này đều bật `disableAnimations`, tức
+    là đi đúng đường mà máy bật Reduce Motion đi. Tắt animation thì dải đứng ở đầu
+    vòng lặp và các thông báo đứng ở khung mà cả hai đều đã hiện, chứ không phải khung
+    trống.
+
 ## Viết tài liệu
 
-Tài liệu trong repo viết bằng **tiếng Việt**, chữ trên giao diện app viết bằng **tiếng
-Anh**. Hook `vn-writing` sẽ chặn nếu tài liệu tiếng Việt có em-dash hoặc jargon không nền.
+Tài liệu trong repo viết bằng **tiếng Việt**. Chữ trên giao diện app có **hai bản**,
+tiếng Anh và tiếng Việt, và cả hai nằm trong `lib/i18n/`; xem bẫy 37. Hook `vn-writing`
+sẽ chặn nếu tài liệu tiếng Việt có em-dash hoặc jargon không nền.
 
 Tránh từ **"trục"**: nó là cách dịch thẳng của *axis* và tối nghĩa với người đọc. Viết
 thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
@@ -676,6 +772,9 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | Danh mục dịch vụ | `docs/research/README.md` |
 | Nhóm dịch vụ (category) | `lib/domain/default_categories.dart` cho 22 nhóm dựng sẵn, `lib/domain/category_book.dart` cho cách tra |
 | Sáng hay tối | Bẫy 34, `lib/ui/theme/palette.dart` cho giá trị, `lib/data/theme_store.dart` cho lựa chọn của người dùng |
+| Chữ trên giao diện, hai thứ tiếng | Bẫy 37 và 38. `lib/i18n/parts/` cho từng vùng màn hình, `lib/i18n/strings_en.dart` và `strings_vi.dart` cho bản dịch, `lib/data/locale_store.dart` cho lựa chọn |
+| Loại tiền và tỉ giá | Bẫy 41. `lib/domain/fx.dart`, `lib/domain/currency_catalog.dart`, `lib/data/currency_store.dart` |
+| Hai màn onboarding | Bẫy 42. `lib/ui/screens/onboarding/` |
 | Icon | `docs/icon-credits.md` |
 | Cái gì sắp xảy ra với một mục | `lib/ui/reminder_timeline.dart` cho phép dựng, `lib/ui/widgets/reminder_timeline_card.dart` cho khối trên màn Detail |
 | Bộ lọc màn Upcoming | `lib/domain/upcoming_filter.dart` cho luật khớp, `lib/ui/filter_presenter.dart` cho danh sách chip và dòng tóm tắt, `lib/ui/widgets/filter_sheet.dart` cho sheet |
