@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:subdock/domain/currency_picks.dart';
 import 'package:subdock/i18n.dart';
 import 'package:subdock/ui/screens/onboarding/setup_page.dart';
 import 'package:subdock/ui/screens/onboarding/value_props_page.dart';
@@ -20,13 +21,13 @@ import 'package:subdock/ui/widgets/primitives.dart';
 /// [NotificationAsk], where the timing is the whole feature. Restore has moved
 /// to Settings.
 class OnboardingScreen extends StatefulWidget {
-  final String currency;
+  final CurrencyPicks picks;
   final AppLocale locale;
 
   /// Called as the user taps, not at the end. Both choices take effect
   /// immediately — the language so the rest of this screen is already in it,
   /// and the currency so the sample figures are.
-  final ValueChanged<String> onCurrency;
+  final ValueChanged<CurrencyPicks> onCurrency;
   final ValueChanged<AppLocale> onLocale;
 
   /// The list is ready to be opened.
@@ -34,7 +35,7 @@ class OnboardingScreen extends StatefulWidget {
 
   const OnboardingScreen({
     super.key,
-    required this.currency,
+    required this.picks,
     required this.locale,
     required this.onCurrency,
     required this.onLocale,
@@ -97,7 +98,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               _Scrollable(child: ValuePropsPage()),
               _Scrollable(
                 child: SetupPage(
-                  currency: widget.currency,
+                  picks: widget.picks,
                   locale: widget.locale,
                   onCurrency: widget.onCurrency,
                   onLocale: widget.onLocale,

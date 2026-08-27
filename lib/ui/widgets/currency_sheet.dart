@@ -6,28 +6,45 @@ import 'package:subdock/ui/widgets/currency_row.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/search_field.dart';
 
-/// The full currency list, behind the `Another currency` row.
+/// The full currency list, behind the `Add a currency` row and behind a tap
+/// on a currency card.
 ///
 /// A sheet rather than a longer list on the page itself. Fifty rows under the
 /// question would bury the language section and the button below it, and the
-/// four on the page answer for almost everyone; this is the door for the rest.
+/// one or two cards on the page answer for almost everyone; this is the door
+/// for the rest.
 ///
 /// Search matches the code and the name in the language being read, so
 /// someone reading Vietnamese finds the yen by typing `yên` and someone
 /// reading English finds it by typing `yen`. Both find it by typing `JPY`.
 class CurrencySheet extends StatefulWidget {
+  /// The code this sheet was opened *on*: the slot being filled or changed.
   final String selected;
 
-  const CurrencySheet({super.key, required this.selected});
+  /// Every code already declared, [selected] usually among them.
+  ///
+  /// Ticked and dimmed rather than hidden. A list that quietly dropped the
+  /// currency the user already has would answer "is my dong in here" with an
+  /// empty search, and the honest answer is "yes, and you already have it".
+  final Set<String> taken;
+
+  const CurrencySheet({
+    super.key,
+    required this.selected,
+    this.taken = const {},
+  });
 
   /// Resolves to the chosen code, or null if the user backed out.
-  static Future<String?> show(BuildContext context, String selected) =>
-      showModalBottomSheet<String>(
-        context: context,
-        backgroundColor: const Color(0x00000000),
-        isScrollControlled: true,
-        builder: (sheet) => CurrencySheet(selected: selected),
-      );
+  static Future<String?> show(
+    BuildContext context,
+    String selected, {
+    Set<String> taken = const {},
+  }) => showModalBottomSheet<String>(
+    context: context,
+    backgroundColor: const Color(0x00000000),
+    isScrollControlled: true,
+    builder: (sheet) => CurrencySheet(selected: selected, taken: taken),
+  );
 
   @override
   State<CurrencySheet> createState() => _CurrencySheetState();
@@ -95,12 +112,23 @@ class _CurrencySheetState extends State<CurrencySheet> {
                 thickness: 1,
                 color: SubdockColors.hairline,
               ),
-              itemBuilder: (context, i) => CurrencyRow(
-                code: matches[i].code,
-                selected: matches[i].code == widget.selected,
-                flat: true,
-                onTap: () => Navigator.of(context).pop(matches[i].code),
-              ),
+              itemBuilder: (context, i) {
+                final code = matches[i].code;
+                final held = widget.taken.contains(code);
+                return Opacity(
+                  // Dimmed, not disabled. Tapping one still closes the sheet
+                  // on that code, and the caller works out that nothing
+                  // changed -- which is a great deal easier to understand
+                  // than a row that swallows the tap.
+                  opacity: held && code != widget.selected ? 0.5 : 1,
+                  child: CurrencyRow(
+                    code: code,
+                    selected: held || code == widget.selected,
+                    flat: true,
+                    onTap: () => Navigator.of(context).pop(code),
+                  ),
+                );
+              },
             ),
           ),
         ],

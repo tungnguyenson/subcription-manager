@@ -99,14 +99,14 @@ class ViStrings implements Strings {
   // ---- onboarding ----
 
   @override
-  String get onboardTitle => 'Không bỏ lỡ ngày đến hạn nào nữa.';
+  String get onboardTitle => 'Không bỏ lỡ hạn thanh toán.';
 
   @override
-  String get onboardListTitle => 'Mọi thứ có ngày hạn, trong một danh sách';
+  String get onboardListTitle => 'Theo dõi mọi thứ có ngày hết hạn';
   @override
-  String get onboardNotifyTitle => 'Báo trước ngày hạn, không phải sau';
+  String get onboardNotifyTitle => 'Biết trước khi tiền bị trừ';
   @override
-  String get onboardSpendTitle => 'Xem cộng lại là bao nhiêu';
+  String get onboardSpendTitle => 'Xem thống kê chi phí hàng tháng';
 
   @override
   String get onboardNextTwelveMonths => '12 tháng tới';
@@ -148,20 +148,30 @@ class ViStrings implements Strings {
   String notifAge(int days) => '$days ngày';
 
   @override
-  String get onboardCurrencyTitle => 'Bạn trả tiền bằng loại tiền nào?';
-  @override
-  String get onboardCurrencyBody =>
-      'Các khoản tổng và từng mục đều hiện theo loại tiền này. Bạn vẫn nhập '
-      'được giá bằng loại tiền khác.';
-  @override
-  String get onboardOtherCurrency => 'Loại tiền khác';
-  @override
-  String get onboardSearchCurrency => 'Tìm loại tiền';
+  String get onboardCurrencyTitle => 'Ngôn ngữ và loại tiền';
   @override
   String get onboardLanguageLabel => 'Ngôn ngữ';
   @override
+  String get onboardCurrencyLabel => 'Đơn vị tiền';
+  @override
+  String get onboardAddCurrency => 'Thêm đơn vị tiền';
+  @override
+  String get onboardOtherCurrency => 'Đơn vị khác';
+  @override
+  String get onboardSearchCurrency => 'Tìm loại tiền';
+  @override
+  String get onboardSampleMonthly => 'hàng tháng';
+  @override
+  String get onboardDefaultLabel => 'Đơn vị tiền mặc định';
+  @override
+  String get onboardDefaultNote =>
+      'Dùng khi thêm mục mới và khi tính tổng. Mỗi mục vẫn giữ đơn vị tiền đã '
+      'nhập cho nó.';
+  @override
+  String get onboardRemoveCurrency => 'Bỏ';
+  @override
   String get onboardNoRateNote =>
-      'Subdock chỉ mang theo một tỉ giá, giữa đồng và đô la. Chọn loại tiền '
+      'Subdock chỉ mang theo một tỉ giá, giữa đồng và đô la. Chọn đơn vị tiền '
       'khác thì từng loại vẫn cộng riêng được, nhưng không có một con số tổng '
       'gộp chung.';
 

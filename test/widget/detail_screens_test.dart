@@ -17,6 +17,7 @@ import 'package:subdock/ui/screens/add_item_screen.dart';
 import 'package:subdock/ui/screens/history_screen.dart';
 import 'package:subdock/ui/screens/item_detail_screen.dart';
 import 'package:subdock/i18n.dart';
+import 'package:subdock/domain/currency_picks.dart';
 import 'package:subdock/ui/screens/onboarding/onboarding_screen.dart';
 import 'package:subdock/ui/screens/reminder_rules_screen.dart';
 import 'package:subdock/ui/screens/reminders_screen.dart';
@@ -845,12 +846,14 @@ void main() {
 
     Future<void> showOnboarding(
       WidgetTester tester, {
+      CurrencyPicks? picks,
       String currency = 'VND',
       AppLocale locale = AppLocale.en,
-      ValueChanged<String>? onCurrency,
+      ValueChanged<CurrencyPicks>? onCurrency,
       ValueChanged<AppLocale>? onLocale,
       VoidCallback? onStart,
     }) async {
+      final chosen = picks ?? CurrencyPicks.one(currency);
       tester.view.physicalSize = const Size(1170, 2532);
       tester.view.devicePixelRatio = 3;
       addTearDown(tester.view.reset);
@@ -859,7 +862,8 @@ void main() {
         SubdockTheme(
           palette: SubdockPalette.light,
           locale: locale,
-          currency: currency,
+          currency: chosen.base,
+          currencies: chosen.codes,
           child: MaterialApp(
             theme: buildSubdockTheme(),
             home: MediaQuery(
@@ -867,7 +871,7 @@ void main() {
               child: Scaffold(
                 body: OnboardingScreen(
                   key: ValueKey(shown++),
-                  currency: currency,
+                  picks: chosen,
                   locale: locale,
                   onCurrency: onCurrency ?? (_) {},
                   onLocale: onLocale ?? (_) {},
@@ -888,7 +892,7 @@ void main() {
 
       expect(find.text('Never miss a due date again.'), findsOneWidget);
       expect(find.text('Everything with a date, in one list'), findsOneWidget);
-      expect(find.text('Told before the date, not after'), findsOneWidget);
+      expect(find.text('Know before the money leaves'), findsOneWidget);
       expect(find.text('See what it adds up to'), findsOneWidget);
 
       // The marquee draws the real list rows, and the lock screen the real
@@ -915,19 +919,22 @@ void main() {
     ) async {
       await showOnboarding(tester);
 
-      expect(find.text('Which currency do you pay in?'), findsNothing);
+      expect(find.text('Language and currency'), findsNothing);
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Which currency do you pay in?'), findsOneWidget);
+      expect(find.text('Language and currency'), findsOneWidget);
       expect(find.text('Continue'), findsNothing);
       expect(find.text('Get started'), findsOneWidget);
     });
 
+    // Both answers take effect as they are tapped rather than at the end, so
+    // that the rest of the screen is already in the language and the sample
+    // figures already in the currency.
     testWidgets('both answers are handed back as they are tapped', (
       tester,
     ) async {
-      final currencies = <String>[];
+      final currencies = <CurrencyPicks>[];
       final locales = <AppLocale>[];
       var started = 0;
 
@@ -940,26 +947,38 @@ void main() {
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('USD'));
+      await tester.tap(find.text('English'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('Tiếng Việt'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Add a currency'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('USD'));
+      await tester.pumpAndSettle();
+
       await tester.tap(find.text('Get started'));
       await tester.pumpAndSettle();
 
-      expect(currencies, ['USD']);
       expect(locales, [AppLocale.vi]);
+      // Appended, and the base left where it was. Adding a currency says "I
+      // am billed in this too", not "state my totals in this".
+      expect(currencies.single.codes, ['VND', 'USD']);
+      expect(currencies.single.base, 'VND');
       expect(started, 1);
     });
 
-    // The tile has to be readable by the one person it is for: someone who
+    // The sheet has to be readable by the one person it is for: someone who
     // cannot read the language currently on screen.
-    testWidgets('each language tile is written in its own language', (
-      tester,
-    ) async {
+    testWidgets('each language is written in its own language', (tester) async {
       await showOnboarding(tester, locale: AppLocale.vi);
       await tester.tap(find.text('Tiếp tục'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Tiếng Việt'), findsOneWidget);
+      await tester.tap(find.text('Tiếng Việt'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tiếng Việt'), findsWidgets);
       expect(find.text('English'), findsOneWidget);
     });
 
@@ -981,19 +1000,98 @@ void main() {
       expect(find.textContaining('no single combined total'), findsOneWidget);
     });
 
-    // A pick made in the sheet has to stay visible on the page behind it.
-    // Substituting it into the four would move the other rows under the
-    // user's finger the moment they came back.
-    testWidgets('a currency picked from the full list joins the four', (
+    // Two currencies the app cannot relate is a working list with no combined
+    // figure on the Money screen, and the warning is keyed off the declared
+    // set rather than off the base alone -- the base here is perfectly
+    // convertible on its own.
+    testWidgets('a second currency with no rate to the base says so too', (
       tester,
     ) async {
-      await showOnboarding(tester, currency: 'GBP');
+      await showOnboarding(tester, picks: CurrencyPicks.one('VND'));
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('no single combined total'), findsNothing);
+
+      await showOnboarding(
+        tester,
+        picks: CurrencyPicks(['VND', 'EUR'], base: 'VND'),
+      );
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('no single combined total'), findsOneWidget);
+    });
+
+    // A card is a bill in that currency rather than the currency's name and
+    // symbol. The question is not which glyph the user likes, it is what
+    // their bills look like.
+    testWidgets('each declared currency is drawn as a bill in it', (
+      tester,
+    ) async {
+      await showOnboarding(
+        tester,
+        picks: CurrencyPicks(['VND', 'USD'], base: 'VND'),
+      );
       await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
 
-      for (final code in ['VND', 'USD', 'EUR', 'JPY', 'GBP']) {
-        expect(find.text(code), findsOneWidget, reason: code);
-      }
+      expect(find.text('Netflix'), findsOneWidget);
+      expect(find.text('231,000 ₫'), findsOneWidget);
+      expect(find.text('Spotify'), findsOneWidget);
+      expect(find.text(r'$12.99'), findsOneWidget);
+    });
+
+    // The table only covers the currencies people are commonly billed in.
+    // A currency outside it is not a gap in the screen: the card falls back
+    // to the currency's own mark and name, which is what the picker showed
+    // for every currency before the table existed.
+    testWidgets('a currency with no sample bill still fills its card', (
+      tester,
+    ) async {
+      await showOnboarding(tester, currency: 'CHF');
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Swiss franc'), findsOneWidget);
+    });
+
+    // The chips only mean anything once there are two currencies to choose
+    // between, and the row of them is what the second card buys.
+    testWidgets('which currency the totals speak is asked only once it is a '
+        'question', (tester) async {
+      await showOnboarding(tester, picks: CurrencyPicks.one('VND'));
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(find.text('DEFAULT CURRENCY'), findsNothing);
+
+      final picks = <CurrencyPicks>[];
+      await showOnboarding(
+        tester,
+        picks: CurrencyPicks(['VND', 'USD'], base: 'VND'),
+        onCurrency: picks.add,
+      );
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(find.text('DEFAULT CURRENCY'), findsOneWidget);
+
+      await tester.tap(find.text(r'$ USD'));
+      await tester.pumpAndSettle();
+      expect(picks.single.base, 'USD');
+      // Only the base moved. The other currency is a separate answer.
+      expect(picks.single.codes, ['VND', 'USD']);
+    });
+
+    // Adding is offered only while there is room, and the design caps it at
+    // two. Without the cap the chip row on the amount field grows without
+    // limit on a form used every day.
+    testWidgets('a full list stops offering to add another', (tester) async {
+      await showOnboarding(
+        tester,
+        picks: CurrencyPicks(['VND', 'USD'], base: 'VND'),
+      );
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add a currency'), findsNothing);
     });
   });
 

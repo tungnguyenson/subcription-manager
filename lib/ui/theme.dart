@@ -57,6 +57,14 @@ class SubdockTheme extends StatelessWidget {
   /// built.
   final String currency;
 
+  /// Every currency the user declared, [currency] among them.
+  ///
+  /// Optional, and null means "just the one". Almost every caller is a widget
+  /// test putting a single screen under a bare scope, and making those name a
+  /// list to say the thing they already said with [currency] would be noise in
+  /// a hundred places to serve two.
+  final List<String>? currencies;
+
   final Widget child;
 
   const SubdockTheme({
@@ -64,6 +72,7 @@ class SubdockTheme extends StatelessWidget {
     required this.palette,
     this.locale = AppLocale.en,
     this.currency = Fx.defaultBase,
+    this.currencies,
     required this.child,
   });
 
@@ -85,10 +94,13 @@ class SubdockTheme extends StatelessWidget {
     _active = palette;
     S.publish(locale);
     Fx.publishBase(currency);
+    final declared = currencies ?? [currency];
+    Fx.publishDeclared(declared);
     return _ChromeScope(
       palette: palette,
       locale: locale,
       currency: currency,
+      currencies: declared,
       child: child,
     );
   }
@@ -98,11 +110,13 @@ class _ChromeScope extends InheritedWidget {
   final SubdockPalette palette;
   final AppLocale locale;
   final String currency;
+  final List<String> currencies;
 
   const _ChromeScope({
     required this.palette,
     required this.locale,
     required this.currency,
+    required this.currencies,
     required super.child,
   });
 
@@ -110,7 +124,16 @@ class _ChromeScope extends InheritedWidget {
   bool updateShouldNotify(_ChromeScope old) =>
       old.palette != palette ||
       old.locale != locale ||
-      old.currency != currency;
+      old.currency != currency ||
+      !_same(old.currencies, currencies);
+
+  static bool _same(List<String> a, List<String> b) {
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }
 
 /// The colour tokens.

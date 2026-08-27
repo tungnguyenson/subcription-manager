@@ -49,17 +49,42 @@ abstract class OnboardingStrings {
   /// `1d`, `2d` — how long ago a notification arrived.
   String notifAge(int days);
 
-  // ---- screen two: currency and language ----
+  // ---- screen two: language and currency ----
 
+  /// The page title. It names both questions, because both are on it and a
+  /// title that named only one would make the other look like a detail of it.
   String get onboardCurrencyTitle;
-  String get onboardCurrencyBody;
+
+  String get onboardLanguageLabel;
+
+  /// The heading over the declared currencies.
+  String get onboardCurrencyLabel;
+
+  /// The dashed row under the declared currencies.
+  String get onboardAddCurrency;
 
   /// The row at the bottom of the currency list, into the full search.
   String get onboardOtherCurrency;
 
   String get onboardSearchCurrency;
 
-  String get onboardLanguageLabel;
+  /// Under each sample card: the cycle the sample amount is charged on.
+  ///
+  /// The only part of the sample card that is translated. The service name and
+  /// the plan tier beside it are not, and that follows the real catalog, where
+  /// `CatalogPlan.name` ships in the provider's own wording and stays in it
+  /// whichever language the app is being read in.
+  String get onboardSampleMonthly;
+
+  /// The heading over the two chips, shown only once there are two currencies
+  /// to choose between.
+  String get onboardDefaultLabel;
+
+  /// Under those chips, saying what the choice actually does.
+  String get onboardDefaultNote;
+
+  /// The label on the control that takes a currency back off the list.
+  String get onboardRemoveCurrency;
 
   /// Shown under a currency the app holds no exchange rate for.
   ///

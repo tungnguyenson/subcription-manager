@@ -115,7 +115,7 @@ class EnStrings implements Strings {
   @override
   String get onboardListTitle => 'Everything with a date, in one list';
   @override
-  String get onboardNotifyTitle => 'Told before the date, not after';
+  String get onboardNotifyTitle => 'Know before the money leaves';
   @override
   String get onboardSpendTitle => 'See what it adds up to';
 
@@ -160,17 +160,27 @@ class EnStrings implements Strings {
   String notifAge(int days) => '${days}d';
 
   @override
-  String get onboardCurrencyTitle => 'Which currency do you pay in?';
+  String get onboardCurrencyTitle => 'Language and currency';
   @override
-  String get onboardCurrencyBody =>
-      'Totals and each item are shown in this currency. You can still enter '
-      'a price in another one.';
+  String get onboardLanguageLabel => 'Language';
+  @override
+  String get onboardCurrencyLabel => 'Currency';
+  @override
+  String get onboardAddCurrency => 'Add a currency';
   @override
   String get onboardOtherCurrency => 'Another currency';
   @override
   String get onboardSearchCurrency => 'Search currencies';
   @override
-  String get onboardLanguageLabel => 'Language';
+  String get onboardSampleMonthly => 'monthly';
+  @override
+  String get onboardDefaultLabel => 'Default currency';
+  @override
+  String get onboardDefaultNote =>
+      'Used for new items and for every total. Each item keeps the currency '
+      'it was entered in.';
+  @override
+  String get onboardRemoveCurrency => 'Remove';
   @override
   String get onboardNoRateNote =>
       'Subdock carries one exchange rate, between the dong and the dollar. In '

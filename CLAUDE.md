@@ -94,7 +94,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Bốn mươi lăm cái bẫy đã vấp, đừng vấp lại
+## Bốn mươi bảy cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -868,6 +868,90 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
       chữ thường chứ không đậm và `height: 1.45` chứ không phải `1`, vì `rowValue` được
       đặt cho một dòng đứng một mình.
 
+46. **Loại tiền là một danh sách, không còn là một mã.** `CurrencyStore.read` trả về
+    `CurrencyPicks`, gồm `codes` (một hoặc hai mã) và `base` (mã mà mọi phép cộng phát
+    biểu lại). Đó là hai câu hỏi khác nhau: `codes` là "tôi bị tính tiền bằng những loại
+    nào", `base` là "cộng tổng lại thì nói bằng loại nào". Trước đây app chỉ hỏi câu thứ
+    hai, nên form nhập tiền phải đoán câu thứ nhất: nó bày `base` cộng nửa còn lại của
+    cặp tỉ giá đóng gói sẵn. Người tính tiền bằng đồng và bằng won vì thế có sẵn một chip
+    đô la không dùng tới, mà lại không có chip won.
+
+    Không một khoản `Money` nào bị viết lại khi danh sách này đổi, đúng như bẫy 41.
+
+    - **Khoá `base_currency` giữ nguyên tên, và không được đổi.** Bản cài cũ chỉ ghi đúng
+      dòng đó, và dòng đó vẫn là một câu trả lời đầy đủ. Thiếu dòng `currencies` thì
+      `read` đọc dòng cũ thành danh sách một phần tử. Chốt chặn là bài `a base written by
+      an older build reads as one currency` trong `test/unit/data/locale_currency_store_test.dart`.
+    - **`CurrencyPicks` dễ dãi lúc dựng**, cùng luật với `mappers.dart`: viết hoa, bỏ
+      trùng, cắt còn hai, và kéo `base` vào danh sách nếu nó đứng ngoài. Ném lỗi ở đây là
+      để một người không còn loại tiền nào.
+    - **Thêm một loại tiền không dời `base`.** "Tôi cũng bị tính bằng loại này" không phải
+      "cộng tổng bằng loại này". Ngược lại, `withBase` khi danh sách đã đầy thì **ô base
+      nhường chỗ**, không phải ô kia: người đang đổi loại tiền của tổng là đang sửa chính
+      câu trả lời đó, còn loại tiền thứ hai là một câu trả lời khác họ cố ý đưa ra.
+    - **`CostField.offered` đọc `Fx.declared`, và chỉ nối thêm nửa còn lại của cặp tỉ giá
+      khi danh sách có đúng một mã.** Bỏ ngoại lệ đó là lấy mất một chip của người chưa hề
+      mở ô thứ hai, để đổi lấy việc họ đã trả lời một câu hỏi trong onboarding. Trần vẫn
+      là ba chip, và chỉ một trường hợp chạm tới trần: một mã duy nhất mà app không có tỉ
+      giá, cộng cả hai nửa của tỉ giá app có.
+    - **Mỗi thẻ loại tiền vẽ một hoá đơn, không vẽ tên loại tiền.** Bảng nằm ở
+      `lib/ui/screens/onboarding/currency_samples.dart`. Riêng USD và VND lấy giá thật từ
+      danh mục kèm nguồn, vì đó là hai mã hầu hết người dùng sẽ chọn và một con số bịa ở
+      đây sẽ bị chính app cãi lại ba cú bấm sau, trên trang của đúng dịch vụ đó. Mười mã
+      còn lại là minh hoạ, cùng loại với ngày tháng trong dải trôi ngang ở trang trước.
+      Mã không có trong bảng thì thẻ rơi về ký hiệu và tên loại tiền, đó là đúng chứ không
+      phải thiếu.
+    - **Thẻ bấm được để đổi chính ô đó, và có nút bỏ khi danh sách có hai mã.** Bản thiết
+      kế không có đường nào gỡ một loại tiền ra; thiếu nó thì một cú bấm nhầm là vĩnh
+      viễn, trên màn hình mà cú bấm kế tiếp là `Bắt đầu`.
+    - **Sau onboarding, đường duy nhất là hàng Loại tiền trong Settings**, và nó mở đúng
+      khối đó trong một sheet (`CurrencyPicksSheet`). Onboarding chỉ hiện khi danh sách
+      mục còn rỗng, nên không có đường này thì câu trả lời đóng băng mãi mãi.
+
+    Hai quyết định về trang thứ hai của onboarding đi kèm:
+
+    - **Ngôn ngữ hỏi trước, và là một hàng mở sheet chứ không còn là hai ô cạnh nhau.**
+      Thứ tự có lý do: khối loại tiền bên dưới dài hơn hẳn, và trả lời nó trước bằng một
+      thứ tiếng người đọc không đọc được là bắt họ trả lời hai lần. Sheet dùng chung
+      `LanguageSheet` với Settings.
+    - **Không còn đoạn văn dưới tiêu đề.** Trang là tiêu đề, hai nhãn và hai khối điều
+      khiển; mỗi câu thêm vào đẩy thẻ thứ hai và cái nút xuống khỏi khung 390x844. Thứ
+      phải nói thì nói ngay chỗ nó áp dụng: dưới hàng chip mặc định, và dưới một loại tiền
+      app không có tỉ giá.
+
+    Dòng phụ của thẻ trong tiếng Việt dài hơn tiếng Anh và đã tràn một lần, đúng bẫy 40.
+    Đệm thẻ, cỡ ô icon và cỡ số tiền đều đã bóp lại cho vừa `Standard · hàng tháng`. Sửa
+    gì ở thẻ này thì chạy `SHOTS_VI=1` rồi nhìn ảnh, đừng tin là xong.
+
+    `tool/shots/capture.dart` chụp thêm khung `onboarding-setup-two`, vì trạng thái hai
+    loại tiền là trạng thái bản thiết kế mô tả và là trạng thái duy nhất có hàng chip mặc
+    định. Cùng lúc đó sửa một lỗi cũ trong file: khối onboarding ghi cứng bảng màu sáng,
+    nên bản `SHOTS_DARK=1` ghi một màn sáng vào tệp tên `dark_`.
+
+
+47. **Trước khi danh sách đầu tiên về, app không vẽ gì ngoài nền gradient.**
+    `_showOnboarding` hỏi `_loaded && _items.isEmpty`, mà `_loaded` chỉ bật khi stream
+    drift kêu lần đầu. Nhánh còn lại là `AppShell`, nên trong đúng những khung hình đó
+    người vừa cài xong nhìn thấy một màn Upcoming rỗng, đủ tab bar và đủ dòng chữ báo
+    không có gì đến hạn, rồi onboarding mới đè lên. Câu đầu tiên app nói với họ là "bạn
+    chẳng có gì", phát ra từ đúng cái màn hình chỉ nên tới sau phần giải thích.
+
+    Giữ nền gradient chứ không để trống, để không có lỗ xám và để onboarding rơi xuống
+    mà không có gì xê dịch. Không có spinner: đây là một khung hình đọc SQLite ngay trên
+    máy, và một cái spinner ở đó chỉ làm một phép đọc tức thời trông như chậm.
+
+    **Đừng sửa theo chiều ngược lại**, tức là đoán onboarding trong lúc dữ liệu còn đang
+    về. Nó chỉ đổi cái nháy này lấy cái nháy ngược lại, và cái nháy ngược lại rơi vào
+    người đã có sẵn danh sách, tức là người mất nhiều hơn.
+
+    Chốt chặn là `integration_test/first_launch_test.dart`, chạy trên máy ảo
+    (`flutter test integration_test/first_launch_test.dart -d <simulator-id>`). Nó pump
+    từng khung một chứ không `pumpAndSettle`, và đó là cả bài test: settle nhảy qua đúng
+    những khung hình chứa cái nháy. Phải là integration test vì cái cổng nằm trong
+    `app.dart`, và `HomePage` lên lịch nhắc hạn ngay ở stream event đầu tiên nên cần một
+    nền tảng thật trả lời.
+
+
 ## Viết tài liệu
 
 Tài liệu trong repo viết bằng **tiếng Việt**. Chữ trên giao diện app có **hai bản**,
@@ -890,8 +974,8 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | Nhóm dịch vụ (category) | `lib/domain/default_categories.dart` cho 22 nhóm dựng sẵn, `lib/domain/category_book.dart` cho cách tra |
 | Sáng hay tối | Bẫy 34, `lib/ui/theme/palette.dart` cho giá trị, `lib/data/theme_store.dart` cho lựa chọn của người dùng |
 | Chữ trên giao diện, hai thứ tiếng | Bẫy 37 và 38. `lib/i18n/parts/` cho từng vùng màn hình, `lib/i18n/strings_en.dart` và `strings_vi.dart` cho bản dịch, `lib/data/locale_store.dart` cho lựa chọn |
-| Loại tiền và tỉ giá | Bẫy 41. `lib/domain/fx.dart`, `lib/domain/currency_catalog.dart`, `lib/data/currency_store.dart` |
-| Hai màn onboarding | Bẫy 42. `lib/ui/screens/onboarding/` |
+| Loại tiền và tỉ giá | Bẫy 41 và 46. `lib/domain/fx.dart`, `lib/domain/currency_catalog.dart`, `lib/domain/currency_picks.dart`, `lib/data/currency_store.dart`, `lib/ui/widgets/currency_picker.dart` |
+| Hai màn onboarding | Bẫy 42 và 46. `lib/ui/screens/onboarding/` |
 | Icon | `docs/icon-credits.md` |
 | Cái gì sắp xảy ra với một mục | `lib/ui/reminder_timeline.dart` cho phép dựng, `lib/ui/widgets/reminder_timeline_card.dart` cho khối trên màn Detail |
 | Bộ lọc màn Upcoming | `lib/domain/upcoming_filter.dart` cho luật khớp, `lib/ui/filter_presenter.dart` cho danh sách chip và dòng tóm tắt, `lib/ui/widgets/filter_sheet.dart` cho sheet |

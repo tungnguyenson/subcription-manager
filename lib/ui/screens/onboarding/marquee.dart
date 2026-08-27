@@ -70,8 +70,11 @@ class _SampleMarqueeState extends State<SampleMarquee>
       mainAxisSize: MainAxisSize.min,
       children: [
         for (final item in [...widget.items, ...widget.items])
+          // Wider than it was when each chip had a border to end it: with the
+          // box gone, the gap is the only thing separating one item's date
+          // from the next item's icon.
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(right: 22),
             child: _SampleChip(item: item),
           ),
       ],
@@ -126,9 +129,11 @@ class _SampleChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: SubdockSurface.card(radius: 12),
-      padding: const EdgeInsets.fromLTRB(9, 8, 12, 8),
+    // No surface of its own: the chip sits inside a card already, and a second
+    // hairline a few millimetres inside the first reads as a box in a box
+    // rather than as one item in a list. The icon tile carries the shape.
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

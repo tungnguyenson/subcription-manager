@@ -10,10 +10,10 @@ import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/data/item_repository.dart';
 import 'package:subdock/data/settings_store.dart';
 import 'package:subdock/data/currency_store.dart';
+import 'package:subdock/domain/currency_picks.dart';
 import 'package:subdock/data/locale_store.dart';
 import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/category_book.dart';
-import 'package:subdock/domain/fx.dart';
 import 'package:subdock/i18n.dart';
 import 'package:subdock/domain/item_actions.dart';
 import 'package:subdock/domain/local_date.dart';
@@ -53,7 +53,7 @@ import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
-import 'package:subdock/ui/widgets/currency_sheet.dart';
+import 'package:subdock/ui/widgets/currency_picker.dart';
 import 'package:subdock/ui/widgets/delete_ask.dart';
 import 'package:subdock/ui/widgets/language_sheet.dart';
 import 'package:subdock/ui/widgets/restore_ask.dart';
@@ -115,7 +115,7 @@ class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
   /// reads, and it falls back to the phone's language while the question is
   /// still open.
   AppLocale? _chosenLocale;
-  String? _chosenCurrency;
+  CurrencyPicks? _chosenCurrency;
 
   /// Read from the platform dispatcher, not from `MediaQuery`. This state sits
   /// above [MaterialApp] and so has no MediaQuery to ask; the dispatcher is
@@ -146,7 +146,7 @@ class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
       AppLocale.en;
 
   /// The same shape for money, seeded off the phone's region.
-  String get _currency =>
+  CurrencyPicks get _currency =>
       _chosenCurrency ??
       CurrencyStore.suggestFor(
         WidgetsBinding.instance.platformDispatcher.locale.countryCode,
@@ -192,10 +192,10 @@ class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
     unawaited(widget.locales.save(locale));
   }
 
-  void _setCurrency(String code) {
-    if (code == _chosenCurrency) return;
-    setState(() => _chosenCurrency = code);
-    unawaited(widget.currencies.save(code));
+  void _setCurrency(CurrencyPicks picks) {
+    if (picks == _chosenCurrency) return;
+    setState(() => _chosenCurrency = picks);
+    unawaited(widget.currencies.save(picks));
   }
 
   SubdockPalette get _palette => switch (_choice) {
@@ -216,10 +216,13 @@ class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
     // widget every screen is wrapped in below the Navigator.
     SystemChrome.setSystemUIOverlayStyle(subdockOverlayStyle(palette));
 
+    final currency = _currency;
+
     return SubdockTheme(
       palette: palette,
       locale: _locale,
-      currency: _currency,
+      currency: currency.base,
+      currencies: currency.codes,
       child: MaterialApp(
         title: 'Subdock',
         debugShowCheckedModeBanner: false,
@@ -237,7 +240,7 @@ class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
           onThemeChoice: _setChoice,
           locale: _locale,
           onLocale: _setLocale,
-          currency: _currency,
+          currency: currency,
           onCurrency: _setCurrency,
         ),
       ),
@@ -265,10 +268,11 @@ class HomePage extends StatefulWidget {
   /// palette is: all three are published above the Navigator.
   final AppLocale locale;
   final ValueChanged<AppLocale>? onLocale;
-  final String currency;
-  final ValueChanged<String>? onCurrency;
+  final CurrencyPicks currency;
+  final ValueChanged<CurrencyPicks>? onCurrency;
 
-  const HomePage({
+  // ignore: prefer_const_constructors_in_immutables
+  HomePage({
     super.key,
     required this.repository,
     required this.settings,
@@ -282,7 +286,7 @@ class HomePage extends StatefulWidget {
     this.onThemeChoice,
     this.locale = AppLocale.en,
     this.onLocale,
-    this.currency = Fx.defaultBase,
+    required this.currency,
     this.onCurrency,
   });
 
@@ -644,10 +648,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// amount keeps the currency it was entered in and only the combined totals
   /// move, and the language is a property of the reader rather than of the
   /// list.
-  Future<void> _pickCurrency() async {
-    final picked = await CurrencySheet.show(context, widget.currency);
-    if (picked != null) widget.onCurrency?.call(picked);
-  }
+  Future<void> _pickCurrency() =>
+      CurrencyPicksSheet.show(context, widget.currency, (picks) {
+        widget.onCurrency?.call(picks);
+      });
 
   Future<void> _pickLanguage() async {
     final picked = await LanguageSheet.show(context, widget.locale);
@@ -696,6 +700,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     SubdockTheme.watch(context);
+
+    // Nothing at all until the first list arrives, and that blank frame is the
+    // point rather than a gap to be filled. `_showOnboarding` cannot answer
+    // before the items do, so the other branch used to run: a brand new user
+    // was shown an empty Upcoming, tab bar and all, and onboarding only
+    // replaced it once the stream had ticked. The very first thing the app
+    // ever said was "you have nothing", from a screen that is only meant to be
+    // reached after the explanation.
+    //
+    // The gradient stays, so what shows is the app's own ground rather than a
+    // grey hole, and so nothing moves when onboarding lands on top of it. It
+    // is one frame off a local SQLite read; a spinner here would be a spinner
+    // nobody has time to see and would make an instant read look slow.
+    if (!_loaded) {
+      return GlassBackground(
+        child: Scaffold(backgroundColor: const Color(0x00000000)),
+      );
+    }
+
     if (_showOnboarding) {
       // The gradient, not the flat mid-tone. Onboarding is the first thing the
       // user sees and it is where the look has to land; `canvas` here painted
@@ -706,9 +729,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           backgroundColor: const Color(0x00000000),
           body: SafeArea(
             child: OnboardingScreen(
-              currency: widget.currency,
+              picks: widget.currency,
               locale: widget.locale,
-              onCurrency: (code) => widget.onCurrency?.call(code),
+              onCurrency: (picks) => widget.onCurrency?.call(picks),
               onLocale: (locale) => widget.onLocale?.call(locale),
               onStart: () => setState(() => _onboardingDismissed = true),
             ),
@@ -853,7 +876,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           onOpenFileBackup: _openFileBackup,
           themeChoice: widget.themeChoice,
           onThemeChoice: widget.onThemeChoice,
-          currencyLabel: widget.currency,
+          currencyLabel: widget.currency.codes.join(' · '),
           languageLabel: widget.locale.label,
           onOpenCurrency: _pickCurrency,
           onOpenLanguage: _pickLanguage,

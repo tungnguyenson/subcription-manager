@@ -27,15 +27,32 @@ class CostField extends StatelessWidget {
 
   /// Which currencies the chips offer.
   ///
-  /// The base first, then the two the app holds a rate between. Three at most,
-  /// and usually two, because a row of chips is a row of things the user has
-  /// to rule out before typing — and a fourth currency the app cannot relate
-  /// to any of the others earns its place on nobody's form.
-  static List<String> offered(String base) => [
-    base.toUpperCase(),
-    for (final code in CurrencyCatalog.ratedPair)
-      if (code != base.toUpperCase()) code,
-  ];
+  /// What the user declared in onboarding, base first. Three at most, and
+  /// usually two, because a row of chips is a row of things the user has to
+  /// rule out before typing — and a fourth currency earns its place on
+  /// nobody's form.
+  ///
+  /// A user who declared only one currency also gets whichever half of the
+  /// one bundled rate is missing, and that is a deliberate exception rather
+  /// than an oversight. Before the declared list existed everyone got dong and
+  /// dollars here; taking them away from someone who never opened the second
+  /// slot would charge them a chip on a form they use daily for answering a
+  /// question in onboarding. A user who *did* declare a second currency has
+  /// said what they are billed in, and the app takes them at their word.
+  static List<String> offered(String base) {
+    final chosen = base.toUpperCase();
+    final declared = [
+      chosen,
+      for (final code in Fx.declared)
+        if (code != chosen) code,
+    ];
+    if (declared.length > 1) return declared;
+    return [
+      ...declared,
+      for (final code in CurrencyCatalog.ratedPair)
+        if (code != chosen) code,
+    ];
+  }
 
   /// `≈ 520,000 ₫ · 26,046 ₫/$`, or null when there is nothing to convert.
   final String? convertedLine;

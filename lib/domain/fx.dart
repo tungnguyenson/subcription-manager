@@ -156,6 +156,21 @@ abstract final class Fx {
   /// Called by the app when the stored choice is read, and when it changes.
   static void publishBase(String code) => _base = code.toUpperCase();
 
+  static List<String> _declared = const [defaultBase];
+
+  /// The currencies the user says they are billed in, [base] among them.
+  ///
+  /// Published the same way and by the same widget as [base], because it is
+  /// read by the same kind of caller: the amount field decides which chips to
+  /// offer and has no reason to be handed the answer through four widgets to
+  /// get there. What it is *not* is a claim about the data — a list holding
+  /// only dong does not mean no dollar amount is stored, it means the user
+  /// said dollars are not one tap away.
+  static List<String> get declared => _declared;
+
+  static void publishDeclared(List<String> codes) =>
+      _declared = [for (final code in codes) code.toUpperCase()];
+
   /// Past this age the converted line is hidden entirely rather than shown
   /// with a stale date. A confident wrong number is worse than no number.
   static const int maxDisplayAgeDays = 30;

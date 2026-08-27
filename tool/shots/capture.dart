@@ -21,6 +21,7 @@ import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/data/settings_store.dart';
 import 'package:subdock/data/currency_store.dart';
+import 'package:subdock/domain/currency_picks.dart';
 import 'package:subdock/data/locale_store.dart';
 import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/local_date.dart';
@@ -92,7 +93,7 @@ void main() {
     // Written explicitly, in both runs. With nothing stored the app falls back
     // to a guess off the host's region, which would make every figure in these
     // screenshots depend on the machine that took them.
-    await CurrencyStore(db).save('VND');
+    await CurrencyStore(db).save(CurrencyPicks.one('VND'));
     final repository = ItemRepository(db);
     final settings = SettingsStore(db);
 
@@ -431,11 +432,23 @@ void main() {
     // above needs a seeded one. Reduce Motion is on for the same reason the
     // widget tests turn it on -- the marquee and the arriving notifications
     // never stop, so `pumpAndSettle` would never return.
-    for (final (name, page) in [('onboarding', 0), ('onboarding-setup', 1)]) {
+    // Three frames rather than two: the setup page has a shape it only takes
+    // once a second currency is on it -- two cards, and the row of chips that
+    // asks which of them the totals speak. Capturing only the one-currency
+    // state hides the state the design is actually specified in.
+    for (final (name, page, picks) in [
+      ('onboarding', 0, CurrencyPicks.one('VND')),
+      ('onboarding-setup', 1, CurrencyPicks.one('VND')),
+      ('onboarding-setup-two', 1, CurrencyPicks(['VND', 'USD'], base: 'VND')),
+    ]) {
       await tester.pumpWidget(
         SubdockTheme(
-          palette: SubdockPalette.light,
-          currency: 'VND',
+          // Follows `SHOTS_DARK` like every other frame. Hard-coded light
+          // here before, so the dark run wrote a light onboarding into a file
+          // named `dark_`, which is worse than not taking the shot at all.
+          palette: dark ? SubdockPalette.dark : SubdockPalette.light,
+          currency: picks.base,
+          currencies: picks.codes,
           locale: vietnamese ? AppLocale.vi : AppLocale.en,
           child: MaterialApp(
             theme: buildSubdockTheme(),
@@ -448,7 +461,7 @@ void main() {
                   body: SafeArea(
                     child: OnboardingScreen(
                       key: ValueKey(name),
-                      currency: 'VND',
+                      picks: picks,
                       locale: vietnamese ? AppLocale.vi : AppLocale.en,
                       onCurrency: (_) {},
                       onLocale: (_) {},

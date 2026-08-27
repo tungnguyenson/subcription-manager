@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:subdock/data/currency_store.dart';
 import 'package:subdock/data/database.dart';
 import 'package:subdock/data/locale_store.dart';
+import 'package:subdock/domain/currency_picks.dart';
 import 'package:subdock/i18n.dart';
 
 void main() {
@@ -62,16 +63,44 @@ void main() {
     });
 
     test('survives the round trip, upper-cased', () async {
-      await currencies.save('usd');
-      expect(await currencies.read(), 'USD');
+      await currencies.save(CurrencyPicks.one('usd'));
+      expect(await currencies.read(), CurrencyPicks.one('USD'));
+    });
+
+    test(
+      'both currencies come back, and so does which one is the base',
+      () async {
+        await currencies.save(CurrencyPicks(['VND', 'USD'], base: 'USD'));
+
+        final read = await currencies.read();
+        expect(read?.codes, ['VND', 'USD']);
+        expect(read?.base, 'USD');
+      },
+    );
+
+    // The list row is new. Every install written before it holds a base row
+    // and nothing else, and that install was running a working app -- so the
+    // base row alone has to keep reading as the answer it was.
+    test('a base written by an older build reads as one currency', () async {
+      await db
+          .into(db.settingRow)
+          .insert(
+            SettingRowCompanion(
+              settingKey: const Value('base_currency'),
+              value: const Value('JPY'),
+            ),
+            mode: InsertMode.insertOrReplace,
+          );
+
+      expect(await currencies.read(), CurrencyPicks.one('JPY'));
     });
 
     // A three-letter code this build has never heard of is still a currency.
     // Refusing it would strand anyone whose choice was written by a later
     // build with a longer list.
     test('a code outside the catalogue still reads back', () async {
-      await currencies.save('XPF');
-      expect(await currencies.read(), 'XPF');
+      await currencies.save(CurrencyPicks.one('XPF'));
+      expect(await currencies.read(), CurrencyPicks.one('XPF'));
     });
 
     test('anything that is not a code at all reads as unanswered', () async {
@@ -91,10 +120,10 @@ void main() {
     // Offered, never applied. The picker still shows what is selected and the
     // user still has to press on.
     test('the guess off the phone region is only a starting point', () {
-      expect(CurrencyStore.suggestFor('VN'), 'VND');
-      expect(CurrencyStore.suggestFor('de'), 'EUR');
-      expect(CurrencyStore.suggestFor(null), 'VND');
-      expect(CurrencyStore.suggestFor('ZZ'), 'VND');
+      expect(CurrencyStore.suggestFor('VN').base, 'VND');
+      expect(CurrencyStore.suggestFor('de').base, 'EUR');
+      expect(CurrencyStore.suggestFor(null).base, 'VND');
+      expect(CurrencyStore.suggestFor('ZZ').base, 'VND');
     });
   });
 }
