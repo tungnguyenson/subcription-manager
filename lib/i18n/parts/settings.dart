@@ -44,6 +44,9 @@ abstract class SettingsStrings {
   String get aboutOnThisPhone;
   String get aboutPrices;
 
+  /// The title bar of the system file picker, on the way in to a restore.
+  String get chooseABackup;
+
   // ---- payment sources ----
 
   String get sourcesTitle;
@@ -58,6 +61,16 @@ abstract class SettingsStrings {
   String get sourcesNameHint;
   String sourcesDefaultUsage(String usage);
   String get sourcesRemove;
+
+  /// The presets on the add-source sheet. Each one only fills the name field
+  /// with a word the user can then edit, so it has to say what *kind* of money
+  /// it is rather than name a bank: Vietnam alone has a dozen wallets and
+  /// forty banks, and a closed list would be wrong within a month.
+  String get sourcePresetCard;
+  String get sourcePresetBank;
+  String get sourcePresetWallet;
+  String get sourcePresetContactless;
+  String get sourcePresetCash;
   String get sourcesNotUsedYet;
   String sourcesItemCount(int count);
 
@@ -114,4 +127,13 @@ abstract class SettingsStrings {
   /// reminders still arrive, but when the system next wakes rather than at the
   /// minute set above.
   String get remindersInexact;
+
+  /// How much of the shared notification budget one item is holding.
+  ///
+  /// Said as the app's own limit rather than the platform's. The number comes
+  /// from iOS keeping 64 pending notifications per app, and the same
+  /// allocation runs on Android because there is no published figure this app
+  /// would dare quote — see trap 11.
+  String budgetHolds(int held, int budget);
+  String budgetDroppedElsewhere(int count);
 }

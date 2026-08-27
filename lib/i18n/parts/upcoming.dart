@@ -17,7 +17,20 @@ abstract class UpcomingStrings {
   String get layoutCalendar;
 
   /// The chip that gathers every item still inside its free period.
+  ///
+  /// It shares a header row with the layout tray and the filter button, and
+  /// that row has no slack: a label a couple of characters longer than the
+  /// English one pushes the filter button off the screen.
   String get freeTrials;
+
+  /// The second line of an overdue row, under the countdown pill.
+  ///
+  /// Its own string rather than [DateStrings.daysAgo], because the pill above
+  /// it has already said the row is late. English repeats the `ago` because it
+  /// reads as a date where the other rows carry one; Vietnamese does not, and
+  /// `4 ngày trước` is wide enough in that slot to wrap onto a second line and
+  /// make overdue rows taller than every other row in the list.
+  String overdueAgo(int days);
 
   /// The badge on a row, in capitals.
   String get freeTrialBadge;

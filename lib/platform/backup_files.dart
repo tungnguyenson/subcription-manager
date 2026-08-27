@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:subdock/i18n.dart';
 
 /// Hands a backup to the operating system, and takes one back.
 ///
@@ -58,7 +59,7 @@ class BackupFiles {
   /// would fail for exactly the person who kept their backup somewhere safe.
   Future<String?> pick() async {
     final picked = await FilePicker.pickFile(
-      dialogTitle: 'Choose a Subdock backup',
+      dialogTitle: S.t.chooseABackup,
       // Filtered but not enforced: the JSON is what gets validated, and some
       // providers hand back a file whose name lost its extension in transit.
       type: FileType.custom,

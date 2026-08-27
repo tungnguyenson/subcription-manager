@@ -187,7 +187,10 @@ class ViStrings implements Strings {
   String get layoutCalendar => 'Lịch';
 
   @override
-  String get freeTrials => 'Đang dùng thử';
+  String get freeTrials => 'Dùng thử';
+  @override
+  String overdueAgo(int days) => '$days ngày';
+
   @override
   String get freeTrialBadge => 'DÙNG THỬ';
   @override
@@ -538,9 +541,9 @@ class ViStrings implements Strings {
   // ---- savings ----
 
   @override
-  String get tabMoveToYearly => 'Chuyển sang gói năm';
+  String get tabMoveToYearly => 'Sang gói năm';
   @override
-  String get tabCancelAService => 'Huỷ một dịch vụ';
+  String get tabCancelAService => 'Huỷ dịch vụ';
 
   @override
   String get savingsCancelLead =>
@@ -759,6 +762,9 @@ class ViStrings implements Strings {
       'vào ngày được tra, và app nói rõ ngày đó. Chúng ở đây để điền nhanh một '
       'ô, không phải để nói bạn đang trả bao nhiêu.';
 
+  @override
+  String get chooseABackup => 'Chọn một bản sao lưu Subdock';
+
   // ---- payment sources ----
 
   @override
@@ -793,6 +799,17 @@ class ViStrings implements Strings {
   String get sourcesNotUsedYet => 'Chưa dùng lần nào';
   @override
   String sourcesItemCount(int count) => '$count mục';
+
+  @override
+  String get sourcePresetCard => 'Thẻ';
+  @override
+  String get sourcePresetBank => 'Chuyển khoản';
+  @override
+  String get sourcePresetWallet => 'Ví điện tử';
+  @override
+  String get sourcePresetContactless => 'Apple / Google Pay';
+  @override
+  String get sourcePresetCash => 'Tiền mặt';
 
   // ---- all services ----
 
@@ -854,6 +871,13 @@ class ViStrings implements Strings {
   String get historyVerbRenewed => 'đã gia hạn';
 
   // ---- reminders ----
+
+  @override
+  String budgetHolds(int held, int budget) =>
+      'Đang giữ $held trên $budget suất nhắc hạn app đặt được.';
+  @override
+  String budgetDroppedElsewhere(int count) =>
+      'Có $count nhắc hạn của các mục khác phải bỏ đi.';
 
   @override
   String get remindersDefaultSchedule => 'Thang nhắc mặc định';

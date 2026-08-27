@@ -2,6 +2,7 @@ import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/ui/money_format.dart';
+import 'package:subdock/i18n.dart';
 
 enum ReminderStatus {
   /// Already fired, or would have.
@@ -32,9 +33,8 @@ class ReminderRung {
     required this.status,
   });
 
-  String get label => leadDays == 0
-      ? 'On the day'
-      : '$leadDays ${leadDays == 1 ? "day" : "days"} before';
+  String get label =>
+      leadDays == 0 ? S.t.leadOnTheDay : S.t.leadDaysBefore(leadDays);
 }
 
 abstract final class RemindersPresenter {
@@ -116,11 +116,9 @@ abstract final class RemindersPresenter {
   /// same allocation runs on Android because the app has no verified figure
   /// for that platform and will not print one it cannot stand behind.
   static String budgetLine(int held, int droppedElsewhere) {
-    final base =
-        'Holds $held of the '
-        '${NotificationPlanner.budget} reminder slots this app schedules.';
+    final base = S.t.budgetHolds(held, NotificationPlanner.budget);
     return droppedElsewhere == 0
         ? base
-        : '$base $droppedElsewhere reminders on other items had to be dropped.';
+        : '$base ${S.t.budgetDroppedElsewhere(droppedElsewhere)}';
   }
 }

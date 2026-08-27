@@ -188,8 +188,8 @@ abstract final class BackupPresenter {
 
   /// The cloud states worth showing instead of a date, and null for the rest.
   static String? _cloudProblem(CloudResult result) => switch (result.state) {
-    CloudState.signedOut => 'Sign in to iCloud',
-    CloudState.failed => 'Could not save',
+    CloudState.signedOut => S.t.backupStateSignedOut,
+    CloudState.failed => S.t.backupStateFailed,
     _ => null,
   };
 

@@ -64,8 +64,8 @@ class ReminderRulesScreen extends StatelessWidget {
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: onBack),
-        Text('Reminders', style: SubdockText.screenTitle),
-        const SectionLabel('Default schedule'),
+        Text(S.t.rowReminders, style: SubdockText.screenTitle),
+        SectionLabel(S.t.remindersDefaultSchedule),
         GroupedCard(
           children: [
             for (final lead in AppSettings.offeredLeads)
@@ -78,22 +78,22 @@ class ReminderRulesScreen extends StatelessWidget {
               ),
           ],
         ),
-        const SectionLabel('Time of day'),
+        SectionLabel(S.t.remindersTimeOfDay),
         GroupedCard(
           children: [
             DetailRow(
-              label: 'Send at',
+              label: S.t.remindersSendAt,
               value: settings.remindAt.toString(),
               monoValue: true,
               onTap: onPickTime,
             ),
           ],
         ),
-        const SectionLabel('Channels'),
+        SectionLabel(S.t.remindersChannels),
         GroupedCard(
           children: [
             ToggleRow(
-              label: 'Push',
+              label: S.t.remindersPush,
               value: pushGranted,
               // Turning it on is a system prompt; turning it off is a system
               // setting. Neither belongs to this switch, so it only ever asks.
@@ -108,7 +108,7 @@ class ReminderRulesScreen extends StatelessWidget {
         // nothing the footnote below does not already say.
         if (pushGranted && onSendTest != null) ...[
           const SizedBox(height: 10),
-          SecondaryButton('Send a test reminder', onPressed: onSendTest),
+          SecondaryButton(S.t.remindersSendTest, onPressed: onSendTest),
         ],
         // Only the state, never the tutorial. That notifications are off is
         // something the user cannot see anywhere else on this screen; how the

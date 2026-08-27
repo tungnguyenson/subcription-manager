@@ -78,10 +78,21 @@ void main() {
       tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
       addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
     }
-    final prefix = dark ? 'dark_' : '';
+    // `SHOTS_VI=1` renders the same screens with the interface in Vietnamese,
+    // into `out/vi_*.png`. The language is a stored choice, so it is written
+    // to the settings row before the app is pumped rather than poked into the
+    // widget tree afterwards.
+    final vietnamese = Platform.environment['SHOTS_VI'] == '1';
+
+    final prefix = '${vietnamese ? 'vi_' : ''}${dark ? 'dark_' : ''}';
 
     final db = SubdockDatabase(NativeDatabase.memory());
     addTearDown(db.close);
+    if (vietnamese) await LocaleStore(db).save(AppLocale.vi);
+    // Written explicitly, in both runs. With nothing stored the app falls back
+    // to a guess off the host's region, which would make every figure in these
+    // screenshots depend on the machine that took them.
+    await CurrencyStore(db).save('VND');
     final repository = ItemRepository(db);
     final settings = SettingsStore(db);
 
@@ -310,16 +321,16 @@ void main() {
 
     // The calendar layout: the month grid, and the day open under it. Same
     // items, same filter, laid out by date instead of by distance.
-    await tapText('Calendar');
+    await tapText(S.t.layoutCalendar);
     await shot('upcoming-calendar');
-    await tapText('List');
+    await tapText(S.t.layoutList);
 
     // The filter, in both of its states: the sheet open over the list, and the
     // list narrowed with the summary row under the title.
     await tester.tap(find.byIcon(Icons.filter_list_rounded));
     await tester.pumpAndSettle();
     drain();
-    await tapText('Mobile and SIM');
+    await tapText(S.t.categoryLabel('PHONE')!);
     await shot('upcoming-filter-sheet');
     await pop();
     await shot('upcoming-filtered');
@@ -329,12 +340,12 @@ void main() {
     await tester.tap(find.byIcon(Icons.filter_list_rounded));
     await tester.pumpAndSettle();
     drain();
-    await tapText('Free trials');
+    await tapText(S.t.freeTrials);
     await pop();
     await shot('upcoming-filter-empty');
-    await tapText('Clear filters');
+    await tapText(S.t.clearFilters);
 
-    await tapText('Spending');
+    await tapText(S.t.spendingTitle);
     await shot('money');
     // A month other than the one the user is in. The whole card follows the
     // column, so this is the shot that shows whether it really does.
@@ -344,42 +355,42 @@ void main() {
     // The year view too. It is the densest card in the app -- a headline, a
     // per-currency sum and a per-kind sum, all of the same money -- and it is
     // where an unlabelled figure reads as a number the app made up.
-    await tapText('Year');
+    await tapText(S.t.spanYear);
     await shot('money-year');
-    await tapText('Month');
+    await tapText(S.t.spanMonth);
 
-    await tapText('Savings');
+    await tapText(S.t.savingsTitle);
     await shot('savings');
 
-    await tapText('Settings');
+    await tapText(S.t.settingsTitle);
     await shot('settings');
 
-    await tapText('All services');
+    await tapText(S.t.allServices);
     await shot('services');
     await pop();
 
-    await tapText('Reminders');
+    await tapText(S.t.rowReminders);
     await shot('reminders');
     await pop();
 
     // The backup channel that exists off iOS. iCloud is unsupported in this
     // harness, so its row is absent, which is the correct Android screen.
-    await tapText('File');
+    await tapText(S.t.rowFile);
     await shot('backup-file');
     await pop();
 
-    await tapText('About');
+    await tapText(S.t.rowAbout);
     await shot('about');
     await pop();
 
-    await tapText('History');
+    await tapText(S.t.rowHistory);
     await shot('history');
     await pop();
 
-    await tapText('Upcoming');
+    await tapText(S.t.upcomingTitle);
     await tapText('Netflix Premium');
     await shot('detail');
-    await tapText('Edit');
+    await tapText(S.t.edit);
     await shot('edit');
     await pop();
     await pop();
@@ -393,7 +404,7 @@ void main() {
 
     // The add form, on a service with plans, with Forever unticked so the
     // "when does it stop" card is on screen.
-    await tester.tap(find.byTooltip('Add an item'));
+    await tester.tap(find.byTooltip(S.t.addAnItem));
     await tester.pumpAndSettle();
     drain();
     await shot('add-pick');
@@ -401,15 +412,15 @@ void main() {
     // too. `Enter manually` is below the fold and a lazy list has not built
     // it, so a finder cannot reach it.
     await tapText('Disney+');
-    await tapText('Repeats forever');
+    await tapText(S.t.repeatsForever);
     await shot('add-details');
     await tester.dragUntilVisible(
-      find.text('New'),
+      find.text(S.t.sourceNew),
       find.byType(Scrollable).first,
       const Offset(0, -220),
     );
     await tester.pumpAndSettle();
-    await tapText('New');
+    await tapText(S.t.sourceNew);
     await shot('add-source');
 
     // Onboarding, last, and pumped on its own rather than reached through the
@@ -422,6 +433,7 @@ void main() {
         SubdockTheme(
           palette: SubdockPalette.light,
           currency: 'VND',
+          locale: vietnamese ? AppLocale.vi : AppLocale.en,
           child: MaterialApp(
             theme: buildSubdockTheme(),
             debugShowCheckedModeBanner: false,
@@ -434,7 +446,7 @@ void main() {
                     child: OnboardingScreen(
                       key: ValueKey(name),
                       currency: 'VND',
-                      locale: AppLocale.en,
+                      locale: vietnamese ? AppLocale.vi : AppLocale.en,
                       onCurrency: (_) {},
                       onLocale: (_) {},
                     ),
@@ -447,7 +459,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       if (page == 1) {
-        await tester.tap(find.text('Continue'));
+        await tester.tap(find.text(vietnamese ? 'Tiếp tục' : 'Continue'));
         await tester.pumpAndSettle();
       }
       drain();

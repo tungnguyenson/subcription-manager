@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/ui/theme.dart';
+import 'package:subdock/i18n.dart';
 
 /// The mark beside a payment source's name.
 ///
@@ -43,16 +44,16 @@ class SourceMark extends StatelessWidget {
 /// list would be wrong within a month — and the name is the part that matters,
 /// because the whole feature is "a name you recognise".
 abstract final class SourcePresets {
-  static const List<(String, SourceGlyph)> all = [
-    ('Card', SourceGlyph.card),
-    ('Bank transfer', SourceGlyph.bank),
+  static List<(String, SourceGlyph)> get all => [
+    (S.t.sourcePresetCard, SourceGlyph.card),
+    (S.t.sourcePresetBank, SourceGlyph.bank),
     // One 'Wallet' rather than a row of named ones. Naming two of the dozen
     // wallets in use here reads as a list of the wallets the app supports, and
     // the user whose wallet is not on it concludes theirs is missing. The name
     // is a free-text field anyway, so the preset only has to say what kind of
     // money it is; the user types which one.
-    ('Wallet', SourceGlyph.wallet),
-    ('Apple / Google Pay', SourceGlyph.contactless),
-    ('Cash', SourceGlyph.cash),
+    (S.t.sourcePresetWallet, SourceGlyph.wallet),
+    (S.t.sourcePresetContactless, SourceGlyph.contactless),
+    (S.t.sourcePresetCash, SourceGlyph.cash),
   ];
 }

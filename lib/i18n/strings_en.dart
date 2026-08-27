@@ -201,6 +201,9 @@ class EnStrings implements Strings {
   @override
   String get freeTrials => 'Free trials';
   @override
+  String overdueAgo(int days) => daysAgo(days);
+
+  @override
   String get freeTrialBadge => 'FREE TRIAL';
   @override
   String get freeNow => 'Free now';
@@ -793,6 +796,9 @@ class EnStrings implements Strings {
       'published on the day they were checked, and the app says which day. '
       'They are there to fill a field in, not to tell you what you are paying.';
 
+  @override
+  String get chooseABackup => 'Choose a Subdock backup';
+
   // ---- payment sources ----
 
   @override
@@ -828,6 +834,17 @@ class EnStrings implements Strings {
   @override
   String sourcesItemCount(int count) =>
       '$count ${count == 1 ? 'item' : 'items'}';
+
+  @override
+  String get sourcePresetCard => 'Card';
+  @override
+  String get sourcePresetBank => 'Bank transfer';
+  @override
+  String get sourcePresetWallet => 'Wallet';
+  @override
+  String get sourcePresetContactless => 'Apple / Google Pay';
+  @override
+  String get sourcePresetCash => 'Cash';
 
   // ---- all services ----
 
@@ -888,6 +905,13 @@ class EnStrings implements Strings {
   String get historyVerbRenewed => 'renewed';
 
   // ---- reminders ----
+
+  @override
+  String budgetHolds(int held, int budget) =>
+      'Holds $held of the $budget reminder slots this app schedules.';
+  @override
+  String budgetDroppedElsewhere(int count) =>
+      '$count reminders on other items had to be dropped.';
 
   @override
   String get remindersDefaultSchedule => 'Default schedule';

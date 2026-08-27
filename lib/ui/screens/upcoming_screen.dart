@@ -741,7 +741,7 @@ abstract final class UpcomingCopy {
   }
 
   static String overdueDetail(LocalDate actBy, LocalDate today) =>
-      S.t.daysAgo(actBy.daysUntil(today));
+      S.t.overdueAgo(actBy.daysUntil(today));
 
   /// Day-first, which is how dates are written in Vietnam. Using the device
   /// locale here would show an American reader 08/17 for a date a Vietnamese

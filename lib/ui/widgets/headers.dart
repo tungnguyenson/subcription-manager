@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:subdock/ui/theme.dart';
+import 'package:subdock/i18n.dart';
 
 /// The back link at the top of a pushed screen.
 ///
@@ -8,10 +9,14 @@ import 'package:subdock/ui/theme.dart';
 /// you came from as well made the top of every pushed screen read as two
 /// competing headings.
 class BackLink extends StatelessWidget {
-  final String label;
+  /// Null takes the word `Back` in whatever language is in force. Nullable
+  /// rather than defaulted, because a default has to be a compile-time
+  /// constant and a translated word is not one.
+  final String? label;
+
   final VoidCallback? onTap;
 
-  const BackLink({super.key, this.label = 'Back', this.onTap});
+  const BackLink({super.key, this.label, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +26,7 @@ class BackLink extends StatelessWidget {
         onTap: onTap ?? () => Navigator.of(context).maybePop(),
         child: Padding(
           padding: const EdgeInsets.fromLTRB(0, 2, 12, 14),
-          child: Text('‹ $label', style: SubdockText.quietAction),
+          child: Text('‹ ${label ?? S.t.back}', style: SubdockText.quietAction),
         ),
       ),
     );
@@ -63,13 +68,16 @@ class ScreenHeading extends StatelessWidget {
 /// it. Only the escape hatch sits at the top.
 class EditorHeader extends StatelessWidget {
   final String title;
-  final String cancelLabel;
+
+  /// Null takes `Cancel`. See [BackLink.label].
+  final String? cancelLabel;
+
   final VoidCallback? onCancel;
 
   const EditorHeader({
     super.key,
     required this.title,
-    this.cancelLabel = 'Cancel',
+    this.cancelLabel,
     this.onCancel,
   });
 
@@ -93,7 +101,10 @@ class EditorHeader extends StatelessWidget {
             onTap: onCancel ?? () => Navigator.of(context).maybePop(),
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Text(cancelLabel, style: SubdockText.quietAction),
+              child: Text(
+                cancelLabel ?? S.t.cancel,
+                style: SubdockText.quietAction,
+              ),
             ),
           ),
         ],
