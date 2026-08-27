@@ -24,6 +24,10 @@ class BackupScreen extends StatelessWidget {
   /// Writes a copy. Null where the channel writes its own.
   final VoidCallback? onBackUp;
 
+  /// Writes the list out as a spreadsheet. Null where the channel has no such
+  /// thing.
+  final VoidCallback? onExportCsv;
+
   /// Replaces everything in the app. The confirmation belongs to whoever wires
   /// this up, not to a button on a settings screen.
   final VoidCallback? onRestore;
@@ -34,6 +38,7 @@ class BackupScreen extends StatelessWidget {
     super.key,
     required this.page,
     this.onBackUp,
+    this.onExportCsv,
     this.onRestore,
     this.onBack,
   });
@@ -62,6 +67,12 @@ class BackupScreen extends StatelessWidget {
           children: [
             if (page.backUpLabel case final label?)
               DetailRow.nav(label: label, onTap: onBackUp),
+            // Under the backup rather than above it. The backup is the row
+            // someone came here for after losing a phone; the spreadsheet is
+            // the row they came here for out of curiosity, and only one of the
+            // two has a bad day behind it.
+            if (page.exportCsvLabel case final label?)
+              DetailRow.nav(label: label, onTap: onExportCsv),
             // The one that destroys the list is last and reads plainly. It is
             // not tinted: the sheet it opens is where the warning belongs, and
             // a red row in a settings list is read as broken rather than as

@@ -279,7 +279,6 @@ def main():
                 "category": old["category"],
                 "defaultCycle": old.get("defaultCycle"),
                 "cancelUrl": old.get("cancelUrl"),
-                "noteVi": old.get("noteVi"),
                 "defaultPlan": None,
                 "plans": [],
             }
@@ -301,7 +300,6 @@ def main():
                 "category": "SUBSCRIPTION",
                 "defaultCycle": "MONTHLY",
                 "cancelUrl": None,
-                "noteVi": None,
                 "defaultPlan": None,
                 "plans": [],
                 "_todo": True,

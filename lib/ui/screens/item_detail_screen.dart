@@ -217,7 +217,11 @@ class ItemDetailScreen extends StatelessWidget {
               label: S.t.rowDateFrom,
               value: ItemPresenter.dateSourceLabel(item.dateSource),
             ),
-            DetailRow(label: S.t.rowNote, value: item.note ?? '—'),
+            // Only when there is one. The row used to print an em dash on
+            // every item in the app, because until the form grew a note box
+            // there was no way to put anything there -- a permanent blank
+            // line answering a question nobody had asked.
+            if (item.note case final note?) _NoteRow(note: note, onTap: onEdit),
           ],
         ),
         // Both blocks answer "what about this one?", which is this screen's
@@ -325,6 +329,57 @@ class ItemDetailScreen extends StatelessWidget {
 /// Three states rather than two. A plan the user is halfway through has a
 /// payment that is *due now*, and drawing it the same as one already made
 /// would tell them they are one further ahead than they are.
+/// The note, stacked rather than laid out as a [DetailRow].
+///
+/// Every other row on this card holds a date, an amount or a word or two, so
+/// a right-aligned single line that ellipsizes is the right shape for them. A
+/// note is a sentence somebody wrote, and on that shape it comes out as four
+/// words and a dash -- the row cutting off exactly the part it exists to
+/// carry. So the label goes above and the text wraps under it, full width.
+class _NoteRow extends StatelessWidget {
+  final String note;
+  final VoidCallback? onTap;
+
+  const _NoteRow({required this.note, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: SubdockSpacing.rowH,
+          vertical: SubdockSpacing.rowV,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(S.t.rowNote, style: SubdockText.rowLabel),
+            const SizedBox(height: 4),
+            // No line cap. A note long enough to fill the screen is a note the
+            // user chose to write, and this is the one place in the app that
+            // shows it back to them -- the list rows and the CSV column both
+            // have somewhere else to be.
+            //
+            // Full ink, because this is an answer like every other value on
+            // the card. But not the weight and not the leading: `rowValue` is
+            // medium at `height: 1`, which is right for a date or an amount
+            // sitting alone on its line and reads as shouting once it runs to
+            // a sentence, with the two lines set solid against each other.
+            Text(
+              note,
+              style: SubdockText.rowValue.copyWith(
+                fontWeight: SubdockWeight.regular,
+                height: 1.45,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _PaymentProgress extends StatelessWidget {
   final Instalments position;
 

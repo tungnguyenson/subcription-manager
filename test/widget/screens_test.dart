@@ -640,7 +640,9 @@ void main() {
         SettingsScreen(
           backup: BackupPresenter.build(
             items: const [],
-            saved: LastBackups(file: d('2026-08-11')),
+            saved: LastBackups(
+              fileAt: LocalDateTime(d('2026-08-11'), const LocalTime(9, 30)),
+            ),
             device: DeviceBackup.wholeDeviceOnly,
             cloud: const CloudResult(CloudState.saved),
           ),
@@ -656,7 +658,7 @@ void main() {
       expect(find.text('Never'), findsOneWidget);
 
       await tester.tap(find.text('iCloud'));
-      await tester.tap(find.text('File'));
+      await tester.tap(find.text('Import/Export'));
       await tester.pumpAndSettle();
 
       expect((cloud, file), (1, 1));
@@ -670,7 +672,9 @@ void main() {
         SettingsScreen(
           backup: BackupPresenter.build(
             items: const [],
-            saved: LastBackups(cloud: d('2026-06-25')),
+            saved: LastBackups(
+              cloudAt: LocalDateTime(d('2026-06-25'), const LocalTime(9, 30)),
+            ),
             device: DeviceBackup.wholeDeviceOnly,
             cloud: const CloudResult(CloudState.signedOut),
           ),
@@ -700,7 +704,7 @@ void main() {
       );
 
       expect(find.text('iCloud'), findsNothing);
-      expect(find.text('File'), findsOneWidget);
+      expect(find.text('Import/Export'), findsOneWidget);
     });
 
     // The banner exists because Settings is where you go if you already know
@@ -753,7 +757,9 @@ void main() {
                 dateSource: DateSource.userConfirmed,
               ),
             ],
-            saved: LastBackups(file: d('2026-08-25')),
+            saved: LastBackups(
+              fileAt: LocalDateTime(d('2026-08-25'), const LocalTime(9, 30)),
+            ),
             device: DeviceBackup.wholeDeviceOnly,
           ),
         ),
@@ -793,7 +799,7 @@ void main() {
       await show(tester, SettingsScreen(onAbout: () => opened++));
 
       final about = tester.getRect(find.text('About'));
-      for (final label in ['All services', 'Widget', 'File']) {
+      for (final label in ['All services', 'Widget', 'Import/Export']) {
         expect(
           about.top,
           greaterThan(tester.getRect(find.text(label)).top),
@@ -808,7 +814,7 @@ void main() {
 
     // The version is the reason the screen exists: it is what a person has to
     // read off the app when they are describing a problem to someone else.
-    testWidgets('names the build, and what the app keeps', (tester) async {
+    testWidgets('names the build', (tester) async {
       await show(
         tester,
         const AboutScreen(version: '1.2.0', buildNumber: '47'),
@@ -816,8 +822,20 @@ void main() {
 
       expect(find.text('1.2.0'), findsOneWidget);
       expect(find.text('47'), findsOneWidget);
-      expect(find.text('None'), findsNWidgets(2));
-      expect(find.text('On this phone'), findsOneWidget);
+    });
+
+    // The three rows saying there is no account, no server, and that the list
+    // is on this phone have gone. The same three facts are in the lead
+    // paragraph and the footnote, and saying them twice on one short screen
+    // read as an argument rather than as an answer.
+    testWidgets('the card about the list is gone', (tester) async {
+      await show(
+        tester,
+        const AboutScreen(version: '1.2.0', buildNumber: '47'),
+      );
+
+      expect(find.text('What it does with your list'), findsNothing);
+      expect(find.text('On this phone'), findsNothing);
     });
 
     // A platform that will not answer gets a dash rather than a crash, and the
@@ -828,7 +846,7 @@ void main() {
       await show(tester, const AboutScreen(version: '—', buildNumber: '—'));
 
       expect(find.text('—'), findsNWidgets(2));
-      expect(find.text('On this phone'), findsOneWidget);
+      expect(find.text('About'), findsOneWidget);
     });
   });
 
@@ -840,7 +858,9 @@ void main() {
     ) async {
       var restored = 0;
       final page = BackupPresenter.cloudPage(
-        saved: LastBackups(cloud: d('2026-08-11')),
+        saved: LastBackups(
+          cloudAt: LocalDateTime(d('2026-08-11'), const LocalTime(9, 30)),
+        ),
         cloud: const CloudResult(CloudState.saved),
       );
 
@@ -850,8 +870,11 @@ void main() {
       );
 
       expect(find.text('iCloud'), findsOneWidget);
-      expect(find.text('Saved'), findsOneWidget);
-      expect(find.text('11/08/2026'), findsOneWidget);
+      // One row about the copy, and it is the moment. `Saved` over a date said
+      // the same thing twice, and could contradict it.
+      expect(find.text('Last saved'), findsOneWidget);
+      expect(find.text('11/08/2026 at 09:30'), findsOneWidget);
+      expect(find.text('Saved'), findsNothing);
       // The app writes on its own; a button would suggest it does not.
       expect(find.text('Export a backup'), findsNothing);
 
@@ -878,6 +901,58 @@ void main() {
       await tester.pumpAndSettle();
 
       expect((exported, restored), (1, 1));
+    });
+
+    // Two files on one screen, and they are not versions of each other: the
+    // JSON comes back, the CSV does not. Three rows rather than a format
+    // chooser, because the choice is between two different jobs.
+    testWidgets('the spreadsheet is its own row, under the backup', (
+      tester,
+    ) async {
+      var csv = 0;
+      await show(
+        tester,
+        BackupScreen(
+          page: BackupPresenter.filePage(saved: LastBackups.none),
+          onBackUp: () {},
+          onExportCsv: () => csv++,
+          onRestore: () {},
+        ),
+      );
+
+      expect(
+        tester.getRect(find.text('Export as CSV')).top,
+        greaterThan(tester.getRect(find.text('Export a backup')).top),
+        reason: 'the row someone reaches for after losing a phone comes first',
+      );
+
+      await tester.tap(find.text('Export as CSV'));
+      await tester.pumpAndSettle();
+      expect(csv, 1);
+    });
+
+    // A row that writes a file the app cannot read back has to say so, or the
+    // reader takes it for a second backup.
+    testWidgets('the note says the CSV does not come back', (tester) async {
+      await show(
+        tester,
+        BackupScreen(page: BackupPresenter.filePage(saved: LastBackups.none)),
+      );
+
+      expect(find.textContaining('does not come back'), findsOneWidget);
+    });
+
+    // iCloud writes its own copy on a timer. A spreadsheet is something the
+    // user asks for, and the row belongs where the asking happens.
+    testWidgets('iCloud offers no spreadsheet', (tester) async {
+      final page = BackupPresenter.cloudPage(
+        saved: LastBackups.none,
+        cloud: const CloudResult(CloudState.saved),
+      );
+
+      await show(tester, BackupScreen(page: page!));
+
+      expect(find.text('Export as CSV'), findsNothing);
     });
 
     // Restoring replaces the list and there is nowhere to undo it from. The

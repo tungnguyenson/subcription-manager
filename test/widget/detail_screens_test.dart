@@ -112,6 +112,47 @@ void main() {
       expect(tile.iconName, 'spotify');
     });
 
+    // The row is prose, so it wraps under its label instead of taking the
+    // right-aligned single line every other row on this card takes. On that
+    // shape a written sentence comes out as four words and an ellipsis.
+    testWidgets('shows the note in full', (tester) async {
+      await show(
+        tester,
+        ItemDetailScreen(
+          item: claude.copyWith(
+            note: () =>
+                'Card ending 4417. Ask about the education discount before '
+                'the next renewal.',
+          ),
+          category: CategoryBook.shipped[claude.categoryId],
+          today: today,
+        ),
+      );
+
+      expect(
+        find.text(
+          'Card ending 4417. Ask about the education discount before the next '
+          'renewal.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    // The row used to print an em dash on every item in the app, because
+    // until the form grew a note box nothing could put anything there.
+    testWidgets('says nothing at all when there is no note', (tester) async {
+      await show(
+        tester,
+        ItemDetailScreen(
+          item: claude.copyWith(note: () => null),
+          category: CategoryBook.shipped[claude.categoryId],
+          today: today,
+        ),
+      );
+
+      expect(find.text('Note'), findsNothing);
+    });
+
     // The app only knows what the user typed. This row is what stops a
     // remembered date from looking like a confirmed one.
     testWidgets('shows where the date came from', (tester) async {
@@ -975,6 +1016,25 @@ void main() {
       }
     }
 
+    /// The note box, picked out by its hint: the form holds half a dozen
+    /// `TextField`s and index order across them is not something to lean on.
+    final noteBox = find.byWidgetPredicate(
+      (w) =>
+          w is TextField &&
+          w.decoration?.hintText == 'Anything you want to remember',
+    );
+
+    /// Every field on the form except that one.
+    ///
+    /// The note sits at the foot of the form, so `find.byType(TextField).last`
+    /// -- how the tests below reach the small number box and the new-source
+    /// name -- started landing on it the day the box was added.
+    final otherBoxes = find.byWidgetPredicate(
+      (w) =>
+          w is TextField &&
+          w.decoration?.hintText != 'Anything you want to remember',
+    );
+
     final catalog = ServiceCatalog([
       const CatalogEntry(
         id: 'netflix',
@@ -1036,6 +1096,73 @@ void main() {
       expect(saved, isNotNull);
       expect(saved!.inTrial, isTrue);
       expect(saved!.expiresOn, today);
+    });
+
+    // The box the note column waited on. Everything below it -- the SQLite
+    // column, the backup codec, the CSV cell, the detail row -- has been there
+    // all along; the form was the only thing missing, so the row on the detail
+    // screen read an em dash on every item in the app.
+    testWidgets('a typed note reaches the draft', (tester) async {
+      DraftItem? saved;
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (draft) => saved = draft,
+        ),
+      );
+
+      await tester.tap(find.text('Today'));
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(noteBox);
+      await tester.pumpAndSettle();
+      await tester.enterText(noteBox, 'Shared with Minh, he pays half.');
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save item'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save item'));
+      await tester.pumpAndSettle();
+
+      expect(saved?.note, 'Shared with Minh, he pays half.');
+    });
+
+    // A box holding spaces is a box somebody cleared. It has to come back as
+    // null, because null is what the detail screen reads to decide whether the
+    // row is drawn at all -- whitespace would draw an empty one.
+    testWidgets('an emptied note saves as nothing, not as blanks', (
+      tester,
+    ) async {
+      DraftItem? saved;
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          initial: DraftItem.of(claude, CategoryBook.shipped),
+          onSave: (draft) => saved = draft,
+        ),
+      );
+
+      // The edit form opens holding what the item already says.
+      expect(find.text('Card ending 4417.'), findsOneWidget);
+
+      await tester.ensureVisible(noteBox);
+      await tester.pumpAndSettle();
+      await tester.enterText(noteBox, '   ');
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Save changes'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Save changes'));
+      await tester.pumpAndSettle();
+
+      expect(saved, isNotNull);
+      expect(saved!.note, isNull);
     });
 
     // The caller writes to SQLite before it pops this route, so the form and
@@ -1104,7 +1231,7 @@ void main() {
       await tester.tap(find.text('New'));
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField).last, 'VCB 4412');
+      await tester.enterText(otherBoxes.last, 'VCB 4412');
       await tester.pumpAndSettle();
       await tester.ensureVisible(find.text('Add source'));
       await tester.pumpAndSettle();
@@ -1995,7 +2122,7 @@ void main() {
       expect(find.text('Every 2 months'), findsOneWidget);
       expect(find.text('Every'), findsOneWidget);
 
-      await tester.enterText(find.byType(TextField).last, '5');
+      await tester.enterText(otherBoxes.last, '5');
       await tester.pumpAndSettle();
       expect(find.text('Every 5 months'), findsOneWidget);
 
@@ -2035,7 +2162,7 @@ void main() {
       await tester.tap(find.text('Every…'));
       await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField).last, '45');
+      await tester.enterText(otherBoxes.last, '45');
       await tester.pumpAndSettle();
       await tester.tap(find.text('Days'));
       await tester.pumpAndSettle();

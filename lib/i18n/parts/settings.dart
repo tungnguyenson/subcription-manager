@@ -11,9 +11,6 @@ abstract class SettingsStrings {
   String get themeSystem;
   String get themeLight;
   String get themeDark;
-  String get themeSystemBody;
-  String get themeLightBody;
-  String get themeDarkBody;
   String get sectionBackup;
   String get sectionApp;
   String get rowAbout;
@@ -36,12 +33,6 @@ abstract class SettingsStrings {
   String get aboutThisBuild;
   String get aboutVersion;
   String get aboutBuild;
-  String get aboutWhatItDoes;
-  String get aboutAccount;
-  String get aboutServer;
-  String get aboutNone;
-  String get aboutYourList;
-  String get aboutOnThisPhone;
   String get aboutPrices;
 
   /// The title bar of the system file picker, on the way in to a restore.

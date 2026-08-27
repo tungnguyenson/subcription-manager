@@ -189,9 +189,6 @@ def check_entry(rep, entry, seen_ids):
     if not plans and default:
         rep.error(eid, "defaultPlan is set but there are no plans")
 
-    if not plans and not entry.get("noteVi"):
-        rep.warn(eid, "no plans and no noteVi saying why")
-
 
 def validate(path):
     rep = Report(path)

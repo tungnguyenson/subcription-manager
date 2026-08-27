@@ -17,7 +17,6 @@
       "defaultPlan": "pro",
       "cancelUrl": "https://claude.ai/settings/billing",
       "manageUrl": "https://claude.ai/settings/billing",
-      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -26,7 +25,6 @@
           "currency": "USD",
           "cycle": "MONTHLY",
           "amountMinor": 2000,
-          "note": "$20/tháng nếu trả theo tháng",
           "source": "https://claude.com/pricing",
           "checkedAt": "2026-08-23"
         },
@@ -37,7 +35,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 20000,
-          "note": "$200/năm, trả trước ($17/tháng quy đổi)",
           "source": "https://claude.com/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -56,7 +53,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "plus",
       "cancelUrl": "https://chatgpt.com/#settings/Subscription",
-      "noteVi": "ChatGPT Plus chỉ bán theo tháng, OpenAI không có gói năm cho tier này.",
       "plans": [
         {
           "tier": "plus",
@@ -83,7 +79,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "cancelUrl": null,
-      "noteVi": "Chỉ thấy gói tháng, Google không hiện gói năm riêng cho Google AI Pro.",
       "plans": [
         {
           "tier": "pro",
@@ -120,7 +115,6 @@
       "defaultPlan": "pro",
       "cancelUrl": "https://github.com/settings/copilot",
       "manageUrl": "https://github.com/settings/copilot",
-      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -156,7 +150,6 @@
       "defaultPlan": "pro",
       "cancelUrl": null,
       "manageUrl": "https://www.cursor.com/dashboard",
-      "noteVi": "Chỉ thấy gói tháng trên trang giá, không thấy gói năm cho Pro.",
       "plans": [
         {
           "tier": "pro",
@@ -181,7 +174,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "standard",
@@ -200,7 +192,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 28800,
-          "note": "$24/tháng quy đổi, trả cả năm",
           "source": "https://docs.midjourney.com/docs/plans",
           "checkedAt": "2026-08-23"
         }
@@ -218,7 +209,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -237,7 +227,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 20000,
-          "note": "$17/tháng quy đổi, trả cả năm",
           "source": "https://www.perplexity.ai/pro",
           "checkedAt": "2026-08-23"
         }
@@ -256,7 +245,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "supergrok",
       "cancelUrl": null,
-      "noteVi": "Đây là giá gói SuperGrok mua riêng trên x.ai, không phải gói Grok đi kèm X Premium+.",
       "plans": [
         {
           "tier": "supergrok",
@@ -282,7 +270,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "creator",
       "cancelUrl": null,
-      "noteVi": "Giá niêm yết chuẩn của gói Creator; tháng đầu tiên đang được giảm còn 11 USD.",
       "plans": [
         {
           "tier": "creator",
@@ -301,7 +288,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 22000,
-          "note": "trả 10 tháng, tặng 2 tháng",
           "source": "https://elevenlabs.io/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -318,7 +304,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -354,7 +339,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "standard",
@@ -373,7 +357,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 14400,
-          "note": "$12/tháng quy đổi, trả cả năm",
           "source": "https://runwayml.com/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -391,7 +374,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "premium",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "premium",
@@ -400,7 +382,6 @@
           "currency": "USD",
           "cycle": "MONTHLY",
           "amountMinor": 3000,
-          "note": "Gói \"Best Offer\", chưa gồm thuế, billed monthly",
           "source": "https://leonardo.ai/pricing",
           "checkedAt": "2026-08-24"
         },
@@ -411,7 +392,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 28800,
-          "note": "Tổng tiền cả năm khi bật \"Pay Yearly\" (24 USD/tháng x 12), chưa gồm thuế",
           "source": "https://leonardo.ai/pricing",
           "checkedAt": "2026-08-24"
         }
@@ -429,7 +409,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "plus",
       "cancelUrl": null,
-      "noteVi": "Giá tính theo credit sử dụng mỗi tháng, không phải hạn mức cố định.",
       "plans": [
         {
           "tier": "plus",
@@ -438,7 +417,6 @@
           "currency": "USD",
           "cycle": "MONTHLY",
           "amountMinor": 3000,
-          "note": "kèm $30 credit dùng mỗi tháng",
           "source": "https://v0.app/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -455,7 +433,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -464,7 +441,6 @@
           "currency": "USD",
           "cycle": "MONTHLY",
           "amountMinor": 2500,
-          "note": "100 credits/tháng, billed monthly",
           "source": "https://lovable.dev/pricing",
           "checkedAt": "2026-08-24"
         },
@@ -475,7 +451,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 25200,
-          "note": "Tổng tiền cả năm khi chọn Yearly (21 USD/tháng x 12, \"2 months free\")",
           "source": "https://lovable.dev/pricing",
           "checkedAt": "2026-08-24"
         }
@@ -492,7 +467,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "core",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "core",
@@ -511,7 +485,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 24000,
-          "note": "$20/tháng quy đổi, trả cả năm",
           "source": "https://replit.com/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -529,7 +502,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "plus",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "plus",
@@ -538,7 +510,6 @@
           "currency": "USD",
           "cycle": "MONTHLY",
           "amountMinor": 1999,
-          "note": "Giá niêm yết trong danh sách In-App Purchase trên App Store (Poe Monthly Subscription / Plus)",
           "source": "https://apps.apple.com/us/app/poe-fast-ai-chat/id1640745955",
           "checkedAt": "2026-08-24"
         },
@@ -549,7 +520,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 19999,
-          "note": "Tổng tiền cả năm theo In-App Purchase trên App Store (Poe Annual Subscription - Plus)",
           "source": "https://apps.apple.com/us/app/poe-fast-ai-chat/id1640745955",
           "checkedAt": "2026-08-24"
         }
@@ -568,7 +538,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "plus",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "plus",
@@ -587,7 +556,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 9499,
-          "note": "giảm 20% so với trả tháng",
           "source": "https://character.ai/subscribe",
           "checkedAt": "2026-08-23"
         }

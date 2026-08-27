@@ -35,6 +35,13 @@ abstract class FormStrings {
   String get fieldTapToOpenCalendar;
   String get fieldOpenSubscriptionPage;
 
+  /// The free-text box at the foot of the form, and the grey line inside it
+  /// while it is empty. The hint names the kind of thing worth writing there:
+  /// the form already asks for every fact the app itself acts on, so what is
+  /// left is what only the user knows.
+  String get fieldNote;
+  String get fieldNoteHint;
+
   String get saveChanges;
   String get saveItem;
 
@@ -124,21 +131,21 @@ abstract class FormStrings {
   String get backupNever;
   String get backupCloudTitle;
   String get backupCloudIntro;
-  String get backupStatus;
-  String get backupLastCopy;
+  String get backupLastSaved;
+  String backupCopyAt(String date, String time);
   String get backupLastExport;
   String get backupRestoreFromCloud;
   String get backupCloudRestoreNote;
   String get backupFileTitle;
+  String get backupExportCsv;
+  String csvExported(int count);
   String get backupFileIntro;
   String get backupRestoreFromFile;
   String get backupFileRestoreNote;
   String get backupNothingSaved;
   String backupNothingSavedBody(int confirmed);
-  String get backupStateSaved;
   String get backupStateSignedOut;
   String get backupStateFailed;
-  String get backupStateWaiting;
   String get backupNoteWholeDevice;
   String get backupNotePerApp;
   String get backupNoteUnknown;

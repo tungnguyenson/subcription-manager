@@ -31,14 +31,23 @@ class BackupFiles {
   /// [origin] anchors the popover on iPad, where a share sheet with nothing to
   /// point at is a crash rather than a centred dialog. Null everywhere else.
   ///
+  /// [mimeType] is what the receiving app is told it is getting. It decides
+  /// which apps the sheet even offers: a spreadsheet handed over as
+  /// `application/json` is a file Numbers and Sheets will not appear for.
+  ///
   /// Returns false when the user dismissed the sheet without choosing anything,
   /// so the caller can stay quiet rather than claiming a backup was saved.
-  Future<bool> save(String contents, String fileName, {Rect? origin}) async {
+  Future<bool> save(
+    String contents,
+    String fileName, {
+    String mimeType = 'application/json',
+    Rect? origin,
+  }) async {
     final staged = await _stage(contents, fileName);
 
     final result = await SharePlus.instance.share(
       ShareParams(
-        files: [XFile(staged.path, mimeType: 'application/json')],
+        files: [XFile(staged.path, mimeType: mimeType)],
         fileNameOverrides: [fileName],
         sharePositionOrigin: origin,
       ),

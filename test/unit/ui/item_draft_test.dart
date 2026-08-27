@@ -39,6 +39,7 @@ void main() {
       expect(draft.amountMinor, 1200000);
       expect(draft.currency, 'VND');
       expect(draft.leadDays, [7, 3]);
+      expect(draft.note, 'Paid by transfer.');
     });
 
     // The link and the note were settled when the item was created. Re-running
@@ -50,6 +51,29 @@ void main() {
   });
 
   group('DraftItem.applyTo', () {
+    // The column existed in SQLite, in the backup file and in the CSV, and it
+    // showed on the detail screen -- but the form had no box, so nothing in
+    // the app could ever put anything in it.
+    test('the edited note reaches the item', () {
+      final edited = DraftItem.of(course(), CategoryBook.shipped)
+          .copyForTest(note: () => 'Now on the Techcombank card.')
+          .applyTo(course());
+
+      expect(edited.note, 'Now on the Techcombank card.');
+    });
+
+    // Emptying the box has to clear the column, not leave the old note
+    // standing. The form hands back null for a box holding nothing, and the
+    // merge must not read that as "the form did not ask".
+    test('a cleared note clears the item', () {
+      final edited = DraftItem.of(
+        course(),
+        CategoryBook.shipped,
+      ).copyForTest(note: () => null).applyTo(course());
+
+      expect(edited.note, isNull);
+    });
+
     test('the edited cost reaches the item', () {
       final edited = DraftItem.of(
         course(),
@@ -162,7 +186,7 @@ void main() {
       expect(edited.nagAfterDue, NagPolicy.none);
     });
 
-    test('a catalog match picked during the edit brings its link and note', () {
+    test('a catalog match picked during the edit brings its link', () {
       const netflix = CatalogEntry(
         id: 'netflix',
         name: 'Netflix Premium',
@@ -170,7 +194,6 @@ void main() {
         categoryId: 'STREAMING',
         defaultCycle: Cycle.monthly,
         cancelUrl: 'https://netflix.com/cancelplan',
-        noteVi: 'Huỷ trong phần Tài khoản.',
       );
 
       final edited = DraftItem.of(
@@ -179,7 +202,6 @@ void main() {
       ).copyForTest(matched: netflix).applyTo(course());
 
       expect(edited.actionUrl, 'https://netflix.com/cancelplan');
-      expect(edited.note, 'Huỷ trong phần Tài khoản.');
     });
   });
 }
@@ -196,6 +218,7 @@ extension on DraftItem {
     int? amountMinor,
     String? currency,
     CatalogEntry? matched,
+    String? Function()? note,
   }) => DraftItem(
     name: name ?? this.name,
     expiresOn: expiresOn ?? this.expiresOn,
@@ -207,5 +230,8 @@ extension on DraftItem {
     currency: currency ?? this.currency,
     leadDays: leadDays,
     matched: matched ?? this.matched,
+    inTrial: inTrial,
+    paymentSourceId: paymentSourceId,
+    note: note != null ? note() : this.note,
   );
 }

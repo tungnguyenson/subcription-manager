@@ -175,28 +175,19 @@ void main() {
       expect(chosen, ThemeChoice.light);
     });
 
-    // The tray can say which one is picked. It cannot say that System means
-    // the app will change on its own later, which is the one thing about this
-    // setting a user can be surprised by.
-    testWidgets('says out loud that System changes on its own', (tester) async {
-      await showTall(tester, const SettingsScreen());
-
-      expect(find.textContaining('Following the phone'), findsOneWidget);
-    });
-
-    // One line in all three states. A footnote that comes and goes moves the
-    // Backup rows under the reader's thumb while they are choosing.
-    testWidgets('the note is one line whichever is picked', (tester) async {
+    // The tray carries no prose under it any more. It was one line in all three
+    // states, and what it said under System -- that the app will change on its
+    // own later -- is now unsaid; the three words in the tray are the whole
+    // explanation.
+    testWidgets('the tray explains itself without a note under it', (
+      tester,
+    ) async {
       for (final choice in ThemeChoice.values) {
         await showTall(tester, SettingsScreen(themeChoice: choice));
+        expect(find.textContaining('Following the phone'), findsNothing);
         expect(
-          find
-                  .textContaining('whatever the phone is set to')
-                  .evaluate()
-                  .length +
-              find.textContaining('Following the phone').evaluate().length,
-          1,
-          reason: '$choice should say exactly one thing about itself',
+          find.textContaining('whatever the phone is set to'),
+          findsNothing,
         );
       }
     });

@@ -16,7 +16,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "premium-plus",
       "cancelUrl": "https://help.audible.com/s/topic/0TO4z000000SoIzGAK/cancel?language=en_US",
-      "noteVi": null,
       "plans": [
         {
           "tier": "premium-plus",
@@ -25,7 +24,6 @@
           "currency": "USD",
           "cycle": "MONTHLY",
           "amountMinor": 1495,
-          "note": "1 credit sách/tháng + toàn bộ Plus Catalog",
           "source": "https://www.audible.com/ep/memberbenefits",
           "checkedAt": "2026-08-23"
         }
@@ -43,7 +41,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "cancelUrl": "https://www.amazon.com/gp/help/customer/display.html?nodeId=GLSQ4722655M4ZEJ",
-      "noteVi": null,
       "plans": [
         {
           "tier": "standard",
@@ -52,7 +49,6 @@
           "currency": "USD",
           "cycle": "MONTHLY",
           "amountMinor": 1199,
-          "note": "Mượn tối đa 20 tựa cùng lúc",
           "source": "https://www.amazon.com/b?ie=UTF8&node=18473854011",
           "checkedAt": "2026-08-23"
         }
@@ -69,7 +65,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "cancelUrl": null,
-      "noteVi": "Everand (Scribd cũ) đổi sang mô hình unlock theo thẻ; gói Standard chỉ có 1 lượt unlock mỗi tháng.",
       "plans": [
         {
           "tier": "standard",
@@ -78,7 +73,6 @@
           "currency": "USD",
           "cycle": "MONTHLY",
           "amountMinor": 1199,
-          "note": "1 lượt unlock/tháng",
           "source": "https://support.scribd.com/hc/en-us/articles/40678839226644-Everand-plans-Standard-Plus-and-Deluxe",
           "checkedAt": "2026-08-23"
         }
@@ -94,7 +88,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Xác nhận qua trình duyệt thật ở trang chọn quốc gia storytel.com/store-select: Việt Nam không nằm trong danh sách quốc gia Storytel phục vụ (chỉ có Ấn Độ, Indonesia, Singapore, Hàn Quốc, Thái Lan ở khu vực Á); Storytel cũng không có bảng giá USD toàn cầu, mỗi nước niêm yết bằng nội tệ riêng, nên không có giá để tham chiếu cho người dùng VN.",
       "plans": []
     },
     {
@@ -107,7 +100,6 @@
       "defaultCycle": "QUARTERLY",
       "defaultPlan": "standard",
       "cancelUrl": null,
-      "noteVi": "Đã xác minh lại độc lập trên waka.vn: bảng giá chính thức liệt kê 03 tháng = 207.000đ, 06 tháng = 414.000đ, 12 tháng = 828.000đ — đúng là không giảm giá gì cho gói dài hơn (828.000 = 4 lần 207.000), không phải suy luận sai của lần thu thập trước, đây là giá thật của hãng.",
       "plans": [
         {
           "tier": "standard",
@@ -116,7 +108,6 @@
           "currency": "VND",
           "cycle": "QUARTERLY",
           "amountMinor": 207000,
-          "note": "Gói 3 tháng, truy cập không giới hạn kho hội viên",
           "source": "https://waka.vn/quyen-loi-hoi-vien-waka",
           "checkedAt": "2026-08-23"
         },
@@ -127,7 +118,6 @@
           "currency": "VND",
           "cycle": "YEARLY",
           "amountMinor": 828000,
-          "note": "Gói 12 tháng, truy cập không giới hạn kho hội viên",
           "source": "https://waka.vn/quyen-loi-hoi-vien-waka",
           "checkedAt": "2026-08-23"
         }
@@ -143,7 +133,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "premium",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "premium",
@@ -152,7 +141,6 @@
           "currency": "VND",
           "cycle": "MONTHLY",
           "amountMinor": 129000,
-          "note": "1 thẻ sách/tháng để đổi sách nói bất kỳ",
           "source": "https://book.fonos.vn/products/the-hoi-vien-fonos-goi-thang",
           "checkedAt": "2026-08-23"
         },
@@ -163,7 +151,6 @@
           "currency": "VND",
           "cycle": "YEARLY",
           "amountMinor": 899000,
-          "note": "12 thẻ sách/năm, tặng kèm khi kích hoạt",
           "source": "https://book.fonos.vn/products/the-hoi-vien-fonos-goi-nam",
           "checkedAt": "2026-08-23"
         }
@@ -179,7 +166,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": "https://support.patreon.com/hc/en-us/articles/360005502572-Canceling-a-paid-membership",
-      "noteVi": "Giá do từng creator tự đặt, Patreon không có bảng giá chung.",
       "plans": []
     },
     {
@@ -192,7 +178,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "standard",
@@ -226,7 +211,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "cancelUrl": "https://help.mubi.com/article/68-how-do-i-cancel-my-subscription-if-i-purchased-it-online-through-the-web",
-      "noteVi": null,
       "plans": [
         {
           "tier": "standard",
@@ -261,7 +245,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "premium-100",
       "cancelUrl": null,
-      "noteVi": "WEBTOON bán 4 mức Premium theo số Coin/tháng (3.99-49.99 USD); ghi mức phổ biến nhất, không có gói năm.",
       "plans": [
         {
           "tier": "premium-100",
@@ -270,7 +253,6 @@
           "currency": "USD",
           "cycle": "MONTHLY",
           "amountMinor": 999,
-          "note": "100 Coin/tháng, đọc không quảng cáo trên các bộ Original",
           "source": "https://webtoon.zendesk.com/hc/en-us/articles/14400167339284-Monthly-Coin-Premium-Summary-FAQ",
           "checkedAt": "2026-08-23"
         }
@@ -287,7 +269,6 @@
       "defaultCycle": "YEARLY",
       "defaultPlan": "standard",
       "cancelUrl": "https://www.prioritypass.com/en-GB/support/membership-help/how-do-i-cancel-my-membership",
-      "noteVi": "Priority Pass chỉ bán theo năm, không có gói tháng; hạng Standard vẫn tính 35 USD mỗi lượt vào phòng chờ.",
       "plans": [
         {
           "tier": "standard",
@@ -296,7 +277,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 9900,
-          "note": "Không có lượt miễn phí, 35 USD/lượt vào phòng chờ",
           "source": "https://www.prioritypass.com/en-us/join",
           "checkedAt": "2026-08-23"
         }
@@ -313,7 +293,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Airalo bán gói eSIM theo dung lượng/quốc gia dùng một lần, không phải thuê bao định kỳ nên không có giá chuẩn để lưu.",
       "plans": []
     },
     {
@@ -329,7 +308,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Mục chung: giá vé tháng xe buýt/metro khác nhau theo tuyến và thành phố, không có mức giá chuẩn toàn quốc.",
       "plans": []
     },
     {
@@ -342,7 +320,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Tinder định giá theo tuổi và khu vực, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
     },
     {
@@ -356,7 +333,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Bumble định giá theo tuổi và khu vực, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
     },
     {
@@ -370,7 +346,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Hinge định giá theo tuổi và khu vực, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
     },
     {
@@ -384,7 +359,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Grindr XTRA định giá theo khu vực và không có trang giá chính thức công khai ổn định nên không lưu giá (không lấy giá từ blog).",
       "plans": []
     },
     {
@@ -398,7 +372,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Coffee Meets Bagel định giá theo khu vực/thời hạn, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
     },
     {
@@ -412,7 +385,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Badoo định giá theo quốc gia/thiết bị/khuyến mãi, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
     },
     {
@@ -426,7 +398,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "happn định giá theo khu vực/thiết bị, không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
     },
     {
@@ -440,7 +411,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "OkCupid định giá động theo người dùng (giới tính, tuổi, khu vực...), không công bố bảng giá chính thức nên không lưu giá (không lấy giá từ blog).",
       "plans": []
     }
   ]

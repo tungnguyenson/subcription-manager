@@ -50,6 +50,12 @@ class BackupPage {
   /// not write one by hand.
   final String? backUpLabel;
 
+  /// The label on the button that writes the list out as a spreadsheet, or
+  /// null on a channel that has no such thing. Separate from [backUpLabel]
+  /// because the two files are not versions of each other: one comes back and
+  /// one does not.
+  final String? exportCsvLabel;
+
   final String? restoreLabel;
 
   /// The caveat under the actions, where this channel has one.
@@ -60,6 +66,7 @@ class BackupPage {
     required this.intro,
     this.facts = const [],
     this.backUpLabel,
+    this.exportCsvLabel,
     this.restoreLabel,
     this.note,
   });
@@ -71,12 +78,14 @@ class BackupView {
   /// `Never`, or the date of the newest copy on either channel.
   final String lastBackup;
 
-  /// What the iCloud row says, or null where there is no such row.
+  /// Whether Settings carries an iCloud row at all.
   ///
-  /// Null on Android, where the system already carries the database to the
+  /// False on Android, where the system already carries the database to the
   /// next phone and the app adds nothing. A row reading `Not available` there
-  /// would report a gap that does not exist.
-  final String? cloud;
+  /// would report a gap that does not exist. What the row then *says* is
+  /// [cloudLine], the same as the file row: one place decides the wording, so
+  /// the two rows cannot drift into describing themselves differently.
+  final bool hasCloud;
 
   /// What the two Settings rows say on their right-hand side.
   ///
@@ -99,7 +108,7 @@ class BackupView {
   const BackupView({
     required this.lastBackup,
     required this.note,
-    this.cloud,
+    this.hasCloud = false,
     this.cloudLine = '',
     this.fileLine = '',
     this.warningTitle,
@@ -128,7 +137,7 @@ abstract final class BackupPresenter {
     return BackupView(
       lastBackup: newest == null ? S.t.backupNever : MoneyFormat.date(newest),
       note: _note(device),
-      cloud: _cloud(cloud),
+      hasCloud: cloud.state != CloudState.unsupported,
       // The problem outranks the date. A row reading `25/06/2026` beside an
       // iCloud that has been signed out since July is the app reporting a copy
       // it stopped keeping.
@@ -149,15 +158,22 @@ abstract final class BackupPresenter {
     required LastBackups saved,
     required CloudResult cloud,
   }) {
-    final state = _cloud(cloud);
-    if (state == null) return null;
+    if (cloud.state == CloudState.unsupported) return null;
 
     return BackupPage(
       title: S.t.backupCloudTitle,
       intro: S.t.backupCloudIntro,
+      // One row, not a status over a date. `Saved` and a date underneath say
+      // the same thing twice, and the date says it with evidence: a moment the
+      // user can check against what they remember doing. The status word only
+      // earned its place while it could contradict the row below it, which is
+      // exactly the pairing that has to stop happening.
+      //
+      // The failures keep the row instead of the date, because they are not a
+      // state the date could describe. `27/08/2026 at 14:08` beside an iCloud
+      // signed out since then is the app reporting a copy it stopped keeping.
       facts: [
-        (S.t.backupStatus, state),
-        (S.t.backupLastCopy, _date(saved.cloud)),
+        (S.t.backupLastSaved, _cloudProblem(cloud) ?? _moment(saved.cloudAt)),
       ],
       // Nothing to press for the copy itself. The app writes on its own, and a
       // button here would suggest it does not.
@@ -171,12 +187,19 @@ abstract final class BackupPresenter {
     intro: S.t.backupFileIntro,
     facts: [(S.t.backupLastExport, _date(saved.file))],
     backUpLabel: S.t.exportABackup,
+    exportCsvLabel: S.t.backupExportCsv,
     restoreLabel: S.t.backupRestoreFromFile,
     note: S.t.backupFileRestoreNote,
   );
 
   static String _date(LocalDate? on) =>
       on == null ? S.t.backupNever : MoneyFormat.date(on);
+
+  /// The day and the hour, joined by the language rather than by a comma:
+  /// English puts `at` between them and Vietnamese puts `lúc`.
+  static String _moment(LocalDateTime? at) => at == null
+      ? S.t.backupNever
+      : S.t.backupCopyAt(MoneyFormat.date(at.date), at.time.toString());
 
   static LocalDate? _newest(LastBackups saved) =>
       switch ((saved.file, saved.cloud)) {
@@ -187,7 +210,14 @@ abstract final class BackupPresenter {
       };
 
   /// The cloud states worth showing instead of a date, and null for the rest.
+  ///
+  /// Only the two the user can act on. A run that has not written yet says
+  /// `Never`, which is what it is: nothing is up there. `Waiting for a change`
+  /// used to sit here and it answered a question nobody asked, since the row
+  /// is read to find out whether a copy exists.
   static String? _cloudProblem(CloudResult result) => switch (result.state) {
+    // Named so the user knows the fix is theirs and where it lives. "Failed"
+    // would send them looking for a bug in the app.
     CloudState.signedOut => S.t.backupStateSignedOut,
     CloudState.failed => S.t.backupStateFailed,
     _ => null,
@@ -210,27 +240,6 @@ abstract final class BackupPresenter {
             item.state != ItemState.archived,
       )
       .length;
-
-  /// What the iCloud row reads.
-  ///
-  /// Says what is true right now rather than what the setting is. There is no
-  /// switch here to report: the app writes to iCloud whenever it can, and the
-  /// only thing worth putting on screen is whether that is working. `On` beside
-  /// an account that is signed out would be the exact lie this app is built to
-  /// avoid.
-  static String? _cloud(CloudResult result) => switch (result.state) {
-    CloudState.unsupported => null,
-    CloudState.saved => S.t.backupStateSaved,
-    // Named so the user knows the fix is theirs and where it lives. "Failed"
-    // would send them looking for a bug in the app.
-    CloudState.signedOut => S.t.backupStateSignedOut,
-    CloudState.failed => S.t.backupStateFailed,
-    CloudState.idle => S.t.backupStateWaiting,
-    // Only ever comes back from a read, and this row reports the last write.
-    // Left explicit rather than folded into a wildcard so that adding a state
-    // to [CloudState] stays a compile error here.
-    CloudState.missing => S.t.backupStateWaiting,
-  };
 
   /// Answers section 11.2 of the product spec: say in the interface whether
   /// the database is in the device's own backup, so the user knows what they

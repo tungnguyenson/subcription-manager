@@ -17,7 +17,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "cancelUrl": "https://account.adobe.com/plans",
-      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -27,7 +26,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 6999,
           "seats": 1,
-          "note": "Hợp đồng năm, trả theo tháng",
           "source": "https://helpx.adobe.com/account/individual/subscriptions-and-plans/plan-types-and-eligibility/changes-to-individual-plan.html",
           "checkedAt": "2026-08-23"
         },
@@ -39,7 +37,6 @@
           "cycle": "YEARLY",
           "amountMinor": 77999,
           "seats": 1,
-          "note": "Trả trước cả năm",
           "source": "https://helpx.adobe.com/account/individual/subscriptions-and-plans/plan-types-and-eligibility/changes-to-individual-plan.html",
           "checkedAt": "2026-08-23"
         }
@@ -56,7 +53,6 @@
       "defaultPlan": "professional",
       "cancelUrl": null,
       "manageUrl": "https://www.figma.com/settings",
-      "noteVi": null,
       "plans": [
         {
           "tier": "professional",
@@ -66,7 +62,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 2000,
           "seats": 1,
-          "note": "Full seat, trả theo tháng",
           "source": "https://www.figma.com/pricing/",
           "checkedAt": "2026-08-23"
         },
@@ -78,7 +73,6 @@
           "cycle": "YEARLY",
           "amountMinor": 19200,
           "seats": 1,
-          "note": "Full seat, trả theo năm (16 USD/tháng)",
           "source": "https://www.figma.com/pricing/",
           "checkedAt": "2026-08-23"
         }
@@ -94,7 +88,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "plus",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "plus",
@@ -104,7 +97,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 1200,
           "seats": 1,
-          "note": "Trả theo tháng",
           "source": "https://www.notion.com/pricing",
           "checkedAt": "2026-08-23"
         },
@@ -116,7 +108,6 @@
           "cycle": "YEARLY",
           "amountMinor": 12000,
           "seats": 1,
-          "note": "Trả theo năm (10 USD/tháng)",
           "source": "https://www.notion.com/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -135,7 +126,6 @@
       "defaultPlan": "all-products-pack",
       "cancelUrl": null,
       "manageUrl": "https://account.jetbrains.com/licenses",
-      "noteVi": "Giá năm là giá năm đầu (299 USD); các năm gia hạn tiếp theo rẻ hơn nhờ continuity discount của JetBrains.",
       "plans": [
         {
           "tier": "all-products-pack",
@@ -145,7 +135,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 2990,
           "seats": 1,
-          "note": "Trả theo tháng",
           "source": "https://www.jetbrains.com/store/",
           "checkedAt": "2026-08-23"
         },
@@ -157,7 +146,6 @@
           "cycle": "YEARLY",
           "amountMinor": 29900,
           "seats": 1,
-          "note": "Trả theo năm, giá năm đầu tiên",
           "source": "https://www.jetbrains.com/store/",
           "checkedAt": "2026-08-23"
         }
@@ -177,7 +165,6 @@
       "defaultPlan": "personal",
       "cancelUrl": null,
       "manageUrl": "https://account.microsoft.com/services",
-      "noteVi": null,
       "plans": [
         {
           "tier": "personal",
@@ -187,7 +174,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 999,
           "seats": 1,
-          "note": "1 người dùng",
           "source": "https://www.microsoft.com/en-us/microsoft-365/buy/compare-all-microsoft-365-products",
           "checkedAt": "2026-08-23"
         },
@@ -199,7 +185,6 @@
           "cycle": "YEARLY",
           "amountMinor": 9999,
           "seats": 1,
-          "note": "1 người dùng, trả theo năm",
           "source": "https://www.microsoft.com/en-us/microsoft-365/buy/compare-all-microsoft-365-products",
           "checkedAt": "2026-08-23"
         }
@@ -216,7 +201,6 @@
       "defaultCycle": "YEARLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Mục chung, không có brand — phí đăng ký/gia hạn khác nhau theo TLD và nhà cung cấp.",
       "plans": []
     },
     {
@@ -231,7 +215,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Mục chung, không có brand — phí VPS/hosting khác nhau theo nhà cung cấp và cấu hình.",
       "plans": []
     },
     {
@@ -244,7 +227,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "cancelUrl": null,
-      "noteVi": "Vercel Pro chỉ tính phí theo tháng (theo seat), không bán gói trả trước theo năm.",
       "plans": [
         {
           "tier": "pro",
@@ -254,7 +236,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 2000,
           "seats": 1,
-          "note": "Phí nền tảng + 1 seat",
           "source": "https://vercel.com/docs/plans/pro-plan",
           "checkedAt": "2026-08-23"
         }
@@ -272,7 +253,6 @@
       "defaultCycle": "YEARLY",
       "defaultPlan": "business-starter",
       "cancelUrl": null,
-      "noteVi": "Chỉ xác nhận được giá cam kết năm (7 USD/user/tháng); trang giá không hiện tĩnh mức phí trả linh hoạt theo tháng.",
       "plans": [
         {
           "tier": "business-starter",
@@ -282,7 +262,6 @@
           "cycle": "YEARLY",
           "amountMinor": 8400,
           "seats": 1,
-          "note": "7 USD/user/tháng, cam kết năm, mỗi user",
           "source": "https://workspace.google.com/pricing.html",
           "checkedAt": "2026-08-23"
         }
@@ -298,7 +277,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -307,7 +285,6 @@
           "currency": "VND",
           "cycle": "MONTHLY",
           "amountMinor": 150000,
-          "note": "Giá 1 người dùng",
           "source": "https://www.canva.com/pricing/",
           "checkedAt": "2026-08-24"
         },
@@ -318,7 +295,6 @@
           "currency": "VND",
           "cycle": "YEARLY",
           "amountMinor": 1300000,
-          "note": "Tổng tiền cả năm, giá 1 người dùng",
           "source": "https://www.canva.com/pricing/",
           "checkedAt": "2026-08-24"
         }
@@ -335,7 +311,6 @@
       "defaultPlan": "pro",
       "cancelUrl": null,
       "manageUrl": "https://zoom.us/billing",
-      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -345,7 +320,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 1699,
           "seats": 1,
-          "note": "Trả theo tháng",
           "source": "https://zoom.us/pricing",
           "checkedAt": "2026-08-23"
         },
@@ -357,7 +331,6 @@
           "cycle": "YEARLY",
           "amountMinor": 16990,
           "seats": 1,
-          "note": "Trả theo năm",
           "source": "https://zoom.us/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -374,7 +347,6 @@
       "defaultPlan": "pro",
       "cancelUrl": null,
       "manageUrl": "https://slack.com/account/settings",
-      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -384,7 +356,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 875,
           "seats": 1,
-          "note": "Trả theo tháng, mỗi user",
           "source": "https://slack.com/pricing",
           "checkedAt": "2026-08-23"
         },
@@ -396,7 +367,6 @@
           "cycle": "YEARLY",
           "amountMinor": 8700,
           "seats": 1,
-          "note": "7.25 USD/tháng khi trả theo năm",
           "source": "https://slack.com/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -412,7 +382,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -422,7 +391,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 3000,
           "seats": 1,
-          "note": "Trả theo tháng",
           "source": "https://www.grammarly.com/plans",
           "checkedAt": "2026-08-23"
         },
@@ -434,7 +402,6 @@
           "cycle": "YEARLY",
           "amountMinor": 14400,
           "seats": 1,
-          "note": "Trả theo năm (12 USD/tháng)",
           "source": "https://www.grammarly.com/plans",
           "checkedAt": "2026-08-23"
         }
@@ -451,7 +418,6 @@
       "defaultPlan": "pro",
       "cancelUrl": null,
       "manageUrl": "https://app.todoist.com/app/settings/subscription",
-      "noteVi": null,
       "plans": [
         {
           "tier": "pro",
@@ -460,7 +426,6 @@
           "currency": "USD",
           "cycle": "MONTHLY",
           "amountMinor": 700,
-          "note": "Billed monthly",
           "source": "https://www.todoist.com/pricing",
           "checkedAt": "2026-08-24"
         },
@@ -471,7 +436,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 6000,
-          "note": "Tổng tiền cả năm khi thanh toán theo năm ($5/tháng)",
           "source": "https://www.todoist.com/pricing",
           "checkedAt": "2026-08-24"
         }
@@ -487,7 +451,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Trang evernote.com/compare-plans mở được bằng trình duyệt thật nhưng hiện giá VND với số lẻ tới hàng thập phân (vd 62.766,58đ/tháng) — dấu hiệu quy đổi tỉ giá tự động theo IP chứ không phải bảng giá VND chính thức của hãng, nên không dùng. Danh sách In-App Purchase trên App Store cũng chỉ là các mục cũ chồng chéo (Premium/Plus/Personal, có cả gói trọn đời) không tách được cặp giá tháng/năm hiện hành rõ ràng.",
       "plans": []
     },
     {
@@ -501,7 +464,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "standard",
@@ -511,7 +473,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 500,
           "seats": 1,
-          "note": "Trả theo tháng",
           "source": "https://obsidian.md/sync",
           "checkedAt": "2026-08-23"
         },
@@ -523,7 +484,6 @@
           "cycle": "YEARLY",
           "amountMinor": 4800,
           "seats": 1,
-          "note": "Trả theo năm (4 USD/tháng)",
           "source": "https://obsidian.md/sync",
           "checkedAt": "2026-08-23"
         }
@@ -539,7 +499,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "standard",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "standard",
@@ -549,7 +508,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 600,
           "seats": 1,
-          "note": "Trả theo tháng, mỗi user",
           "source": "https://trello.com/pricing",
           "checkedAt": "2026-08-23"
         },
@@ -561,7 +519,6 @@
           "cycle": "YEARLY",
           "amountMinor": 6000,
           "seats": 1,
-          "note": "5 USD/tháng khi trả theo năm",
           "source": "https://trello.com/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -577,7 +534,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "starter",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "starter",
@@ -587,7 +543,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 1349,
           "seats": 1,
-          "note": "Trả theo tháng, mỗi user",
           "source": "https://asana.com/pricing",
           "checkedAt": "2026-08-23"
         },
@@ -599,7 +554,6 @@
           "cycle": "YEARLY",
           "amountMinor": 13188,
           "seats": 1,
-          "note": "10.99 USD/tháng khi trả theo năm",
           "source": "https://asana.com/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -615,7 +569,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "unlimited",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "unlimited",
@@ -625,7 +578,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 1000,
           "seats": 1,
-          "note": "Trả theo tháng, mỗi user",
           "source": "https://clickup.com/pricing",
           "checkedAt": "2026-08-23"
         },
@@ -637,7 +589,6 @@
           "cycle": "YEARLY",
           "amountMinor": 8400,
           "seats": 1,
-          "note": "7 USD/tháng khi trả theo năm",
           "source": "https://clickup.com/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -653,7 +604,6 @@
       "defaultCycle": "YEARLY",
       "defaultPlan": "basic",
       "cancelUrl": null,
-      "noteVi": "Chỉ xác nhận được giá trả theo năm (10 USD/user/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "plans": [
         {
           "tier": "basic",
@@ -663,7 +613,6 @@
           "cycle": "YEARLY",
           "amountMinor": 12000,
           "seats": 1,
-          "note": "10 USD/user/tháng, trả theo năm",
           "source": "https://linear.app/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -679,7 +628,6 @@
       "defaultCycle": "YEARLY",
       "defaultPlan": "team",
       "cancelUrl": null,
-      "noteVi": "Chỉ xác nhận được giá trả theo năm (20 USD/user/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "plans": [
         {
           "tier": "team",
@@ -689,7 +637,6 @@
           "cycle": "YEARLY",
           "amountMinor": 24000,
           "seats": 1,
-          "note": "20 USD/user/tháng, trả theo năm",
           "source": "https://airtable.com/pricing",
           "checkedAt": "2026-08-23"
         }
@@ -705,7 +652,6 @@
       "defaultCycle": "YEARLY",
       "defaultPlan": "starter",
       "cancelUrl": null,
-      "noteVi": "Chỉ xác nhận được giá trả theo năm (8 USD/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "plans": [
         {
           "tier": "starter",
@@ -715,7 +661,6 @@
           "cycle": "YEARLY",
           "amountMinor": 9600,
           "seats": 1,
-          "note": "8 USD/tháng, trả theo năm",
           "source": "https://miro.com/pricing/",
           "checkedAt": "2026-08-23"
         }
@@ -731,7 +676,6 @@
       "defaultCycle": "YEARLY",
       "defaultPlan": "pro",
       "cancelUrl": null,
-      "noteVi": "Chỉ xác nhận được giá trả theo năm (8 USD/tháng); trang giá không hiện tĩnh mức trả theo tháng.",
       "plans": [
         {
           "tier": "pro",
@@ -741,7 +685,6 @@
           "cycle": "YEARLY",
           "amountMinor": 9600,
           "seats": 1,
-          "note": "8 USD/tháng, trả theo năm",
           "source": "https://www.raycast.com/pro",
           "checkedAt": "2026-08-23"
         }
@@ -757,7 +700,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "mac-ios",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "mac-ios",
@@ -766,7 +708,6 @@
           "currency": "USD",
           "cycle": "MONTHLY",
           "amountMinor": 1899,
-          "note": "Gói phổ biến nhất (\"Popular choice\"), chưa gồm thuế, 1 Mac + 4 thiết bị iOS",
           "source": "https://setapp.com/pricing",
           "checkedAt": "2026-08-24"
         },
@@ -777,7 +718,6 @@
           "currency": "USD",
           "cycle": "YEARLY",
           "amountMinor": 13488,
-          "note": "Tổng tiền cả năm khi bật \"Save up to 40% yearly\", chưa gồm thuế",
           "source": "https://setapp.com/pricing",
           "checkedAt": "2026-08-24"
         }
@@ -794,7 +734,6 @@
       "defaultPlan": null,
       "cancelUrl": null,
       "manageUrl": "https://github.com/settings/billing/summary",
-      "noteVi": "Xác nhận lại bằng trình duyệt thật trên github.com/pricing: GitHub chỉ còn 3 gói Free, Team (4 USD/user/tháng, tính theo tổ chức chứ không phải cá nhân) và Enterprise (từ 21 USD/user/tháng); không còn gói Pro cho tài khoản cá nhân nên không có tier phù hợp để ghi giá.",
       "plans": []
     },
     {
@@ -807,7 +746,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "pro",
       "cancelUrl": null,
-      "noteVi": "Giá Pro tính theo 1 website/domain.",
       "plans": [
         {
           "tier": "pro",
@@ -817,7 +755,6 @@
           "cycle": "MONTHLY",
           "amountMinor": 2500,
           "seats": 1,
-          "note": "Trả theo tháng",
           "source": "https://www.cloudflare.com/plans/",
           "checkedAt": "2026-08-23"
         },
@@ -829,7 +766,6 @@
           "cycle": "YEARLY",
           "amountMinor": 24000,
           "seats": 1,
-          "note": "20 USD/tháng khi trả theo năm",
           "source": "https://www.cloudflare.com/plans/",
           "checkedAt": "2026-08-23"
         }

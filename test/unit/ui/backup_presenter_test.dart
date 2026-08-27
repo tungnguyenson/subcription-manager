@@ -22,6 +22,12 @@ void main() {
     state: state,
   );
 
+  /// The record keeps the hour; these cases are about the day, so they all
+  /// share one. The hour only reaches the screen on the iCloud page, which has
+  /// its own group below.
+  LocalDateTime? at(LocalDate? on) =>
+      on == null ? null : LocalDateTime(on, const LocalTime(9, 30));
+
   BackupView build({
     List<TrackedItem> items = const [],
     LocalDate? lastSavedOn,
@@ -30,7 +36,7 @@ void main() {
     CloudResult cloud = CloudResult.unsupported,
   }) => BackupPresenter.build(
     items: items,
-    saved: LastBackups(file: lastSavedOn, cloud: lastCloudOn),
+    saved: LastBackups(fileAt: at(lastSavedOn), cloudAt: at(lastCloudOn)),
     device: device,
     cloud: cloud,
   );
@@ -128,47 +134,56 @@ void main() {
   // can, so the only thing worth putting on screen is whether that worked.
   group('the iCloud row', () {
     test('is absent where the app writes to no cloud at all', () {
-      expect(build().cloud, isNull);
+      expect(build().hasCloud, isFalse);
     });
 
-    test('says it saved once a write landed', () {
-      expect(build(cloud: const CloudResult(CloudState.saved)).cloud, 'Saved');
+    test('is there wherever the app writes to a cloud at all', () {
+      expect(build(cloud: CloudResult.idle).hasCloud, isTrue);
+    });
+
+    test('carries the date of the last write that landed', () {
+      expect(
+        build(
+          lastCloudOn: d('2026-08-25'),
+          cloud: const CloudResult(CloudState.saved),
+        ).cloudLine,
+        '25/08/2026',
+      );
     });
 
     // The fix is the user's and it lives in system settings, so the row sends
     // them there. "Failed" would send them hunting for a bug in the app.
     test('a signed-out account is named as the thing to fix', () {
       expect(
-        build(cloud: const CloudResult(CloudState.signedOut)).cloud,
+        build(cloud: const CloudResult(CloudState.signedOut)).cloudLine,
         'Sign in to iCloud',
       );
     });
 
     test('an unexplained failure still says something went wrong', () {
       expect(
-        build(cloud: const CloudResult(CloudState.failed, detail: 'x')).cloud,
+        build(cloud: const CloudResult(CloudState.failed, detail: 'x'))
+            .cloudLine,
         'Could not save',
       );
     });
 
+    // Nothing is up there yet, and that is a plain answer rather than a state
+    // of the machinery. `Waiting for a change` used to sit here and it answered
+    // a question nobody asked.
     test('before the first attempt it does not claim to have saved', () {
-      final cloud = build(cloud: CloudResult.idle).cloud;
-
-      expect(cloud, isNotNull);
-      expect(cloud, isNot('Saved'));
+      expect(build(cloud: CloudResult.idle).cloudLine, 'Never');
     });
 
-    // The date belongs to a file that exists. A cloud write that failed must
-    // not leave one behind, which is enforced in app.dart; here the row simply
-    // has to be able to say both things at once.
-    test('a failed write can sit beside a date from an earlier one', () {
+    // The problem outranks the date: a date from June beside an iCloud signed
+    // out since July is the app reporting a copy it stopped keeping.
+    test('a failure hides a date the app can no longer stand behind', () {
       final view = build(
-        lastSavedOn: d('2026-08-25'),
+        lastCloudOn: d('2026-06-25'),
         cloud: const CloudResult(CloudState.signedOut),
       );
 
-      expect(view.lastBackup, '25/08/2026');
-      expect(view.cloud, 'Sign in to iCloud');
+      expect(view.cloudLine, 'Sign in to iCloud');
     });
   });
 
@@ -224,6 +239,62 @@ void main() {
 
       expect(note, contains('only copy'));
       expect(note, isNot(contains('backup and moves')));
+    });
+  });
+
+  group('the iCloud page', () {
+    BackupPage page({
+      LocalDateTime? copiedAt,
+      CloudResult cloud = const CloudResult(CloudState.saved),
+    }) => BackupPresenter.cloudPage(
+      saved: LastBackups(cloudAt: copiedAt),
+      cloud: cloud,
+    )!;
+
+    final copied = LocalDateTime(d('2026-08-27'), const LocalTime(12, 52));
+
+    // One row, not a status over a date. The pair used to be able to contradict
+    // each other -- `Saved` above `Never` -- and even when they agreed the
+    // status word only repeated what the date already proved.
+    test('there is one row about the copy, and it is the date', () {
+      expect(page(copiedAt: copied).facts, [
+        ('Last saved', '27/08/2026 at 12:52'),
+      ]);
+    });
+
+    // Nobody presses anything to make this write happen, so a bare day cannot
+    // tell the copy written after the edit just made from the one written at
+    // breakfast.
+    test('the row names the hour, not just the day', () {
+      expect(page(copiedAt: copied).facts.single.$2, contains('12:52'));
+    });
+
+    // Before the first write lands there is genuinely nothing up there.
+    test('a run that has not written yet says Never', () {
+      expect(page(cloud: CloudResult.idle).facts.single.$2, 'Never');
+    });
+
+    // The one thing a date cannot describe. A moment from this morning beside
+    // an account signed out since then reports a copy the app stopped keeping.
+    test('a signed-out account takes the row instead of the date', () {
+      expect(
+        page(
+          copiedAt: copied,
+          cloud: const CloudResult(CloudState.signedOut),
+        ).facts.single.$2,
+        'Sign in to iCloud',
+      );
+    });
+
+    // Android has no row at all, and no page behind it.
+    test('there is no page where the app writes to no cloud', () {
+      expect(
+        BackupPresenter.cloudPage(
+          saved: LastBackups.none,
+          cloud: CloudResult.unsupported,
+        ),
+        isNull,
+      );
     });
   });
 }

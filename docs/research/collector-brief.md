@@ -27,9 +27,7 @@ File đã có sẵn stub cho mọi dịch vụ thuộc batch của bạn. Với 
    tự đi xác nhận ngày hết hạn. **Chỉ ghi URL có bằng chứng tồn tại**: trang trợ giúp của
    hãng ghi rõ đường dẫn đó, hoặc mở ra trả 200/302 sang trang đăng nhập. Trả 404 thì không
    phải. **Không tự chế đường dẫn nghe hợp lý** kiểu đoán `/account/subscription`.
-7. `noteVi`: một câu tiếng Việt, chỉ viết khi có thứ thật sự đáng nói — không bán ở VN,
-   không tra được giá và vì sao, gói có ràng buộc lạ. Không viết câu quảng cáo.
-8. Xoá `_todo` và `_hint` khi làm xong mục đó. Xoá `_legacyPrice` sau khi đã xác minh lại
+7. Xoá `_todo` và `_hint` khi làm xong mục đó. Xoá `_legacyPrice` sau khi đã xác minh lại
    (dù kết quả là ghi plan mới hay bỏ hẳn giá cũ).
 
 ## Luật giá — phần dễ sai nhất
@@ -63,7 +61,7 @@ trên store, và với người dùng VN thì đó mới đúng là giá thật 
 phải là trang app của chính hãng (`apps.apple.com/...`, `play.google.com/...`), không
 phải bài viết nói về app đó.
 
-**Không tra được thì để `plans: []`** và ghi lý do vào `noteVi`. Không suy luận, không lấy
+**Không tra được thì để `plans: []`.** Không suy luận, không lấy
 giá năm ngoái, không lấy giá vùng khác thay thế. App này có cả một enum `DateSource` chỉ
 để tránh hiển thị một con số tự tin hơn mức nó xứng đáng — dữ liệu giá theo đúng nguyên
 tắc đó.
@@ -82,7 +80,6 @@ Mục được đánh dấu `MỤC CHUNG` trong `_hint` ("Thẻ tập gym", "H�
   "defaultCycle": "MONTHLY",
   "cancelUrl": "https://www.netflix.com/cancelplan",
   "manageUrl": "https://www.netflix.com/account",
-  "noteVi": null,
   "defaultPlan": "standard",
   "plans": [
     {
@@ -93,7 +90,6 @@ Mục được đánh dấu `MỤC CHUNG` trong `_hint` ("Thẻ tập gym", "H�
       "cycle": "MONTHLY",
       "amountMinor": 220000,
       "seats": 2,
-      "note": "1080p, 2 thiết bị",
       "source": "https://help.netflix.com/vi/node/24926",
       "checkedAt": "2026-08-23"
     }

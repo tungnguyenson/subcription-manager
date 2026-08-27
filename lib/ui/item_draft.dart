@@ -31,7 +31,7 @@ class DraftItem {
   final List<int> leadDays;
 
   /// The catalog row the name matched, when it matched one. Carries the cancel
-  /// link and the note, neither of which the form asks for.
+  /// link, which the form does not ask for.
   final CatalogEntry? matched;
 
   /// The user said this one is not being paid for yet.
@@ -43,6 +43,13 @@ class DraftItem {
 
   /// Which source pays for this, or null for "not said".
   final String? paymentSourceId;
+
+  /// Free text the user wrote about this one, or null for none.
+  ///
+  /// Empty and null are the same thing here: the field normalises a cleared
+  /// box back to null, so nothing downstream has to decide whether `''` means
+  /// "no note" or "a note that says nothing".
+  final String? note;
 
   const DraftItem({
     required this.name,
@@ -57,13 +64,14 @@ class DraftItem {
     this.matched,
     this.inTrial = false,
     this.paymentSourceId,
+    this.note,
   });
 
   /// Seeds the form from an item that already exists.
   ///
-  /// Deliberately does not carry the catalog match: the link and the note on
-  /// the item were settled when it was created, and re-deriving them from the
-  /// name would overwrite whatever the user has since put there.
+  /// Deliberately does not carry the catalog match: the link on the item was
+  /// settled when it was created, and re-deriving it from the name would
+  /// overwrite whatever the user has since put there.
   factory DraftItem.of(TrackedItem item, CategoryBook categories) => DraftItem(
     name: item.name,
     expiresOn: item.expiresOn,
@@ -76,6 +84,7 @@ class DraftItem {
     leadDays: item.leadDays,
     inTrial: item.inTrial,
     paymentSourceId: item.paymentSourceId,
+    note: item.note,
   );
 
   /// Folds this draft back into the item it was seeded from.
@@ -114,9 +123,9 @@ class DraftItem {
       dateSource: dateChanged ? DateSource.userEstimated : null,
       snoozedUntil: dateChanged ? () => null : null,
       actionUrl: entry == null ? null : () => entry.cancelUrl,
-      note: entry == null ? null : () => entry.noteVi,
       inTrial: inTrial,
       paymentSourceId: () => paymentSourceId,
+      note: () => note,
     );
   }
 

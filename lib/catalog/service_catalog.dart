@@ -42,8 +42,6 @@ class CatalogPlan {
   /// How many people the plan covers, when the vendor sells it that way.
   final int? seats;
 
-  final String? note;
-
   /// The vendor's own page this price was read off.
   final String source;
 
@@ -58,7 +56,6 @@ class CatalogPlan {
     required this.cycle,
     required this.amountMinor,
     this.seats,
-    this.note,
     required this.source,
     required this.checkedAt,
   });
@@ -91,7 +88,6 @@ class CatalogPlan {
       cycle: cycle,
       amountMinor: amount.toInt(),
       seats: (json['seats'] as num?)?.toInt(),
-      note: json['note'] as String?,
       source: required('source'),
       checkedAt: required('checkedAt'),
     );
@@ -153,8 +149,6 @@ class CatalogEntry {
   /// confirmed one is putting the user one tap from the page that knows.
   final String? manageUrl;
 
-  final String? noteVi;
-
   /// Published prices. Empty when no price could be sourced, which is the
   /// honest state for a bill whose amount changes every period.
   final List<CatalogPlan> plans;
@@ -172,7 +166,6 @@ class CatalogEntry {
     this.currency,
     this.cancelUrl,
     this.manageUrl,
-    this.noteVi,
     this.plans = const [],
     this.defaultPlan,
   });
@@ -227,7 +220,6 @@ class CatalogEntry {
       currency: json['currency'] as String?,
       cancelUrl: json['cancelUrl'] as String?,
       manageUrl: json['manageUrl'] as String?,
-      noteVi: json['noteVi'] as String?,
       plans: (json['plans'] as List<dynamic>? ?? const [])
           .map((e) => CatalogPlan.fromJson(e as Map<String, dynamic>))
           .toList(growable: false),

@@ -115,6 +115,7 @@ void main() {
       Cycle? cycle = Cycle.monthly,
       bool inTrial = false,
       String? sourceId,
+      String? note,
     }) => repository.upsert(
       TrackedItem(
         id: id,
@@ -127,6 +128,7 @@ void main() {
         currency: amountMinor == null ? null : currency,
         inTrial: inTrial,
         paymentSourceId: sourceId,
+        note: note,
       ),
       now,
     );
@@ -154,6 +156,7 @@ void main() {
       amountMinor: 2000,
       currency: 'USD',
       inTrial: true,
+      note: 'Ask about the education discount before the trial ends.',
     );
     await put(
       'spotify',

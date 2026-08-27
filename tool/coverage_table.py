@@ -76,8 +76,7 @@ def main():
     w("")
     w("Cột **Giá** ghi số dòng giá thu được. Cột **Th+Năm** đánh dấu mục có đủ cả")
     w("gói tháng lẫn gói năm của cùng một gói, tức là mục app tính được tiền tiết")
-    w("kiệm. Ô đánh dấu `·` nghĩa là không có. Cột **Vì sao trống** chỉ điền")
-    w("cho mục không có giá.")
+    w("kiệm. Ô đánh dấu `·` nghĩa là không có.")
     w("")
 
     for category in sorted(by_category, key=lambda s: -len(by_category[s])):
@@ -92,19 +91,13 @@ def main():
         w("")
         w(f"{len(rows)} mục, {n_priced} có giá, {n_both} so được gói năm.")
         w("")
-        w("| Dịch vụ | Giá | Vùng | Th+Năm | Icon | Link gói | Link huỷ | Vì sao trống |")
-        w("|---|---|---|---|---|---|---|---|")
+        w("| Dịch vụ | Giá | Vùng | Th+Năm | Icon | Link gói | Link huỷ |")
+        w("|---|---|---|---|---|---|---|")
         for e in rows:
             plans = e.get("plans", [])
             cycles = {p["cycle"] for p in plans}
             regions = sorted({p["region"] for p in plans})
             region = "+".join("VN" if r == "VN" else "toàn cầu" for r in regions)
-            why = ""
-            if not plans:
-                # Ghi chú do agent viết, đôi khi có em-dash. Bảng này là văn
-                # bản tiếng Việt nên đổi sang dấu phẩy cho đúng luật viết.
-                note = (e.get("noteVi") or "").replace("|", " ").replace("—", ",")
-                why = note[:70] + ("..." if len(note) > 70 else "")
             w(
                 f"| {e['name']} "
                 f"| {len(plans) or '·'} "
@@ -112,8 +105,7 @@ def main():
                 f"| {'✓' if cycles >= {'MONTHLY', 'YEARLY'} else '·'} "
                 f"| {icon_tier(rules, e['name'])} "
                 f"| {'✓' if e.get('manageUrl') else '·'} "
-                f"| {'✓' if e.get('cancelUrl') else '·'} "
-                f"| {why} |"
+                f"| {'✓' if e.get('cancelUrl') else '·'} |"
             )
         w("")
 

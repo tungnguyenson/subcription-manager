@@ -17,20 +17,31 @@ import 'settings_store.dart';
 /// the newer of the two beside whichever row the reader happened to look at.
 enum BackupChannel { file, cloud }
 
-/// The last date a copy existed on each channel.
+/// The last moment a copy existed on each channel.
+///
+/// Kept to the minute rather than to the day, because the cloud channel writes
+/// by itself. A row reading `27/08/2026` beside a copy the app wrote four
+/// minutes ago and one it wrote at breakfast say the same thing, and the user
+/// checking this screen is asking which of the two they have. The file channel
+/// keeps the same shape only so one record does not need two storage formats;
+/// what it puts on screen is still a day, because a file the user exported in
+/// May is a file from May whatever hour they saved it.
 class LastBackups {
   /// The newest export the user took to a file.
-  final LocalDate? file;
+  final LocalDateTime? fileAt;
 
   /// The newest write to the user's own cloud that landed.
-  final LocalDate? cloud;
+  final LocalDateTime? cloudAt;
 
-  const LastBackups({this.file, this.cloud});
+  const LastBackups({this.fileAt, this.cloudAt});
 
   static const none = LastBackups();
 
+  LocalDate? get file => fileAt?.date;
+  LocalDate? get cloud => cloudAt?.date;
+
   /// Whether any copy exists at all, which is what the warning turns on.
-  bool get any => file != null || cloud != null;
+  bool get any => fileAt != null || cloudAt != null;
 }
 
 /// Reads the whole database out as a [Backup], and writes one back in.
@@ -145,9 +156,7 @@ class BackupStore {
     // this list is backed up as of a day it did not exist on, and clearing it
     // would say no copy exists while the user is holding one.
     final takenOn = DateTime.tryParse(backup.exportedAt);
-    await (takenOn == null
-        ? _clearSaved(from)
-        : markSaved(LocalDate.fromDateTime(takenOn.toLocal()), from));
+    await (takenOn == null ? _clearSaved(from) : markSaved(takenOn, from));
   });
 
   /// The key the last backup's date lives under, in `settingRow`.
@@ -193,17 +202,23 @@ class BackupStore {
   /// and writing a date here would put something on screen that stands for
   /// nothing.
   Future<void> markSaved(
-    LocalDate on, [
+    DateTime at, [
     BackupChannel channel = BackupChannel.file,
   ]) => _db
       .into(_db.settingRow)
       .insert(
         SettingRowCompanion(
           settingKey: Value(_keyFor(channel)),
-          value: Value(on.toString()),
+          value: Value(_stamp(at)),
         ),
         mode: InsertMode.insertOrReplace,
       );
+
+  /// Written in the device's own zone and without a `Z`, because it is read
+  /// back as a wall clock. Storing UTC would put a copy written at 01:00 in
+  /// Vietnam on the previous day's row, which is the same mistake
+  /// [fileNameFor] already refuses to make.
+  static String _stamp(DateTime at) => at.toLocal().toIso8601String();
 
   /// Forgets the date, for a restored file that does not carry one.
   Future<void> _clearSaved(BackupChannel channel) => (_db.delete(
@@ -214,15 +229,28 @@ class BackupStore {
   /// of this table. A corrupted value reads as "never backed up", which is the
   /// pessimistic answer and therefore the safe one.
   static LastBackups _readLastSaved(List<SettingRowData> rows) {
-    LocalDate? file;
-    LocalDate? cloud;
+    LocalDateTime? file;
+    LocalDateTime? cloud;
     for (final row in rows) {
-      if (row.settingKey == _lastSavedKey) file = LocalDate.tryParse(row.value);
-      if (row.settingKey == _lastCloudKey) {
-        cloud = LocalDate.tryParse(row.value);
-      }
+      if (row.settingKey == _lastSavedKey) file = _readStamp(row.value);
+      if (row.settingKey == _lastCloudKey) cloud = _readStamp(row.value);
     }
-    return LastBackups(file: file, cloud: cloud);
+    return LastBackups(fileAt: file, cloudAt: cloud);
+  }
+
+  /// Reads either shape. Installs from before this record kept the hour hold a
+  /// bare `2026-08-27` under the same key, and that is a real date the user is
+  /// entitled to keep seeing -- rejecting it would report `Never` to someone
+  /// who has a copy. It reads back as midnight, which is the only hour the
+  /// stored value can honestly claim.
+  static LocalDateTime? _readStamp(String text) {
+    final at = DateTime.tryParse(text);
+    if (at == null) return null;
+    final local = at.isUtc ? at.toLocal() : at;
+    return LocalDateTime(
+      LocalDate.fromDateTime(local),
+      LocalTime(local.hour, local.minute),
+    );
   }
 
   /// The name the exported file is offered under.

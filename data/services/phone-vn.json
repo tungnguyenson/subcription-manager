@@ -47,7 +47,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Mục chung cho gói cước di động của mọi nhà mạng, thay cho bảy mục SIM riêng trước đây. Hết hạn mà không nạp thì mất số, đặt mức quan trọng cao. Không có giá dựng sẵn: mỗi nhà mạng một bảng giá, và mỗi người một gói, nên bất kỳ con số nào ở đây cũng là app đoán hộ. Người dùng tự gõ số họ thật sự trả.",
       "plans": []
     },
     {
@@ -63,7 +62,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "giga-f1",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "giga-f1",
@@ -72,7 +70,6 @@
           "currency": "VND",
           "cycle": "MONTHLY",
           "amountMinor": 205000,
-          "note": "300 Mbps, gói cáp quang hộ gia đình phổ biến nhất",
           "source": "https://fpt.vn/internet/gia-dinh",
           "checkedAt": "2026-08-23"
         }
@@ -91,7 +88,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "meshvt1-t",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "meshvt1-t",
@@ -100,7 +96,6 @@
           "currency": "VND",
           "cycle": "MONTHLY",
           "amountMinor": 210000,
-          "note": "300 Mbps, kèm modem Wifi6 + 1 thiết bị MeshWifi, gói cáp quang hộ gia đình rẻ nhất trên trang chủ viettel.vn",
           "source": "https://viettel.vn/vx/",
           "checkedAt": "2026-08-23"
         }
@@ -119,7 +114,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": "home-1",
       "cancelUrl": null,
-      "noteVi": null,
       "plans": [
         {
           "tier": "home-1",
@@ -128,7 +122,6 @@
           "currency": "VND",
           "cycle": "MONTHLY",
           "amountMinor": 180000,
-          "note": "300 Mbps, gói internet-only rẻ nhất/phổ biến nhất cho hộ gia đình",
           "source": "https://vnpt.vn/tu-van/da-dang-goi-cuoc-internet-cap-quang-vnpt.html",
           "checkedAt": "2026-08-23"
         }
@@ -146,7 +139,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Mục chung cho các gói truyền hình cáp/K+ theo từng nhà cung cấp và combo khác nhau nên không đặt giá chuẩn.",
       "plans": []
     },
     {
@@ -162,7 +154,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Số tiền thay đổi theo sản lượng tiêu thụ mỗi kỳ nên không đặt giá chuẩn.",
       "plans": []
     },
     {
@@ -177,7 +168,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Số tiền thay đổi theo sản lượng tiêu thụ mỗi kỳ nên không đặt giá chuẩn.",
       "plans": []
     },
     {
@@ -193,7 +183,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Mức phí do từng ban quản lý toà nhà quy định nên không đặt giá chuẩn.",
       "plans": []
     },
     {
@@ -209,7 +198,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Mức phí do từng địa phương/đơn vị thu gom quy định nên không đặt giá chuẩn.",
       "plans": []
     },
     {
@@ -225,7 +213,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Mức phí do từng toà nhà/bãi xe quy định nên không đặt giá chuẩn.",
       "plans": []
     },
     {
@@ -240,7 +227,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Số tiền thay đổi theo lượng dùng và giá thị trường mỗi kỳ nên không đặt giá chuẩn.",
       "plans": []
     },
     {
@@ -256,7 +242,6 @@
       "defaultCycle": "YEARLY",
       "defaultPlan": "ho-gia-dinh-nguoi-1",
       "cancelUrl": null,
-      "noteVi": "Giá là mức đóng của người thứ nhất trong hộ; từ người thứ hai trở đi được giảm dần còn 70%/60%/50%/40% mức này.",
       "plans": [
         {
           "tier": "ho-gia-dinh-nguoi-1",
@@ -265,7 +250,6 @@
           "currency": "VND",
           "cycle": "YEARLY",
           "amountMinor": 1366200,
-          "note": "Bằng 4,5% mức lương cơ sở (2.530.000đ/tháng từ 1/7/2026), theo Nghị định 161/2026/NĐ-CP",
           "source": "https://vinhthuan.angiang.gov.vn/tu-ngay-0172026-dieu-chinh-muc-dong-bao-hiem-y-te-ho-gia-dinh-theo-muc-luong-co-so-moi",
           "checkedAt": "2026-08-23"
         }
@@ -282,7 +266,6 @@
       "defaultCycle": "YEARLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Phí đóng tuỳ hợp đồng và gói bảo hiểm của từng khách hàng nên không có giá chuẩn.",
       "plans": []
     },
     {
@@ -296,7 +279,6 @@
       "defaultCycle": "YEARLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Phí khác nhau theo loại xe, hãng bảo hiểm và có/không kèm bảo hiểm vật chất nên không có giá chuẩn.",
       "plans": []
     },
     {
@@ -310,7 +292,6 @@
       "defaultCycle": "YEARLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Phí đóng tuỳ gói và độ tuổi người được bảo hiểm nên không có giá chuẩn.",
       "plans": []
     },
     {
@@ -325,7 +306,6 @@
       "defaultCycle": null,
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Phí đóng tuỳ chuyến đi, thời gian và hãng bảo hiểm nên không có giá chuẩn.",
       "plans": []
     },
     {
@@ -339,7 +319,6 @@
       "defaultCycle": null,
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Hộ chiếu có giá trị 10 năm kể từ ngày cấp với người từ đủ 14 tuổi trở lên (5 năm với trẻ dưới 14 tuổi). Nhiều nước yêu cầu hộ chiếu còn hạn ít nhất 6 tháng khi nhập cảnh, nên đặt ngày phải làm sớm.",
       "plans": []
     },
     {
@@ -355,7 +334,6 @@
       "defaultCycle": null,
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Theo Luật Căn cước 2023, phải làm thủ tục cấp đổi thẻ khi đủ 14, 25, 40 và 60 tuổi; thẻ cấp trong vòng 2 năm trước mốc tuổi đó có giá trị đến mốc tuổi tiếp theo, thẻ cấp từ 58-60 tuổi trở lên có giá trị vô thời hạn.",
       "plans": []
     },
     {
@@ -371,7 +349,6 @@
       "defaultCycle": null,
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Từ 1/1/2025, GPLX hạng B (gộp B1, B2 cũ) và C1 có thời hạn 10 năm kể từ ngày cấp; các hạng còn lại (C, D1, D2, D, BE, C1E, CE, D1E, D2E, DE) có thời hạn 5 năm.",
       "plans": []
     },
     {
@@ -386,7 +363,6 @@
       "defaultCycle": null,
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Xe con dưới 9 chỗ không kinh doanh vận tải: chu kỳ đăng kiểm lần đầu 36 tháng, các chu kỳ sau rút ngắn còn 24 hoặc 12 tháng tuỳ tuổi xe. Phải đi đăng kiểm trước ngày hết hạn tem, nên đặt ngày phải làm sớm.",
       "plans": []
     },
     {
@@ -400,7 +376,6 @@
       "defaultCycle": null,
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Thời hạn khác nhau theo loại visa và nước cấp nên không có giá chuẩn hay thời hạn cố định.",
       "plans": []
     },
     {
@@ -414,7 +389,6 @@
       "defaultCycle": null,
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Thời hạn khác nhau theo diện tạm trú và cơ quan cấp nên không có thời hạn cố định.",
       "plans": []
     },
     {
@@ -429,7 +403,6 @@
       "defaultCycle": null,
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Thời hạn hiệu lực do từng cơ quan cấp phép quy định theo ngành nghề nên không có thời hạn cố định.",
       "plans": []
     },
     {
@@ -443,7 +416,6 @@
       "defaultCycle": null,
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Thời hạn hiệu lực khác nhau theo ngành nghề và hội nghề nghiệp cấp chứng chỉ nên không có thời hạn cố định.",
       "plans": []
     },
     {
@@ -458,7 +430,6 @@
       "defaultCycle": "MONTHLY",
       "defaultPlan": null,
       "cancelUrl": null,
-      "noteVi": "Mục chung cho gói cước trả sau, giá khác nhau theo nhà mạng và gói cụ thể nên không đặt giá chuẩn.",
       "plans": []
     }
   ]

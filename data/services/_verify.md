@@ -6,7 +6,7 @@
 `flutter analyze` sạch. Số test tại thời điểm đó là 351, hiện là 410.
 
 Mọi giá đều kèm `source` là trang của chính hãng và `checkedAt`. Mục không tra được để
-`plans: []` kèm lý do trong `noteVi` — không mục nào mang số đoán.
+`plans: []` — không mục nào mang số đoán.
 
 ### Việc đã làm thêm 2026-08-24
 
@@ -106,7 +106,7 @@ Riêng `bhyt`: cần kiểm tra Nghị định 161/2026/NĐ-CP và mức lương
 
 - `qobuz`: đã **xoá gói năm** ($129,96). Agent tự khai là suy ra từ mức 10,83 USD/tháng
   khi cam kết trả năm — trang hãng không hiện tổng tiền cả năm. Vi phạm luật "không suy
-  luận". Đã ghi lý do vào `noteVi`.
+  luận".
 
 ## E. Mục nên bỏ khỏi catalog
 

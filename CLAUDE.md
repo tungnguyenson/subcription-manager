@@ -94,7 +94,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Bốn mươi hai cái bẫy đã vấp, đừng vấp lại
+## Bốn mươi lăm cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -751,6 +751,123 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     vòng lặp và các thông báo đứng ở khung mà cả hai đều đã hiện, chứ không phải khung
     trống.
 
+43. **`markSaved` nhận kênh làm tham số không bắt buộc, và bỏ trống là ghi vào kênh
+    tệp.** Đường ghi lên iCloud trong `app.dart` từng gọi `markSaved(at)` trơn. Nó
+    biên dịch được, tải lên thật, rồi đóng dấu ngày vào ô của kênh tệp. Kết quả trên
+    màn iCloud là `Trạng thái: Đã lưu` nằm ngay trên `Bản gần nhất: Chưa bao giờ`, còn
+    hàng `File` trong Settings mọc ra một ngày cho một tệp người dùng chưa từng xuất.
+    Hai câu đối nhau như vậy thì người đọc tin câu tệ hơn, và đó là câu sai.
+
+    **Màn iCloud giờ chỉ còn một dòng, `Lưu gần nhất`, và nó ghi tới phút.** Dòng
+    trạng thái cũ đã bỏ: khi nó đúng thì nó nói lại đúng thứ cái ngày đã chứng minh,
+    còn khi nó sai thì nó là nửa dối trá ở trên. Không ai bấm gì để lần ghi lên iCloud
+    xảy ra, nên một ngày trơn không phân biệt được bản viết lúc sáng với bản viết ngay
+    sau lần sửa vừa rồi, mà đó chính là câu người mở màn này đang hỏi. Vì vậy
+    `LastBackups` mang `fileAt` và `cloudAt` kiểu `LocalDateTime`; `file` và `cloud`
+    chỉ còn là hai getter trả về phần ngày, và hàng `File` vẫn in ngày thôi vì một tệp
+    xuất hồi tháng Năm là tệp của tháng Năm dù lưu lúc mấy giờ.
+
+    Hai trạng thái vẫn thắng cái ngày và chiếm luôn dòng đó: chưa đăng nhập iCloud, và
+    ghi hỏng. Cả hai là thứ một cái ngày không mô tả được, và `27/08/2026 lúc 14:08`
+    đứng cạnh một tài khoản đã đăng xuất từ hôm đó là app báo cáo một bản sao nó đã
+    thôi giữ. Chưa ghi lần nào thì viết `Chưa bao giờ`, không viết `Đang chờ có gì
+    đổi`: người mở màn này hỏi có bản sao hay không, không hỏi máy đang ở trạng thái gì.
+
+    **Kèm theo là một luật của `DetailRow`, không riêng màn này.** Trước đây nhãn và
+    giá trị mỗi bên là một `Flexible`, tức là mỗi bên đúng một nửa bề ngang dù có cần
+    hay không, và một `Flexible` cần ít hơn thì bỏ trống phần thừa chứ không nhường.
+    Nhãn ngắn cạnh giá trị dài vì thế cho ra một khoảng trống giữa thẻ và một dấu `…`
+    ở cuối giá trị, tức là cắt mất đúng cái phần dòng đó sinh ra để nói. Nay nhãn lấy
+    đúng phần nó cần và giá trị lấy phần còn lại; nhãn vẫn bị chặn ở `_labelShare`
+    (0.55) để một bản dịch tiếng Việt dài thêm vài chữ không đẩy được giá trị ra ngoài.
+
+    Giá trị lưu xuống `settingRow` nay là chuỗi ISO theo giờ máy, không kèm `Z`. Bản
+    cài cũ giữ một chuỗi ngày trơn dưới đúng khoá đó, và `_readStamp` vẫn đọc được nó
+    thành nửa đêm. Từ chối chuỗi cũ là báo `Chưa bao giờ` cho người đang có bản sao,
+    tức là đúng cái lỗi vừa sửa xong.
+
+    Chốt chặn ở ba mức: `the cloud copy is remembered to the minute` và `a date written
+    by an older build still reads` trong `test/unit/data/backup_store_test.dart`, nhóm
+    `the iCloud page` trong `test/unit/ui/backup_presenter_test.dart`, và bài
+    `a cloud write stamps the cloud row, not the file row` trong
+    `integration_test/backup_test.dart`. Chỉ bài cuối thấy được chỗ hỏng thật, vì lời
+    gọi thiếu tham số nằm trong `app.dart`.
+
+44. **Kênh File có hai tệp, và chỉ một trong hai quay về được.** `Export a backup` ghi
+    JSON đầy đủ, `Export as CSV` ghi danh sách dịch vụ thành bảng tính, `Restore from
+    a file` chỉ đọc JSON. Không có đường nhập CSV, và đó là chủ ý chứ không phải chưa
+    làm: mười cột người đọc được không mang nổi nhóm, nguồn tiền, lịch sử đã trả và
+    cài đặt, nên một tệp đi ra rồi quay về sẽ đặt danh sách vào một cái app đã mất sạch
+    những thứ đứng sau nó. Chú thích dưới nút nói thẳng điều này.
+
+    Không bỏ JSON đi được. Trên Android không có iCloud, nên tệp JSON là **đường sao
+    lưu đầy đủ duy nhất** người dùng tự tay cầm được.
+
+    `_exportCsv` trong `app.dart` **cố ý không gọi `markSaved`**. `Lần xuất gần nhất`
+    là ngày tồn tại một tệp có thể dựng lại được app, mà tệp này thì không, nên đóng
+    dấu nó là gỡ mất cảnh báo "chưa sao lưu gì" cho một người thật sự chưa có bản sao
+    lưu nào.
+
+    Vài chi tiết trong `lib/ui/csv_export.dart` đừng bỏ:
+
+    - **Có BOM và xuống dòng bằng CRLF.** Excel trên Windows đọc tệp UTF-8 không BOM
+      theo bảng mã hệ thống, tức là một danh sách tên tiếng Việt mở ra thành ký tự rác.
+    - **Số tiền không có dấu phân nhóm.** Dấu phẩy ở đây là dấu ngăn cột, và bảng tính
+      đọc `260,000` thành chữ chứ không thành số. Vì vậy không dùng `MoneyFormat`.
+    - **Ngày viết kiểu ISO**, không viết ngày trước như trên màn hình. Cột này để sắp
+      xếp và lọc trong bảng tính, mà `27/08/2026` là kiểu ngày duy nhất bảng tính đọc
+      khác nhau tuỳ máy người đọc đặt ở đâu.
+    - **Tiêu đề cột có chuỗi i18n riêng**, không dùng lại nhãn dòng của màn Detail. Tệp
+      là một giao kèo với thứ người dùng mở nó lên; sửa chữ trên một màn hình không
+      được âm thầm đổi tên một cột ai đó đã viết công thức trỏ vào.
+    - **Cột trạng thái viết `Cancelled (still usable)` trong ngoặc, không viết dấu
+      phẩy.** Dấu phẩy hợp lệ nhưng bắt trình ghi bọc ngoặc kép cái ô đó ở mọi dòng đã
+      huỷ, chẳng để làm gì.
+    - **Mục đã cất đi vẫn nằm trong tệp**, kèm cột nói rõ. Màn hình giấu chúng đi, còn
+      một tệp thì không phải màn hình.
+    - **Cột dùng thử đọc cờ `inTrial`, không đọc `isTrialOn`**, theo đúng bẫy 14: một
+      tệp không mang trong mình cái ngày hôm nay.
+
+    Cả `paused` (tắt nhắc) lẫn thang nhắc hạn đều không có cột. Đó là cái giá của bộ
+    mười cột đọc được, và JSON vẫn giữ đủ.
+
+45. **Một trường chỉ thật sự chạy khi đủ bốn chỗ, và ba chỗ đầu không đỏ khi thiếu chỗ
+    thứ tư.** Cột `note` từng có mặt ở khắp nơi: cột SQLite, `mappers.dart`,
+    `backup.dart`, cột CSV, và một dòng trên màn Detail. Chỉ thiếu đúng một thứ, là ô
+    nhập trong form, nên `DraftItem` không mang `note` và **không đường nào trong app
+    đặt được giá trị đó**. Dòng `Ghi chú` trên màn Detail vì thế in ra một dấu gạch
+    ngang với mọi mục, mãi mãi, và không có test nào đỏ vì mỗi mảnh riêng lẻ đều đúng.
+
+    Bốn chỗ đó là: bảng (bẫy 1), `backup.dart` (bẫy 26), `DraftItem` cả ba phần của nó
+    (trường, `.of`, `applyTo`), và **lời gọi `TrackedItem.on` trong `_saveDraft` của
+    `app.dart`**. Chỗ thứ tư là chỗ nguy hiểm nhất, vì nó nhận tham số **không bắt
+    buộc**: bỏ sót một cái thì trình biên dịch im, app chạy, mục được lưu, và câu trả
+    lời người dùng vừa gõ biến mất. Đúng hình dạng của bẫy 43.
+
+    Chuyện đó đã xảy ra với hai trường khác nữa, và chúng nằm im rất lâu: `inTrial` và
+    `paymentSourceId` **có** ô trên form, đi đúng tới `DraftItem`, rồi không được truyền
+    tiếp trong `_saveDraft`. Đường Edit che mất chuyện này, vì `applyTo` trộn vào một
+    mục đã có nên nó mang hai trường đó qua bình thường. Mất mát chỉ hiện ở **lần lưu
+    đầu tiên của một mục**: bật công tắc dùng thử, chọn thẻ, bấm Lưu, và mục hiện ra
+    không dùng thử, không thẻ nào.
+
+    Chốt chặn là `integration_test/add_test.dart`, chạy trên máy ảo
+    (`flutter test integration_test/add_test.dart -d <simulator-id>`). Phải là
+    integration test: widget test của form chỉ nhìn thấy cái `DraftItem` đi ra, mà cái
+    đó vốn đã đúng ở cả ba lần hỏng.
+
+    Hai quyết định về giao diện đi kèm:
+
+    - **Ô rỗng lưu thành `null`, không lưu thành `''`.** Màn Detail hỏi `note == null`
+      để quyết định có vẽ dòng đó không, nên một chuỗi toàn dấu cách sẽ vẽ ra một dòng
+      trống. `_savedNote` trong `add_item_screen.dart` là chỗ cắt.
+    - **Dòng note trên màn Detail không phải `DetailRow`.** `DetailRow` là một dòng
+      `maxLines: 1` căn phải, đúng cho một ngày hay một số tiền, và một câu người dùng
+      viết đi qua nó thì ra bốn chữ với dấu `…`, tức là cắt mất đúng phần dòng đó sinh
+      ra để nói. `_NoteRow` xếp nhãn lên trên và cho chữ xuống dòng hết chiều ngang,
+      chữ thường chứ không đậm và `height: 1.45` chứ không phải `1`, vì `rowValue` được
+      đặt cho một dòng đứng một mình.
+
 ## Viết tài liệu
 
 Tài liệu trong repo viết bằng **tiếng Việt**. Chữ trên giao diện app có **hai bản**,
@@ -779,6 +896,6 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | Cái gì sắp xảy ra với một mục | `lib/ui/reminder_timeline.dart` cho phép dựng, `lib/ui/widgets/reminder_timeline_card.dart` cho khối trên màn Detail |
 | Bộ lọc màn Upcoming | `lib/domain/upcoming_filter.dart` cho luật khớp, `lib/ui/filter_presenter.dart` cho danh sách chip và dòng tóm tắt, `lib/ui/widgets/filter_sheet.dart` cho sheet |
 | Lịch tháng trên Upcoming | `lib/ui/calendar_presenter.dart` cho phép dựng lưới và luật chọn ngày, `lib/ui/widgets/month_grid.dart` cho cái card |
-| Sao lưu, khôi phục, và câu hỏi đồng bộ | `docs/backup-and-sync.md` |
+| Sao lưu, khôi phục, và câu hỏi đồng bộ | `docs/backup-and-sync.md`. Bẫy 43 và 44 cho hai kênh hiện tại, `lib/ui/csv_export.dart` cho tệp bảng tính |
 | Việc còn dang dở | `data/services/_verify.md` |
 | Khối so sánh gói năm và nút trang thuê bao | `docs/design-spec-annual-saving.md`, đã dựng, logic ở `lib/ui/annual_saving_presenter.dart` và `lib/ui/manage_presenter.dart` |

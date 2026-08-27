@@ -733,14 +733,6 @@ class EnStrings implements Strings {
   @override
   String get themeDark => 'Dark';
   @override
-  String get themeSystemBody =>
-      'Following the phone. This changes when the system setting does, '
-      'including on a schedule.';
-  @override
-  String get themeLightBody => 'Always light, whatever the phone is set to.';
-  @override
-  String get themeDarkBody => 'Always dark, whatever the phone is set to.';
-  @override
   String get sectionBackup => 'Backup';
   @override
   String get sectionApp => 'App';
@@ -749,7 +741,7 @@ class EnStrings implements Strings {
   @override
   String get rowICloud => 'iCloud';
   @override
-  String get rowFile => 'File';
+  String get rowFile => 'Import/Export';
   @override
   String get rowReminders => 'Reminders';
   @override
@@ -778,18 +770,6 @@ class EnStrings implements Strings {
   String get aboutVersion => 'Version';
   @override
   String get aboutBuild => 'Build';
-  @override
-  String get aboutWhatItDoes => 'What it does with your list';
-  @override
-  String get aboutAccount => 'Account';
-  @override
-  String get aboutServer => 'Server';
-  @override
-  String get aboutNone => 'None';
-  @override
-  String get aboutYourList => 'Your list';
-  @override
-  String get aboutOnThisPhone => 'On this phone';
   @override
   String get aboutPrices =>
       'Prices in the built-in service list are what each provider had '
@@ -997,6 +977,10 @@ class EnStrings implements Strings {
   String get fieldTapToOpenCalendar => 'Tap to open the calendar';
   @override
   String get fieldOpenSubscriptionPage => 'Open subscription page';
+  @override
+  String get fieldNote => 'Note';
+  @override
+  String get fieldNoteHint => 'Anything you want to remember';
 
   @override
   String get saveChanges => 'Save changes';
@@ -1129,9 +1113,10 @@ class EnStrings implements Strings {
       'again whenever something changes. There is no account and no Subdock '
       'server involved.';
   @override
-  String get backupStatus => 'Status';
+  String get backupLastSaved => 'Last saved';
+
   @override
-  String get backupLastCopy => 'Last copy';
+  String backupCopyAt(String date, String time) => '$date at $time';
   @override
   String get backupLastExport => 'Last export';
   @override
@@ -1141,17 +1126,24 @@ class EnStrings implements Strings {
       'Restoring replaces everything in the app with what is in iCloud. It '
       'does not merge.';
   @override
-  String get backupFileTitle => 'File';
+  String get backupFileTitle => 'Import/Export';
+  @override
+  String get backupExportCsv => 'Export as CSV';
+  @override
+  String csvExported(int count) =>
+      'Exported ${count == 1 ? '1 service' : '\$count services'}.';
   @override
   String get backupFileIntro =>
-      'One JSON file holding every item, shelf, payment source and recorded '
-      'payment. Yours to keep wherever you like, and to read.';
+      'A JSON backup holds everything: every item, shelf, payment source and '
+      'recorded payment. A CSV holds the list itself, one line per service, '
+      'for reading in a spreadsheet.';
   @override
   String get backupRestoreFromFile => 'Restore from a file';
   @override
   String get backupFileRestoreNote =>
       'Restoring replaces everything in the app with what is in the file. It '
-      'does not merge.';
+      'does not merge, and it reads the JSON backup only — the CSV goes out '
+      'and does not come back.';
   @override
   String get backupNothingSaved => 'Nothing has been backed up';
   @override
@@ -1160,13 +1152,9 @@ class EnStrings implements Strings {
       '${confirmed == 1 ? 'one of its dates was' : '$confirmed of its dates '
                 'were'} confirmed with a provider. Removing the app removes them.';
   @override
-  String get backupStateSaved => 'Saved';
-  @override
   String get backupStateSignedOut => 'Sign in to iCloud';
   @override
   String get backupStateFailed => 'Could not save';
-  @override
-  String get backupStateWaiting => 'Waiting for a change';
   @override
   String get backupNoteWholeDevice =>
       'Subdock has no account and no server. Your list is in this '
@@ -1432,4 +1420,34 @@ class EnStrings implements Strings {
 
   @override
   String get fallbackShelf => 'Other';
+  @override
+  String get csvColName => 'Name';
+  @override
+  String get csvColCategory => 'Category';
+  @override
+  String get csvColNextDate => 'Next date';
+  @override
+  String get csvColRepeats => 'Repeats';
+  @override
+  String get csvColAmount => 'Amount';
+  @override
+  String get csvColCurrency => 'Currency';
+  @override
+  String get csvColPaidWith => 'Paid with';
+  @override
+  String get csvColTrial => 'Free trial';
+  @override
+  String get csvColStatus => 'Status';
+  @override
+  String get csvColNote => 'Note';
+  @override
+  String get csvYes => 'Yes';
+  @override
+  String get csvNo => 'No';
+  @override
+  String get csvStateActive => 'Active';
+  @override
+  String get csvStateCancelled => 'Cancelled (still usable)';
+  @override
+  String get csvStateArchived => 'Archived';
 }

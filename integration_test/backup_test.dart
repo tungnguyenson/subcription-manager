@@ -282,6 +282,39 @@ void main() {
     expect((await db.selectAll().get()).length, 2);
   });
 
+  // Two dates, two channels, and nothing in the app tells them apart at a
+  // glance: `markSaved` takes the channel as an optional argument that
+  // defaults to the file. Leaving it off compiles, uploads, and reports
+  // `Saved` on the iCloud screen with `Last copy — Never` right underneath,
+  // while the File row grows a date for a file the user never exported.
+  testWidgets('a cloud write stamps the cloud row, not the file row', (
+    tester,
+  ) async {
+    await seed();
+    await launch(tester);
+
+    // Launching subscribes to the item stream, which queues the write. The
+    // debounce is the only thing between here and the upload.
+    await tester.pump(const Duration(seconds: 13));
+    await tester.pumpAndSettle();
+    expect(cloud.written, isNotNull, reason: 'the upload actually ran');
+
+    await openSettings(tester);
+    await tapRow(tester, 'iCloud');
+
+    expect(find.text('Last saved'), findsOneWidget);
+    expect(
+      find.text('Never'),
+      findsNothing,
+      reason: 'the write that just landed is the last copy',
+    );
+
+    // And the other channel is untouched: no file has been exported.
+    final saved = await BackupStore(db, repo, SettingsStore(db)).lastSaved();
+    expect(saved.cloudAt, isNotNull);
+    expect(saved.fileAt, isNull, reason: 'nothing was ever written to a file');
+  });
+
   // Silence here would read as a tap that did nothing.
   testWidgets('an empty container says so rather than nothing', (tester) async {
     await seed();
@@ -414,7 +447,12 @@ class _FakeFiles extends BackupFiles {
   String? toPick;
 
   @override
-  Future<bool> save(String contents, String fileName, {Rect? origin}) async {
+  Future<bool> save(
+    String contents,
+    String fileName, {
+    String mimeType = 'application/json',
+    Rect? origin,
+  }) async {
     saved = contents;
     savedAs = fileName;
     return true;

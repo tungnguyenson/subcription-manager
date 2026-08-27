@@ -699,14 +699,6 @@ class ViStrings implements Strings {
   @override
   String get themeDark => 'Tối';
   @override
-  String get themeSystemBody =>
-      'Đi theo điện thoại. Máy đổi lúc nào thì app đổi lúc đó, kể cả khi máy '
-      'đổi theo giờ đã hẹn.';
-  @override
-  String get themeLightBody => 'Luôn sáng, bất kể máy đang đặt gì.';
-  @override
-  String get themeDarkBody => 'Luôn tối, bất kể máy đang đặt gì.';
-  @override
   String get sectionBackup => 'Sao lưu';
   @override
   String get sectionApp => 'Ứng dụng';
@@ -715,7 +707,7 @@ class ViStrings implements Strings {
   @override
   String get rowICloud => 'iCloud';
   @override
-  String get rowFile => 'Tệp';
+  String get rowFile => 'Nhập/Xuất';
   @override
   String get rowReminders => 'Nhắc hạn';
   @override
@@ -744,18 +736,6 @@ class ViStrings implements Strings {
   String get aboutVersion => 'Phiên bản';
   @override
   String get aboutBuild => 'Số build';
-  @override
-  String get aboutWhatItDoes => 'App làm gì với danh sách của bạn';
-  @override
-  String get aboutAccount => 'Tài khoản';
-  @override
-  String get aboutServer => 'Máy chủ';
-  @override
-  String get aboutNone => 'Không có';
-  @override
-  String get aboutYourList => 'Danh sách của bạn';
-  @override
-  String get aboutOnThisPhone => 'Nằm trên máy này';
   @override
   String get aboutPrices =>
       'Giá trong danh mục dịch vụ đóng gói sẵn là giá nhà cung cấp niêm yết '
@@ -963,6 +943,10 @@ class ViStrings implements Strings {
   String get fieldTapToOpenCalendar => 'Chạm để mở lịch';
   @override
   String get fieldOpenSubscriptionPage => 'Mở trang thuê bao';
+  @override
+  String get fieldNote => 'Ghi chú';
+  @override
+  String get fieldNoteHint => 'Điều gì bạn muốn nhớ';
 
   @override
   String get saveChanges => 'Lưu thay đổi';
@@ -1094,9 +1078,10 @@ class ViStrings implements Strings {
       'và ghi lại mỗi khi có gì đổi. Không có tài khoản nào và không có máy '
       'chủ Subdock nào dính vào.';
   @override
-  String get backupStatus => 'Trạng thái';
+  String get backupLastSaved => 'Lưu gần nhất';
+
   @override
-  String get backupLastCopy => 'Bản gần nhất';
+  String backupCopyAt(String date, String time) => '$date lúc $time';
   @override
   String get backupLastExport => 'Lần xuất gần nhất';
   @override
@@ -1106,17 +1091,23 @@ class ViStrings implements Strings {
       'Khôi phục là thay toàn bộ những gì đang có trong app bằng những gì nằm '
       'trong iCloud. Nó không trộn.';
   @override
-  String get backupFileTitle => 'Tệp';
+  String get backupFileTitle => 'Nhập/Xuất';
+  @override
+  String get backupExportCsv => 'Xuất ra CSV';
+  @override
+  String csvExported(int count) => 'Đã xuất \$count dịch vụ.';
   @override
   String get backupFileIntro =>
-      'Một tệp JSON chứa mọi mục, mọi nhóm, mọi nguồn tiền và mọi lần trả đã '
-      'ghi. Của bạn, cất ở đâu tuỳ ý, và đọc được.';
+      'Bản sao lưu JSON chứa tất cả: mọi mục, mọi nhóm, mọi nguồn tiền và mọi '
+      'lần trả đã ghi. Tệp CSV chứa chính cái danh sách, mỗi dòng một dịch '
+      'vụ, để mở bằng bảng tính.';
   @override
   String get backupRestoreFromFile => 'Khôi phục từ một tệp';
   @override
   String get backupFileRestoreNote =>
       'Khôi phục là thay toàn bộ những gì đang có trong app bằng những gì nằm '
-      'trong tệp. Nó không trộn.';
+      'trong tệp. Nó không trộn, và nó chỉ đọc bản sao lưu JSON. Tệp CSV chỉ '
+      'đi ra, không quay về.';
   @override
   String get backupNothingSaved => 'Chưa có gì được sao lưu';
   @override
@@ -1124,13 +1115,9 @@ class ViStrings implements Strings {
       'Danh sách của bạn chỉ nằm trên máy này, và $confirmed ngày trong đó đã '
       'được hỏi lại nhà cung cấp. Gỡ app là mất chúng.';
   @override
-  String get backupStateSaved => 'Đã lưu';
-  @override
   String get backupStateSignedOut => 'Hãy đăng nhập iCloud';
   @override
   String get backupStateFailed => 'Không lưu được';
-  @override
-  String get backupStateWaiting => 'Đang chờ có gì đổi';
   @override
   String get backupNoteWholeDevice =>
       'Subdock không có tài khoản và không có máy chủ. Danh sách của bạn nằm '
@@ -1396,4 +1383,34 @@ class ViStrings implements Strings {
 
   @override
   String get fallbackShelf => 'Khác';
+  @override
+  String get csvColName => 'Tên';
+  @override
+  String get csvColCategory => 'Nhóm';
+  @override
+  String get csvColNextDate => 'Ngày kế tiếp';
+  @override
+  String get csvColRepeats => 'Lặp lại';
+  @override
+  String get csvColAmount => 'Số tiền';
+  @override
+  String get csvColCurrency => 'Loại tiền';
+  @override
+  String get csvColPaidWith => 'Trả bằng';
+  @override
+  String get csvColTrial => 'Dùng thử';
+  @override
+  String get csvColStatus => 'Trạng thái';
+  @override
+  String get csvColNote => 'Ghi chú';
+  @override
+  String get csvYes => 'Có';
+  @override
+  String get csvNo => 'Không';
+  @override
+  String get csvStateActive => 'Đang theo dõi';
+  @override
+  String get csvStateCancelled => 'Đã huỷ (còn hạn dùng)';
+  @override
+  String get csvStateArchived => 'Đã cất đi';
 }

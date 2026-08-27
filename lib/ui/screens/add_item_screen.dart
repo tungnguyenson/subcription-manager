@@ -100,8 +100,10 @@ class AddItemScreen extends StatefulWidget {
 class _AddItemScreenState extends State<AddItemScreen> {
   final _name = TextEditingController();
   final _amount = TextEditingController();
+  final _note = TextEditingController();
   final _nameFocus = FocusNode();
   final _amountFocus = FocusNode();
+  final _noteFocus = FocusNode();
 
   CatalogEntry? _matched;
   LocalDate? _expiresOn;
@@ -215,6 +217,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       setState(() => _planTier = null);
     });
     _nameFocus.addListener(() => setState(() {}));
+    _noteFocus.addListener(() => setState(() {}));
     // Grouping commas are settled when the field is left, not while it is
     // being typed into: re-formatting under the cursor moves the caret away
     // from the digit the user is working on.
@@ -263,6 +266,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     _sourceId = initial.paymentSourceId;
     _inTrial = initial.inTrial;
+    _note.text = initial.note ?? '';
 
     // The name is already what the user meant. Offering to replace it with a
     // catalog row the moment the screen opens is an offer to undo their edit.
@@ -273,10 +277,12 @@ class _AddItemScreenState extends State<AddItemScreen> {
   void dispose() {
     _name.dispose();
     _amount.dispose();
+    _note.dispose();
     _count.dispose();
     _every.dispose();
     _nameFocus.dispose();
     _amountFocus.dispose();
+    _noteFocus.dispose();
     _countFocus.dispose();
     _everyFocus.dispose();
     super.dispose();
@@ -308,6 +314,16 @@ class _AddItemScreenState extends State<AddItemScreen> {
   }
 
   bool get _canSave => _dueDate != null && !_saved;
+
+  /// The note as it will be stored, or null when the box says nothing.
+  ///
+  /// A box holding spaces is a box the user cleared, so it comes back as null
+  /// rather than as whitespace -- otherwise the detail screen would print a
+  /// blank line where it prints nothing today.
+  String? get _savedNote {
+    final typed = _note.text.trim();
+    return typed.isEmpty ? null : typed;
+  }
 
   /// Latched by the first tap on Save, never unlatched.
   ///
@@ -513,6 +529,14 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   child: _leadRail(),
                 ),
               ],
+              // Last, and on both forms. Everything above it is a fact the
+              // app acts on -- a date it reminds against, an amount it totals,
+              // a shelf it files under -- and this is the one box that asks
+              // for what only the user knows. Asking it before the form has
+              // finished asking its own questions would read as a required
+              // field.
+              const SizedBox(height: SubdockSpacing.formBlock),
+              _gutter(Field(label: S.t.fieldNote, child: _noteField())),
               const SizedBox(height: SubdockSpacing.formBlock),
               _gutter(
                 SummaryBlock(
@@ -821,6 +845,42 @@ class _AddItemScreenState extends State<AddItemScreen> {
       ),
     ),
   );
+
+  /// The free-text box at the foot of the form.
+  ///
+  /// Two lines to start and up to six, rather than one line that scrolls: a
+  /// note is written in sentences, and a one-line box hides everything but the
+  /// last few words of what the user just typed. Past six it scrolls inside
+  /// itself, so a long note cannot push the Save button off a small screen.
+  ///
+  /// No clear button, unlike the name field. That one opens pre-filled from a
+  /// catalogue row and clearing it is the common move; this one only ever
+  /// holds what the user wrote themselves.
+  Widget _noteField() {
+    return FieldBox(
+      focused: _noteFocus.hasFocus,
+      child: TextField(
+        controller: _note,
+        focusNode: _noteFocus,
+        minLines: 2,
+        maxLines: 6,
+        keyboardType: TextInputType.multiline,
+        textInputAction: TextInputAction.newline,
+        textCapitalization: TextCapitalization.sentences,
+        style: SubdockText.fieldValue,
+        cursorColor: SubdockColors.accent,
+        decoration: InputDecoration(
+          isDense: true,
+          border: InputBorder.none,
+          contentPadding: EdgeInsets.zero,
+          hintText: S.t.fieldNoteHint,
+          hintStyle: SubdockText.fieldValue.copyWith(
+            color: SubdockColors.inkMuted,
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _nameField() {
     return FieldBox(
@@ -1556,6 +1616,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         matched: _matched,
         inTrial: _inTrial,
         paymentSourceId: _sourceId,
+        note: _savedNote,
       ),
     );
   }

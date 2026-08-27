@@ -33,7 +33,6 @@ một tier**. Netflix có 4 tier × 2 chu kỳ × 2 vùng giá.
   "category": "STREAMING",
   "defaultCycle": "MONTHLY",
   "cancelUrl": "https://www.netflix.com/cancelplan",
-  "noteVi": null,
   "defaultPlan": "standard",
   "plans": [
     {
@@ -44,7 +43,6 @@ một tier**. Netflix có 4 tier × 2 chu kỳ × 2 vùng giá.
       "cycle": "MONTHLY",
       "amountMinor": 220000,
       "seats": 2,
-      "note": "1080p, 2 thiết bị",
       "source": "https://help.netflix.com/vi/node/24926",
       "checkedAt": "2026-08-23"
     }
@@ -128,7 +126,7 @@ Brief cho mỗi agent, viết một lần rồi thay phần nhóm:
 3. Có bản giá VN riêng thì lấy cả `region: VN` lẫn `region: GLOBAL`. Không có thì chỉ lấy
    cái tồn tại.
 4. **Không tra được giá → để `plans: []`.** Không suy ra, không quy đổi tỉ giá, không lấy
-   giá năm ngoái. Ghi lý do vào `noteVi`.
+   giá năm ngoái.
 5. `cancelUrl` trỏ tới trang huỷ thật, không phải trang chủ. Không tìm thấy trang huỷ thì
    để `null`.
 6. Ghi ra `data/services/<tên-file>.json`, chạy `python3 tool/validate_services.py <file>`

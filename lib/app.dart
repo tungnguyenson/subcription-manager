@@ -32,6 +32,7 @@ import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/manage_presenter.dart';
 import 'package:subdock/ui/reminder_timeline.dart';
 import 'package:subdock/ui/backup_presenter.dart';
+import 'package:subdock/ui/csv_export.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/screens/add_item_screen.dart';
 import 'package:subdock/ui/screens/history_screen.dart';
@@ -624,8 +625,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // Only a write that landed counts as a backup. Recording one for a failed
     // upload would put a date under `Last backup` and take the warning off the
     // screen, for a file that is not there.
+    //
+    // Stamped against the cloud channel, and the argument is not optional in
+    // spirit: leaving it off takes [BackupChannel.file], which puts today's
+    // date beside `File` for a file the user never exported, and leaves
+    // `Last copy` on the iCloud screen reading `Never` under a status that
+    // says `Saved`.
     if (result.state == CloudState.saved) {
-      await widget.backups.markSaved(LocalDate.fromDateTime(at));
+      await widget.backups.markSaved(at, BackupChannel.cloud);
     }
     if (mounted) setState(() => _cloud = result);
   }
@@ -1161,6 +1168,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       builder: (_) => BackupScreen(
         page: BackupPresenter.filePage(saved: _lastBackupOn),
         onBackUp: () => unawaited(_exportBackup()),
+        onExportCsv: () => unawaited(_exportCsv()),
         onRestore: () => unawaited(_importBackup()),
       ),
     ),
@@ -1331,11 +1339,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       amountMinor: draft.amountMinor,
       currency: draft.currency,
       actionUrl: matched?.cancelUrl,
-      note: matched?.noteVi,
+      note: draft.note,
       leadDays: draft.leadDays,
       remindAt: _settings.remindAt,
       // The user typed this date from memory unless they say otherwise.
       dateSource: DateSource.userEstimated,
+      // Both are on the add form, and both used to be dropped here: a new
+      // item saved with the trial switch on and a card picked came out of
+      // this call with neither. `applyTo` carried them on the edit path, so
+      // the loss only showed on the first save.
+      inTrial: draft.inTrial,
+      paymentSourceId: draft.paymentSourceId,
     );
 
     await widget.repository.upsert(
@@ -1565,8 +1579,33 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       // both a "Saved" message and a date under `Last backup` would stand for
       // something that did not happen.
       if (!saved) return;
-      await widget.backups.markSaved(LocalDate.fromDateTime(at));
+      await widget.backups.markSaved(at);
       if (mounted) _confirm(S.t.backedUp(backup.summary));
+    } on Exception catch (error) {
+      if (mounted) _confirm(S.t.couldNotExport('$error'));
+    }
+  }
+
+  /// Hands the list to the share sheet as one spreadsheet.
+  ///
+  /// Out only, and it deliberately records nothing. `Last export` is the date a
+  /// file exists that can put the app back, and this file cannot: it carries
+  /// ten readable columns and none of the shelves, payment sources or recorded
+  /// payments behind them. Stamping it would take the "nothing has been backed
+  /// up" warning off the screen for someone who still has no backup.
+  Future<void> _exportCsv() async {
+    final at = DateTime.now();
+    final box = context.findRenderObject() as RenderBox?;
+
+    try {
+      final saved = await widget.files.save(
+        CsvExport.encode(_items, categories: _categories, sources: _sources),
+        CsvExport.fileNameFor(at),
+        mimeType: 'text/csv',
+        origin: box == null ? null : box.localToGlobal(Offset.zero) & box.size,
+      );
+      if (!saved) return;
+      if (mounted) _confirm(S.t.csvExported(_items.length));
     } on Exception catch (error) {
       if (mounted) _confirm(S.t.couldNotExport('$error'));
     }

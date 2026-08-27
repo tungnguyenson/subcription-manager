@@ -55,17 +55,6 @@ class AboutScreen extends StatelessWidget {
             ),
           ],
         ),
-        SectionLabel(S.t.aboutWhatItDoes),
-        GroupedCard(
-          children: [
-            // Three answers to the question a careful person asks about an app
-            // that knows when their bills are due. Value rows rather than
-            // prose, because the shape is what makes them read as facts.
-            DetailRow(label: S.t.aboutAccount, value: S.t.aboutNone),
-            DetailRow(label: S.t.aboutServer, value: S.t.aboutNone),
-            DetailRow(label: S.t.aboutYourList, value: S.t.aboutOnThisPhone),
-          ],
-        ),
         Footnote(S.t.aboutPrices),
       ],
     );

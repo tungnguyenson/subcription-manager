@@ -95,12 +95,6 @@ class SettingsScreen extends StatelessWidget {
   /// The tray shows which of the three is picked; it cannot say that System
   /// means the app will change on its own later, which is the one thing about
   /// this setting a user can be surprised by.
-  String get _themeNote => switch (themeChoice) {
-    ThemeChoice.system => S.t.themeSystemBody,
-    ThemeChoice.light => S.t.themeLightBody,
-    ThemeChoice.dark => S.t.themeDarkBody,
-  };
-
   @override
   Widget build(BuildContext context) {
     SubdockTheme.watch(context);
@@ -186,10 +180,6 @@ class SettingsScreen extends StatelessWidget {
               ? null
               : (i) => onThemeChoice!(ThemeChoice.values[i]),
         ),
-        // One line in all three states rather than a line that appears only
-        // under System. A footnote that comes and goes moves the two Backup
-        // rows under the reader's thumb while they are choosing.
-        Footnote(_themeNote),
         SectionLabel(S.t.sectionBackup),
         GroupedCard(
           children: [
@@ -201,7 +191,7 @@ class SettingsScreen extends StatelessWidget {
             //
             // iCloud first, and absent entirely off iOS, where the system
             // already carries the database to the next phone.
-            if (backup?.cloud != null)
+            if (backup?.hasCloud ?? false)
               DetailRow.nav(
                 label: S.t.rowICloud,
                 value: backup?.cloudLine,

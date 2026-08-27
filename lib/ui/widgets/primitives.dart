@@ -297,6 +297,13 @@ class _CaretPainter extends CustomPainter {
 /// A label on the left, a value on the right. The workhorse of the detail,
 /// settings and review screens.
 class DetailRow extends StatelessWidget {
+  /// The most of a row the label may take before it starts to ellipsize.
+  ///
+  /// Above half, because the label is normally the shorter of the two and this
+  /// only ever binds on the rare long one; not the whole row, because the
+  /// value must always keep somewhere to be.
+  static const double _labelShare = 0.55;
+
   final String label;
   final String? value;
 
@@ -344,43 +351,56 @@ class DetailRow extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // The pair shares one Expanded and pushes apart inside it, rather
-            // than each taking a flex of its own. Two flexible children of the
-            // same Row split the free space in half, so the value used to land
-            // at the end of its *half* -- near the middle of the card -- with
-            // its `textAlign: right` doing nothing, because a loose Flexible is
-            // already exactly as wide as its text. Both are still Flexible in
-            // here, so a long label and a long value give way to each other
-            // instead of overflowing.
+            // The label takes what it needs and the value takes the rest,
+            // rather than the two splitting the row down the middle.
+            //
+            // Two `Flexible` children of one Row each get half the free space
+            // whether or not they want it, and a loose Flexible that wants
+            // less simply leaves its share empty -- it does not hand it over.
+            // So a short label beside a long value produced a gap in the
+            // middle of the card and an ellipsis at the end of the value:
+            // `Last saved  27/08/2026 at 14...`, with the part the row exists
+            // to report being the part that got cut.
+            //
+            // The value is the answer and the label is the question, so the
+            // label is the one that yields. It is still capped, because a
+            // Vietnamese label two or three words longer than its English
+            // original must not be able to squeeze the value out entirely.
             Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Flexible(
-                    child: Text(
-                      label,
-                      style: chevron
-                          ? SubdockText.rowLink
-                          : SubdockText.rowLabel,
-                    ),
-                  ),
-                  if (value != null) ...[
-                    const SizedBox(width: 12),
-                    Flexible(
+              child: LayoutBuilder(
+                builder: (context, room) => Row(
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: room.maxWidth * _labelShare,
+                      ),
                       child: Text(
-                        value!,
-                        textAlign: TextAlign.right,
+                        label,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: chevron
-                            ? SubdockText.rowLabel.copyWith(fontSize: 12)
-                            : (valueColor == null
-                                  ? base
-                                  : base.copyWith(color: valueColor)),
+                            ? SubdockText.rowLink
+                            : SubdockText.rowLabel,
                       ),
                     ),
+                    if (value != null) ...[
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          value!,
+                          textAlign: TextAlign.right,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: chevron
+                              ? SubdockText.rowLabel.copyWith(fontSize: 12)
+                              : (valueColor == null
+                                    ? base
+                                    : base.copyWith(color: valueColor)),
+                        ),
+                      ),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
             if (chevron) ...[

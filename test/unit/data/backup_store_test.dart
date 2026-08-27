@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show Value;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:subdock/data/backup_store.dart';
@@ -16,6 +17,10 @@ void main() {
   late BackupStore backups;
 
   LocalDate d(String iso) => LocalDate.parse(iso);
+
+  /// A moment on the device's own clock. The record is kept to the minute,
+  /// so every write has to name one.
+  DateTime t(String iso) => DateTime.parse(iso);
 
   setUp(() {
     db = SubdockDatabase(NativeDatabase.memory());
@@ -216,10 +221,10 @@ void main() {
     });
 
     test('comes back once recorded, and survives being overwritten', () async {
-      await backups.markSaved(d('2026-08-25'));
+      await backups.markSaved(t('2026-08-25 09:30'));
       expect((await backups.lastSaved()).file, d('2026-08-25'));
 
-      await backups.markSaved(d('2026-08-26'));
+      await backups.markSaved(t('2026-08-26 09:30'));
       expect((await backups.lastSaved()).file, d('2026-08-26'));
     });
 
@@ -228,12 +233,42 @@ void main() {
     // landed. One date covering both would report the newer of the two beside
     // whichever row the reader looked at.
     test('the two channels are recorded apart', () async {
-      await backups.markSaved(d('2026-08-25'), BackupChannel.file);
-      await backups.markSaved(d('2026-05-01'), BackupChannel.cloud);
+      await backups.markSaved(t('2026-08-25 09:30'), BackupChannel.file);
+      await backups.markSaved(t('2026-05-01 09:30'), BackupChannel.cloud);
 
       final saved = await backups.lastSaved();
       expect(saved.file, d('2026-08-25'));
       expect(saved.cloud, d('2026-05-01'));
+    });
+
+    // Nobody presses anything to make the cloud write happen, so the day on
+    // its own cannot tell this morning's copy from the one written after the
+    // edit the user just made. That distinction is the whole reason someone
+    // opens the iCloud screen.
+    test('the cloud copy is remembered to the minute', () async {
+      await backups.markSaved(t('2026-08-27 12:52'), BackupChannel.cloud);
+
+      final at = (await backups.lastSaved()).cloudAt;
+      expect(at?.date, d('2026-08-27'));
+      expect(at?.time, const LocalTime(12, 52));
+    });
+
+    // Installs from before the record kept the hour hold a bare date under the
+    // same key. Refusing to read it would report `Never` to someone who has a
+    // copy, which is the one answer this screen must never give wrongly.
+    test('a date written by an older build still reads', () async {
+      await db
+          .into(db.settingRow)
+          .insert(
+            SettingRowCompanion(
+              settingKey: const Value('last_cloud_backup_on'),
+              value: const Value('2026-08-27'),
+            ),
+          );
+
+      final at = (await backups.lastSaved()).cloudAt;
+      expect(at?.date, d('2026-08-27'));
+      expect(at?.time, const LocalTime(0, 0), reason: 'midnight, not a guess');
     });
 
     // Reading the whole database out is not a backup. Nothing has left the
@@ -253,7 +288,7 @@ void main() {
       await repo.upsert(item(), 1);
       final taken = await backups.read(clock: DateTime.utc(2026, 5, 25, 4));
 
-      await backups.markSaved(d('2026-08-25'));
+      await backups.markSaved(t('2026-08-25 09:30'));
       await backups.restore(taken);
 
       expect((await backups.lastSaved()).file, d('2026-05-25'));
@@ -274,7 +309,7 @@ void main() {
 
     // A hand-written file, or one from a build older than this field.
     test('a restore from a file with no date reads as never', () async {
-      await backups.markSaved(d('2026-08-25'));
+      await backups.markSaved(t('2026-08-25 09:30'));
 
       await backups.restore(
         const Backup(
@@ -299,7 +334,7 @@ void main() {
           predicate<LastBackups>((saved) => saved.file == d('2026-08-25')),
         ),
       );
-      await backups.markSaved(d('2026-08-25'));
+      await backups.markSaved(t('2026-08-25 09:30'));
       await done;
     });
   });

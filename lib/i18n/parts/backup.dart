@@ -36,4 +36,31 @@ abstract class BackupStrings {
   String get listJoin;
 
   String get fallbackShelf;
+
+  // ---- the CSV export ----
+
+  /// The column headings, and their own strings rather than the row labels the
+  /// detail screen uses. A file is a contract with whatever the user opens it
+  /// in; rewording a row on a screen must not silently rename a column in a
+  /// spreadsheet somebody has built a formula against.
+  String get csvColName;
+  String get csvColCategory;
+
+  /// Not `Expires` and not `Due`: which of the two is right depends on the
+  /// shelf, and a column heading has to cover every row under it.
+  String get csvColNextDate;
+  String get csvColRepeats;
+  String get csvColAmount;
+  String get csvColCurrency;
+  String get csvColPaidWith;
+  String get csvColTrial;
+  String get csvColStatus;
+  String get csvColNote;
+
+  String get csvYes;
+  String get csvNo;
+
+  String get csvStateActive;
+  String get csvStateCancelled;
+  String get csvStateArchived;
 }
