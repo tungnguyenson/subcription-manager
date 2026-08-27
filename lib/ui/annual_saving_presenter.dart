@@ -7,6 +7,7 @@ import 'package:subdock/domain/money.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/ui/date_copy.dart';
 import 'package:subdock/ui/money_format.dart';
+import 'package:subdock/i18n.dart';
 
 /// The yearly-versus-monthly block, already worded.
 ///
@@ -112,15 +113,16 @@ abstract final class AnnualSavingPresenter {
     final stale = _monthsBetween(checked, today) > staleAfterMonths;
 
     return AnnualSavingCopy(
-      savingLead: stale ? 'Save about' : 'Save',
+      savingLead: stale ? S.t.savingLeadAbout : S.t.savingLeadExact,
       savingAmount: MoneyFormat.full(saved),
-      monthlyValue:
-          '${MoneyFormat.full(monthly)} × 12 = ${MoneyFormat.full(twelve)}',
+      monthlyValue: S.t.twelveTimes(
+        MoneyFormat.full(monthly),
+        MoneyFormat.full(twelve),
+      ),
       yearlyValue: MoneyFormat.full(yearly),
       sourceLine: stale
-          ? 'Listed price from ${DateCopy.listedDate(checked)} — '
-                'check the current price'
-          : 'Listed price, checked ${DateCopy.listedDate(checked)}',
+          ? S.t.annualNoteStale(DateCopy.listedDate(checked))
+          : S.t.annualNoteFresh(DateCopy.listedDate(checked)),
       mismatchLine: _mismatchLine(item, monthly),
       stale: stale,
     );
@@ -170,8 +172,10 @@ abstract final class AnnualSavingPresenter {
     final gap = (theirs.minor - listed.minor).abs();
     if (gap * 100 < listed.minor.abs() * mismatchPercent) return null;
 
-    return 'Based on the listed price of ${MoneyFormat.full(listed)}, '
-        'not the ${MoneyFormat.full(theirs)} you entered';
+    return S.t.annualNoteMismatch(
+      MoneyFormat.full(listed),
+      MoneyFormat.full(theirs),
+    );
   }
 
   /// Whole months from [from] to [to], floored. Good enough for a staleness

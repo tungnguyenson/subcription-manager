@@ -4,6 +4,8 @@ import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/money_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
+import 'package:subdock/domain/fx.dart';
 
 /// One row of the by-item breakdown.
 class ItemSpend {
@@ -76,7 +78,7 @@ class MoneyScreen extends StatelessWidget {
         // names the act while the screen names its contents. In use it reads
         // as two places: a reader who taps `Spending` and lands on `Money`
         // has to check they got where they meant to go, every time.
-        Text('Spending', style: SubdockText.screenTitle),
+        Text(S.t.spendingTitle, style: SubdockText.screenTitle),
         const SizedBox(height: 18),
         _TotalCard(view: view, onSpan: onSpan, onMonth: onMonth),
         if (savings != null) ...[
@@ -96,7 +98,7 @@ class MoneyScreen extends StatelessWidget {
             // while it sits inside the total above it is the screen
             // contradicting itself.
             child: Text(
-              'IN A FREE TRIAL',
+              S.t.inAFreeTrial,
               style: SubdockText.sectionLabel.copyWith(
                 color: SubdockColors.accent,
               ),
@@ -125,7 +127,7 @@ class MoneyScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Starts charging ${trial.startsCharging}',
+                              S.t.startsCharging(trial.startsCharging),
                               style: SubdockText.caption.copyWith(
                                 fontSize: 13.5,
                               ),
@@ -150,7 +152,7 @@ class MoneyScreen extends StatelessWidget {
         // question a reader arrives with is what the money is going *on*, and
         // twenty shelves answer that where forty rows do not.
         if (view.byCategory.isNotEmpty) ...[
-          const SectionLabel('By category'),
+          SectionLabel(S.t.byCategory),
           GroupedCard(
             children: [
               for (final shelf in view.byCategory) _CategoryRow(shelf: shelf),
@@ -158,7 +160,7 @@ class MoneyScreen extends StatelessWidget {
           ),
         ],
         if (view.items.isNotEmpty) ...[
-          const SectionLabel('By item'),
+          SectionLabel(S.t.byItem),
           GroupedCard(
             children: [
               for (final spend in view.items)
@@ -166,7 +168,7 @@ class MoneyScreen extends StatelessWidget {
                   label: spend.name,
                   value: spend.foreign == null
                       ? MoneyFormat.full(spend.total)
-                      : '≈ ${MoneyFormat.full(spend.total)}',
+                      : S.t.approximately(MoneyFormat.full(spend.total)),
                   monoValue: true,
                 ),
             ],
@@ -181,10 +183,10 @@ class MoneyScreen extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text('Payment history', style: SubdockText.rowLink),
+                    child: Text(S.t.paymentHistory, style: SubdockText.rowLink),
                   ),
                   Text(
-                    'Open ›',
+                    S.t.open,
                     style: TextStyle(
                       fontFamily: SubdockText.family,
                       fontSize: 15,
@@ -300,7 +302,7 @@ class _CategoryRow extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 shelf.converted
-                    ? '≈ ${MoneyFormat.full(shelf.total)}'
+                    ? S.t.approximately(MoneyFormat.full(shelf.total))
                     : MoneyFormat.full(shelf.total),
                 style: SubdockText.monoValue,
               ),
@@ -351,7 +353,7 @@ class _TotalCard extends StatelessWidget {
             SizedBox(
               width: 150,
               child: SegmentedRow(
-                labels: const ['Month', 'Year'],
+                labels: [S.t.spanMonth, S.t.spanYear],
                 selected: view.span.index,
                 onSelect: onSpan == null
                     ? null
@@ -375,7 +377,9 @@ class _TotalCard extends StatelessWidget {
             // rate to get here. Multiplying a dong figure by a cycle is
             // exact, so a list with no foreign currency in it gets the
             // figure plain.
-            final money when total.converted => '≈ ${MoneyFormat.full(money)}',
+            final money when total.converted => S.t.approximately(
+              MoneyFormat.full(money),
+            ),
             final money => MoneyFormat.full(money),
           }, style: SubdockText.figure),
         ),
@@ -402,14 +406,14 @@ class _TotalCard extends StatelessWidget {
         // as more money rather than as the same money sorted.
         if (view.bands.isNotEmpty)
           _CardBlock(
-            label: 'Where it goes',
-            caption: 'The same total again, split by kind.',
+            label: S.t.whereItGoes,
+            caption: S.t.whereItGoesCaption,
             children: [
               for (final band in view.bands)
                 _CardRow(
                   label: band.label,
                   value: band.converted
-                      ? '≈ ${MoneyFormat.full(band.total)}'
+                      ? S.t.approximately(MoneyFormat.full(band.total))
                       : MoneyFormat.full(band.total),
                 ),
             ],
@@ -430,9 +434,7 @@ class _TotalCard extends StatelessWidget {
               border: Border(top: BorderSide(color: SubdockColors.hairline)),
             ),
             child: Text(
-              'No usable rate — ${total.unconvertedCount} '
-              '${total.unconvertedCount == 1 ? "currency" : "currencies"} '
-              'left unconverted',
+              S.t.unconverted(total.unconvertedCount),
               style: SubdockText.caption,
             ),
           ),
@@ -541,7 +543,7 @@ class _BarChartState extends State<_BarChart> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('COST BY MONTH', style: SubdockText.sectionLabel),
+        Text(S.t.costByMonth, style: SubdockText.sectionLabel),
         const SizedBox(height: 12),
         SingleChildScrollView(
           controller: _controller,
@@ -589,10 +591,13 @@ class _Column extends StatelessWidget {
       label: [
         bar.longLabel,
         if (bar.minor == 0)
-          'nothing due'
+          S.t.chartNothingDue
         else
-          '${MoneyFormat.grouped(bar.minor)} dong',
-        if (bar.ahead) 'not due yet',
+          S.t.chartAmount(
+            MoneyFormat.grouped(bar.minor),
+            S.t.currencyName(Fx.base),
+          ),
+        if (bar.ahead) S.t.chartNotDueYet,
       ].join(': '),
       excludeSemantics: true,
       child: GestureDetector(

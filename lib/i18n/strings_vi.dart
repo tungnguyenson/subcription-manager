@@ -478,4 +478,196 @@ class ViStrings implements Strings {
   String timelineDropped(int count, int budget) =>
       '$count nhắc hạn nữa của mục này không lọt vào $budget suất app đặt '
       'được, và sẽ được nhặt lại khi các mốc gần trôi qua.';
+
+  // ---- spending ----
+
+  @override
+  String get spanMonth => 'Tháng';
+  @override
+  String get spanYear => 'Năm';
+  @override
+  String get thisMonth => 'Tháng này';
+  @override
+  String get nextTwelveMonths => '12 tháng tới';
+  @override
+  String get costByMonth => 'CHI THEO THÁNG';
+  @override
+  String get inAFreeTrial => 'ĐANG DÙNG THỬ';
+  @override
+  String startsCharging(String date) => 'Bắt đầu trừ tiền $date';
+  @override
+  String get byCategory => 'Theo nhóm';
+  @override
+  String get byItem => 'Theo mục';
+  @override
+  String get paymentHistory => 'Lịch sử trả tiền';
+  @override
+  String get open => 'Mở ›';
+  @override
+  String get whereItGoes => 'Tiền đi đâu';
+  @override
+  String get whereItGoesCaption => 'Vẫn con số đó, chia theo loại.';
+  @override
+  String get bandSubscriptions => 'Gói thuê bao';
+  @override
+  String get bandBills => 'Hoá đơn và tiện ích';
+  @override
+  String get bandAnnual => 'Trả một lần mỗi năm';
+  @override
+  String timesInMonth(String name, int times) => '$name ×$times';
+  @override
+  String approximately(String amount) => '≈ $amount';
+  @override
+  String alternateTotal(String amount, String rate) => '≈ $amount ($rate)';
+  @override
+  String unconverted(int currencies) =>
+      'Không có tỉ giá dùng được — $currencies loại tiền nằm ngoài tổng';
+  @override
+  String get chartNothingDue => 'không có gì đến hạn';
+  @override
+  String chartAmount(String digits, String currency) => '$digits $currency';
+  @override
+  String get chartNotDueYet => 'chưa tới hạn';
+
+  // ---- savings ----
+
+  @override
+  String get tabMoveToYearly => 'Chuyển sang gói năm';
+  @override
+  String get tabCancelAService => 'Huỷ một dịch vụ';
+
+  @override
+  String get savingsCancelLead =>
+      'Xếp theo mức dễ bỏ. Mỗi con số là khoản bạn thôi trả trong một năm.';
+  @override
+  String get savingsNothingToMove => 'Chưa có gì đáng chuyển lúc này.';
+  @override
+  String savingsYearlyLead(int cheaper, int monthlyCount) =>
+      '$cheaper trên $monthlyCount gói hàng tháng rẻ hơn nếu trả theo năm.';
+
+  @override
+  String get savingsNothingToMoveShort => 'Chưa có gì đáng chuyển';
+  @override
+  String savingsTotalSub(int plans) =>
+      'một năm, nếu chuyển $plans gói sang trả theo năm';
+
+  @override
+  String get paidUpFront => 'Trả trước một lần, không phải hàng tháng';
+
+  @override
+  String skippedSuggestions(int count) => 'Đã bỏ qua $count gợi ý — hiện lại';
+
+  @override
+  String get cancelDisclaimer =>
+      'Subdock không huỷ hộ bạn được. Nó đưa bạn tới đúng trang, và thôi theo '
+      'dõi khi bạn nói là đã xong.';
+
+  @override
+  String reminderSetFor(String date) => 'Đã hẹn nhắc ngày $date';
+  @override
+  String remindMeOn(String date) => 'Nhắc tôi ngày $date';
+  @override
+  String get skip => 'Bỏ qua';
+
+  @override
+  String noYearlyPriceYet(int count) => '$count gói chưa có giá năm';
+  @override
+  String get addPrice => 'Thêm giá';
+
+  @override
+  String get openedOpenAgain => 'Đã mở · mở lại';
+  @override
+  String get cancelledRemove => 'Đã huỷ — bỏ khỏi Subdock';
+
+  @override
+  String get tierEntertainment => 'Giải trí';
+  @override
+  String get tierEntertainmentHint => 'Dễ bỏ nhất';
+  @override
+  String get tierWork => 'Công việc và công cụ';
+  @override
+  String get tierWorkHint => 'Chỉ giữ cái đang dùng';
+  @override
+  String get tierHard => 'Khó bỏ';
+  @override
+  String get tierHardHint => 'Lưu trữ, kết nối, tiện ích';
+
+  @override
+  String yearlyCompare(String monthly, String yearly, int percent) =>
+      '$monthly × 12 → $yearly · rẻ hơn $percent%';
+  @override
+  String yearlyNoteStale(String checkedDate) =>
+      'Giá niêm yết từ $checkedDate — kiểm lại trước đã.';
+  @override
+  String yearlyNoteMismatch(String listed, String entered) =>
+      'Giá niêm yết là $listed, không phải $entered bạn đã nhập.';
+  @override
+  String yearlyNoteFresh(String checkedDate) =>
+      'Trả một lần mỗi năm, không phải hàng tháng. Giá niêm yết tra ngày '
+      '$checkedDate.';
+
+  @override
+  String leftOut(String parts) => 'Không tính: $parts';
+  @override
+  String leftOutAlreadyYearly(int count) => '$count đã trả theo năm';
+  @override
+  String leftOutInTrial(int count) => '$count đang dùng thử';
+  @override
+  String leftOutUnpriced(int count) => '$count gói chưa có giá năm';
+
+  @override
+  String perYearAmount(String amount) => '$amount/năm';
+
+  @override
+  String get viaAppStore => 'App Store';
+  @override
+  String get whereAppStore => 'Cài đặt › Tài khoản Apple › Thuê bao';
+  @override
+  String get actionAppStore => 'Mở danh sách thuê bao';
+  @override
+  String get viaGooglePlay => 'Google Play';
+  @override
+  String get whereGooglePlay => 'Play Store › Thanh toán và gói thuê bao';
+  @override
+  String get actionGooglePlay => 'Mở danh sách thuê bao';
+  @override
+  String get viaWeb => 'Web';
+  @override
+  String get actionCancelPage => 'Mở trang huỷ';
+  @override
+  String get viaAccountPage => 'Trang tài khoản';
+  @override
+  String get actionAccountPage => 'Mở trang tài khoản';
+  @override
+  String get viaNotInCatalogue => 'Không có trong danh mục';
+  @override
+  String get whereNotInCatalogue => 'Subdock không biết trang huỷ của mục này';
+
+  @override
+  String get savingLeadAbout => 'Tiết kiệm khoảng';
+  @override
+  String get savingLeadExact => 'Tiết kiệm';
+  @override
+  String savingLine(String lead, String amount) => '$lead $amount một năm';
+  @override
+  String twelveTimes(String monthly, String twelve) =>
+      '$monthly × 12 = $twelve';
+  @override
+  String annualNoteStale(String checkedDate) =>
+      'Giá niêm yết từ $checkedDate — kiểm lại giá hiện tại';
+  @override
+  String annualNoteFresh(String checkedDate) =>
+      'Giá niêm yết, tra ngày $checkedDate';
+  @override
+  String annualNoteMismatch(String listed, String entered) =>
+      'Tính theo giá niêm yết $listed, không phải $entered bạn đã nhập';
+
+  @override
+  String openAccount(String name) => 'Mở tài khoản $name';
+  @override
+  String get manageInAppStore => 'Quản lý trong App Store';
+  @override
+  String get manageInGooglePlay => 'Quản lý trong Google Play';
+  @override
+  String get boughtThroughAppStore => 'Bạn mua qua App Store?';
 }

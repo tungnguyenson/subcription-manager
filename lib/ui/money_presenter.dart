@@ -9,6 +9,7 @@ import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/ui/date_copy.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/screens/money_screen.dart';
+import 'package:subdock/i18n.dart';
 
 /// Which span the Spending screen is showing.
 enum MoneySpan { month, year }
@@ -305,15 +306,16 @@ abstract final class MoneyPresenter {
             // A charge that lands more than once in the month says so.
             // Netflix at four times the price with no explanation reads as
             // a mistake in the app.
-            name: times == 1 ? item.name : '${item.name} ×$times',
+            name: times == 1 ? item.name : S.t.timesInMonth(item.name, times),
             total: Fx.total(
               [Money(money.minor * times, money.currency)],
               rate: Fx.bundledUsdVnd,
               today: today,
             ).approximateBase!,
             // The exact foreign figure is kept beside the converted one,
-            // because it is the part that is actually true.
-            foreign: money.currency == Fx.bundledUsdVnd.to
+            // because it is the part that is actually true. "Foreign" is
+            // relative to the base the user picked, not to the dong.
+            foreign: money.currency == Fx.base
                 ? null
                 : Money(money.minor * times, money.currency),
           );
@@ -336,7 +338,7 @@ abstract final class MoneyPresenter {
     return MoneyView(
       span: MoneySpan.month,
       showingMonth: showing,
-      label: showing == today.month ? 'This month' : DateCopy.month(showing),
+      label: showing == today.month ? S.t.thisMonth : DateCopy.month(showing),
       total: total,
       // Nothing under the figure. The two lines that used to live here -- the
       // count of items, and a note that a month still ahead was read off the
@@ -524,7 +526,7 @@ abstract final class MoneyPresenter {
 
     return MoneyView(
       span: MoneySpan.year,
-      label: 'Next 12 months',
+      label: S.t.nextTwelveMonths,
       total: total,
       // No sentence explaining that twelve monthly charges come to twelve
       // times one. The heading already says which twelve months, and a reader
@@ -533,9 +535,9 @@ abstract final class MoneyPresenter {
       alternateTotal: MoneyPresenter.alternateTotal(total, restate: restate),
       bands: [
         for (final (label, parts) in [
-          ('Subscriptions', subscriptions),
-          ('Bills and utilities', bills),
-          ('Charged once a year', annual),
+          (S.t.bandSubscriptions, subscriptions),
+          (S.t.bandBills, bills),
+          (S.t.bandAnnual, annual),
         ])
           if (band(parts) case final MixedTotal band)
             if (band.approximateBase case final Money total)
@@ -556,7 +558,18 @@ abstract final class MoneyPresenter {
 
     final base = total.approximateBase;
     final rate = total.rate;
-    if (base == null || rate == null || rate.to != base.currency) return null;
+    if (base == null || rate == null) return null;
+
+    // Read in whichever direction the base sits on. The app bundles one rate,
+    // USD to VND, and which of the two the user counts in is their choice --
+    // a card that only knew how to restate a dong total would leave someone
+    // who picked dollars with no second figure at all.
+    final other = switch (base.currency) {
+      final code when code == rate.to => rate.invert(base),
+      final code when code == rate.from => rate.convert(base),
+      _ => null,
+    };
+    if (other == null) return null;
 
     // The rate rides on this line rather than on a line of its own at the
     // foot of the card. It is the whole reason both figures on the card are
@@ -567,8 +580,7 @@ abstract final class MoneyPresenter {
     // rate older than [Fx.maxDisplayAgeDays] rather than converting with it,
     // so a rate that reaches the screen at all is one the app is prepared to
     // stand behind; past that there is no converted figure here to date.
-    return '≈ ${MoneyFormat.full(rate.invert(base))} '
-        '(${MoneyFormat.rate(rate)})';
+    return S.t.alternateTotal(MoneyFormat.full(other), MoneyFormat.rate(rate));
   }
 
   /// What this item costs over twelve months, or null when there is no amount

@@ -4,6 +4,7 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/ui/savings_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// The one screen where a number is good news.
 ///
@@ -82,10 +83,10 @@ class _SavingsScreenState extends State<SavingsScreen> {
     return ListView(
       padding: SubdockSpacing.screenPadding(context),
       children: [
-        Text('Savings', style: SubdockText.screenTitle),
+        Text(S.t.savingsTitle, style: SubdockText.screenTitle),
         const SizedBox(height: 14),
         SegmentedRow(
-          labels: const ['Move to yearly', 'Cancel a service'],
+          labels: [S.t.tabMoveToYearly, S.t.tabCancelAService],
           selected: _tab.index,
           onSelect: (i) => setState(() {
             _tab = SavingsTab.values[i];
@@ -126,12 +127,12 @@ class _SavingsScreenState extends State<SavingsScreen> {
             // plan is cheaper per month and more expensive today, and someone
             // who acts on this figure without knowing that gets a surprise
             // twelve times the size of the one they were avoiding.
-            'Paid up front, not monthly',
+            S.t.paidUpFront,
             style: SubdockText.caption,
           ),
         ],
       ),
-      const SectionLabel('Move to yearly'),
+      SectionLabel(S.t.tabMoveToYearly),
       for (var i = 0; i < view.yearly.length; i++) ...[
         if (i > 0) const SizedBox(height: SubdockSpacing.rowGap),
         _YearlyCard(
@@ -163,9 +164,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Text(
-            '${view.skipped} '
-            '${view.skipped == 1 ? "suggestion" : "suggestions"} '
-            'skipped — show again',
+            S.t.skippedSuggestions(view.skipped),
             style: SubdockText.footnote.copyWith(color: SubdockColors.accent),
           ),
         ),
@@ -202,8 +201,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
       // The limit, said plainly and last. The app cannot cancel anything: it
       // has no account with any vendor and never will. Anything vaguer here
       // would let a user believe tapping the button did the deed.
-      'Subdock cannot cancel for you. It takes you to the right page and '
-      'stops tracking once you say it is done.',
+      S.t.cancelDisclaimer,
       style: SubdockText.caption,
     ),
   ];
@@ -286,8 +284,8 @@ class _YearlyCard extends StatelessWidget {
               Expanded(
                 child: _SavingsButton(
                   label: row.reminding
-                      ? 'Reminder set for ${row.remindOn}'
-                      : 'Remind me on ${row.remindOn}',
+                      ? S.t.reminderSetFor(row.remindOn)
+                      : S.t.remindMeOn(row.remindOn),
                   outlined: row.reminding,
                   onTap: () => onChoose(
                     row.reminding
@@ -298,7 +296,7 @@ class _YearlyCard extends StatelessWidget {
               ),
               const SizedBox(width: 9),
               QuietButton(
-                'Skip',
+                S.t.skip,
                 onPressed: () => onChoose(YearlyChoice.skipped),
               ),
             ],
@@ -337,9 +335,7 @@ class _UnpricedFold extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      '${rows.length} '
-                      '${rows.length == 1 ? "plan has" : "plans have"} '
-                      'no yearly price yet',
+                      S.t.noYearlyPriceYet(rows.length),
                       style: SubdockText.itemSubtitle.copyWith(fontSize: 15),
                     ),
                   ),
@@ -376,7 +372,7 @@ class _UnpricedFold extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Add price',
+                        S.t.addPrice,
                         style: TextStyle(
                           fontFamily: SubdockText.family,
                           fontSize: 14.5,
@@ -516,7 +512,7 @@ class _CancelCard extends StatelessWidget {
             if (row.target.canOpen) ...[
               const SizedBox(height: 13),
               _SavingsButton(
-                label: sentTo ? 'Opened · open again' : row.target.action!,
+                label: sentTo ? S.t.openedOpenAgain : row.target.action!,
                 outlined: sentTo,
                 onTap: onOpen,
               ),
@@ -524,7 +520,7 @@ class _CancelCard extends StatelessWidget {
             if (sentTo) ...[
               const SizedBox(height: 4),
               QuietButton(
-                'Cancelled — remove from Subdock',
+                S.t.cancelledRemove,
                 danger: true,
                 onPressed: onRemove,
               ),

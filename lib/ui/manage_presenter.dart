@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/domain/manage_link.dart';
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/i18n.dart';
 
 /// One tappable way out of the app, and what tapping it tells us.
 @immutable
@@ -69,23 +70,23 @@ abstract final class ManagePresenter {
     final vendor = vendorUrl == null || vendorUrl.isEmpty
         ? null
         : ManageAction(
-            label: 'Open $name account',
+            label: S.t.openAccount(name),
             url: vendorUrl,
             records: PurchaseChannel.web,
           );
 
-    const store = ManageAction(
-      label: 'Manage in the App Store',
+    final store = ManageAction(
+      label: S.t.manageInAppStore,
       url: ManageLinks.appStore,
       records: PurchaseChannel.appStore,
     );
 
     return switch (item.purchaseChannel) {
       // Already answered. One button, no question under it.
-      PurchaseChannel.appStore => const ManageOffer(primary: store),
-      PurchaseChannel.playStore => const ManageOffer(
+      PurchaseChannel.appStore => ManageOffer(primary: store),
+      PurchaseChannel.playStore => ManageOffer(
         primary: ManageAction(
-          label: 'Manage in Google Play',
+          label: S.t.manageInGooglePlay,
           url: ManageLinks.playStore,
           records: PurchaseChannel.playStore,
         ),
@@ -98,8 +99,8 @@ abstract final class ManagePresenter {
       // answer, so the question is never put to the user directly.
       PurchaseChannel.unknown when vendor != null => ManageOffer(
         primary: vendor,
-        alternate: const ManageAction(
-          label: 'Bought through the App Store?',
+        alternate: ManageAction(
+          label: S.t.boughtThroughAppStore,
           url: ManageLinks.appStore,
           records: PurchaseChannel.appStore,
         ),
@@ -107,8 +108,7 @@ abstract final class ManagePresenter {
 
       // No vendor page. The store is still a real answer for something that
       // renews, and no answer at all for anything else.
-      PurchaseChannel.unknown =>
-        renews ? const ManageOffer(primary: store) : null,
+      PurchaseChannel.unknown => renews ? ManageOffer(primary: store) : null,
     };
   }
 }

@@ -10,6 +10,8 @@ import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/ui/date_copy.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
+import 'package:subdock/i18n.dart';
+import 'package:subdock/domain/fx.dart';
 
 /// The two questions the Savings screen answers, and nothing else.
 ///
@@ -202,12 +204,9 @@ class SavingsView {
 
   /// The line under the tab strip on the yearly tab.
   String leadFor(SavingsTab tab, int monthlyCount) => switch (tab) {
-    SavingsTab.cancel =>
-      'Grouped by how easy it is to drop. Each total is what you '
-          'stop paying in a year.',
-    SavingsTab.yearly when yearly.isEmpty => 'Nothing to move right now.',
-    SavingsTab.yearly =>
-      '${yearly.length} of $monthlyCount monthly plans cost less yearly.',
+    SavingsTab.cancel => S.t.savingsCancelLead,
+    SavingsTab.yearly when yearly.isEmpty => S.t.savingsNothingToMove,
+    SavingsTab.yearly => S.t.savingsYearlyLead(yearly.length, monthlyCount),
   };
 }
 
@@ -249,10 +248,13 @@ abstract final class SavingsPresenter {
     'DOCUMENTS': 2,
   };
 
-  static const List<(String, String)> _tiers = [
-    ('Entertainment', 'Easiest to drop'),
-    ('Work and tools', 'Keep only what you are using'),
-    ('Hard to drop', 'Storage, connectivity, utilities'),
+  /// Read per call, not held as a `const`: these are words and words move
+  /// with the language. The tier *order* does not, and neither does which
+  /// shelf lands in which tier — that judgement is [_ease] above.
+  static List<(String, String)> get _tiers => [
+    (S.t.tierEntertainment, S.t.tierEntertainmentHint),
+    (S.t.tierWork, S.t.tierWorkHint),
+    (S.t.tierHard, S.t.tierHardHint),
   ];
 
   /// A price older than this stops being stated and starts being suggested.
@@ -331,8 +333,8 @@ abstract final class SavingsPresenter {
     return SavingsView(
       total: _joinCurrencies(totals, sign: false),
       totalSub: yearlyRows.isEmpty
-          ? 'Nothing to move right now'
-          : 'a year, moving ${_plural(yearlyRows.length, "plan")} to yearly',
+          ? S.t.savingsNothingToMoveShort
+          : S.t.savingsTotalSub(yearlyRows.length),
       yearly: yearlyRows,
       unpriced: unpriced,
       leftOut: _leftOut(
@@ -402,17 +404,19 @@ abstract final class SavingsPresenter {
       name: item.name,
       iconName: item.iconName,
       saving: '−${MoneyFormat.full(saved)}',
-      compare:
-          '${MoneyFormat.full(monthly)} × 12 → '
-          '${MoneyFormat.full(yearly)} · $percent% less',
+      compare: S.t.yearlyCompare(
+        MoneyFormat.full(monthly),
+        MoneyFormat.full(yearly),
+        percent,
+      ),
       note: stale
-          ? 'Listed price from ${DateCopy.listedDate(checked)} — '
-                'check it first.'
+          ? S.t.yearlyNoteStale(DateCopy.listedDate(checked))
           : (mismatch
-                ? 'Listed price is ${MoneyFormat.full(monthly)}, not the '
-                      '${MoneyFormat.full(theirs)} you entered.'
-                : 'Charged once a year, not monthly. '
-                      'Listed price checked ${DateCopy.listedDate(checked)}.'),
+                ? S.t.yearlyNoteMismatch(
+                    MoneyFormat.full(monthly),
+                    MoneyFormat.full(theirs),
+                  )
+                : S.t.yearlyNoteFresh(DateCopy.listedDate(checked))),
       stale: stale,
       remindOn: _remindOn(item, defaultLeadDays),
       choice: item.yearlyChoice,
@@ -436,11 +440,11 @@ abstract final class SavingsPresenter {
     required int unpriced,
   }) {
     final parts = <String>[
-      if (alreadyYearly > 0) '$alreadyYearly already yearly',
-      if (inTrial > 0) '$inTrial in a trial',
-      if (unpriced > 0) '${_plural(unpriced, "plan")} with no yearly price',
+      if (alreadyYearly > 0) S.t.leftOutAlreadyYearly(alreadyYearly),
+      if (inTrial > 0) S.t.leftOutInTrial(inTrial),
+      if (unpriced > 0) S.t.leftOutUnpriced(unpriced),
     ];
-    return parts.isEmpty ? null : 'Left out: ${parts.join(' · ')}';
+    return parts.isEmpty ? null : S.t.leftOut(parts.join(S.t.bullet));
   }
 
   // ---- cancel ----
@@ -470,7 +474,9 @@ abstract final class SavingsPresenter {
           name: item.name,
           iconName: item.iconName,
           target: target,
-          yearly: money == null ? '—' : '−${MoneyFormat.full(money)}/yr',
+          yearly: money == null
+              ? '—'
+              : S.t.perYearAmount('−${MoneyFormat.full(money)}'),
           hasAmount: money != null,
         ),
       );
@@ -493,7 +499,7 @@ abstract final class SavingsPresenter {
             rows: buckets[tier]!,
             total: totals[tier]!.isEmpty
                 ? '—'
-                : '${_joinCurrencies(totals[tier]!, sign: true)}/yr',
+                : S.t.perYearAmount(_joinCurrencies(totals[tier]!, sign: true)),
             discouraged: tier == 2,
           ),
     ];
@@ -512,18 +518,18 @@ abstract final class SavingsPresenter {
     // vendor's site at all — the vendor's page will not even list it.
     switch (item.purchaseChannel) {
       case PurchaseChannel.appStore:
-        return const CancelTarget(
-          via: 'App Store',
-          where: 'Settings › Apple Account › Subscriptions',
+        return CancelTarget(
+          via: S.t.viaAppStore,
+          where: S.t.whereAppStore,
           url: ManageLinks.appStore,
-          action: 'Open Subscriptions',
+          action: S.t.actionAppStore,
         );
       case PurchaseChannel.playStore:
-        return const CancelTarget(
-          via: 'Google Play',
-          where: 'Play Store › Payments and subscriptions',
+        return CancelTarget(
+          via: S.t.viaGooglePlay,
+          where: S.t.whereGooglePlay,
           url: ManageLinks.playStore,
-          action: 'Open subscriptions',
+          action: S.t.actionGooglePlay,
         );
       case PurchaseChannel.web:
       case PurchaseChannel.unknown:
@@ -533,10 +539,10 @@ abstract final class SavingsPresenter {
     final cancel = entry?.cancelUrl;
     if (cancel != null && cancel.isNotEmpty) {
       return CancelTarget(
-        via: 'Web',
+        via: S.t.viaWeb,
         where: _readable(cancel),
         url: cancel,
-        action: 'Open the cancel page',
+        action: S.t.actionCancelPage,
       );
     }
 
@@ -546,16 +552,16 @@ abstract final class SavingsPresenter {
     final manage = entry?.manageUrl;
     if (manage != null && manage.isNotEmpty) {
       return CancelTarget(
-        via: 'Account page',
+        via: S.t.viaAccountPage,
         where: _readable(manage),
         url: manage,
-        action: 'Open the account page',
+        action: S.t.actionAccountPage,
       );
     }
 
-    return const CancelTarget(
-      via: 'Not in the catalogue',
-      where: 'Subdock has no cancel page for this one',
+    return CancelTarget(
+      via: S.t.viaNotInCatalogue,
+      where: S.t.whereNotInCatalogue,
     );
   }
 
@@ -597,9 +603,12 @@ abstract final class SavingsPresenter {
     // VND first — it is the money that actually leaves a card in Vietnam —
     // then the rest alphabetically so the order never depends on insertion.
     final keys = totals.keys.toList()
+      // The currency the app counts in leads, whichever one that is. It used
+      // to be the dong by name, which put a foreign subtotal first for anyone
+      // who told onboarding they pay in something else.
       ..sort((a, b) {
-        if (a == 'VND') return -1;
-        if (b == 'VND') return 1;
+        if (a == Fx.base) return -1;
+        if (b == Fx.base) return 1;
         return a.compareTo(b);
       });
     return keys
@@ -608,9 +617,6 @@ abstract final class SavingsPresenter {
         )
         .join(' + ');
   }
-
-  static String _plural(int n, String noun) =>
-      n == 1 ? '$n $noun' : '$n ${noun}s';
 
   /// The pair worth putting on screen: Vietnam first, then global.
   ///

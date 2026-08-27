@@ -507,4 +507,201 @@ class EnStrings implements Strings {
       '$count further ${count == 1 ? 'reminder' : 'reminders'} for this item '
       'did not fit the $budget slots the app schedules, and will be picked up '
       'as the nearer ones pass.';
+
+  // ---- spending ----
+
+  @override
+  String get spanMonth => 'Month';
+  @override
+  String get spanYear => 'Year';
+  @override
+  String get thisMonth => 'This month';
+  @override
+  String get nextTwelveMonths => 'Next 12 months';
+  @override
+  String get costByMonth => 'COST BY MONTH';
+  @override
+  String get inAFreeTrial => 'IN A FREE TRIAL';
+  @override
+  String startsCharging(String date) => 'Starts charging $date';
+  @override
+  String get byCategory => 'By category';
+  @override
+  String get byItem => 'By item';
+  @override
+  String get paymentHistory => 'Payment history';
+  @override
+  String get open => 'Open ›';
+  @override
+  String get whereItGoes => 'Where it goes';
+  @override
+  String get whereItGoesCaption => 'The same total again, split by kind.';
+  @override
+  String get bandSubscriptions => 'Subscriptions';
+  @override
+  String get bandBills => 'Bills and utilities';
+  @override
+  String get bandAnnual => 'Charged once a year';
+  @override
+  String timesInMonth(String name, int times) => '$name ×$times';
+  @override
+  String approximately(String amount) => '≈ $amount';
+  @override
+  String alternateTotal(String amount, String rate) => '≈ $amount ($rate)';
+  @override
+  String unconverted(int currencies) =>
+      'No usable rate — $currencies '
+      '${currencies == 1 ? 'currency' : 'currencies'} left unconverted';
+  @override
+  String get chartNothingDue => 'nothing due';
+  @override
+  String chartAmount(String digits, String currency) => '$digits $currency';
+  @override
+  String get chartNotDueYet => 'not due yet';
+
+  // ---- savings ----
+
+  @override
+  String get tabMoveToYearly => 'Move to yearly';
+  @override
+  String get tabCancelAService => 'Cancel a service';
+
+  @override
+  String get savingsCancelLead =>
+      'Grouped by how easy it is to drop. Each total is what you stop paying '
+      'in a year.';
+  @override
+  String get savingsNothingToMove => 'Nothing to move right now.';
+  @override
+  String savingsYearlyLead(int cheaper, int monthlyCount) =>
+      '$cheaper of $monthlyCount monthly plans cost less yearly.';
+
+  @override
+  String get savingsNothingToMoveShort => 'Nothing to move right now';
+  @override
+  String savingsTotalSub(int plans) =>
+      'a year, moving $plans ${plans == 1 ? 'plan' : 'plans'} to yearly';
+
+  @override
+  String get paidUpFront => 'Paid up front, not monthly';
+
+  @override
+  String skippedSuggestions(int count) =>
+      '$count ${count == 1 ? 'suggestion' : 'suggestions'} skipped — show '
+      'again';
+
+  @override
+  String get cancelDisclaimer =>
+      'Subdock cannot cancel for you. It takes you to the right page and '
+      'stops tracking once you say it is done.';
+
+  @override
+  String reminderSetFor(String date) => 'Reminder set for $date';
+  @override
+  String remindMeOn(String date) => 'Remind me on $date';
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String noYearlyPriceYet(int count) =>
+      '$count ${count == 1 ? 'plan has' : 'plans have'} no yearly price yet';
+  @override
+  String get addPrice => 'Add price';
+
+  @override
+  String get openedOpenAgain => 'Opened · open again';
+  @override
+  String get cancelledRemove => 'Cancelled — remove from Subdock';
+
+  @override
+  String get tierEntertainment => 'Entertainment';
+  @override
+  String get tierEntertainmentHint => 'Easiest to drop';
+  @override
+  String get tierWork => 'Work and tools';
+  @override
+  String get tierWorkHint => 'Keep only what you are using';
+  @override
+  String get tierHard => 'Hard to drop';
+  @override
+  String get tierHardHint => 'Storage, connectivity, utilities';
+
+  @override
+  String yearlyCompare(String monthly, String yearly, int percent) =>
+      '$monthly × 12 → $yearly · $percent% less';
+  @override
+  String yearlyNoteStale(String checkedDate) =>
+      'Listed price from $checkedDate — check it first.';
+  @override
+  String yearlyNoteMismatch(String listed, String entered) =>
+      'Listed price is $listed, not the $entered you entered.';
+  @override
+  String yearlyNoteFresh(String checkedDate) =>
+      'Charged once a year, not monthly. Listed price checked $checkedDate.';
+
+  @override
+  String leftOut(String parts) => 'Left out: $parts';
+  @override
+  String leftOutAlreadyYearly(int count) => '$count already yearly';
+  @override
+  String leftOutInTrial(int count) => '$count in a trial';
+  @override
+  String leftOutUnpriced(int count) =>
+      '$count ${count == 1 ? 'plan' : 'plans'} with no yearly price';
+
+  @override
+  String perYearAmount(String amount) => '$amount/yr';
+
+  @override
+  String get viaAppStore => 'App Store';
+  @override
+  String get whereAppStore => 'Settings › Apple Account › Subscriptions';
+  @override
+  String get actionAppStore => 'Open Subscriptions';
+  @override
+  String get viaGooglePlay => 'Google Play';
+  @override
+  String get whereGooglePlay => 'Play Store › Payments and subscriptions';
+  @override
+  String get actionGooglePlay => 'Open subscriptions';
+  @override
+  String get viaWeb => 'Web';
+  @override
+  String get actionCancelPage => 'Open the cancel page';
+  @override
+  String get viaAccountPage => 'Account page';
+  @override
+  String get actionAccountPage => 'Open the account page';
+  @override
+  String get viaNotInCatalogue => 'Not in the catalogue';
+  @override
+  String get whereNotInCatalogue => 'Subdock has no cancel page for this one';
+
+  @override
+  String get savingLeadAbout => 'Save about';
+  @override
+  String get savingLeadExact => 'Save';
+  @override
+  String savingLine(String lead, String amount) => '$lead $amount a year';
+  @override
+  String twelveTimes(String monthly, String twelve) =>
+      '$monthly × 12 = $twelve';
+  @override
+  String annualNoteStale(String checkedDate) =>
+      'Listed price from $checkedDate — check the current price';
+  @override
+  String annualNoteFresh(String checkedDate) =>
+      'Listed price, checked $checkedDate';
+  @override
+  String annualNoteMismatch(String listed, String entered) =>
+      'Based on the listed price of $listed, not the $entered you entered';
+
+  @override
+  String openAccount(String name) => 'Open $name account';
+  @override
+  String get manageInAppStore => 'Manage in the App Store';
+  @override
+  String get manageInGooglePlay => 'Manage in Google Play';
+  @override
+  String get boughtThroughAppStore => 'Bought through the App Store?';
 }

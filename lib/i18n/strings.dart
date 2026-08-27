@@ -2,7 +2,9 @@ import 'parts/common.dart';
 import 'parts/currency.dart';
 import 'parts/dates.dart';
 import 'parts/item.dart';
+import 'parts/money.dart';
 import 'parts/onboarding.dart';
+import 'parts/savings.dart';
 import 'parts/timeline.dart';
 import 'parts/upcoming.dart';
 
@@ -10,7 +12,9 @@ export 'parts/common.dart';
 export 'parts/currency.dart';
 export 'parts/dates.dart';
 export 'parts/item.dart';
+export 'parts/money.dart';
 export 'parts/onboarding.dart';
+export 'parts/savings.dart';
 export 'parts/timeline.dart';
 export 'parts/upcoming.dart';
 
@@ -31,6 +35,8 @@ abstract class Strings
         CurrencyStrings,
         DateStrings,
         ItemStrings,
+        MoneyStrings,
         OnboardingStrings,
+        SavingsStrings,
         TimelineStrings,
         UpcomingStrings {}
