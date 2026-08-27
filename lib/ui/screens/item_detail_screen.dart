@@ -13,6 +13,7 @@ import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/ui/widgets/reminder_timeline_card.dart';
+import 'package:subdock/i18n.dart';
 
 class ItemDetailScreen extends StatelessWidget {
   final TrackedItem item;
@@ -125,7 +126,7 @@ class ItemDetailScreen extends StatelessWidget {
                   // Matches BackLink's own padding so the two links sit on one
                   // baseline at either end of the row.
                   padding: EdgeInsets.fromLTRB(12, 2, 0, 14),
-                  child: Text('Edit', style: SubdockText.quietAction),
+                  child: Text(S.t.edit, style: SubdockText.quietAction),
                 ),
               ),
           ],
@@ -165,31 +166,35 @@ class ItemDetailScreen extends StatelessWidget {
             if (position != null) _PaymentProgress(position: position),
             // The three rows the form owns open the form. The rest of this
             // card is derived or already has an editor of its own.
-            DetailRow(label: 'Category', value: category.label, onTap: onEdit),
             DetailRow(
-              label: 'Repeats',
+              label: S.t.rowCategory,
+              value: category.label,
+              onTap: onEdit,
+            ),
+            DetailRow(
+              label: S.t.rowRepeats,
               value: ItemPresenter.repeatLabel(item),
               onTap: onEdit,
             ),
             if (Instalments.lastOccurrence(item) case final last?)
               DetailRow(
-                label: 'Last payment',
+                label: S.t.rowLastPayment,
                 value: MoneyFormat.date(last),
                 monoValue: true,
               ),
             DetailRow(
-              label: 'Remind me',
+              label: S.t.rowRemindMe,
               value: _remindLabel(),
               onTap: onEditReminders,
             ),
             DetailRow(
-              label: 'Cost',
+              label: S.t.rowCost,
               // A dash on a row that leads somewhere reads as "nothing to see
               // here". An item with no price has one, and this is where the
               // user goes to put it in.
               value: money != null
                   ? _costLabel(money)
-                  : (onEdit == null ? '—' : 'Add a cost'),
+                  : (onEdit == null ? '—' : S.t.addACost),
               monoValue: money != null,
               valueColor: money == null && onEdit != null
                   ? SubdockColors.accent
@@ -198,24 +203,28 @@ class ItemDetailScreen extends StatelessWidget {
             ),
             if (Instalments.totalLeft(item) case final left?)
               DetailRow(
-                label: 'Total left',
+                label: S.t.rowTotalLeft,
                 value: MoneyFormat.full(left),
                 monoValue: true,
               ),
             if (source case final PaymentSource paid)
-              DetailRow(label: 'Pays from', value: paid.name, onTap: onEdit),
+              DetailRow(
+                label: S.t.rowPaysFrom,
+                value: paid.name,
+                onTap: onEdit,
+              ),
             DetailRow(
-              label: 'Date from',
+              label: S.t.rowDateFrom,
               value: ItemPresenter.dateSourceLabel(item.dateSource),
             ),
-            DetailRow(label: 'Note', value: item.note ?? '—'),
+            DetailRow(label: S.t.rowNote, value: item.note ?? '—'),
           ],
         ),
         // Both blocks answer "what about this one?", which is this screen's
         // question. Neither belongs on the list, which answers "what is coming
         // up?" -- see design-spec.md 2.2.
         if (saving != null) ...[
-          const SectionLabel('Yearly plan'),
+          SectionLabel(S.t.rowYearlyPlan),
           _AnnualSavingCard(copy: saving),
         ],
         if (manage != null) ...[
@@ -234,30 +243,30 @@ class ItemDetailScreen extends StatelessWidget {
             ),
         ],
         if (timeline case final timeline?) ...[
-          const SectionLabel('What happens next'),
+          SectionLabel(S.t.whatHappensNext),
           ReminderTimelineCard(timeline: timeline, today: today),
         ],
-        const SectionLabel('Actions'),
+        SectionLabel(S.t.actions),
         PrimaryButton(_markLabel(position), onPressed: onMarkPaid),
         const SizedBox(height: 10),
         // Plain wording again. It used to carry the next reminder's date,
         // which was the only place on the screen that date appeared; the
         // timeline above says it now, along with the four it could not fit.
-        SecondaryButton('Edit reminders', onPressed: onEditReminders),
+        SecondaryButton(S.t.editReminders, onPressed: onEditReminders),
         const SizedBox(height: 10),
         // Named for what it does, not for the mechanism. "Snooze" is a word
         // about the app; "remind me again in 3 days" is a sentence about the
         // user's week, and it is the only wording that says how long.
         if (onSnooze != null) ...[
-          QuietButton('Remind me again in 3 days', onPressed: onSnooze),
+          QuietButton(S.t.remindAgainInThreeDays, onPressed: onSnooze),
           const SizedBox(height: 10),
         ],
         if (_stopLabel() case final stop?)
           QuietButton(stop, onPressed: onStop)
         else
-          QuietButton('Delete this item', onPressed: onDelete, danger: true),
+          QuietButton(S.t.deleteThisItem, onPressed: onDelete, danger: true),
         if (history.isNotEmpty) ...[
-          const SectionLabel('History'),
+          SectionLabel(S.t.rowHistory),
           GroupedCard(
             children: [
               for (final event in history)
@@ -270,7 +279,7 @@ class ItemDetailScreen extends StatelessWidget {
         ],
         if (_stopLabel() != null) ...[
           const SizedBox(height: 24),
-          QuietButton('Delete this item', onPressed: onDelete, danger: true),
+          QuietButton(S.t.deleteThisItem, onPressed: onDelete, danger: true),
         ],
         Footnote(ItemPresenter.deleteConsequence(scheduledCount)),
       ],
@@ -279,7 +288,7 @@ class ItemDetailScreen extends StatelessWidget {
 
   String _remindLabel() {
     final leads = item.leadDays;
-    if (leads.isEmpty) return 'Never';
+    if (leads.isEmpty) return S.t.never;
     return ItemPresenter.leadLabel(leads.first);
   }
 
@@ -292,22 +301,21 @@ class ItemDetailScreen extends StatelessWidget {
   /// `Mark payment 4 as paid` while there are instalments left to count, and
   /// plain `Mark as paid` otherwise. The number is what tells the user the app
   /// and their own records agree about where they are in the plan.
-  String _markLabel(Instalments? position) => position == null
-      ? 'Mark as paid'
-      : 'Mark payment ${position.index} as paid';
+  String _markLabel(Instalments? position) =>
+      position == null ? S.t.markAsPaid : S.t.markPaymentAsPaid(position.index);
 
   /// The quiet action, or null when this item has no series to end.
   String? _stopLabel() {
     if (item.state != ItemState.active) return null;
-    if (Instalments.of(item) != null) return 'Stop after this payment';
-    if (item.cycle != null) return 'Cancel this subscription';
+    if (Instalments.of(item) != null) return S.t.stopAfterThisPayment;
+    if (item.cycle != null) return S.t.cancelThisSubscription;
     return null;
   }
 
   String _paidLabel(HandledEvent event) {
     final minor = event.actualChargedMinor ?? event.baseAmountMinor;
     final currency = event.currency;
-    if (minor == null || currency == null) return 'Paid';
+    if (minor == null || currency == null) return S.t.paid;
     return MoneyFormat.full(Money(minor, currency));
   }
 }
@@ -336,9 +344,11 @@ class _PaymentProgress extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text('Payment', style: SubdockText.rowLabel)),
+              Expanded(
+                child: Text(S.t.instalmentPayment, style: SubdockText.rowLabel),
+              ),
               Text(
-                '${position.index} of ${position.total}',
+                S.t.instalmentPosition(position.index, position.total),
                 style: SubdockText.rowValue.copyWith(
                   fontFamily: SubdockText.mono,
                   letterSpacing: -0.13,
@@ -415,14 +425,14 @@ class _AnnualSavingCard extends StatelessWidget {
                   letterSpacing: -0.5,
                 ),
               ),
-              const TextSpan(text: ' a year'),
+              TextSpan(text: S.t.aYear),
             ],
           ),
         ),
         const SizedBox(height: 14),
-        _SumLine(label: 'Monthly', value: copy.monthlyValue),
+        _SumLine(label: S.t.cycleMonthly, value: copy.monthlyValue),
         const SizedBox(height: 6),
-        _SumLine(label: 'Yearly', value: copy.yearlyValue),
+        _SumLine(label: S.t.cycleYearly, value: copy.yearlyValue),
         const SizedBox(height: 14),
         Text(
           copy.sourceLine,

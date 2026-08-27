@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/glass.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// How a run of rows is separated.
 enum ItemRowStyle {
@@ -162,7 +163,7 @@ class ItemRow extends StatelessWidget {
                           ),
                           if (trial) ...[
                             const SizedBox(width: 8),
-                            const StatusBadge('Free trial'),
+                            StatusBadge(S.t.freeTrialBadge),
                           ],
                         ],
                       ),

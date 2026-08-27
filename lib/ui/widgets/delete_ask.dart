@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/glass.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// The last thing between an item and the row that stops existing.
 ///
@@ -59,18 +60,12 @@ class DeleteAsk extends StatelessWidget {
   );
 
   /// `12 recorded payments`, or the sentence that says there are none.
-  static String paymentLine(int count) => switch (count) {
-    0 => 'Nothing recorded yet',
-    1 => '1 recorded payment',
-    _ => '$count recorded payments',
-  };
+  static String paymentLine(int count) =>
+      count == 0 ? S.t.recordedPaymentsNone : S.t.recordedPayments(count);
 
   /// `4 pending`, or the sentence that says nothing is waiting.
-  static String reminderLine(int count) => switch (count) {
-    0 => 'None pending',
-    1 => '1 pending reminder',
-    _ => '$count pending reminders',
-  };
+  static String reminderLine(int count) =>
+      count == 0 ? S.t.pendingRemindersNone : S.t.pendingReminders(count);
 
   @override
   Widget build(BuildContext context) {
@@ -100,26 +95,30 @@ class DeleteAsk extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                'Delete $name?',
+                S.t.deleteAskTitle(name),
                 style: SubdockText.detailTitle.copyWith(fontSize: 25),
               ),
               const SizedBox(height: 16),
               _Line(
                 icon: Icons.receipt_long_rounded,
-                label: 'Deleted with it',
+                label: S.t.deleteAskLost,
                 value: paymentLine(paymentCount),
                 danger: paymentCount > 0,
               ),
               const SizedBox(height: 8),
               _Line(
                 icon: Icons.notifications_off_rounded,
-                label: 'Reminders stopped',
+                label: S.t.deleteAskRemindersStopped,
                 value: reminderLine(reminderCount),
               ),
               const SizedBox(height: 18),
-              PrimaryButton('Keep it', onPressed: onCancel),
+              PrimaryButton(S.t.deleteAskKeep, onPressed: onCancel),
               const SizedBox(height: 6),
-              QuietButton('Delete', onPressed: onConfirm, danger: true),
+              QuietButton(
+                S.t.deleteAskConfirm,
+                onPressed: onConfirm,
+                danger: true,
+              ),
             ],
           ),
         ),

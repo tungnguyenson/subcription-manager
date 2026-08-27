@@ -4,6 +4,7 @@ import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/ui/reminder_timeline.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// "What happens next" for one item, drawn as a single column of dated stops.
 ///
@@ -159,8 +160,10 @@ class _StopRow extends StatelessWidget {
       return stop.detail;
     }
     final at = stop.time;
-    if (at == null) return stop.isNext ? 'Reminder · next' : 'Reminder';
-    return stop.isNext ? 'Reminder at $at · next' : 'Reminder at $at';
+    final label = at == null
+        ? S.t.timelineReminder
+        : S.t.timelineReminderAt('$at');
+    return stop.isNext ? S.t.timelineNext(label) : label;
   }
 }
 

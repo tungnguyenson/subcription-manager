@@ -4,6 +4,7 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/upcoming_filter.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
+import 'package:subdock/i18n.dart';
 
 /// Turns the item list into the buckets the Upcoming screen renders.
 ///
@@ -233,16 +234,16 @@ class _Row {
   static String? subtitleOf(TrackedItem item, LocalDate today) {
     final money = item.money;
 
-    if (money == null && item.isTrialOn(today)) return 'Free now';
+    if (money == null && item.isTrialOn(today)) return S.t.freeNow;
 
     final parts = <String>[];
     if (money != null) parts.add(MoneyFormat.full(money));
 
     final position = Instalments.of(item);
     if (position != null) {
-      parts.add('payment ${position.index} of ${position.total}');
+      parts.add(S.t.instalment(position.index, position.total));
     }
 
-    return parts.isEmpty ? null : parts.join(' · ');
+    return parts.isEmpty ? null : parts.join(S.t.bullet);
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/ui/calendar_presenter.dart';
+import 'package:subdock/i18n.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
 import 'package:subdock/ui/widgets/empty_placard.dart';
@@ -205,7 +206,7 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
   List<Widget> _sections(UpcomingView view) => [
     if (view.overdue.isNotEmpty)
       _Section(
-        title: 'Overdue',
+        title: S.t.bucketOverdue,
         count: view.overdue.length,
         tint: SubdockColors.danger,
         entries: view.overdue,
@@ -221,7 +222,7 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
     // them when that is what the reader wants.
     if (view.thisWeek.isNotEmpty)
       _Section(
-        title: 'Next 7 days',
+        title: S.t.bucketNext7,
         count: view.thisWeek.length,
         entries: view.thisWeek,
         onOpen: widget.onOpen,
@@ -234,7 +235,7 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
     // is the only ranking this list needs.
     if (view.thisMonth.isNotEmpty)
       _Section(
-        title: 'Next 30 days',
+        title: S.t.bucketNext30,
         count: view.thisMonth.length,
         entries: view.thisMonth,
         onOpen: widget.onOpen,
@@ -242,7 +243,7 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
       ),
     if (view.later.isNotEmpty)
       _Section(
-        title: 'Later',
+        title: S.t.bucketLater,
         count: view.later.length,
         entries: view.later,
         onOpen: widget.onOpen,
@@ -281,7 +282,7 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
         // A day with nothing on it still gets its heading. Dropping the whole
         // block would leave the reader who just tapped a date with no sign
         // that the tap landed.
-        emptyLine: 'Nothing on this day.',
+        emptyLine: S.t.nothingOnThisDay,
       ),
     ];
   }
@@ -304,7 +305,9 @@ class _TitleRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
-        Expanded(child: Text('Upcoming', style: SubdockText.screenTitle)),
+        Expanded(
+          child: Text(S.t.upcomingTitle, style: SubdockText.screenTitle),
+        ),
         // One link, and it is a link rather than a button: it leaves the
         // screen. The controls that act *on* this screen -- the layout, the
         // trial shortcut, the filter -- moved down to the row below, where
@@ -323,7 +326,7 @@ class _TitleRow extends StatelessWidget {
                   ),
                   SizedBox(width: 5),
                   Text(
-                    'All services',
+                    S.t.allServices,
                     style: TextStyle(
                       fontFamily: SubdockText.family,
                       fontSize: 15,
@@ -384,7 +387,7 @@ class _ControlRow extends StatelessWidget {
           // clip `Free trial` down to `Fre...` on every phone.
           Flexible(
             child: SegmentedRow(
-              labels: const ['List', 'Calendar'],
+              labels: [S.t.layoutList, S.t.layoutCalendar],
               icons: const [
                 Icons.view_agenda_outlined,
                 Icons.calendar_month_outlined,
@@ -411,7 +414,7 @@ class _ControlRow extends StatelessWidget {
               // with no visible cause.
               if (trials > 0 || trialOnly) ...[
                 ChoiceChipPill(
-                  'Free trial',
+                  S.t.freeTrials,
                   count: trials,
                   selected: trialOnly,
                   onTap: onToggleTrial,
@@ -504,7 +507,7 @@ class _FilterSummary extends StatelessWidget {
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                 child: Text(
-                  'Clear',
+                  S.t.filterClear,
                   style: TextStyle(
                     fontFamily: SubdockText.family,
                     fontSize: 14.5,
@@ -542,7 +545,7 @@ class _NoMatches extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Nothing matches these filters',
+            S.t.nothingMatchesFilters,
             style: TextStyle(
               fontFamily: SubdockText.family,
               fontSize: 17,
@@ -558,7 +561,7 @@ class _NoMatches extends StatelessWidget {
           ],
           const SizedBox(height: 16),
           IntrinsicWidth(
-            child: PrimaryButton('Clear filters', onPressed: onClear),
+            child: PrimaryButton(S.t.clearFilters, onPressed: onClear),
           ),
         ],
       ),
@@ -680,7 +683,7 @@ class _EmptyState extends StatelessWidget {
           const EmptyPlacard(),
           const SizedBox(height: 20),
           Text(
-            'Nothing tracked yet',
+            S.t.nothingTracked,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontFamily: SubdockText.family,
@@ -693,12 +696,12 @@ class _EmptyState extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Add the first date you keep forgetting.',
+            S.t.nothingTrackedBody,
             textAlign: TextAlign.center,
             style: SubdockText.summary,
           ),
           const SizedBox(height: 16),
-          IntrinsicWidth(child: PrimaryButton('Add an item', onPressed: onAdd)),
+          IntrinsicWidth(child: PrimaryButton(S.t.addAnItem, onPressed: onAdd)),
         ],
       ),
     );
@@ -731,16 +734,14 @@ abstract final class UpcomingCopy {
   /// as `Claude …` beside them.
   static String when(LocalDate actBy, LocalDate today) {
     final days = today.daysUntil(actBy);
-    if (days < 0) return 'Late';
-    if (days == 0) return 'Today';
-    if (days == 1) return 'Tomorrow';
-    return '${days}d';
+    if (days < 0) return S.t.late;
+    if (days == 0) return S.t.today;
+    if (days == 1) return S.t.tomorrow;
+    return S.t.daysShort(days);
   }
 
-  static String overdueDetail(LocalDate actBy, LocalDate today) {
-    final days = actBy.daysUntil(today);
-    return days == 1 ? '1 day ago' : '$days days ago';
-  }
+  static String overdueDetail(LocalDate actBy, LocalDate today) =>
+      S.t.daysAgo(actBy.daysUntil(today));
 
   /// Day-first, which is how dates are written in Vietnam. Using the device
   /// locale here would show an American reader 08/17 for a date a Vietnamese

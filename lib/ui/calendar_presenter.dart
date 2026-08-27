@@ -5,6 +5,7 @@ import 'package:subdock/domain/upcoming_filter.dart';
 import 'package:subdock/ui/date_copy.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
+import 'package:subdock/i18n.dart';
 
 /// The month grid on Upcoming, and the day the user has open under it.
 ///
@@ -94,7 +95,7 @@ abstract final class CalendarPresenter {
     return CalendarView(
       year: shownYear,
       month: shownMonth,
-      monthLabel: '${DateCopy.month(shownMonth).substring(0, 3)} $shownYear',
+      monthLabel: S.t.monthLabel(S.t.monthShort(shownMonth), shownYear),
       cells: cells,
       selected: day,
       selectedLabel: dayLabel(day),
@@ -109,9 +110,12 @@ abstract final class CalendarPresenter {
   ///
   /// Spelled out rather than 20/08/2026 because it is a heading, and the
   /// weekday is the part that ties it back to the column it was tapped in.
-  static String dayLabel(LocalDate date) =>
-      '${DateCopy.weekday(date).substring(0, 3)} ${date.day} '
-      '${DateCopy.month(date.month).substring(0, 3)} ${date.year}';
+  static String dayLabel(LocalDate date) => S.t.calendarDayLabel(
+    S.t.weekdayShort(date.weekday),
+    date.day,
+    S.t.monthShort(date.month),
+    date.year,
+  );
 
   /// Which day opens when the user arrives at a month.
   ///

@@ -3,6 +3,7 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
+import 'package:subdock/i18n.dart';
 
 /// What kind of thing a row on the timeline is.
 ///
@@ -90,10 +91,7 @@ class ReminderTimeline {
     final parts = [
       ?silence,
       if (droppedForItem > 0)
-        '$droppedForItem further '
-            '${droppedForItem == 1 ? "reminder" : "reminders"} for this item '
-            'did not fit the ${NotificationPlanner.budget} slots the app '
-            'schedules, and will be picked up as the nearer ones pass.',
+        S.t.timelineDropped(droppedForItem, NotificationPlanner.budget),
     ];
     return parts.isEmpty ? null : parts.join(' ');
   }
@@ -167,8 +165,8 @@ abstract final class ReminderTimelinePresenter {
         TimelineStop(
           date: actBy,
           kind: TimelineKind.deadline,
-          label: 'Act by this day',
-          detail: actBy < today ? 'already passed' : null,
+          label: S.t.timelineActBy,
+          detail: actBy < today ? S.t.timelineAlreadyPassed : null,
           isPast: actBy < today,
         ),
       TimelineStop(
@@ -178,10 +176,10 @@ abstract final class ReminderTimelinePresenter {
         // this day is not one charge among many -- it is the one the whole
         // trial was counting down to.
         label: expiring
-            ? 'Expires'
+            ? S.t.timelineExpires
             : trial
-            ? 'First payment'
-            : 'Payment due',
+            ? S.t.timelineFirstPayment
+            : S.t.timelinePaymentDue,
         detail: _dueDetail(item, expiring: expiring, past: expires < today),
         isPast: expires < today,
       ),
@@ -206,9 +204,9 @@ abstract final class ReminderTimelinePresenter {
   }) {
     final money = item.money;
     final amount = money == null ? null : MoneyFormat.full(money);
-    if (past) return [?amount, 'already passed'].join(' · ');
+    if (past) return [?amount, S.t.timelineAlreadyPassed].join(S.t.bullet);
     if (amount == null) return null;
-    return expiring ? amount : '$amount charged';
+    return expiring ? amount : S.t.timelineCharged(amount);
   }
 
   /// Today's row on an item in a free trial: the only fact in this block that
@@ -236,8 +234,8 @@ abstract final class ReminderTimelinePresenter {
         //
         // Never `0 more days`: `isTrialOn` is `today < expiresOn`, so this row
         // is already gone on the morning of the charge.
-        label: 'Free for $left more ${left == 1 ? "day" : "days"}',
-        detail: 'nothing charged yet',
+        label: S.t.timelineFreeForDays(left),
+        detail: S.t.timelineNothingChargedYet,
       ),
     ];
   }
@@ -266,9 +264,7 @@ abstract final class ReminderTimelinePresenter {
           date: nags.first.date,
           time: nags.first.time,
           kind: TimelineKind.nag,
-          label: nags.length == 1
-              ? 'Still not marked as paid'
-              : _nagLabel(nags),
+          label: nags.length == 1 ? S.t.timelineNag : _nagLabel(nags),
         ),
     ];
   }
@@ -276,11 +272,8 @@ abstract final class ReminderTimelinePresenter {
   /// `Then every day until you mark it as paid`, with the step read off the
   /// gap between the first two rather than from the policy enum, so the row
   /// can never claim a cadence the plan is not actually holding.
-  static String _nagLabel(List<PlannedAlert> nags) {
-    final step = nags.first.date.daysUntil(nags[1].date);
-    final every = step == 1 ? 'every day' : 'every $step days';
-    return 'Then $every until you mark it as paid';
-  }
+  static String _nagLabel(List<PlannedAlert> nags) =>
+      S.t.timelineNagEvery(nags.first.date.daysUntil(nags[1].date));
 
   static TimelineKind _kindOf(AlertReason reason) => switch (reason) {
     AlertReason.lead => TimelineKind.lead,
@@ -293,9 +286,9 @@ abstract final class ReminderTimelinePresenter {
     AlertReason.lead => ItemPresenter.leadLabel(alert.leadDays),
     // The user's own words back at them. This row exists because they pressed
     // a button that said "remind me again", and the phrasing is the receipt.
-    AlertReason.snoozed => 'You asked to be reminded',
-    AlertReason.verify => 'Check the date is still right',
-    AlertReason.nag => 'Still not marked as paid',
+    AlertReason.snoozed => S.t.timelineSnoozed,
+    AlertReason.verify => S.t.timelineVerify,
+    AlertReason.nag => S.t.timelineNag,
   };
 
   /// Alerts before the marker on a shared date: an 08:30 reminder on the due
@@ -344,14 +337,9 @@ abstract final class ReminderTimelinePresenter {
   /// its own, and an empty ladder is a trip to the Reminders screen.
   static String? _silence(TrackedItem item, List<PlannedAlert> mine) {
     if (mine.isNotEmpty) return null;
-    if (item.paused) {
-      return 'Reminders are off for this item, so nothing is scheduled.';
-    }
-    if (item.state != ItemState.active) {
-      return 'This item is closed, so nothing more is scheduled.';
-    }
-    return 'No reminders are scheduled. Every step of the ladder for this '
-        'item has already passed.';
+    if (item.paused) return S.t.timelineSilentPaused;
+    if (item.state != ItemState.active) return S.t.timelineSilentClosed;
+    return S.t.timelineSilentLadderDone;
   }
 
   /// `27/08`, or `27/08/2026` once the year stops being the obvious one.

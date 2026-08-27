@@ -3,6 +3,7 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/domain/upcoming_filter.dart';
 import 'package:subdock/ui/item_presenter.dart';
+import 'package:subdock/i18n.dart';
 
 /// One chip in the filter sheet: the key it toggles, and the word on it.
 class FilterOption {
@@ -105,9 +106,9 @@ abstract final class FilterPresenter {
           FilterOption(key: source.id, label: source.name, glyph: source.glyph),
         // Last, and always present. An item with no source said is the normal
         // state of a freshly added row, so this chip is never the empty one.
-        const FilterOption(
+        FilterOption(
           key: UpcomingFilter.noSourceKey,
-          label: 'No source',
+          label: S.t.filterNoSource,
           isAbsence: true,
         ),
       ],
@@ -145,15 +146,15 @@ abstract final class FilterPresenter {
   }) {
     final labels = options.labels;
     final parts = <String>[
-      '$shown of $total ${total == 1 ? 'item' : 'items'}',
-      ..._group(filter.categoryIds, labels, 'types'),
-      ..._group(filter.cycleKeys, labels, 'cycles'),
-      ..._group(filter.sourceIds, labels, 'sources'),
-      if (filter.trialOnly) 'Free trials',
-      if (filter.noPriceOnly) 'No price',
-      if (filter.mutedOnly) 'Reminders off',
+      S.t.filterCount(shown, total),
+      ..._group(filter.categoryIds, labels, S.t.filterTypes),
+      ..._group(filter.cycleKeys, labels, S.t.filterCycles),
+      ..._group(filter.sourceIds, labels, S.t.filterSources),
+      if (filter.trialOnly) S.t.freeTrials,
+      if (filter.noPriceOnly) S.t.filterNoPrice,
+      if (filter.mutedOnly) S.t.filterRemindersOff,
     ];
-    return parts.join(' · ');
+    return parts.join(S.t.bullet);
   }
 
   /// The chips of one group, named or counted.
@@ -164,12 +165,12 @@ abstract final class FilterPresenter {
   static List<String> _group(
     Set<String> keys,
     Map<String, String> labels,
-    String plural,
+    String Function(int count) counted,
   ) {
     // In the order the sheet draws them, not the order the set iterates.
     final named = labels.keys.where(keys.contains).toList();
     if (named.isEmpty) return const [];
-    if (named.length > 2) return ['${named.length} $plural'];
+    if (named.length > 2) return [counted(named.length)];
     return [for (final key in named) labels[key]!];
   }
 }

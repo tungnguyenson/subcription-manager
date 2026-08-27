@@ -1,10 +1,18 @@
 import 'parts/common.dart';
 import 'parts/currency.dart';
+import 'parts/dates.dart';
+import 'parts/item.dart';
 import 'parts/onboarding.dart';
+import 'parts/timeline.dart';
+import 'parts/upcoming.dart';
 
 export 'parts/common.dart';
 export 'parts/currency.dart';
+export 'parts/dates.dart';
+export 'parts/item.dart';
 export 'parts/onboarding.dart';
+export 'parts/timeline.dart';
+export 'parts/upcoming.dart';
 
 /// Every word the interface says, in one language.
 ///
@@ -18,4 +26,11 @@ export 'parts/onboarding.dart';
 /// sentence — Vietnamese does not put the plural where English does, and a
 /// translation handed `'$n days'` cannot fix that.
 abstract class Strings
-    implements CommonStrings, CurrencyStrings, OnboardingStrings {}
+    implements
+        CommonStrings,
+        CurrencyStrings,
+        DateStrings,
+        ItemStrings,
+        OnboardingStrings,
+        TimelineStrings,
+        UpcomingStrings {}

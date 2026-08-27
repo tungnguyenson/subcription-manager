@@ -6,6 +6,7 @@ import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/glass.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/ui/widgets/source_mark.dart';
+import 'package:subdock/i18n.dart';
 
 /// The sheet that narrows the Upcoming list.
 ///
@@ -120,7 +121,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 ),
                 if (options.categories.isNotEmpty)
                   _Group(
-                    title: 'Type',
+                    title: S.t.filterType,
                     children: [
                       for (final option in options.categories)
                         ChoiceChipPill(
@@ -132,7 +133,7 @@ class _FilterSheetState extends State<FilterSheet> {
                   ),
                 if (options.cycles.isNotEmpty)
                   _Group(
-                    title: 'Billing cycle',
+                    title: S.t.filterBillingCycle,
                     children: [
                       for (final option in options.cycles)
                         ChoiceChipPill(
@@ -143,7 +144,7 @@ class _FilterSheetState extends State<FilterSheet> {
                     ],
                   ),
                 _Group(
-                  title: 'Pays from',
+                  title: S.t.filterPaysFrom,
                   children: [
                     for (final option in options.sources)
                       ChoiceChipPill(
@@ -155,16 +156,16 @@ class _FilterSheetState extends State<FilterSheet> {
                   ],
                 ),
                 _Group(
-                  title: 'Only show',
+                  title: S.t.filterOnlyShow,
                   children: [
                     ChoiceChipPill(
-                      'Free trials',
+                      S.t.freeTrials,
                       selected: _filter.trialOnly,
                       onTap: () =>
                           _set(_filter.withTrialOnly(!_filter.trialOnly)),
                     ),
                     ChoiceChipPill(
-                      'No price',
+                      S.t.filterNoPrice,
                       selected: _filter.noPriceOnly,
                       onTap: () =>
                           _set(_filter.withNoPriceOnly(!_filter.noPriceOnly)),
@@ -174,7 +175,7 @@ class _FilterSheetState extends State<FilterSheet> {
                       // pool. That it *widens* rather than narrows is a fact
                       // about the implementation; what the user asked for is
                       // "the ones I switched off".
-                      'Reminders off',
+                      S.t.filterRemindersOff,
                       selected: _filter.mutedOnly,
                       onTap: () =>
                           _set(_filter.withMutedOnly(!_filter.mutedOnly)),
@@ -183,9 +184,7 @@ class _FilterSheetState extends State<FilterSheet> {
                 ),
                 const SizedBox(height: 26),
                 PrimaryButton(
-                  _filter.isEmpty
-                      ? 'Done'
-                      : 'Show $shown ${shown == 1 ? 'item' : 'items'}',
+                  _filter.isEmpty ? S.t.done : S.t.filterShow(shown),
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
@@ -223,7 +222,7 @@ class _Header extends StatelessWidget {
       children: [
         Expanded(
           child: Text(
-            'Filter',
+            S.t.filterTitle,
             style: SubdockText.detailTitle.copyWith(fontSize: 25),
           ),
         ),
@@ -235,7 +234,7 @@ class _Header extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
             child: Text(
-              'Clear all',
+              S.t.filterClearAll,
               style: TextStyle(
                 fontFamily: SubdockText.family,
                 fontSize: 15,

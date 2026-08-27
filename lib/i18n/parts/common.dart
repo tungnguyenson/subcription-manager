@@ -9,6 +9,16 @@ abstract class CommonStrings {
   String get continueOn;
   String get getStarted;
 
+  // ---- the four destinations ----
+  //
+  // The tab bar's labels, and each screen's own title. One string for both:
+  // the label under a tab and the heading of the screen it opens have to be
+  // the same word, or the user cannot tell they arrived where they aimed.
+
+  String get spendingTitle;
+  String get savingsTitle;
+  String get settingsTitle;
+
   // ---- units ----
 
   /// The abbreviation on a big stat card: `14.2M`, `14,2 triệu`.

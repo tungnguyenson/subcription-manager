@@ -4,6 +4,8 @@ import 'theme.dart';
 import 'widgets/glass.dart';
 import 'widgets/tab_mark.dart';
 
+import 'package:subdock/i18n.dart';
+
 /// The four top-level destinations.
 ///
 /// Four, not three. [savings] joined the bar in the Glass design and it is the
@@ -91,13 +93,13 @@ class _TabBar extends StatelessWidget {
               child: Row(
                 children: [
                   _TabButton(
-                    label: 'Upcoming',
+                    label: S.t.upcomingTitle,
                     glyph: TabGlyph.upcoming,
                     active: current == ShellTab.upcoming,
                     onTap: () => onSelect(ShellTab.upcoming),
                   ),
                   _TabButton(
-                    label: 'Spending',
+                    label: S.t.spendingTitle,
                     glyph: TabGlyph.money,
                     active: current == ShellTab.money,
                     onTap: () => onSelect(ShellTab.money),
@@ -110,13 +112,13 @@ class _TabBar extends StatelessWidget {
                     child: Center(child: _AddButton(onTap: onAdd)),
                   ),
                   _TabButton(
-                    label: 'Savings',
+                    label: S.t.savingsTitle,
                     glyph: TabGlyph.savings,
                     active: current == ShellTab.savings,
                     onTap: () => onSelect(ShellTab.savings),
                   ),
                   _TabButton(
-                    label: 'Settings',
+                    label: S.t.settingsTitle,
                     glyph: TabGlyph.settings,
                     active: current == ShellTab.settings,
                     onTap: () => onSelect(ShellTab.settings),
@@ -192,7 +194,7 @@ class _AddButton extends StatelessWidget {
     // to VoiceOver, and it is the one affordance on this bar with no visible
     // word beside it, so a long press naming it is worth having.
     return Tooltip(
-      message: 'Add an item',
+      message: S.t.addAnItem,
       child: Material(
         color: SubdockColors.accent,
         shape: const CircleBorder(),

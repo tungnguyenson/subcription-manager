@@ -4,6 +4,7 @@ import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/ui/calendar_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// The month, with an arrow either side of it.
 ///
@@ -82,17 +83,6 @@ class MonthGrid extends StatelessWidget {
 
   const MonthGrid({super.key, required this.view, this.onSelect});
 
-  /// Monday first, matching [CalendarPresenter].
-  static const List<String> _weekdays = [
-    'MON',
-    'TUE',
-    'WED',
-    'THU',
-    'FRI',
-    'SAT',
-    'SUN',
-  ];
-
   /// Every cell is this tall whether or not it carries a mark.
   ///
   /// Fixed, not sized to its contents. A grid whose rows breathe with the
@@ -113,7 +103,7 @@ class MonthGrid extends StatelessWidget {
         children: [
           Row(
             children: [
-              for (final day in _weekdays)
+              for (final day in S.t.weekdayInitials)
                 Expanded(
                   child: Text(
                     day,
