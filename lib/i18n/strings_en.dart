@@ -1,4 +1,5 @@
 import 'parts/currency_names_en.dart';
+import 'parts/category_names_en.dart';
 import 'strings.dart';
 
 class EnStrings implements Strings {
@@ -29,6 +30,11 @@ class EnStrings implements Strings {
   @override
   String millions(String digits, String symbol, {required bool minorUnits}) =>
       minorUnits ? '$symbol${digits}M' : '${digits}M $symbol';
+
+  // ---- categories ----
+
+  @override
+  String? categoryLabel(String id) => CategoryNamesEn.names[id];
 
   // ---- currency ----
 
@@ -1151,4 +1157,141 @@ class EnStrings implements Strings {
   String get backupNoteUnknown =>
       'Subdock has no account and no server. What you see in the app is the '
       'only copy, and removing the app removes it.';
+
+  // ---- notifications ----
+
+  @override
+  String get channelDeadlines => 'Deadlines';
+  @override
+  String get channelDeadlinesBody => 'Things you lose if the date passes.';
+  @override
+  String get channelReminders => 'Reminders';
+  @override
+  String get channelRemindersBody => 'Renewals and dates worth a glance.';
+
+  @override
+  String get actionMarkAsPaid => 'Mark as paid';
+  @override
+  String get actionRemindTomorrow => 'Remind tomorrow';
+  @override
+  String get actionOpen => 'Open';
+  @override
+  String get actionGotIt => 'Got it';
+
+  @override
+  String get testReminderTitle => 'Test reminder';
+  @override
+  String get testReminderBody => 'Delivery works. Nothing on your list is due.';
+
+  @override
+  String get notifDueToday => 'Due today';
+  @override
+  String get notifDueTomorrow => 'Due tomorrow';
+  @override
+  String notifDueInDays(int days) => 'Due in $days days';
+  @override
+  String get notifOverdue => 'Overdue';
+  @override
+  String get notifVerify => 'Check this date is still right';
+  @override
+  String get notifSnoozed => 'You asked to be reminded';
+  @override
+  String get notifYearlyCostsLess => 'Yearly costs less';
+
+  // ---- the app's own voice ----
+
+  @override
+  String get notificationsOffTitle => 'Notifications are off';
+  @override
+  String get notificationsOffBody => 'Nothing will remind you.';
+  @override
+  String get turnOn => 'On';
+
+  @override
+  String cutAYear(String amount) => 'Cut $amount a year';
+  @override
+  String plansCostLessYearly(int count) =>
+      '$count ${count == 1 ? 'plan' : 'plans'} cost less yearly · cancelling '
+      'saves more';
+
+  @override
+  String get none => 'None';
+
+  @override
+  String savedNamed(String name) => 'Saved "$name".';
+  @override
+  String savedUnderLater(String name) => 'Saved "$name" — it is under Later.';
+  @override
+  String savedUnderNext30(String name) =>
+      'Saved "$name" — it is under Next 30 days.';
+  @override
+  String get askTrialEnds => 'Remind you before the trial ends?';
+  @override
+  String askBeforeCharges(String name) => 'Remind you before $name charges?';
+
+  @override
+  String askLineOnTheDay(String fireOn, String money, String from) =>
+      'Notification on $fireOn, the day it happens$money$from.';
+  @override
+  String askLineBefore(
+    String fireOn,
+    String lead,
+    String actBy,
+    String money,
+    String from,
+  ) => 'Notification on $fireOn — $lead ($actBy)$money$from.';
+  @override
+  String askMoneyThen(String amount) => ' · then $amount';
+  @override
+  String askMoney(String amount) => ' · $amount';
+  @override
+  String askFrom(String source) => ' from $source';
+  @override
+  String reminderSetOn(String date) => 'Reminder set for $date.';
+
+  @override
+  String get sawRenewalDate => 'Did you see the renewal date?';
+  @override
+  String get enterDate => 'Enter date';
+  @override
+  String savedConfirmedDate(String date) => 'Saved $date as confirmed.';
+  @override
+  String get yearlyMentionedInReminder =>
+      'The renewal reminder will mention the yearly price.';
+  @override
+  String remindingAgainOn(String date) => 'Reminding you again on $date.';
+
+  @override
+  String backedUp(String summary) => 'Backed up $summary.';
+  @override
+  String couldNotExport(String error) => 'Could not export: $error';
+  @override
+  String restored(String summary) => 'Restored $summary.';
+  @override
+  String couldNotRestore(String error) => 'Could not restore: $error';
+  @override
+  String couldNotOpenFile(String error) => 'Could not open that file: $error';
+  @override
+  String get noCopyInICloud => 'There is no copy in iCloud yet.';
+  @override
+  String get signInToICloud =>
+      'Sign in to iCloud to reach the copy kept there.';
+  @override
+  String couldNotReadICloud(String detail) => 'Could not read iCloud: $detail.';
+  @override
+  String get unknownError => 'unknown error';
+  @override
+  String takenOn(String date) => 'taken $date';
+
+  @override
+  String get couldNotOpenPage => 'Could not open that page.';
+  @override
+  String couldNotScheduleTest(String error) =>
+      'Could not schedule a test: $error';
+  @override
+  String testSetInexact(String at, String zone) =>
+      'Test set for $at $zone, give or take a few minutes — this device will '
+      'not fire on the minute.';
+  @override
+  String testSet(String at, String zone) => 'Test set for $at $zone.';
 }

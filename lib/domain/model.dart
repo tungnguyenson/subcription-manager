@@ -5,6 +5,10 @@ import 'money.dart';
 import 'recurrence.dart';
 import 'reminders.dart';
 
+import 'package:subdock/i18n.dart';
+
+import 'default_categories.dart';
+
 /// Every persisted enum carries an explicit [wireName] rather than relying on
 /// the Dart identifier.
 ///
@@ -65,7 +69,10 @@ class Category {
   /// (`STREAMING`, `PHONE`); a user-made one gets a generated id.
   final String id;
 
-  /// What the user reads. Editable on shipped rows too.
+  /// The stored name. Editable on shipped rows too.
+  ///
+  /// Read [displayLabel] to put it on screen; this is what is written to the
+  /// row and what a rename compares against.
   final String label;
 
   /// The mark to draw, or null to work it out from the item's name the way an
@@ -97,6 +104,26 @@ class Category {
   final bool builtIn;
 
   final int sortOrder;
+
+  /// What the user reads.
+  ///
+  /// A shipped shelf still carrying the name it was seeded with follows the
+  /// language; anything else is the name the user typed and is left exactly as
+  /// they typed it. That split is the whole rule, and it falls out of one
+  /// comparison: a shelf is "still shipped" only while its stored label
+  /// matches the default for its id.
+  ///
+  /// The seeding happens in a migration, long before onboarding has asked
+  /// which language to read in, so the stored label cannot be the translated
+  /// one. Translating at read time is what lets a database seeded in English
+  /// come up in Vietnamese without rewriting a single row the user might have
+  /// since edited.
+  String get displayLabel {
+    if (!builtIn) return label;
+    final shipped = defaultCategoryLabels[id];
+    if (shipped == null || shipped != label) return label;
+    return S.t.categoryLabel(id) ?? label;
+  }
 
   const Category({
     required this.id,

@@ -168,7 +168,7 @@ class ItemDetailScreen extends StatelessWidget {
             // card is derived or already has an editor of its own.
             DetailRow(
               label: S.t.rowCategory,
-              value: category.label,
+              value: category.displayLabel,
               onTap: onEdit,
             ),
             DetailRow(

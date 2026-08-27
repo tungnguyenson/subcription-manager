@@ -130,3 +130,13 @@ const List<Category> defaultCategories = [
 
 /// The shelf a hand-typed item falls back to.
 const String fallbackCategoryId = 'OTHER';
+
+/// The label each shipped shelf was seeded with, by id.
+///
+/// The one thing [Category.displayLabel] needs to tell "never renamed" from
+/// "renamed back to exactly the English default", and the second of those two
+/// is a case nobody will ever hit. Derived from the list above rather than
+/// written out again, so the two cannot drift.
+final Map<String, String> defaultCategoryLabels = {
+  for (final category in defaultCategories) category.id: category.label,
+};

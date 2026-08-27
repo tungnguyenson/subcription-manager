@@ -92,7 +92,7 @@ abstract final class FilterPresenter {
     return FilterOptions(
       categories: [
         for (final shelf in shelves)
-          FilterOption(key: shelf.id, label: shelf.label),
+          FilterOption(key: shelf.id, label: shelf.displayLabel),
       ],
       cycles: [
         for (final key in cycleKeys)

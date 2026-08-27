@@ -1,4 +1,5 @@
 import 'parts/currency_names_vi.dart';
+import 'parts/category_names_vi.dart';
 import 'strings.dart';
 
 class ViStrings implements Strings {
@@ -29,6 +30,11 @@ class ViStrings implements Strings {
   @override
   String millions(String digits, String symbol, {required bool minorUnits}) =>
       minorUnits ? '$symbol${digits}M' : '$digits triệu $symbol';
+
+  // ---- categories ----
+
+  @override
+  String? categoryLabel(String id) => CategoryNamesVi.names[id];
 
   // ---- currency ----
 
@@ -1115,4 +1121,142 @@ class ViStrings implements Strings {
   String get backupNoteUnknown =>
       'Subdock không có tài khoản và không có máy chủ. Những gì bạn thấy trong '
       'app là bản duy nhất, và gỡ app là mất nó.';
+
+  // ---- notifications ----
+
+  @override
+  String get channelDeadlines => 'Hạn chót';
+  @override
+  String get channelDeadlinesBody => 'Những thứ qua ngày là mất.';
+  @override
+  String get channelReminders => 'Nhắc hạn';
+  @override
+  String get channelRemindersBody => 'Gia hạn và những ngày đáng liếc qua.';
+
+  @override
+  String get actionMarkAsPaid => 'Đã trả';
+  @override
+  String get actionRemindTomorrow => 'Mai nhắc lại';
+  @override
+  String get actionOpen => 'Mở';
+  @override
+  String get actionGotIt => 'Đã biết';
+
+  @override
+  String get testReminderTitle => 'Nhắc hạn thử';
+  @override
+  String get testReminderBody =>
+      'Thông báo tới được. Không có gì trong danh sách đến hạn cả.';
+
+  @override
+  String get notifDueToday => 'Đến hạn hôm nay';
+  @override
+  String get notifDueTomorrow => 'Đến hạn ngày mai';
+  @override
+  String notifDueInDays(int days) => 'Còn $days ngày nữa đến hạn';
+  @override
+  String get notifOverdue => 'Đã quá hạn';
+  @override
+  String get notifVerify => 'Kiểm lại ngày này còn đúng không';
+  @override
+  String get notifSnoozed => 'Bạn đã hẹn nhắc lại';
+  @override
+  String get notifYearlyCostsLess => 'Gói năm rẻ hơn';
+
+  // ---- the app's own voice ----
+
+  @override
+  String get notificationsOffTitle => 'Thông báo đang tắt';
+  @override
+  String get notificationsOffBody => 'Sẽ không có gì nhắc bạn.';
+  @override
+  String get turnOn => 'Bật';
+
+  @override
+  String cutAYear(String amount) => 'Cắt được $amount một năm';
+  @override
+  String plansCostLessYearly(int count) =>
+      '$count gói rẻ hơn nếu trả theo năm · huỷ hẳn còn tiết kiệm hơn';
+
+  @override
+  String get none => 'Chưa có';
+
+  @override
+  String savedNamed(String name) => 'Đã lưu "$name".';
+  @override
+  String savedUnderLater(String name) =>
+      'Đã lưu "$name" — nó nằm ở nhóm Xa hơn.';
+  @override
+  String savedUnderNext30(String name) =>
+      'Đã lưu "$name" — nó nằm ở nhóm 30 ngày tới.';
+  @override
+  String get askTrialEnds => 'Nhắc bạn trước khi hết dùng thử nhé?';
+  @override
+  String askBeforeCharges(String name) =>
+      'Nhắc bạn trước khi $name trừ tiền nhé?';
+
+  @override
+  String askLineOnTheDay(String fireOn, String money, String from) =>
+      'Thông báo vào $fireOn, đúng ngày nó xảy ra$money$from.';
+  @override
+  String askLineBefore(
+    String fireOn,
+    String lead,
+    String actBy,
+    String money,
+    String from,
+  ) => 'Thông báo vào $fireOn — $lead ($actBy)$money$from.';
+  @override
+  String askMoneyThen(String amount) => ' · rồi $amount';
+  @override
+  String askMoney(String amount) => ' · $amount';
+  @override
+  String askFrom(String source) => ' từ $source';
+  @override
+  String reminderSetOn(String date) => 'Đã hẹn nhắc vào $date.';
+
+  @override
+  String get sawRenewalDate => 'Bạn có thấy ngày gia hạn không?';
+  @override
+  String get enterDate => 'Nhập ngày';
+  @override
+  String savedConfirmedDate(String date) =>
+      'Đã lưu $date, ghi là đã hỏi nhà cung cấp.';
+  @override
+  String get yearlyMentionedInReminder =>
+      'Nhắc hạn gia hạn sẽ nói kèm giá gói năm.';
+  @override
+  String remindingAgainOn(String date) => 'Sẽ nhắc lại vào $date.';
+
+  @override
+  String backedUp(String summary) => 'Đã sao lưu $summary.';
+  @override
+  String couldNotExport(String error) => 'Không xuất được: $error';
+  @override
+  String restored(String summary) => 'Đã khôi phục $summary.';
+  @override
+  String couldNotRestore(String error) => 'Không khôi phục được: $error';
+  @override
+  String couldNotOpenFile(String error) => 'Không mở được tệp đó: $error';
+  @override
+  String get noCopyInICloud => 'Chưa có bản nào trong iCloud.';
+  @override
+  String get signInToICloud => 'Đăng nhập iCloud để lấy bản cất ở đó.';
+  @override
+  String couldNotReadICloud(String detail) => 'Không đọc được iCloud: $detail.';
+  @override
+  String get unknownError => 'lỗi không rõ';
+  @override
+  String takenOn(String date) => 'lấy ngày $date';
+
+  @override
+  String get couldNotOpenPage => 'Không mở được trang đó.';
+  @override
+  String couldNotScheduleTest(String error) => 'Không hẹn thử được: $error';
+  @override
+  String testSetInexact(String at, String zone) =>
+      'Đã hẹn thử lúc $at $zone, xê dịch vài phút — máy này không bắn đúng '
+      'phút được.';
+  @override
+  String testSet(String at, String zone) => 'Đã hẹn thử lúc $at $zone.';
 }

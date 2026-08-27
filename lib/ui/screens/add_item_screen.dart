@@ -392,7 +392,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   // sheet behind this row does with the whole screen.
                   label: S.t.fieldCategory,
                   child: PickerField(
-                    value: _chosen?.label ?? S.t.fieldPickCategory,
+                    value: _chosen?.displayLabel ?? S.t.fieldPickCategory,
                     placeholder: _chosen == null,
                     onTap: _pickCategory,
                   ),
@@ -948,7 +948,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
       title: S.t.fieldCategory,
       options: [
         for (final category in widget.categories.all)
-          (category.id, category.label),
+          (category.id, category.displayLabel),
       ],
       selected: _category.id,
     );

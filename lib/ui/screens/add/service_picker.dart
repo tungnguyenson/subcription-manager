@@ -165,7 +165,7 @@ class _ServicePickerState extends State<ServicePicker> {
             children: [
               for (final shelf in shelves)
                 ChoiceChipPill(
-                  widget.categories[shelf].label,
+                  widget.categories[shelf].displayLabel,
                   selected: shelf == _shelf,
                   onTap: () => setState(() => _shelf = shelf),
                 ),
@@ -185,7 +185,8 @@ class _ServicePickerState extends State<ServicePicker> {
                 if (i > 0) const SizedBox(height: SubdockSpacing.rowGap),
                 _CatalogRow(
                   entry: rows[i],
-                  shelfLabel: widget.categories[rows[i].categoryId].label,
+                  shelfLabel:
+                      widget.categories[rows[i].categoryId].displayLabel,
                   onTap: () => widget.onPick?.call(rows[i]),
                 ),
               ],

@@ -4,6 +4,8 @@ import 'category_book.dart';
 import 'local_date.dart';
 import 'model.dart';
 
+import 'package:subdock/i18n.dart';
+
 enum AlertReason {
   /// Scheduled ahead of the act-by date.
   lead,
@@ -193,7 +195,7 @@ abstract final class NotificationPlanner {
     // lead reminders only: a nag fires *after* the money has gone, and telling
     // someone the yearly plan is cheaper at that point is worse than silence.
     final note = item.yearlyChoice == YearlyChoice.remind
-        ? 'Yearly costs less'
+        ? S.t.notifYearlyCostsLess
         : null;
 
     for (final lead in item.leadDays) {

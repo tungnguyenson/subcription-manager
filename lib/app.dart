@@ -767,9 +767,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           banner: _notificationsGranted
               ? null
               : AlertBanner(
-                  title: 'Notifications are off',
-                  body: 'Nothing will remind you.',
-                  actionLabel: 'On',
+                  title: S.t.notificationsOffTitle,
+                  body: S.t.notificationsOffBody,
+                  actionLabel: S.t.turnOn,
                   onAction: _requestNotifications,
                 ),
           onAdd: _openAdd,
@@ -794,11 +794,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           // that the savings screen has nothing on it.
           savings: savings.hasYearly
               ? SavingsTeaser(
-                  headline: 'Cut ${savings.total} a year',
-                  line:
-                      '${savings.yearly.length} '
-                      '${savings.yearly.length == 1 ? "plan" : "plans"} '
-                      'cost less yearly · cancelling saves more',
+                  headline: S.t.cutAYear(savings.total),
+                  line: S.t.plansCostLessYearly(savings.yearly.length),
                 )
               : null,
           onOpenSavings: () => setState(() => _tab = ShellTab.savings),
@@ -830,7 +827,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               .toSet()
               .toList(),
           servicesLine: _servicesLine,
-          sourcesLine: _sources.isEmpty ? 'None' : '${_sources.length}',
+          sourcesLine: _sources.isEmpty ? S.t.none : '${_sources.length}',
           backup: BackupPresenter.build(
             items: _items,
             saved: _lastBackupOn,
@@ -1019,7 +1016,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     navigator.pop();
     if (navigator.canPop()) navigator.pop();
     _openItem(updated);
-    _confirm('Saved "${updated.name}".');
+    _confirm(S.t.savedNamed(updated.name));
   }
 
   void _openHistory() => _push(
@@ -1070,16 +1067,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       // The failure worth catching is Android refusing an exact alarm, which
       // throws rather than degrading. Saying so beats a button that looks like
       // it worked.
-      if (mounted) _confirm('Could not schedule a test: $error');
+      if (mounted) _confirm(S.t.couldNotScheduleTest('$error'));
       return;
     }
     if (!mounted) return;
 
     _confirm(
       sent.exact == false
-          ? 'Test set for ${sent.at} ${sent.zone}, give or take a few '
-                'minutes — this device will not fire on the minute.'
-          : 'Test set for ${sent.at} ${sent.zone}.',
+          ? S.t.testSetInexact('${sent.at}', sent.zone)
+          : S.t.testSet('${sent.at}', sent.zone),
     );
   }
 
@@ -1190,7 +1186,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void _setYearlyChoice(String itemId, YearlyChoice choice) {
     unawaited(widget.repository.setYearlyChoice(itemId, choice));
     if (choice == YearlyChoice.remind) {
-      _confirm('The renewal reminder will mention the yearly price.');
+      _confirm(S.t.yearlyMentionedInReminder);
     }
   }
 
@@ -1220,7 +1216,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (uri == null) return;
     final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (opened || !mounted) return;
-    _confirm('Could not open that page.');
+    _confirm(S.t.couldNotOpenPage);
   }
 
   /// Leaves for the page where a service is actually cancelled.
@@ -1238,7 +1234,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (opened || !mounted) return;
 
     _openedProviderPageFor = null;
-    _confirm('Could not open that page.');
+    _confirm(S.t.couldNotOpenPage);
   }
 
   /// A form opened over everything: no tab bar.
@@ -1384,24 +1380,27 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final money = item.money == null
         ? ''
         : (item.isTrialOn(today)
-              ? ' · then ${MoneyFormat.full(item.money!)}'
-              : ' · ${MoneyFormat.full(item.money!)}');
-    final from = source == null ? '' : ' from ${source.name}';
+              ? S.t.askMoneyThen(MoneyFormat.full(item.money!))
+              : S.t.askMoney(MoneyFormat.full(item.money!)));
+    final from = source == null ? '' : S.t.askFrom(source.name);
 
     final line = lead == 0
-        ? 'Notification on ${MoneyFormat.shortDate(fireOn)}, the day it '
-              'happens$money$from.'
-        : 'Notification on ${MoneyFormat.shortDate(fireOn)} — '
-              '${ItemPresenter.leadLabel(lead).toLowerCase()} '
-              '(${MoneyFormat.shortDate(item.actBy)})$money$from.';
+        ? S.t.askLineOnTheDay(MoneyFormat.shortDate(fireOn), money, from)
+        : S.t.askLineBefore(
+            MoneyFormat.shortDate(fireOn),
+            ItemPresenter.leadLabel(lead).toLowerCase(),
+            MoneyFormat.shortDate(item.actBy),
+            money,
+            from,
+          );
 
     final allowed = await NotificationAsk.show(
       context,
       itemName: item.name,
       iconName: item.iconName,
       title: item.isTrialOn(today)
-          ? 'Remind you before the trial ends?'
-          : 'Remind you before ${item.name} charges?',
+          ? S.t.askTrialEnds
+          : S.t.askBeforeCharges(item.name),
       line: line,
     );
     if (!mounted) return;
@@ -1409,7 +1408,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (allowed == true) {
       await _requestNotifications();
       if (!mounted) return;
-      _confirm('Reminder set for ${MoneyFormat.shortDate(fireOn)}.');
+      _confirm(S.t.reminderSetOn(MoneyFormat.shortDate(fireOn)));
       return;
     }
 
@@ -1420,12 +1419,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   String _savedMessage(TrackedItem item) {
     final days = LocalDate.today().daysUntil(item.actBy);
     if (days > UpcomingPresenter.monthHorizonDays) {
-      return 'Saved "${item.name}" — it is under Later.';
+      return S.t.savedUnderLater(item.name);
     }
     if (days > UpcomingPresenter.weekHorizonDays) {
-      return 'Saved "${item.name}" — it is under Next 30 days.';
+      return S.t.savedUnderNext30(item.name);
     }
-    return 'Saved "${item.name}".';
+    return S.t.savedNamed(item.name);
   }
 
   /// Leaves for the page that actually holds this subscription.
@@ -1469,7 +1468,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // the user tapping a button that does nothing -- the exact failure mode
     // that ruled out a USSD button for prepaid SIMs.
     _openedProviderPageFor = null;
-    _confirm('Could not open that page.');
+    _confirm(S.t.couldNotOpenPage);
   }
 
   /// The prompt on the way back in.
@@ -1482,7 +1481,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          'Did you see the renewal date?',
+          S.t.sawRenewalDate,
           style: SubdockText.rowValue.copyWith(color: SubdockColors.card),
         ),
         backgroundColor: SubdockColors.ink,
@@ -1492,7 +1491,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         ),
         duration: const Duration(seconds: 8),
         action: SnackBarAction(
-          label: 'Enter date',
+          label: S.t.enterDate,
           textColor: SubdockColors.card,
           onPressed: () => unawaited(_confirmRenewalDate(item)),
         ),
@@ -1537,7 +1536,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final navigator = Navigator.of(context);
     navigator.popUntil((route) => route.isFirst);
     _openItem(updated);
-    _confirm('Saved ${MoneyFormat.date(picked)} as confirmed.');
+    _confirm(S.t.savedConfirmedDate(MoneyFormat.date(picked)));
   }
 
   /// Hands the whole database to the system share sheet as one JSON file.
@@ -1567,9 +1566,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       // something that did not happen.
       if (!saved) return;
       await widget.backups.markSaved(LocalDate.fromDateTime(at));
-      if (mounted) _confirm('Backed up ${backup.summary}.');
+      if (mounted) _confirm(S.t.backedUp(backup.summary));
     } on Exception catch (error) {
-      if (mounted) _confirm('Could not export: $error');
+      if (mounted) _confirm(S.t.couldNotExport('$error'));
     }
   }
 
@@ -1586,13 +1585,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       case CloudState.saved:
         break;
       case CloudState.missing:
-        _confirm('There is no copy in iCloud yet.');
+        _confirm(S.t.noCopyInICloud);
         return;
       case CloudState.signedOut:
-        _confirm('Sign in to iCloud to reach the copy kept there.');
+        _confirm(S.t.signInToICloud);
         return;
       default:
-        _confirm('Could not read iCloud: ${fetch.detail ?? "unknown error"}.');
+        _confirm(S.t.couldNotReadICloud(fetch.detail ?? S.t.unknownError));
         return;
     }
 
@@ -1612,7 +1611,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     try {
       text = await widget.files.pick();
     } on Exception catch (error) {
-      if (mounted) _confirm('Could not open that file: $error');
+      if (mounted) _confirm(S.t.couldNotOpenFile('$error'));
       return;
     }
     if (text == null || !mounted) return;
@@ -1658,7 +1657,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     try {
       await widget.backups.restore(backup, from: from);
     } on Exception catch (error) {
-      if (mounted) _confirm('Could not restore: $error');
+      if (mounted) _confirm(S.t.couldNotRestore('$error'));
       return;
     }
 
@@ -1666,7 +1665,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // The streams re-plan on their own, but the signature guard would skip the
     // re-apply whenever the new plan happens to match the old one.
     _appliedSignature = '';
-    if (mounted) _confirm('Restored ${backup.summary}.');
+    if (mounted) _confirm(S.t.restored(backup.summary));
   }
 
   /// `taken 25/08/2026`, or null when the file does not say.
@@ -1676,7 +1675,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   static String? _takenOn(String iso) {
     final at = DateTime.tryParse(iso);
     if (at == null) return null;
-    return 'taken ${MoneyFormat.date(LocalDate.fromDateTime(at.toLocal()))}';
+    return S.t.takenOn(MoneyFormat.date(LocalDate.fromDateTime(at.toLocal())));
   }
 
   void _confirm(String message) {
@@ -1738,7 +1737,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
     if (!mounted) return;
     Navigator.of(context).maybePop();
-    _confirm('Reminding you again on ${MoneyFormat.shortDate(until)}.');
+    _confirm(S.t.remindingAgainOn(MoneyFormat.shortDate(until)));
   }
 
   /// Ends the series after the payment that is currently due.

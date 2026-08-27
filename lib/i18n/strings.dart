@@ -1,21 +1,27 @@
+import 'parts/app.dart';
+import 'parts/category.dart';
 import 'parts/common.dart';
 import 'parts/currency.dart';
 import 'parts/dates.dart';
 import 'parts/form.dart';
 import 'parts/item.dart';
 import 'parts/money.dart';
+import 'parts/notification.dart';
 import 'parts/onboarding.dart';
 import 'parts/savings.dart';
 import 'parts/settings.dart';
 import 'parts/timeline.dart';
 import 'parts/upcoming.dart';
 
+export 'parts/app.dart';
+export 'parts/category.dart';
 export 'parts/common.dart';
 export 'parts/currency.dart';
 export 'parts/dates.dart';
 export 'parts/form.dart';
 export 'parts/item.dart';
 export 'parts/money.dart';
+export 'parts/notification.dart';
 export 'parts/onboarding.dart';
 export 'parts/savings.dart';
 export 'parts/settings.dart';
@@ -35,12 +41,15 @@ export 'parts/upcoming.dart';
 /// translation handed `'$n days'` cannot fix that.
 abstract class Strings
     implements
+        AppStrings,
+        CategoryStrings,
         CommonStrings,
         CurrencyStrings,
         DateStrings,
         FormStrings,
         ItemStrings,
         MoneyStrings,
+        NotificationStrings,
         OnboardingStrings,
         SavingsStrings,
         SettingsStrings,

@@ -379,7 +379,7 @@ abstract final class MoneyPresenter {
     return [
       for (final entry in totals.entries)
         CategorySpend(
-          label: categories[entry.key].label,
+          label: categories[entry.key].displayLabel,
           total: entry.value.approximateBase!,
           converted: entry.value.converted,
           share: entry.value.approximateBase!.minor / whole,

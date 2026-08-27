@@ -5,6 +5,7 @@ import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/notification_planner.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:subdock/i18n.dart';
 
 /// Action ids the notification's buttons send back. Stable strings, because
 /// iOS keeps registered categories across launches.
@@ -82,15 +83,15 @@ class NotificationScheduler {
           actions: [
             DarwinNotificationAction.plain(
               NotificationAction.done,
-              'Mark as paid',
+              S.t.actionMarkAsPaid,
             ),
             DarwinNotificationAction.plain(
               NotificationAction.snoozeOneDay,
-              'Remind tomorrow',
+              S.t.actionRemindTomorrow,
             ),
             DarwinNotificationAction.plain(
               NotificationAction.openItem,
-              'Open',
+              S.t.actionOpen,
               options: {DarwinNotificationActionOption.foreground},
             ),
           ],
@@ -98,7 +99,10 @@ class NotificationScheduler {
         DarwinNotificationCategory(
           NotificationCategory.informational,
           actions: [
-            DarwinNotificationAction.plain(NotificationAction.done, 'Got it'),
+            DarwinNotificationAction.plain(
+              NotificationAction.done,
+              S.t.actionGotIt,
+            ),
           ],
         ),
       ],
@@ -131,18 +135,18 @@ class NotificationScheduler {
     if (android == null) return;
 
     await android.createNotificationChannel(
-      const AndroidNotificationChannel(
+      AndroidNotificationChannel(
         NotificationCategory.actionable,
-        'Deadlines',
-        description: 'Things you lose if the date passes.',
+        S.t.channelDeadlines,
+        description: S.t.channelDeadlinesBody,
         importance: Importance.high,
       ),
     );
     await android.createNotificationChannel(
-      const AndroidNotificationChannel(
+      AndroidNotificationChannel(
         NotificationCategory.informational,
-        'Reminders',
-        description: 'Renewals and dates worth a glance.',
+        S.t.channelReminders,
+        description: S.t.channelRemindersBody,
         importance: Importance.low,
       ),
     );
@@ -294,14 +298,14 @@ class NotificationScheduler {
 
     await _plugin.zonedSchedule(
       id: testId,
-      title: 'Test reminder',
-      body: 'Delivery works. Nothing on your list is due.',
+      title: S.t.testReminderTitle,
+      body: S.t.testReminderBody,
       scheduledDate: when,
       androidScheduleMode: _modeFor(exact),
-      notificationDetails: const NotificationDetails(
+      notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           NotificationCategory.actionable,
-          'Deadlines',
+          S.t.channelDeadlines,
           importance: Importance.high,
           priority: Priority.high,
         ),
@@ -345,7 +349,7 @@ class NotificationScheduler {
           alert.timeSensitive
               ? NotificationCategory.actionable
               : NotificationCategory.informational,
-          alert.timeSensitive ? 'Deadlines' : 'Reminders',
+          alert.timeSensitive ? S.t.channelDeadlines : S.t.channelReminders,
           // Set here too because the channel carries it only from the moment
           // the channel is created; these decide how the post is drawn on
           // Android 7 and below, which has no channels at all.
@@ -354,24 +358,24 @@ class NotificationScheduler {
           // Same ids as the iOS actions, so one handler serves both.
           actions: <AndroidNotificationAction>[
             if (alert.timeSensitive) ...[
-              const AndroidNotificationAction(
+              AndroidNotificationAction(
                 NotificationAction.done,
-                'Mark as paid',
+                S.t.actionMarkAsPaid,
               ),
-              const AndroidNotificationAction(
+              AndroidNotificationAction(
                 NotificationAction.snoozeOneDay,
-                'Remind tomorrow',
+                S.t.actionRemindTomorrow,
               ),
-              const AndroidNotificationAction(
+              AndroidNotificationAction(
                 NotificationAction.openItem,
-                'Open',
+                S.t.actionOpen,
                 showsUserInterface: true,
                 cancelNotification: false,
               ),
             ] else
-              const AndroidNotificationAction(
+              AndroidNotificationAction(
                 NotificationAction.done,
-                'Got it',
+                S.t.actionGotIt,
               ),
           ],
           // Android's counterpart to threadIdentifier: three reminders for one
@@ -399,13 +403,13 @@ class NotificationScheduler {
 
   String _title(PlannedAlert alert) => switch (alert.reason) {
     AlertReason.lead => switch (alert.leadDays) {
-      0 => 'Due today',
-      1 => 'Due tomorrow',
-      final days => 'Due in $days days',
+      0 => S.t.notifDueToday,
+      1 => S.t.notifDueTomorrow,
+      final days => S.t.notifDueInDays(days),
     },
-    AlertReason.nag => 'Overdue',
-    AlertReason.verify => 'Check this date is still right',
-    AlertReason.snoozed => 'You asked to be reminded',
+    AlertReason.nag => S.t.notifOverdue,
+    AlertReason.verify => S.t.notifVerify,
+    AlertReason.snoozed => S.t.notifSnoozed,
   };
 
   /// `zonedSchedule` needs a real timezone database; the plugin does not load

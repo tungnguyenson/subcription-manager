@@ -60,14 +60,17 @@ abstract final class ServicesPresenter {
     return [
       for (final category in categories.all)
         if (byCategory[category.id] case final rows?)
-          ServiceGroup(label: category.label, rows: rows),
+          ServiceGroup(label: category.displayLabel, rows: rows),
 
       // Anything pointing at a shelf that is not in the book. The foreign key
       // is supposed to make this impossible; it is drawn rather than dropped
       // because a service missing from this list is a service the user thinks
       // they are not being charged for.
       for (final id in byCategory.keys.where((id) => !categories.contains(id)))
-        ServiceGroup(label: categories.fallback.label, rows: byCategory[id]!),
+        ServiceGroup(
+          label: categories.fallback.displayLabel,
+          rows: byCategory[id]!,
+        ),
     ];
   }
 
