@@ -704,4 +704,207 @@ class EnStrings implements Strings {
   String get manageInGooglePlay => 'Manage in Google Play';
   @override
   String get boughtThroughAppStore => 'Bought through the App Store?';
+
+  // ---- settings ----
+
+  @override
+  String get rowCurrency => 'Currency';
+  @override
+  String get rowLanguage => 'Language';
+  @override
+  String get rowWidget => 'Widget';
+  @override
+  String get widgetNotYet => 'Not yet';
+  @override
+  String get rowAppearance => 'Appearance';
+  @override
+  String get themeSystem => 'System';
+  @override
+  String get themeLight => 'Light';
+  @override
+  String get themeDark => 'Dark';
+  @override
+  String get themeSystemBody =>
+      'Following the phone. This changes when the system setting does, '
+      'including on a schedule.';
+  @override
+  String get themeLightBody => 'Always light, whatever the phone is set to.';
+  @override
+  String get themeDarkBody => 'Always dark, whatever the phone is set to.';
+  @override
+  String get sectionBackup => 'Backup';
+  @override
+  String get sectionApp => 'App';
+  @override
+  String get rowAbout => 'About';
+  @override
+  String get rowICloud => 'iCloud';
+  @override
+  String get rowFile => 'File';
+  @override
+  String get rowReminders => 'Reminders';
+  @override
+  String get rowPaymentSources => 'Payment sources';
+  @override
+  String get exportABackup => 'Export a backup';
+  @override
+  String droppedRemindersTitle(int count) =>
+      '$count reminders could not be scheduled';
+  @override
+  String droppedRemindersBody(int budget, String names) =>
+      'This app schedules at most $budget reminders at a time. '
+      'Left out: $names.';
+
+  // ---- about ----
+
+  @override
+  String get aboutTitle => 'About';
+  @override
+  String get aboutLead =>
+      'Subdock tracks anything with an expiry date and reminds you before it '
+      'lapses.';
+  @override
+  String get aboutThisBuild => 'This build';
+  @override
+  String get aboutVersion => 'Version';
+  @override
+  String get aboutBuild => 'Build';
+  @override
+  String get aboutWhatItDoes => 'What it does with your list';
+  @override
+  String get aboutAccount => 'Account';
+  @override
+  String get aboutServer => 'Server';
+  @override
+  String get aboutNone => 'None';
+  @override
+  String get aboutYourList => 'Your list';
+  @override
+  String get aboutOnThisPhone => 'On this phone';
+  @override
+  String get aboutPrices =>
+      'Prices in the built-in service list are what each provider had '
+      'published on the day they were checked, and the app says which day. '
+      'They are there to fill a field in, not to tell you what you are paying.';
+
+  // ---- payment sources ----
+
+  @override
+  String get sourcesTitle => 'Payment sources';
+  @override
+  String get sourcesLead =>
+      'A name you recognise, so a reminder can tell you which card or account '
+      'is about to be charged. Nothing is connected to your bank.';
+  @override
+  String get sourcesNewItems => 'New items';
+  @override
+  String get sourcesStartsOn => 'Starts on';
+  @override
+  String get sourcesYours => 'Your sources';
+  @override
+  String get sourcesEmpty =>
+      'No sources yet. Add the card or account you pay most bills from.';
+  @override
+  String get sourcesAddOne => 'Add one';
+  @override
+  String get sourcesAddTitle => 'Add source';
+  @override
+  String get sourcesAddLead =>
+      'A nickname is enough. Never enter a full card number.';
+  @override
+  String get sourcesNameHint => 'e.g. VCB 4412';
+  @override
+  String sourcesDefaultUsage(String usage) => 'Default · $usage';
+  @override
+  String get sourcesRemove => 'Remove';
+  @override
+  String get sourcesNotUsedYet => 'Not used yet';
+  @override
+  String sourcesItemCount(int count) =>
+      '$count ${count == 1 ? 'item' : 'items'}';
+
+  // ---- all services ----
+
+  @override
+  String get servicesLead =>
+      'Turn one off and it stops showing up on Upcoming and stops sending '
+      'reminders. Nothing is deleted.';
+  @override
+  String get servicesEmpty => 'Nothing tracked yet.';
+  @override
+  String get servicesAdd => 'Add a service';
+  @override
+  String servicesRemindersFor(String name) => '$name reminders';
+  @override
+  String get servicesOff => 'Off · no reminders';
+  @override
+  String servicesTrialEnds(String date) => 'Trial ends $date';
+  @override
+  String servicesNext(String date) => 'Next $date';
+
+  // ---- history ----
+
+  @override
+  String get historyTitle => 'History';
+  @override
+  String get historyAll => 'All';
+  @override
+  String get historyPaid => 'Paid';
+  @override
+  String get historyMissed => 'Missed';
+  @override
+  String historyMonthWithYear(String month, int year) => '$month $year';
+  @override
+  String historyClosedClean(int count) =>
+      '$count closed. This is the record of what did not happen.';
+  @override
+  String historyClosedWithMissed(int count, int missed) =>
+      '$count closed · $missed after the date had passed.';
+  @override
+  String historyClosedOnTime(int count) => '$count closed on time or before.';
+  @override
+  String historyClosedLate(int count) =>
+      '$count closed after the date had passed.';
+  @override
+  String get historyEmptyAll =>
+      'Nothing closed yet. What you deal with in time is recorded here.';
+  @override
+  String get historyEmptyPaid => 'Nothing closed on time yet.';
+  @override
+  String get historyEmptyMissed => 'Nothing has gone past its date unhandled.';
+  @override
+  String get historyVerbMissed => 'missed';
+  @override
+  String get historyVerbHandled => 'handled';
+  @override
+  String get historyVerbPaid => 'paid';
+  @override
+  String get historyVerbRenewed => 'renewed';
+
+  // ---- reminders ----
+
+  @override
+  String get remindersDefaultSchedule => 'Default schedule';
+  @override
+  String get remindersSchedule => 'Schedule';
+  @override
+  String get remindersTimeOfDay => 'Time of day';
+  @override
+  String get remindersSendAt => 'Send at';
+  @override
+  String get remindersChannels => 'Channels';
+  @override
+  String get remindersPush => 'Push';
+  @override
+  String get remindersSendTest => 'Send a test reminder';
+  @override
+  String get remindersTurnOffForItem => 'Turn off every reminder for this item';
+  @override
+  String get remindersNotificationsOff =>
+      'Notifications are off, so nothing is delivered.';
+  @override
+  String get remindersInexact =>
+      'This device is not allowing alarms at an exact time, so reminders '
+      'arrive when the system next wakes rather than at the minute above. '
+      'Allow "Alarms & reminders" in system settings to fix it.';
 }

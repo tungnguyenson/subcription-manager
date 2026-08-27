@@ -4,6 +4,7 @@ import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// The reminder defaults, for the app rather than for one item.
 ///
@@ -114,14 +115,9 @@ class ReminderRulesScreen extends StatelessWidget {
         // defaults propagate is documentation, and documentation does not
         // belong on a settings page.
         if (!pushGranted)
-          const Footnote('Notifications are off, so nothing is delivered.')
+          Footnote(S.t.remindersNotificationsOff)
         else if (exactTiming == false)
-          const Footnote(
-            'This device is not allowing alarms at an exact time, so '
-            'reminders arrive when the system next wakes rather than at the '
-            'minute above. Allow "Alarms & reminders" in system settings to '
-            'fix it.',
-          ),
+          Footnote(S.t.remindersInexact),
       ],
     );
   }

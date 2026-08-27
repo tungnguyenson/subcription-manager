@@ -670,4 +670,207 @@ class ViStrings implements Strings {
   String get manageInGooglePlay => 'Quản lý trong Google Play';
   @override
   String get boughtThroughAppStore => 'Bạn mua qua App Store?';
+
+  // ---- settings ----
+
+  @override
+  String get rowCurrency => 'Loại tiền';
+  @override
+  String get rowLanguage => 'Ngôn ngữ';
+  @override
+  String get rowWidget => 'Widget';
+  @override
+  String get widgetNotYet => 'Chưa có';
+  @override
+  String get rowAppearance => 'Giao diện';
+  @override
+  String get themeSystem => 'Theo máy';
+  @override
+  String get themeLight => 'Sáng';
+  @override
+  String get themeDark => 'Tối';
+  @override
+  String get themeSystemBody =>
+      'Đi theo điện thoại. Máy đổi lúc nào thì app đổi lúc đó, kể cả khi máy '
+      'đổi theo giờ đã hẹn.';
+  @override
+  String get themeLightBody => 'Luôn sáng, bất kể máy đang đặt gì.';
+  @override
+  String get themeDarkBody => 'Luôn tối, bất kể máy đang đặt gì.';
+  @override
+  String get sectionBackup => 'Sao lưu';
+  @override
+  String get sectionApp => 'Ứng dụng';
+  @override
+  String get rowAbout => 'Giới thiệu';
+  @override
+  String get rowICloud => 'iCloud';
+  @override
+  String get rowFile => 'Tệp';
+  @override
+  String get rowReminders => 'Nhắc hạn';
+  @override
+  String get rowPaymentSources => 'Nguồn tiền';
+  @override
+  String get exportABackup => 'Xuất một bản sao lưu';
+  @override
+  String droppedRemindersTitle(int count) =>
+      'Có $count nhắc hạn không đặt được';
+  @override
+  String droppedRemindersBody(int budget, String names) =>
+      'App chỉ đặt được nhiều nhất $budget nhắc hạn một lúc. '
+      'Không đặt được: $names.';
+
+  // ---- about ----
+
+  @override
+  String get aboutTitle => 'Giới thiệu';
+  @override
+  String get aboutLead =>
+      'Subdock theo dõi mọi thứ có ngày hết hạn và nhắc bạn trước khi nó mất '
+      'hiệu lực.';
+  @override
+  String get aboutThisBuild => 'Bản này';
+  @override
+  String get aboutVersion => 'Phiên bản';
+  @override
+  String get aboutBuild => 'Số build';
+  @override
+  String get aboutWhatItDoes => 'App làm gì với danh sách của bạn';
+  @override
+  String get aboutAccount => 'Tài khoản';
+  @override
+  String get aboutServer => 'Máy chủ';
+  @override
+  String get aboutNone => 'Không có';
+  @override
+  String get aboutYourList => 'Danh sách của bạn';
+  @override
+  String get aboutOnThisPhone => 'Nằm trên máy này';
+  @override
+  String get aboutPrices =>
+      'Giá trong danh mục dịch vụ đóng gói sẵn là giá nhà cung cấp niêm yết '
+      'vào ngày được tra, và app nói rõ ngày đó. Chúng ở đây để điền nhanh một '
+      'ô, không phải để nói bạn đang trả bao nhiêu.';
+
+  // ---- payment sources ----
+
+  @override
+  String get sourcesTitle => 'Nguồn tiền';
+  @override
+  String get sourcesLead =>
+      'Một cái tên bạn nhận ra, để nhắc hạn nói được thẻ hay tài khoản nào sắp '
+      'bị trừ. App không nối với ngân hàng nào cả.';
+  @override
+  String get sourcesNewItems => 'Mục mới';
+  @override
+  String get sourcesStartsOn => 'Mặc định dùng';
+  @override
+  String get sourcesYours => 'Nguồn của bạn';
+  @override
+  String get sourcesEmpty =>
+      'Chưa có nguồn nào. Thêm thẻ hay tài khoản bạn hay trả tiền nhất.';
+  @override
+  String get sourcesAddOne => 'Thêm một cái';
+  @override
+  String get sourcesAddTitle => 'Thêm nguồn';
+  @override
+  String get sourcesAddLead =>
+      'Một cái tên gọi là đủ. Đừng bao giờ nhập số thẻ đầy đủ.';
+  @override
+  String get sourcesNameHint => 'ví dụ VCB 4412';
+  @override
+  String sourcesDefaultUsage(String usage) => 'Mặc định · $usage';
+  @override
+  String get sourcesRemove => 'Bỏ';
+  @override
+  String get sourcesNotUsedYet => 'Chưa dùng lần nào';
+  @override
+  String sourcesItemCount(int count) => '$count mục';
+
+  // ---- all services ----
+
+  @override
+  String get servicesLead =>
+      'Tắt một mục thì nó thôi hiện trên Sắp tới và thôi gửi nhắc hạn. Không '
+      'có gì bị xoá.';
+  @override
+  String get servicesEmpty => 'Chưa theo dõi gì.';
+  @override
+  String get servicesAdd => 'Thêm một dịch vụ';
+  @override
+  String servicesRemindersFor(String name) => 'Nhắc hạn của $name';
+  @override
+  String get servicesOff => 'Đã tắt · không nhắc';
+  @override
+  String servicesTrialEnds(String date) => 'Hết dùng thử $date';
+  @override
+  String servicesNext(String date) => 'Kỳ tới $date';
+
+  // ---- history ----
+
+  @override
+  String get historyTitle => 'Lịch sử';
+  @override
+  String get historyAll => 'Tất cả';
+  @override
+  String get historyPaid => 'Đúng hạn';
+  @override
+  String get historyMissed => 'Trễ';
+  @override
+  String historyMonthWithYear(String month, int year) => '$month/$year';
+  @override
+  String historyClosedClean(int count) =>
+      'Đã xong $count. Đây là bằng chứng cho những gì đã không xảy ra.';
+  @override
+  String historyClosedWithMissed(int count, int missed) =>
+      'Đã xong $count · $missed cái xong sau khi ngày hạn đã qua.';
+  @override
+  String historyClosedOnTime(int count) =>
+      'Đã xong $count, đúng hạn hoặc sớm hơn.';
+  @override
+  String historyClosedLate(int count) =>
+      'Đã xong $count, sau khi ngày hạn đã qua.';
+  @override
+  String get historyEmptyAll =>
+      'Chưa có gì đóng lại. Những việc bạn xử lý kịp sẽ được ghi ở đây.';
+  @override
+  String get historyEmptyPaid => 'Chưa có gì đóng lại đúng hạn.';
+  @override
+  String get historyEmptyMissed => 'Chưa có gì để lỡ quá ngày hạn.';
+  @override
+  String get historyVerbMissed => 'trễ';
+  @override
+  String get historyVerbHandled => 'đã xử lý';
+  @override
+  String get historyVerbPaid => 'đã trả';
+  @override
+  String get historyVerbRenewed => 'đã gia hạn';
+
+  // ---- reminders ----
+
+  @override
+  String get remindersDefaultSchedule => 'Thang nhắc mặc định';
+  @override
+  String get remindersSchedule => 'Thang nhắc';
+  @override
+  String get remindersTimeOfDay => 'Giờ trong ngày';
+  @override
+  String get remindersSendAt => 'Gửi lúc';
+  @override
+  String get remindersChannels => 'Kênh';
+  @override
+  String get remindersPush => 'Thông báo đẩy';
+  @override
+  String get remindersSendTest => 'Gửi thử một nhắc hạn';
+  @override
+  String get remindersTurnOffForItem => 'Tắt mọi nhắc hạn của mục này';
+  @override
+  String get remindersNotificationsOff =>
+      'Thông báo đang tắt, nên không có gì được gửi đi.';
+  @override
+  String get remindersInexact =>
+      'Máy này không cho app đặt báo thức đúng phút, nên nhắc hạn sẽ tới lúc '
+      'hệ thống thức dậy chứ không phải đúng giờ ở trên. Cho phép mục "Báo '
+      'thức và lời nhắc" trong cài đặt hệ thống để sửa.';
 }

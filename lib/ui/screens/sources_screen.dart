@@ -6,6 +6,7 @@ import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/ui/widgets/source_mark.dart';
+import 'package:subdock/i18n.dart';
 
 /// One source, plus what is pointing at it.
 class SourceRow {
@@ -88,7 +89,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
   Future<void> _pickDefault() async {
     final picked = await chooseOption<String>(
       context,
-      title: 'Starts on',
+      title: S.t.sourcesStartsOn,
       options: [
         for (final row in widget.rows) (row.source.id, row.source.name),
       ],
@@ -125,24 +126,20 @@ class _SourcesScreenState extends State<SourcesScreen> {
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: widget.onBack),
-        Text('Payment sources', style: SubdockText.screenTitle),
+        Text(S.t.sourcesTitle, style: SubdockText.screenTitle),
         const SizedBox(height: 6),
-        Text(
-          'A name you recognise, so a reminder can tell you which card or '
-          'account is about to be charged. Nothing is connected to your bank.',
-          style: SubdockText.summary,
-        ),
+        Text(S.t.sourcesLead, style: SubdockText.summary),
         // A control of its own rather than an action on every row. The list
         // rows already carry Remove, and a second link beside it would leave
         // the name they both act on about a third of the row wide; this also
         // puts the setting where the reader is looking when they wonder why a
         // new item arrived pointing at one of these.
         if (widget.rows.length > 1) ...[
-          const SectionLabel('New items'),
+          SectionLabel(S.t.sourcesNewItems),
           GroupedCard(
             children: [
               DetailRow(
-                label: 'Starts on',
+                label: S.t.sourcesStartsOn,
                 value: _defaultName,
                 onTap: widget.onSetDefault == null ? null : _pickDefault,
               ),
@@ -150,7 +147,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
           ),
         ],
         if (widget.rows.isNotEmpty) ...[
-          const SectionLabel('Your sources'),
+          SectionLabel(S.t.sourcesYours),
           GroupedCard(
             children: [
               for (final row in widget.rows)
@@ -163,13 +160,9 @@ class _SourcesScreenState extends State<SourcesScreen> {
         ] else
           Padding(
             padding: EdgeInsets.only(top: 20),
-            child: Text(
-              'No sources yet. Add the card or account you pay most bills '
-              'from.',
-              style: SubdockText.summary,
-            ),
+            child: Text(S.t.sourcesEmpty, style: SubdockText.summary),
           ),
-        const SectionLabel('Add one'),
+        SectionLabel(S.t.sourcesAddOne),
         GroupedCard(
           padding: const EdgeInsets.all(14),
           children: [
@@ -193,12 +186,12 @@ class _SourcesScreenState extends State<SourcesScreen> {
               onSubmit: _add,
             ),
             const SizedBox(height: 10),
-            PrimaryButton('Add source', onPressed: _canAdd ? _add : null),
-            const SizedBox(height: 10),
-            Text(
-              'A nickname is enough. Never enter a full card number.',
-              style: SubdockText.caption,
+            PrimaryButton(
+              S.t.sourcesAddTitle,
+              onPressed: _canAdd ? _add : null,
             ),
+            const SizedBox(height: 10),
+            Text(S.t.sourcesAddLead, style: SubdockText.caption),
           ],
         ),
       ],
@@ -235,7 +228,7 @@ class _NameField extends StatelessWidget {
           border: InputBorder.none,
           isDense: true,
           contentPadding: EdgeInsets.symmetric(vertical: 12),
-          hintText: 'e.g. VCB 4412',
+          hintText: S.t.sourcesNameHint,
           hintStyle: TextStyle(
             fontFamily: SubdockText.family,
             fontSize: 16,
@@ -288,7 +281,9 @@ class _SourceListRow extends StatelessWidget {
                   // The list says which one it is too. Someone scanning three
                   // cards should not have to read a row further up to work out
                   // which of them a new item lands on.
-                  row.isDefault ? 'Default · ${row.usage}' : row.usage,
+                  row.isDefault
+                      ? S.t.sourcesDefaultUsage(row.usage)
+                      : row.usage,
                   style: SubdockText.caption.copyWith(fontSize: 13.5),
                 ),
               ],
@@ -300,7 +295,7 @@ class _SourceListRow extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               child: Text(
-                'Remove',
+                S.t.sourcesRemove,
                 style: TextStyle(
                   fontFamily: SubdockText.family,
                   fontSize: 14.5,

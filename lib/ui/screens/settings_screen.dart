@@ -5,6 +5,8 @@ import 'package:subdock/ui/backup_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/item_row.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
+import 'package:subdock/domain/fx.dart';
 
 class SettingsScreen extends StatelessWidget {
   /// Alerts the planner had to leave out. Shown at the top, not buried in a
@@ -69,7 +71,7 @@ class SettingsScreen extends StatelessWidget {
   const SettingsScreen({
     super.key,
     this.droppedReminders = const [],
-    this.currencyLabel = 'VND',
+    this.currencyLabel = Fx.defaultBase,
     this.languageLabel = 'English',
     this.onOpenCurrency,
     this.onOpenLanguage,
@@ -94,11 +96,9 @@ class SettingsScreen extends StatelessWidget {
   /// means the app will change on its own later, which is the one thing about
   /// this setting a user can be surprised by.
   String get _themeNote => switch (themeChoice) {
-    ThemeChoice.system =>
-      'Following the phone. This changes when the system setting does, '
-          'including on a schedule.',
-    ThemeChoice.light => 'Always light, whatever the phone is set to.',
-    ThemeChoice.dark => 'Always dark, whatever the phone is set to.',
+    ThemeChoice.system => S.t.themeSystemBody,
+    ThemeChoice.light => S.t.themeLightBody,
+    ThemeChoice.dark => S.t.themeDarkBody,
   };
 
   @override
@@ -107,16 +107,15 @@ class SettingsScreen extends StatelessWidget {
     return ListView(
       padding: SubdockSpacing.screenPadding(context),
       children: [
-        Text('Settings', style: SubdockText.screenTitle),
+        Text(S.t.settingsTitle, style: SubdockText.screenTitle),
         if (droppedReminders.isNotEmpty) ...[
           const SizedBox(height: 18),
           AlertBanner(
-            title:
-                '${droppedReminders.length} reminders could not be scheduled',
-            body:
-                'This app schedules at most '
-                '${NotificationPlanner.budget} reminders at a time. '
-                'Left out: ${droppedReminders.join(", ")}.',
+            title: S.t.droppedRemindersTitle(droppedReminders.length),
+            body: S.t.droppedRemindersBody(
+              NotificationPlanner.budget,
+              droppedReminders.join(', '),
+            ),
           ),
         ],
         // Under the reminder banner rather than above it. That one is about
@@ -128,7 +127,7 @@ class SettingsScreen extends StatelessWidget {
           AlertBanner(
             title: title,
             body: backup?.warningBody ?? '',
-            actionLabel: 'Export a backup',
+            actionLabel: S.t.exportABackup,
             onAction: onExport,
           ),
         ],
@@ -136,28 +135,28 @@ class SettingsScreen extends StatelessWidget {
         GroupedCard(
           children: [
             DetailRow.nav(
-              label: 'All services',
+              label: S.t.allServices,
               value: servicesLine,
               onTap: onOpenServices,
             ),
-            DetailRow.nav(label: 'Reminders', onTap: onOpenReminders),
+            DetailRow.nav(label: S.t.rowReminders, onTap: onOpenReminders),
             DetailRow.nav(
-              label: 'Payment sources',
+              label: S.t.rowPaymentSources,
               value: sourcesLine,
               onTap: onOpenSources,
             ),
-            DetailRow.nav(label: 'History', onTap: onOpenHistory),
+            DetailRow.nav(label: S.t.rowHistory, onTap: onOpenHistory),
             // Destinations now, not value rows. Both were answered once during
             // onboarding, and the row that shows the answer has to be the row
             // that changes it -- a person who picked the wrong one there has
             // nowhere else to go looking.
             DetailRow.nav(
-              label: 'Currency',
+              label: S.t.rowCurrency,
               value: currencyLabel,
               onTap: onOpenCurrency,
             ),
             DetailRow.nav(
-              label: 'Language',
+              label: S.t.rowLanguage,
               value: languageLabel,
               onTap: onOpenLanguage,
             ),
@@ -173,15 +172,15 @@ class SettingsScreen extends StatelessWidget {
             // having — it answers "can this put my next date on the home
             // screen" without the user hunting for a setting that is not
             // there.
-            const DetailRow(label: 'Widget', value: 'Not yet'),
+            DetailRow(label: S.t.rowWidget, value: S.t.widgetNotYet),
           ],
         ),
         // Above Backup, not below it. Currency, Language and Widget above are
         // all "what the app shows"; this is the same question asked about
         // colour. Backup is about the data, which is a different subject.
-        const SectionLabel('Appearance'),
+        SectionLabel(S.t.rowAppearance),
         SegmentedRow(
-          labels: const ['System', 'Light', 'Dark'],
+          labels: [S.t.themeSystem, S.t.themeLight, S.t.themeDark],
           selected: themeChoice.index,
           onSelect: onThemeChoice == null
               ? null
@@ -191,7 +190,7 @@ class SettingsScreen extends StatelessWidget {
         // under System. A footnote that comes and goes moves the two Backup
         // rows under the reader's thumb while they are choosing.
         Footnote(_themeNote),
-        const SectionLabel('Backup'),
+        SectionLabel(S.t.sectionBackup),
         GroupedCard(
           children: [
             // Each row carries its own date, and they are different dates: a
@@ -204,12 +203,12 @@ class SettingsScreen extends StatelessWidget {
             // already carries the database to the next phone.
             if (backup?.cloud != null)
               DetailRow.nav(
-                label: 'iCloud',
+                label: S.t.rowICloud,
                 value: backup?.cloudLine,
                 onTap: onOpenCloudBackup,
               ),
             DetailRow.nav(
-              label: 'File',
+              label: S.t.rowFile,
               value: backup?.fileLine,
               onTap: onOpenFileBackup,
             ),
@@ -224,9 +223,9 @@ class SettingsScreen extends StatelessWidget {
         // Last on the screen. It is the one row nobody comes to Settings to
         // find: it is read once, by someone reporting a problem, and every
         // other row here is something a user actually came for.
-        const SectionLabel('App'),
+        SectionLabel(S.t.sectionApp),
         GroupedCard(
-          children: [DetailRow.nav(label: 'About', onTap: onAbout)],
+          children: [DetailRow.nav(label: S.t.rowAbout, onTap: onAbout)],
         ),
       ],
     );

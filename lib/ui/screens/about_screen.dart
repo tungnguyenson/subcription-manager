@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// What this build is, and what the app does with what it is given.
 ///
@@ -40,37 +41,32 @@ class AboutScreen extends StatelessWidget {
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: onBack),
-        Text('About', style: SubdockText.screenTitle),
+        Text(S.t.aboutTitle, style: SubdockText.screenTitle),
         const SizedBox(height: 6),
-        Text(
-          'Subdock tracks anything with an expiry date and reminds you before '
-          'it lapses.',
-          style: SubdockText.summary,
-        ),
-        const SectionLabel('This build'),
+        Text(S.t.aboutLead, style: SubdockText.summary),
+        SectionLabel(S.t.aboutThisBuild),
         GroupedCard(
           children: [
-            DetailRow(label: 'Version', value: version, monoValue: true),
-            DetailRow(label: 'Build', value: buildNumber, monoValue: true),
+            DetailRow(label: S.t.aboutVersion, value: version, monoValue: true),
+            DetailRow(
+              label: S.t.aboutBuild,
+              value: buildNumber,
+              monoValue: true,
+            ),
           ],
         ),
-        const SectionLabel('What it does with your list'),
+        SectionLabel(S.t.aboutWhatItDoes),
         GroupedCard(
           children: [
             // Three answers to the question a careful person asks about an app
             // that knows when their bills are due. Value rows rather than
             // prose, because the shape is what makes them read as facts.
-            DetailRow(label: 'Account', value: 'None'),
-            DetailRow(label: 'Server', value: 'None'),
-            DetailRow(label: 'Your list', value: 'On this phone'),
+            DetailRow(label: S.t.aboutAccount, value: S.t.aboutNone),
+            DetailRow(label: S.t.aboutServer, value: S.t.aboutNone),
+            DetailRow(label: S.t.aboutYourList, value: S.t.aboutOnThisPhone),
           ],
         ),
-        const Footnote(
-          'Prices in the built-in service list are what each provider had '
-          'published on the day they were checked, and the app says which day. '
-          'They are there to fill a field in, not to tell you what you are '
-          'paying.',
-        ),
+        Footnote(S.t.aboutPrices),
       ],
     );
   }

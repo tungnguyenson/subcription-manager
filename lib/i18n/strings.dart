@@ -5,6 +5,7 @@ import 'parts/item.dart';
 import 'parts/money.dart';
 import 'parts/onboarding.dart';
 import 'parts/savings.dart';
+import 'parts/settings.dart';
 import 'parts/timeline.dart';
 import 'parts/upcoming.dart';
 
@@ -15,6 +16,7 @@ export 'parts/item.dart';
 export 'parts/money.dart';
 export 'parts/onboarding.dart';
 export 'parts/savings.dart';
+export 'parts/settings.dart';
 export 'parts/timeline.dart';
 export 'parts/upcoming.dart';
 
@@ -38,5 +40,6 @@ abstract class Strings
         MoneyStrings,
         OnboardingStrings,
         SavingsStrings,
+        SettingsStrings,
         TimelineStrings,
         UpcomingStrings {}

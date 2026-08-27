@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// One service on the list, already worded.
 class ServiceToggle {
@@ -74,13 +75,9 @@ class ServicesScreen extends StatelessWidget {
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: onBack),
-        Text('All services', style: SubdockText.screenTitle),
+        Text(S.t.allServices, style: SubdockText.screenTitle),
         const SizedBox(height: 6),
-        Text(
-          'Turn one off and it stops showing up on Upcoming and stops sending '
-          'reminders. Nothing is deleted.',
-          style: SubdockText.summary,
-        ),
+        Text(S.t.servicesLead, style: SubdockText.summary),
         for (final group in groups) ...[
           Padding(
             padding: const EdgeInsets.only(top: 26, bottom: 10),
@@ -103,10 +100,10 @@ class ServicesScreen extends StatelessWidget {
         if (groups.isEmpty)
           Padding(
             padding: EdgeInsets.only(top: 26),
-            child: Text('Nothing tracked yet.', style: SubdockText.summary),
+            child: Text(S.t.servicesEmpty, style: SubdockText.summary),
           ),
         const SizedBox(height: 20),
-        SecondaryButton('Add a service', accent: true, onPressed: onAdd),
+        SecondaryButton(S.t.servicesAdd, accent: true, onPressed: onAdd),
       ],
     );
   }
@@ -182,7 +179,7 @@ class _ToggleRow extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           Semantics(
-            label: '${row.name} reminders',
+            label: S.t.servicesRemindersFor(row.name),
             child: AppToggle(value: row.on, onChanged: onToggle),
           ),
         ],

@@ -5,6 +5,7 @@ import 'package:subdock/ui/reminders_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// One item's reminder ladder.
 ///
@@ -64,13 +65,13 @@ class RemindersScreen extends StatelessWidget {
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: onBack),
-        Text('Reminders', style: SubdockText.screenTitle),
+        Text(S.t.rowReminders, style: SubdockText.screenTitle),
         const SizedBox(height: 6),
         Text(
           '${item.name} · ${RemindersPresenter.anchorLine(item)}',
           style: SubdockText.summary,
         ),
-        const SectionLabel('Schedule'),
+        SectionLabel(S.t.remindersSchedule),
         GroupedCard(
           children: [
             for (final lead in leads)
@@ -87,11 +88,11 @@ class RemindersScreen extends StatelessWidget {
               ),
           ],
         ),
-        const SectionLabel('Time of day'),
+        SectionLabel(S.t.remindersTimeOfDay),
         GroupedCard(
           children: [
             DetailRow(
-              label: 'Send at',
+              label: S.t.remindersSendAt,
               value: item.remindAt.toString(),
               monoValue: true,
               onTap: onPickTime,
@@ -101,7 +102,7 @@ class RemindersScreen extends StatelessWidget {
         Footnote(RemindersPresenter.budgetLine(heldSlots, droppedElsewhere)),
         const SizedBox(height: 24),
         QuietButton(
-          'Turn off every reminder for this item',
+          S.t.remindersTurnOffForItem,
           onPressed: onDisableAll,
           danger: true,
         ),
@@ -140,9 +141,7 @@ class _RungRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  lead == 0
-                      ? 'On the day'
-                      : '$lead ${lead == 1 ? "day" : "days"} before',
+                  lead == 0 ? S.t.leadOnTheDay : S.t.leadDaysBefore(lead),
                   style: SubdockText.rowLink,
                 ),
                 if (detail != null) ...[

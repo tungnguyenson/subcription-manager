@@ -4,6 +4,7 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/screens/services_screen.dart';
 import 'package:subdock/ui/screens/sources_screen.dart';
+import 'package:subdock/i18n.dart';
 
 /// The two list screens that answer "what is in here", worded.
 ///
@@ -77,16 +78,16 @@ abstract final class ServicesPresenter {
   /// will happen on it — so showing it beside the word "off" would be showing
   /// two contradictory things on one line.
   static String _subtitle(TrackedItem item, LocalDate today) {
-    if (item.paused) return 'Off · no reminders';
+    if (item.paused) return S.t.servicesOff;
 
     final parts = <String>[
       if (item.isTrialOn(today))
-        'Trial ends ${MoneyFormat.shortDate(item.expiresOn)}'
+        S.t.servicesTrialEnds(MoneyFormat.shortDate(item.expiresOn))
       else
-        'Next ${MoneyFormat.shortDate(item.expiresOn)}',
+        S.t.servicesNext(MoneyFormat.shortDate(item.expiresOn)),
       if (item.money case final money?) MoneyFormat.full(money),
     ];
-    return parts.join(' · ');
+    return parts.join(S.t.bullet);
   }
 
   /// Each source, with what is pointing at it.
@@ -114,9 +115,9 @@ abstract final class ServicesPresenter {
           itemCount: used.length,
           isDefault: source.id == defaultId,
           usage: switch (used.length) {
-            0 => 'Not used yet',
+            0 => S.t.sourcesNotUsedYet,
             1 => used.single.name,
-            final n => '$n items',
+            final n => S.t.sourcesItemCount(n),
           },
         );
       }(),

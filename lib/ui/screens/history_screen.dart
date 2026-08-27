@@ -7,16 +7,24 @@ import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
+import 'package:subdock/domain/fx.dart';
+import 'package:subdock/domain/money.dart';
 
 /// Which rows the user is looking at.
 enum HistoryFilter {
-  all('All'),
-  paid('Paid'),
-  missed('Missed');
+  all,
+  paid,
+  missed;
 
-  final String label;
-
-  const HistoryFilter(this.label);
+  /// A getter rather than a constructor argument: an enum's arguments have to
+  /// be compile-time constants, and a label that follows the language cannot
+  /// be one.
+  String get label => switch (this) {
+    HistoryFilter.all => S.t.historyAll,
+    HistoryFilter.paid => S.t.historyPaid,
+    HistoryFilter.missed => S.t.historyMissed,
+  };
 }
 
 /// One closed occurrence as the screen shows it.
@@ -74,7 +82,9 @@ abstract final class HistoryPresenter {
   /// month name on a two-year-old row reads as this year's.
   static String monthLabel(LocalDate date, {required int currentYear}) {
     final name = DateCopy.month(date.month);
-    return date.year == currentYear ? name : '$name ${date.year}';
+    return date.year == currentYear
+        ? name
+        : S.t.historyMonthWithYear(name, date.year);
   }
 
   /// The subtitle at the top. Names what the list is *for*, because a log of
@@ -90,21 +100,18 @@ abstract final class HistoryPresenter {
         // "The record of what did not happen" is only true while nothing on
         // the list went past its date. Said over a list with six misses in it,
         // the screen is contradicting its own rows.
-        HistoryFilter.all when missed == 0 =>
-          '$count closed. This is the record of what did not happen.',
-        HistoryFilter.all =>
-          '$count closed · $missed after the date had passed.',
-        HistoryFilter.paid => '$count closed on time or before.',
-        HistoryFilter.missed => '$count closed after the date had passed.',
+        HistoryFilter.all when missed == 0 => S.t.historyClosedClean(count),
+        HistoryFilter.all => S.t.historyClosedWithMissed(count, missed),
+        HistoryFilter.paid => S.t.historyClosedOnTime(count),
+        HistoryFilter.missed => S.t.historyClosedLate(count),
       };
     }
     return switch (filter) {
-      HistoryFilter.all =>
-        'Nothing closed yet. What you deal with in time is recorded here.',
-      HistoryFilter.paid => 'Nothing closed on time yet.',
+      HistoryFilter.all => S.t.historyEmptyAll,
+      HistoryFilter.paid => S.t.historyEmptyPaid,
       // Says what it means rather than "nothing here". An empty Missed list is
       // the one result on this screen that is good news.
-      HistoryFilter.missed => 'Nothing has gone past its date unhandled.',
+      HistoryFilter.missed => S.t.historyEmptyMissed,
     };
   }
 }
@@ -155,7 +162,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: widget.onBack),
-        Text('History', style: SubdockText.screenTitle),
+        Text(S.t.historyTitle, style: SubdockText.screenTitle),
         const SizedBox(height: 12),
         Row(
           children: [
@@ -258,7 +265,7 @@ abstract final class HistoryFromEvents {
           itemName: items[event.itemId]?.name ?? event.itemId,
           on: event.forDueDate,
           what: _missed(event)
-              ? 'missed'
+              ? S.t.historyVerbMissed
               : _what(items[event.itemId], categories),
           amount: _amount(event),
           missed: _missed(event),
@@ -290,9 +297,11 @@ abstract final class HistoryFromEvents {
   /// and an item that is no longer around at all is *handled*, which claims
   /// nothing.
   static String _what(TrackedItem? item, CategoryBook categories) {
-    if (item == null) return 'handled';
+    if (item == null) return S.t.historyVerbHandled;
     final shelf = categories[item.categoryId];
-    return shelf.isObligation && shelf.countsTowardSpend ? 'paid' : 'renewed';
+    return shelf.isObligation && shelf.countsTowardSpend
+        ? S.t.historyVerbPaid
+        : S.t.historyVerbRenewed;
   }
 
   /// Shows the figure from the bank statement when there is one. It always
@@ -301,6 +310,8 @@ abstract final class HistoryFromEvents {
   static String? _amount(HandledEvent event) {
     final minor = event.actualChargedMinor ?? event.baseAmountMinor;
     if (minor == null) return null;
-    return '${MoneyFormat.grouped(minor)} ₫';
+    // The currency the charge was recorded in, not the dong by name. A row
+    // written for a dollar subscription used to come back with a ₫ on it.
+    return MoneyFormat.full(Money(minor, event.currency ?? Fx.base));
   }
 }
