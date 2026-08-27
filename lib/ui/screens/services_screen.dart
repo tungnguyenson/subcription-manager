@@ -69,13 +69,14 @@ class ServicesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     return ListView(
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: onBack),
-        const Text('All services', style: SubdockText.screenTitle),
+        Text('All services', style: SubdockText.screenTitle),
         const SizedBox(height: 6),
-        const Text(
+        Text(
           'Turn one off and it stops showing up on Upcoming and stops sending '
           'reminders. Nothing is deleted.',
           style: SubdockText.summary,
@@ -100,7 +101,7 @@ class ServicesScreen extends StatelessWidget {
           ),
         ],
         if (groups.isEmpty)
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 26),
             child: Text('Nothing tracked yet.', style: SubdockText.summary),
           ),

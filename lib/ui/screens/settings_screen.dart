@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/ui/backup_presenter.dart';
 import 'package:subdock/ui/theme.dart';
@@ -52,6 +53,14 @@ class SettingsScreen extends StatelessWidget {
   final VoidCallback? onOpenCloudBackup;
   final VoidCallback? onOpenFileBackup;
 
+  /// Which of the two Glass variants the app paints in.
+  ///
+  /// A three-way tray rather than a switch, because [ThemeChoice.system] is a
+  /// real answer: a phone that turns dark at sunset is saying something, and a
+  /// switch can only ignore it or fight it.
+  final ThemeChoice themeChoice;
+  final ValueChanged<ThemeChoice>? onThemeChoice;
+
   final VoidCallback? onAbout;
 
   const SettingsScreen({
@@ -69,15 +78,31 @@ class SettingsScreen extends StatelessWidget {
     this.onExport,
     this.onOpenCloudBackup,
     this.onOpenFileBackup,
+    this.themeChoice = ThemeChoice.system,
+    this.onThemeChoice,
     this.onAbout,
   });
 
+  /// What the tray is actually doing, said out loud.
+  ///
+  /// The tray shows which of the three is picked; it cannot say that System
+  /// means the app will change on its own later, which is the one thing about
+  /// this setting a user can be surprised by.
+  String get _themeNote => switch (themeChoice) {
+    ThemeChoice.system =>
+      'Following the phone. This changes when the system setting does, '
+          'including on a schedule.',
+    ThemeChoice.light => 'Always light, whatever the phone is set to.',
+    ThemeChoice.dark => 'Always dark, whatever the phone is set to.',
+  };
+
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     return ListView(
       padding: SubdockSpacing.screenPadding(context),
       children: [
-        const Text('Settings', style: SubdockText.screenTitle),
+        Text('Settings', style: SubdockText.screenTitle),
         if (droppedReminders.isNotEmpty) ...[
           const SizedBox(height: 18),
           AlertBanner(
@@ -137,6 +162,21 @@ class SettingsScreen extends StatelessWidget {
             const DetailRow(label: 'Widget', value: 'Not yet'),
           ],
         ),
+        // Above Backup, not below it. Currency, Language and Widget above are
+        // all "what the app shows"; this is the same question asked about
+        // colour. Backup is about the data, which is a different subject.
+        const SectionLabel('Appearance'),
+        SegmentedRow(
+          labels: const ['System', 'Light', 'Dark'],
+          selected: themeChoice.index,
+          onSelect: onThemeChoice == null
+              ? null
+              : (i) => onThemeChoice!(ThemeChoice.values[i]),
+        ),
+        // One line in all three states rather than a line that appears only
+        // under System. A footnote that comes and goes moves the two Backup
+        // rows under the reader's thumb while they are choosing.
+        Footnote(_themeNote),
         const SectionLabel('Backup'),
         GroupedCard(
           children: [

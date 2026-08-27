@@ -32,18 +32,19 @@ class OnboardingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     return Column(
       children: [
         Expanded(
           child: ListView(
             padding: const EdgeInsets.fromLTRB(22, 52, 22, 12),
             children: [
-              const Text(
+              Text(
                 'Never miss a due date again.',
                 style: SubdockText.onboardTitle,
               ),
               const SizedBox(height: 14),
-              const Text(
+              Text(
                 'Subdock keeps every bill, trial and SIM date in one list and '
                 'reminds you before it hits.',
                 style: SubdockText.body,
@@ -150,7 +151,7 @@ class _Feature extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: SubdockText.family,
                           fontSize: 16,
                           height: 1.35,

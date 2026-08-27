@@ -142,7 +142,7 @@ class _AddMark extends StatelessWidget {
     return Container(
       width: diameter,
       height: diameter,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: SubdockColors.accent,
         shape: BoxShape.circle,
         boxShadow: SubdockShadow.card,

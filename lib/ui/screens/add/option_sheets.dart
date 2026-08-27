@@ -80,38 +80,49 @@ Future<T?> chooseOption<T>(
         top: Radius.circular(SubdockRadius.placard),
       ),
     ),
-    builder: (sheet) => SafeArea(
-      top: false,
-      child: ListView(
-        shrinkWrap: true,
-        padding: const EdgeInsets.fromLTRB(
-          SubdockSpacing.screenH,
-          0,
-          SubdockSpacing.screenH,
-          20,
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Text(title.toUpperCase(), style: SubdockText.sectionLabel),
-          ),
-          GroupedCard(
+    // A Builder, not the SafeArea directly: a route's page is built once and
+    // cached, so this is the element that has to hold the palette dependency
+    // if the sheet is to repaint when the phone goes dark under it.
+    builder: (sheet) => Builder(
+      builder: (context) {
+        SubdockTheme.watch(context);
+        return SafeArea(
+          top: false,
+          child: ListView(
+            shrinkWrap: true,
+            padding: const EdgeInsets.fromLTRB(
+              SubdockSpacing.screenH,
+              0,
+              SubdockSpacing.screenH,
+              20,
+            ),
             children: [
-              for (final (value, label) in options)
-                DetailRow(
-                  // The tick is set in mono because that is the family that
-                  // carries the glyph; Be Vietnam Pro has no U+2713 and
-                  // would fall back to whatever the platform supplies.
-                  label: label,
-                  value: value == selected ? '✓' : null,
-                  monoValue: true,
-                  valueColor: SubdockColors.accent,
-                  onTap: () => Navigator.of(sheet).pop(value),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  title.toUpperCase(),
+                  style: SubdockText.sectionLabel,
                 ),
+              ),
+              GroupedCard(
+                children: [
+                  for (final (value, label) in options)
+                    DetailRow(
+                      // The tick is set in mono because that is the family that
+                      // carries the glyph; Be Vietnam Pro has no U+2713 and
+                      // would fall back to whatever the platform supplies.
+                      label: label,
+                      value: value == selected ? '✓' : null,
+                      monoValue: true,
+                      valueColor: SubdockColors.accent,
+                      onTap: () => Navigator.of(sheet).pop(value),
+                    ),
+                ],
+              ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     ),
   );
 }

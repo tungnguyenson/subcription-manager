@@ -71,6 +71,9 @@ python3 tool/coverage_table.py > docs/research/catalog-coverage.md
 python3 tool/gen_service_marks.py                          # biên dịch icon thành Dart
 flutter test test/golden/ --update-goldens                 # sau khi đổi icon
 
+SHOTS_DARK=1 flutter test tool/shots/capture.dart --update-goldens   # cùng chỗ đó,
+                                                           # bản tối, ra out/dark_*.png
+
 flutter test tool/shots/capture.dart --update-goldens      # chụp lại 9 màn ở khung
                                                            # 390x844 vào tool/shots/out/
                                                            # để so với design/handoff
@@ -86,7 +89,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Ba mươi ba cái bẫy đã vấp, đừng vấp lại
+## Ba mươi sáu cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -560,6 +563,99 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     hàng chip nói ra điều đó. Mở sẵn cả khi vào màn Edit của một mục không phải hàng
     tháng hay hàng năm, cùng một lý do.
 
+34. **Token màu là một biến toàn cục, và mỗi màn phải tự đăng ký để được vẽ lại.**
+    `SubdockColors.ink` không còn là hằng số. Nó là getter đọc từ `_active`, một
+    biến trong `theme.dart` mà `SubdockTheme` đặt lại mỗi lần bản màu đổi. Chọn cách
+    này vì gần năm trăm chỗ gọi token, và khoảng một phần ba nằm trong hàm tĩnh
+    (`SubdockSurface.card`, `TabMark.tint`, các presenter) không có `BuildContext`
+    nào để truyền vào.
+
+    Cái giá phải trả nằm ở chỗ **đặt lại biến đó không tự vẽ lại thứ gì.** Flutter
+    dựng trang của một route đúng một lần rồi giữ luôn cái widget đó
+    (`_ModalScopeState._page`), nên một màn người dùng đã mở sẽ nhận lại đúng widget
+    cũ và bị bỏ qua hoàn toàn khi widget cha dựng lại. Đường duy nhất chui được vào
+    trong một route đã dựng là phụ thuộc kiểu InheritedWidget, và nó chỉ tới những
+    widget đã thật sự đăng ký.
+
+    Vì vậy có đúng một luật: **màn hình, sheet hay dialog nào là gốc của một route
+    thì gọi `SubdockTheme.watch(context)` ngay dòng đầu của `build`.** Quên dòng đó
+    thì màn hình giữ nguyên bản màu cũ cho tới khi có thứ khác tình cờ dựng lại nó,
+    mà lúc hệ thống tự chuyển sang tối thì kết quả là nửa màn sáng nửa màn tối.
+    `AppShell` và `GlassBackground` cũng phải tự gọi, vì `_push` nhét chúng vào
+    trang đã dựng của route cùng với màn hình chứ không phải bọc từ ngoài.
+
+    Chốt chặn là bài `a screen pushed before the change follows it too` trong
+    `test/widget/theme_test.dart`.
+
+    Hai điều đi kèm:
+
+    - **`SubdockTheme` phải nằm trên `MaterialApp`**, vì Navigator nằm trong
+      `MaterialApp` và một InheritedWidget chỉ với tới được thứ nằm dưới nó.
+    - **Token giờ không phải hằng số, nên widget nào đọc token thì không `const`
+      được.** Đó là tính chất tốt chứ không phải phiền: trình biên dịch chỉ ra từng
+      chỗ một, và một widget `const` đọc token sẽ giữ màu nướng sẵn lúc biên dịch
+      dù cây có dựng lại.
+
+    Giá trị màu nằm ở `lib/ui/theme/palette.dart`, hai bản `light` và `dark`. Thêm
+    một màu là thêm một trường ở đó, **điền cả hai bản**, rồi thêm một getter trong
+    `SubdockColors`. Bản tối không phải bản sáng đảo ngược, hai luật của nó ngược hẳn
+    với phép đảo:
+
+    - **Độ nổi vẽ bằng viền, không bằng bóng đổ.** Bóng đổ trên nền tối không có gì
+      để làm sẫm đi, nên `SubdockShadow.sheet`, `toast` và `knob` đều rỗng ở bản tối
+      và `sheetEdge` thay chỗ.
+    - **Chữ nằm trên nền accent tô đầy thì đậm màu, không phải trắng.** Accent bản
+      tối là `oklch(.74 .11 262)`, tức một màu xanh sáng, và chữ trắng trên nó không
+      đọc được. Đó là lý do `onAccent` là một token chứ không phải cái
+      `Color(0xFFFFFFFF)` từng viết rải rác ở từng chỗ gọi, và `onDanger` với
+      `onSavings` cũng vậy. Chữ trong ô icon dịch vụ thì vẫn trắng ở cả hai bản, vì
+      nó nằm trên màu thương hiệu chứ không nằm trên nền của app.
+
+    Lựa chọn bản màu lưu trong `ThemeStore`, một store riêng đọc chung bảng
+    `settingRow`, đúng kiểu `FilterStore`. Riêng chứ không phải một trường của
+    `AppSettings`, vì hai lý do: nó không phải quyết định về *cách app hoạt động*,
+    và nó **không được đi theo file sao lưu**. Một danh sách khôi phục sang máy thứ
+    hai phải trông giống cái máy đó, không phải giống cái máy nó đi ra.
+
+35. **Danh sách trên màn Upcoming là dòng có kẻ, không phải thẻ.** Cả ba danh sách
+    (Overdue, các nhóm theo ngày, và danh sách dưới lưới lịch) đều vẽ mỗi mục là một
+    dòng trong suốt với một đường kẻ 1px bên dưới, không nền, không bo góc, không
+    khoảng cách giữa hai dòng. Trước đây mỗi dòng là một thẻ kính riêng, tức là bốn
+    cạnh viền cộng một rãnh 10px quanh mỗi dòng, nên một màn tám mục đọc ra thành
+    tám vật thể rời nhau xếp chồng lên chứ không phải một danh sách. Rãnh và viền
+    cộng lại tiêu khoảng một phần năm chiều cao màn hình để nói một điều mà một
+    pixel kẻ ngang nói đủ.
+
+    Mất mát phải nói ra: **dòng quá hạn không còn nền đỏ nhạt và viền đỏ nữa**, vì
+    không còn thẻ nào để tô. Nó báo bằng viên thuốc đếm ngược màu danger, mà viên đó
+    dù sao cũng là thứ to tiếng nhất trên dòng. Tên và số tiền vẫn màu mực bình
+    thường, đúng như trước.
+
+    `ItemRowStyle.cards` bật lại kiểu thẻ cũ, truyền qua `UpcomingScreen.rowStyle`.
+    Mặc định là `dividers`.
+
+    Đệm dòng là `15px` trên dưới và `2px` hai bên, không phải `13/14`: không có thẻ
+    thì dòng không có gì để thụt vào, và tên mục phải bắt đầu đúng lề trái với tiêu
+    đề nhóm ngay trên nó.
+
+    Ô icon đi kèm luật này: `ServiceTile.listSize` 46, `listRadius` 11,
+    `listFontSize` 19. Bo 11 chứ không phải 9 vì bo 9 trên một ô 46pt đọc ra thành
+    hình chữ nhật bo tròn chứ không phải hình vuông mềm như mọi icon app nằm cạnh
+    nó trên màn hình chính.
+
+36. **Dòng phụ của một mục đang dùng thử chỉ nói số tiền, trạng thái để cho badge
+    nói.** Trước đây nó viết `Free now · then 260,000 đ`, tức là tiêu cả chiều rộng
+    dòng để nhắc lại đúng cái badge `FREE TRIAL` nằm cách đó hai milimet, và đẩy con
+    số người dùng cần đọc ra sau bốn chữ.
+
+    Một trường hợp dòng này vẫn phải tự trả lời: mục dùng thử **không có giá** thì
+    viết `Free now`. Không có số để nói thì chỉ còn trạng thái, và một dòng trống
+    hẳn ở đó đọc ra thành một mục app không biết gì về nó.
+
+    Chốt chặn là hai bài `a trial shows the amount, and leaves the state to the
+    badge` và `a trial with no amount says it is free rather than nothing` trong
+    `test/unit/ui/upcoming_presenter_test.dart`.
+
 ## Viết tài liệu
 
 Tài liệu trong repo viết bằng **tiếng Việt**, chữ trên giao diện app viết bằng **tiếng
@@ -573,12 +669,13 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | Muốn biết | Đọc |
 |---|---|
 | App làm gì và vì sao | `docs/product-spec.md` |
-| Giao diện | Canvas `Subdock Glass App.dc.html` bên Claude Design, **không nằm trong repo**. Tokens đã chép vào `lib/ui/theme.dart`, đọc doc comment ở đầu file trước khi sửa màu. `docs/design-spec.md` đã cũ và có ghi rõ ở đầu file |
+| Giao diện | Canvas `Subdock Glass App.dc.html` bên Claude Design, **không nằm trong repo**. Giá trị màu ở `lib/ui/theme/palette.dart` (hai bản sáng và tối), cách đọc chúng ở `lib/ui/theme.dart`; đọc bẫy 34 trước khi sửa màu. `docs/design-spec.md` đã cũ và có ghi rõ ở đầu file |
 | Nguồn tiền, bật tắt dịch vụ, Savings | `lib/ui/savings_presenter.dart`, `lib/ui/services_presenter.dart`, `lib/ui/screens/savings_screen.dart` |
 | Dùng thử miễn phí | `lib/ui/screens/add/trial_field.dart` cho cái công tắc, `TrackedItem.isTrialOn` cho câu hỏi hôm nay còn miễn phí không |
 | Phần riêng của Android | `android/build.gradle.kts`, `android/app/src/main/AndroidManifest.xml`, `android/app/src/main/res/xml/` |
 | Danh mục dịch vụ | `docs/research/README.md` |
 | Nhóm dịch vụ (category) | `lib/domain/default_categories.dart` cho 22 nhóm dựng sẵn, `lib/domain/category_book.dart` cho cách tra |
+| Sáng hay tối | Bẫy 34, `lib/ui/theme/palette.dart` cho giá trị, `lib/data/theme_store.dart` cho lựa chọn của người dùng |
 | Icon | `docs/icon-credits.md` |
 | Cái gì sắp xảy ra với một mục | `lib/ui/reminder_timeline.dart` cho phép dựng, `lib/ui/widgets/reminder_timeline_card.dart` cho khối trên màn Detail |
 | Bộ lọc màn Upcoming | `lib/domain/upcoming_filter.dart` cho luật khớp, `lib/ui/filter_presenter.dart` cho danh sách chip và dòng tóm tắt, `lib/ui/widgets/filter_sheet.dart` cho sheet |

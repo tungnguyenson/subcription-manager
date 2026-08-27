@@ -4,10 +4,12 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemChrome;
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/data/item_repository.dart';
 import 'package:subdock/data/settings_store.dart';
+import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/item_actions.dart';
 import 'package:subdock/domain/local_date.dart';
@@ -55,10 +57,11 @@ import 'package:subdock/ui/widgets/notification_ask.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class SubdockApp extends StatelessWidget {
+class SubdockApp extends StatefulWidget {
   final ItemRepository repository;
   final SettingsStore settings;
   final FilterStore filters;
+  final ThemeStore themes;
   final NotificationScheduler scheduler;
   final ServiceCatalog catalog;
   final BackupStore backups;
@@ -70,6 +73,7 @@ class SubdockApp extends StatelessWidget {
     required this.repository,
     required this.settings,
     required this.filters,
+    required this.themes,
     required this.scheduler,
     required this.catalog,
     required this.backups,
@@ -78,20 +82,97 @@ class SubdockApp extends StatelessWidget {
   });
 
   @override
+  State<SubdockApp> createState() => _SubdockAppState();
+}
+
+/// Owns which variant the app is painted in.
+///
+/// Above [MaterialApp] rather than inside it, and that placement is the whole
+/// mechanism: [SubdockTheme] publishes the palette through an inherited
+/// widget, and an inherited widget only reaches a pushed route if it sits
+/// above the Navigator. Put this below and a screen the user has already
+/// opened keeps the old colours until it happens to rebuild for some other
+/// reason.
+class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
+  ThemeChoice _choice = ThemeChoice.system;
+
+  /// Read from the platform dispatcher, not from `MediaQuery`. This state sits
+  /// above [MaterialApp] and so has no MediaQuery to ask; the dispatcher is
+  /// the same value the MediaQuery would be built from.
+  Brightness _systemBrightness =
+      WidgetsBinding.instance.platformDispatcher.platformBrightness;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    unawaited(_loadChoice());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  /// The phone went dark, or came back. Only [ThemeChoice.system] cares, but
+  /// the value is stored either way so that switching back to System later
+  /// does not need a second trip to the dispatcher.
+  @override
+  void didChangePlatformBrightness() {
+    final next = WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    if (next == _systemBrightness) return;
+    setState(() => _systemBrightness = next);
+  }
+
+  Future<void> _loadChoice() async {
+    final stored = await widget.themes.read();
+    if (!mounted || stored == _choice) return;
+    setState(() => _choice = stored);
+  }
+
+  void _setChoice(ThemeChoice choice) {
+    if (choice == _choice) return;
+    setState(() => _choice = choice);
+    unawaited(widget.themes.save(choice));
+  }
+
+  SubdockPalette get _palette => switch (_choice) {
+    ThemeChoice.light => SubdockPalette.light,
+    ThemeChoice.dark => SubdockPalette.dark,
+    ThemeChoice.system =>
+      _systemBrightness == Brightness.dark
+          ? SubdockPalette.dark
+          : SubdockPalette.light,
+  };
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Subdock',
-      debugShowCheckedModeBanner: false,
-      theme: buildSubdockTheme(),
-      home: HomePage(
-        backups: backups,
-        files: files,
-        cloud: cloud,
-        repository: repository,
-        settings: settings,
-        filters: filters,
-        scheduler: scheduler,
-        catalog: catalog,
+    final palette = _palette;
+
+    // Pushed rather than declared through an AnnotatedRegion: the status bar
+    // has to follow the palette on every screen, and the app has no single
+    // widget every screen is wrapped in below the Navigator.
+    SystemChrome.setSystemUIOverlayStyle(subdockOverlayStyle(palette));
+
+    return SubdockTheme(
+      palette: palette,
+      child: MaterialApp(
+        title: 'Subdock',
+        debugShowCheckedModeBanner: false,
+        theme: buildSubdockTheme(palette),
+        home: HomePage(
+          backups: widget.backups,
+          files: widget.files,
+          cloud: widget.cloud,
+          repository: widget.repository,
+          settings: widget.settings,
+          filters: widget.filters,
+          scheduler: widget.scheduler,
+          catalog: widget.catalog,
+          themeChoice: _choice,
+          onThemeChoice: _setChoice,
+        ),
       ),
     );
   }
@@ -107,6 +188,12 @@ class HomePage extends StatefulWidget {
   final BackupFiles files;
   final CloudBackup cloud;
 
+  /// Which Glass variant is painted, and how to change it. Owned by
+  /// [SubdockApp] rather than here, because the widget that publishes the
+  /// palette has to sit above the Navigator and this one sits below it.
+  final ThemeChoice themeChoice;
+  final ValueChanged<ThemeChoice>? onThemeChoice;
+
   const HomePage({
     super.key,
     required this.repository,
@@ -117,6 +204,8 @@ class HomePage extends StatefulWidget {
     required this.backups,
     required this.files,
     required this.cloud,
+    this.themeChoice = ThemeChoice.system,
+    this.onThemeChoice,
   });
 
   @override
@@ -505,6 +594,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     if (_showOnboarding) {
       // The gradient, not the flat mid-tone. Onboarding is the first thing the
       // user sees and it is where the look has to land; `canvas` here painted
@@ -666,6 +756,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           onExport: () => unawaited(_exportBackup()),
           onOpenCloudBackup: _openCloudBackup,
           onOpenFileBackup: _openFileBackup,
+          themeChoice: widget.themeChoice,
+          onThemeChoice: widget.onThemeChoice,
           onAbout: _openAbout,
         );
     }

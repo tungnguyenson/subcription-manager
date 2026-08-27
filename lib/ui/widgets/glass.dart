@@ -17,8 +17,12 @@ class GlassBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Its own dependency, not its parent's. `_push` bakes this widget into a
+    // route's cached page, so nothing above it will ever hand it a new child;
+    // the gradient repaints on a theme change only because of this line.
+    SubdockTheme.watch(context);
     return DecoratedBox(
-      decoration: const BoxDecoration(gradient: SubdockGradients.page),
+      decoration: BoxDecoration(gradient: SubdockGradients.page),
       child: child,
     );
   }
@@ -103,7 +107,7 @@ class DueStack extends StatelessWidget {
               style: SubdockText.when.copyWith(
                 fontFamily: SubdockText.family,
                 fontSize: 14,
-                color: const Color(0xFFFFFFFF),
+                color: SubdockColors.onDanger,
               ),
             ),
           )

@@ -67,6 +67,7 @@ class _ReviewExtractionScreenState extends State<ReviewExtractionScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     final readings = ExtractionReview.ambiguousReadings(_fields.dueDateRaw);
 
     return Column(
@@ -282,7 +283,7 @@ class _AmbiguousDateRow extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(child: Text('Due', style: SubdockText.rowLabel)),
+              Expanded(child: Text('Due', style: SubdockText.rowLabel)),
               const SizedBox(width: 12),
               Text(
                 'two readings',
@@ -356,7 +357,9 @@ class _ReadingTile extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: SubdockText.monoValue.copyWith(
                     fontSize: 13.5,
-                    color: selected ? SubdockColors.card : SubdockColors.ink,
+                    color: selected
+                        ? SubdockColors.onAccent
+                        : SubdockColors.ink,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -365,7 +368,7 @@ class _ReadingTile extends StatelessWidget {
                   textAlign: TextAlign.center,
                   style: SubdockText.footnote.copyWith(
                     color: selected
-                        ? const Color(0xCCFFFFFF)
+                        ? SubdockColors.onAccentSoft
                         : SubdockColors.inkMuted,
                   ),
                 ),

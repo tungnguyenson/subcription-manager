@@ -55,6 +55,7 @@ class _IconGalleryState extends State<IconGallery> {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     final glyphs = _hits(SubdockMarks.pickableGlyphs);
     final brands = _hits(SubdockMarks.pickableBrands);
     final typed = _query.text.trim();
@@ -267,7 +268,7 @@ class _NoHits extends StatelessWidget {
             style: SubdockText.summary,
           ),
           const SizedBox(height: 6),
-          const Text(
+          Text(
             'Clear the search to pick a shape instead.',
             textAlign: TextAlign.center,
             style: SubdockText.caption,

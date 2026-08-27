@@ -20,6 +20,7 @@ import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/data/settings_store.dart';
+import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/recurrence.dart';
@@ -63,6 +64,16 @@ void main() {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
     tester.view.devicePixelRatio = 3;
     addTearDown(tester.view.reset);
+
+    // `SHOTS_DARK=1` renders the same nine screens in the dark variant, into
+    // `out/dark_*.png`. The app is left on ThemeChoice.system, so telling the
+    // fake platform it is dark is the whole switch.
+    final dark = Platform.environment['SHOTS_DARK'] == '1';
+    if (dark) {
+      tester.platformDispatcher.platformBrightnessTestValue = Brightness.dark;
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+    }
+    final prefix = dark ? 'dark_' : '';
 
     final db = SubdockDatabase(NativeDatabase.memory());
     addTearDown(db.close);
@@ -223,6 +234,7 @@ void main() {
         repository: repository,
         settings: settings,
         filters: FilterStore(db),
+        themes: ThemeStore(db),
         scheduler: _StubScheduler(),
         catalog: catalog,
         backups: BackupStore(db, repository, settings),
@@ -247,7 +259,7 @@ void main() {
       drain();
       await expectLater(
         find.byType(MaterialApp),
-        matchesGoldenFile('out/$name.png'),
+        matchesGoldenFile('out/$prefix$name.png'),
       );
 
       final scrollable = find.byType(Scrollable);
@@ -260,7 +272,7 @@ void main() {
       drain();
       await expectLater(
         find.byType(MaterialApp),
-        matchesGoldenFile('out/${name}_full.png'),
+        matchesGoldenFile('out/$prefix${name}_full.png'),
       );
 
       tester.view.physicalSize = const Size(390 * 3, 844 * 3);

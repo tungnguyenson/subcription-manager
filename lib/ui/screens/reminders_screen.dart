@@ -45,6 +45,7 @@ class RemindersScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     final ladder = {
       for (final rung in RemindersPresenter.ladder(
         item,
@@ -63,7 +64,7 @@ class RemindersScreen extends StatelessWidget {
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: onBack),
-        const Text('Reminders', style: SubdockText.screenTitle),
+        Text('Reminders', style: SubdockText.screenTitle),
         const SizedBox(height: 6),
         Text(
           '${item.name} · ${RemindersPresenter.anchorLine(item)}',

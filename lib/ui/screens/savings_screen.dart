@@ -76,12 +76,13 @@ class _SavingsScreenState extends State<SavingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     final view = widget.view;
 
     return ListView(
       padding: SubdockSpacing.screenPadding(context),
       children: [
-        const Text('Savings', style: SubdockText.screenTitle),
+        Text('Savings', style: SubdockText.screenTitle),
         const SizedBox(height: 14),
         SegmentedRow(
           labels: const ['Move to yearly', 'Cancel a service'],
@@ -120,7 +121,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
           const SizedBox(height: 7),
           Text(view.totalSub, style: SubdockText.footnote),
           const SizedBox(height: 5),
-          const Text(
+          Text(
             // The catch, on the headline rather than in a footnote. A yearly
             // plan is cheaper per month and more expensive today, and someone
             // who acts on this figure without knowing that gets a surprise
@@ -197,7 +198,7 @@ class _SavingsScreenState extends State<SavingsScreen> {
       ],
     ],
     const SizedBox(height: 24),
-    const Text(
+    Text(
       // The limit, said plainly and last. The app cannot cancel anything: it
       // has no account with any vendor and never will. Anything vaguer here
       // would let a user believe tapping the button did the deed.
@@ -250,7 +251,7 @@ class _YearlyCard extends StatelessWidget {
                 ),
               ),
               if (row.reminding) ...[
-                const Icon(
+                Icon(
                   Icons.notifications_active_rounded,
                   size: 17,
                   color: SubdockColors.savings,
@@ -269,7 +270,7 @@ class _YearlyCard extends StatelessWidget {
         ),
         if (expanded) ...[
           const SizedBox(height: 12),
-          const Divider(height: 1, thickness: 1, color: SubdockColors.hairline),
+          Divider(height: 1, thickness: 1, color: SubdockColors.hairline),
           const SizedBox(height: 12),
           Text(row.compare, style: SubdockText.monoInline),
           const SizedBox(height: 7),
@@ -374,7 +375,7 @@ class _UnpricedFold extends StatelessWidget {
                           style: SubdockText.itemName,
                         ),
                       ),
-                      const Text(
+                      Text(
                         'Add price',
                         style: TextStyle(
                           fontFamily: SubdockText.family,
@@ -509,11 +510,7 @@ class _CancelCard extends StatelessWidget {
           ),
           if (expanded) ...[
             const SizedBox(height: 12),
-            const Divider(
-              height: 1,
-              thickness: 1,
-              color: SubdockColors.hairline,
-            ),
+            Divider(height: 1, thickness: 1, color: SubdockColors.hairline),
             const SizedBox(height: 12),
             Text(row.target.where, style: SubdockText.monoInline),
             if (row.target.canOpen) ...[
@@ -586,7 +583,7 @@ class _SavingsButton extends StatelessWidget {
                 fontWeight: SubdockWeight.medium,
                 color: outlined
                     ? SubdockColors.savings
-                    : const Color(0xFFFFFFFF),
+                    : SubdockColors.onSavings,
               ),
             ),
           ),

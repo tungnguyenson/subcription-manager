@@ -122,7 +122,7 @@ class _ServicePickerState extends State<ServicePicker> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -139,7 +139,7 @@ class _ServicePickerState extends State<ServicePicker> {
                   ),
                   InkWell(
                     onTap: widget.onCancel,
-                    child: const Padding(
+                    child: Padding(
                       padding: EdgeInsets.fromLTRB(12, 5, 0, 8),
                       child: Text('Cancel', style: SubdockText.quietAction),
                     ),
@@ -200,13 +200,9 @@ class _ServicePickerState extends State<ServicePicker> {
                   ),
                 ),
               const SizedBox(height: 22),
-              const Divider(
-                height: 1,
-                thickness: 1,
-                color: SubdockColors.hairline,
-              ),
+              Divider(height: 1, thickness: 1, color: SubdockColors.hairline),
               const SizedBox(height: 16),
-              const Text('Not in the list?', style: SubdockText.summary),
+              Text('Not in the list?', style: SubdockText.summary),
               const SizedBox(height: 10),
               SecondaryButton(
                 'Enter manually',
@@ -273,7 +269,7 @@ class _CatalogRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   '›',
                   style: TextStyle(
                     fontFamily: SubdockText.family,

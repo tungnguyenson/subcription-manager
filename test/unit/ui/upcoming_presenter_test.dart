@@ -200,6 +200,38 @@ void main() {
       expect(view.thisWeek.single.subtitle, '260,000 ₫');
     });
 
+    // The badge says the state; this line says the amount. It used to say both
+    // -- "Free now · then 260,000 đ" -- which spent the whole width restating
+    // the badge two millimetres above it and pushed the number the reader came
+    // for behind four words.
+    test('a trial shows the amount, and leaves the state to the badge', () {
+      final view = UpcomingPresenter.build([
+        item(
+          'Claude Pro',
+          expiresOn: '2026-08-21',
+          cycle: Cycle.monthly,
+          amountMinor: 260000,
+          currency: 'VND',
+          inTrial: true,
+        ),
+      ], today);
+
+      expect(view.thisWeek.single.trial, isTrue);
+      expect(view.thisWeek.single.subtitle, '260,000 ₫');
+    });
+
+    // The one case the line still has to answer for itself. With no amount
+    // there is nothing left but the state, so it says that rather than going
+    // blank -- a trial row with no second line at all reads as a row the app
+    // knows nothing about.
+    test('a trial with no amount says it is free rather than nothing', () {
+      final view = UpcomingPresenter.build([
+        item('Some beta', expiresOn: '2026-08-21', inTrial: true),
+      ], today);
+
+      expect(view.thisWeek.single.subtitle, 'Free now');
+    });
+
     test('an item with no amount shows no second line', () {
       final view = UpcomingPresenter.build([
         item('passport', expiresOn: '2026-08-18', categoryId: 'DOCUMENTS'),

@@ -67,6 +67,7 @@ class MoneyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     return ListView(
       padding: SubdockSpacing.screenPadding(context),
       children: [
@@ -75,7 +76,7 @@ class MoneyScreen extends StatelessWidget {
         // names the act while the screen names its contents. In use it reads
         // as two places: a reader who taps `Spending` and lands on `Money`
         // has to check they got where they meant to go, every time.
-        const Text('Spending', style: SubdockText.screenTitle),
+        Text('Spending', style: SubdockText.screenTitle),
         const SizedBox(height: 18),
         _TotalCard(view: view, onSpan: onSpan, onMonth: onMonth),
         if (savings != null) ...[
@@ -175,7 +176,7 @@ class MoneyScreen extends StatelessWidget {
           const SizedBox(height: 20),
           InkWell(
             onTap: onOpenHistory,
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.symmetric(vertical: 6),
               child: Row(
                 children: [
@@ -225,7 +226,7 @@ class _CardBlock extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         const SizedBox(height: 16),
-        const Divider(height: 1, thickness: 1, color: SubdockColors.hairline),
+        Divider(height: 1, thickness: 1, color: SubdockColors.hairline),
         const SizedBox(height: 12),
         Text(label.toUpperCase(), style: SubdockText.sectionLabel),
         const SizedBox(height: 4),
@@ -312,7 +313,7 @@ class _CategoryRow extends StatelessWidget {
               value: shelf.share,
               minHeight: 5,
               backgroundColor: SubdockColors.accentTrack,
-              valueColor: const AlwaysStoppedAnimation(SubdockColors.accent),
+              valueColor: AlwaysStoppedAnimation(SubdockColors.accent),
             ),
           ),
         ],
@@ -425,7 +426,7 @@ class _TotalCard extends StatelessWidget {
           const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.only(top: 10),
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(top: BorderSide(color: SubdockColors.hairline)),
             ),
             child: Text(
@@ -652,13 +653,13 @@ class _Column extends StatelessWidget {
   /// [SubdockColors.accentSoft] at half strength. Local to the chart because
   /// it means one thing — a month that has not happened — and a token would
   /// invite it onto surfaces where it means nothing.
-  static const Color _aheadFill = Color(0x1C466FBD);
+  static Color get _aheadFill => SubdockColors.chartAhead;
 
   /// The same month once it is the one being read: the accent, held back.
   /// Far enough from [SubdockColors.accent] to say the figure above it was
   /// worked out rather than paid, far enough from [_aheadFill] to be the
   /// column the reader just tapped.
-  static const Color _aheadSelected = Color(0x8C466FBD);
+  static Color get _aheadSelected => SubdockColors.chartAheadSelected;
 }
 
 /// The way through to Savings.
@@ -686,7 +687,7 @@ class _SavingsLink extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.savings_rounded,
                   size: 28,
                   color: SubdockColors.savings,
@@ -698,7 +699,7 @@ class _SavingsLink extends StatelessWidget {
                     children: [
                       Text(
                         teaser.headline,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontFamily: SubdockText.family,
                           fontSize: 16,
                           height: 1.3,
@@ -716,7 +717,7 @@ class _SavingsLink extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                const Text(
+                Text(
                   '›',
                   style: TextStyle(
                     fontFamily: SubdockText.family,

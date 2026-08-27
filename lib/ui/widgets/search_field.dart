@@ -38,11 +38,7 @@ class SearchField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
       child: Row(
         children: [
-          const Icon(
-            Icons.search_rounded,
-            size: 20,
-            color: SubdockColors.inkMuted,
-          ),
+          Icon(Icons.search_rounded, size: 20, color: SubdockColors.inkMuted),
           const SizedBox(width: 10),
           Expanded(
             child: TextField(
@@ -58,7 +54,7 @@ class SearchField extends StatelessWidget {
                 isDense: true,
                 contentPadding: const EdgeInsets.symmetric(vertical: 12),
                 hintText: hint,
-                hintStyle: const TextStyle(
+                hintStyle: TextStyle(
                   fontFamily: SubdockText.family,
                   fontSize: 16,
                   color: SubdockColors.inkMuted,
@@ -69,7 +65,7 @@ class SearchField extends StatelessWidget {
           if (controller.text.isNotEmpty)
             InkWell(
               onTap: controller.clear,
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.all(4),
                 child: Icon(
                   Icons.close_rounded,

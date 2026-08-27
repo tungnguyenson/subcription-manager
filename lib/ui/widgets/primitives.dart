@@ -64,7 +64,7 @@ class GroupedCard extends StatelessWidget {
     for (var i = 0; i < children.length; i++) {
       if (ruled && i > 0) {
         interleaved.add(
-          const Divider(height: 1, thickness: 1, color: SubdockColors.hairline),
+          Divider(height: 1, thickness: 1, color: SubdockColors.hairline),
         );
       }
       interleaved.add(children[i]);
@@ -89,25 +89,24 @@ class GroupedCard extends StatelessWidget {
 /// character falls back to whatever the platform happens to have — a different
 /// weight and a different size on every device, and nothing at all in a test.
 class Caret extends StatelessWidget {
-  final Color color;
+  /// Null takes [SubdockColors.inkMuted]. Nullable rather than defaulted,
+  /// because a token is no longer a compile-time constant and a default has to
+  /// be one.
+  final Color? color;
+
   final double size;
 
   /// Points up instead of down. Used where the caret reports state rather than
   /// affordance: a section that is already open.
   final bool up;
 
-  const Caret({
-    super.key,
-    this.color = SubdockColors.inkMuted,
-    this.size = 9,
-    this.up = false,
-  });
+  const Caret({super.key, this.color, this.size = 9, this.up = false});
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       size: Size(size, size * 0.55),
-      painter: _CaretPainter(color, up),
+      painter: _CaretPainter(color ?? SubdockColors.inkMuted, up),
     );
   }
 }
@@ -230,7 +229,7 @@ class DetailRow extends StatelessWidget {
             ),
             if (chevron) ...[
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 '›',
                 style: TextStyle(
                   fontFamily: SubdockText.family,
@@ -286,6 +285,17 @@ class ServiceTile extends StatelessWidget {
   /// beside, with a point to spare so a subtitle a shade taller cannot
   /// overtake it. Rows carrying a single line keep the smaller default.
   static const double listSize = 46;
+
+  /// The corner and the letter that go with [listSize].
+  ///
+  /// Two points softer than [SubdockRadius.chip] and five points larger than
+  /// the default letter, both for the same reason: the tile grew, and a chip
+  /// radius on a 46pt square reads as a rounded rectangle rather than as the
+  /// squircle every other app icon beside it on the home screen is. The letter
+  /// is scaled with the box so a fallback tile carries the same weight in the
+  /// row as a brand mark does.
+  static const double listRadius = 11;
+  static const double listFontSize = 19;
 
   const ServiceTile(
     this.name, {
@@ -413,7 +423,7 @@ class PrimaryButton extends StatelessWidget {
               textAlign: TextAlign.center,
               style: SubdockText.button.copyWith(
                 color: enabled
-                    ? const Color(0xFFFFFFFF)
+                    ? SubdockColors.onAccent
                     : SubdockColors.inkMuted,
               ),
             ),
@@ -579,7 +589,7 @@ class ChoiceChipPill extends StatelessWidget {
                     data: IconThemeData(
                       size: 16,
                       color: selected
-                          ? const Color(0xFFFFFFFF)
+                          ? SubdockColors.onAccent
                           : SubdockColors.inkSecondary,
                     ),
                     child: icon!,
@@ -671,7 +681,7 @@ class StatusBadge extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         maxLines: 1,
-        style: const TextStyle(
+        style: TextStyle(
           fontFamily: SubdockText.family,
           fontSize: 11,
           height: 1.25,
@@ -845,7 +855,7 @@ class SegmentedRow extends StatelessWidget {
                   flex: widths == null ? 1 : (widths[i] * 10).round(),
                   child: Material(
                     color: i == selected
-                        ? const Color(0xE6FFFFFF)
+                        ? SubdockColors.segmentSelected
                         : const Color(0x00000000),
                     borderRadius: BorderRadius.circular(SubdockRadius.chip),
                     child: InkWell(
@@ -1075,7 +1085,7 @@ class AppToggle extends StatelessWidget {
           child: Container(
             width: 19,
             height: 19,
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               color: SubdockColors.knob,
               shape: BoxShape.circle,
               boxShadow: SubdockShadow.knob,

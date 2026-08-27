@@ -32,21 +32,20 @@ class BackLink extends StatelessWidget {
 class ScreenHeading extends StatelessWidget {
   final String title;
   final String? subtitle;
-  final TextStyle style;
 
-  const ScreenHeading(
-    this.title, {
-    super.key,
-    this.subtitle,
-    this.style = SubdockText.screenTitle,
-  });
+  /// Null takes [SubdockText.screenTitle]. Nullable rather than defaulted,
+  /// because a token is no longer a compile-time constant and a default has to
+  /// be one.
+  final TextStyle? style;
+
+  const ScreenHeading(this.title, {super.key, this.subtitle, this.style});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: style),
+        Text(title, style: style ?? SubdockText.screenTitle),
         if (subtitle != null) ...[
           const SizedBox(height: 6),
           Text(subtitle!, style: SubdockText.summary),
@@ -118,7 +117,7 @@ class SourceQuote extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(top: 8),
       padding: const EdgeInsets.only(left: 9),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
           left: BorderSide(color: SubdockColors.hairline, width: 2),
         ),

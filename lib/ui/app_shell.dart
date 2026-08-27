@@ -31,6 +31,7 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     return GlassBackground(
       child: Scaffold(
         backgroundColor: const Color(0x00000000),
@@ -67,12 +68,12 @@ class _TabBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlurLayer(
       child: DecoratedBox(
-        decoration: const BoxDecoration(
-          color: SubdockColors.card,
+        decoration: BoxDecoration(
+          color: SubdockColors.tabBar,
           // `0 -1px 0 rgba(255,255,255,.7)` in the design: a bright hairline
           // along the top edge, not a shadow. It is the same trick every other
           // Glass surface uses, turned on its side.
-          border: Border(top: BorderSide(color: Color(0xB3FFFFFF))),
+          border: Border(top: BorderSide(color: SubdockColors.tabBarEdge)),
         ),
         child: SafeArea(
           top: false,
@@ -198,7 +199,7 @@ class _AddButton extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
-          child: const SizedBox(
+          child: SizedBox(
             width: 56,
             height: 56,
             child: Center(
@@ -209,7 +210,7 @@ class _AddButton extends StatelessWidget {
                   fontSize: 34,
                   height: 1,
                   fontWeight: SubdockWeight.hairline,
-                  color: Color(0xFFFFFFFF),
+                  color: SubdockColors.onAccent,
                 ),
               ),
             ),

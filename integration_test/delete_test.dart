@@ -9,6 +9,7 @@ import 'package:subdock/data/database.dart';
 import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/data/item_repository.dart';
 import 'package:subdock/data/settings_store.dart';
+import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/recurrence.dart';
@@ -83,6 +84,7 @@ void main() {
         repository: repo,
         settings: SettingsStore(db),
         filters: FilterStore(db),
+        themes: ThemeStore(db),
         scheduler: NotificationScheduler(),
         catalog: ServiceCatalog(const []),
         backups: BackupStore(db, repo, SettingsStore(db)),

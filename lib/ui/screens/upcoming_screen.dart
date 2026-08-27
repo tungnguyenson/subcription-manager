@@ -99,6 +99,10 @@ class UpcomingScreen extends StatefulWidget {
   final bool trialOnly;
   final VoidCallback? onToggleTrial;
 
+  /// How the three lists on this screen separate their rows. See
+  /// [ItemRowStyle]; the default is a rule under each row.
+  final ItemRowStyle rowStyle;
+
   const UpcomingScreen({
     super.key,
     required this.view,
@@ -116,6 +120,7 @@ class UpcomingScreen extends StatefulWidget {
     this.onSelectDay,
     this.trialOnly = false,
     this.onToggleTrial,
+    this.rowStyle = ItemRowStyle.dividers,
   });
 
   @override
@@ -125,6 +130,7 @@ class UpcomingScreen extends StatefulWidget {
 class _UpcomingScreenState extends State<UpcomingScreen> {
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     final view = widget.view;
 
     // Nothing tracked at all is not a short list, it is a different screen.
@@ -204,6 +210,7 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
         tint: SubdockColors.danger,
         entries: view.overdue,
         onOpen: widget.onOpen,
+        rowStyle: widget.rowStyle,
       ),
     // No section of its own for trials. One used to sit here, above the
     // dated groups, and it cost the trial row the only thing this screen
@@ -218,6 +225,7 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
         count: view.thisWeek.length,
         entries: view.thisWeek,
         onOpen: widget.onOpen,
+        rowStyle: widget.rowStyle,
       ),
     // The same section as the three above it, not a folded summary row.
     // A bucket that arrives closed hides items behind a tap the user has
@@ -230,6 +238,7 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
         count: view.thisMonth.length,
         entries: view.thisMonth,
         onOpen: widget.onOpen,
+        rowStyle: widget.rowStyle,
       ),
     if (view.later.isNotEmpty)
       _Section(
@@ -237,6 +246,7 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
         count: view.later.length,
         entries: view.later,
         onOpen: widget.onOpen,
+        rowStyle: widget.rowStyle,
       ),
   ];
 
@@ -267,6 +277,7 @@ class _UpcomingScreenState extends State<UpcomingScreen> {
         count: calendar.entries.length,
         entries: calendar.entries,
         onOpen: widget.onOpen,
+        rowStyle: widget.rowStyle,
         // A day with nothing on it still gets its heading. Dropping the whole
         // block would leave the reader who just tapped a date with no sign
         // that the tap landed.
@@ -293,7 +304,7 @@ class _TitleRow extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.baseline,
       textBaseline: TextBaseline.alphabetic,
       children: [
-        const Expanded(child: Text('Upcoming', style: SubdockText.screenTitle)),
+        Expanded(child: Text('Upcoming', style: SubdockText.screenTitle)),
         // One link, and it is a link rather than a button: it leaves the
         // screen. The controls that act *on* this screen -- the layout, the
         // trial shortcut, the filter -- moved down to the row below, where
@@ -301,7 +312,7 @@ class _TitleRow extends StatelessWidget {
         if (onOpenServices != null)
           InkWell(
             onTap: onOpenServices,
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               child: Row(
                 children: [
@@ -451,7 +462,7 @@ class _FilterButton extends StatelessWidget {
           child: Icon(
             Icons.filter_list_rounded,
             size: 19,
-            color: active ? const Color(0xFFFFFFFF) : SubdockColors.inkMuted,
+            color: active ? SubdockColors.onAccent : SubdockColors.inkMuted,
           ),
         ),
       ),
@@ -490,7 +501,7 @@ class _FilterSummary extends StatelessWidget {
           if (onClear != null)
             InkWell(
               onTap: onClear,
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                 child: Text(
                   'Clear',
@@ -530,7 +541,7 @@ class _NoMatches extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Nothing matches these filters',
             style: TextStyle(
               fontFamily: SubdockText.family,
@@ -572,6 +583,9 @@ class _Section extends StatelessWidget {
   /// `Next 30 days  0` is a heading that reports on nothing.
   final String? emptyLine;
 
+  /// Passed straight to every [ItemRow] below the heading.
+  final ItemRowStyle rowStyle;
+
   const _Section({
     required this.title,
     required this.count,
@@ -579,6 +593,7 @@ class _Section extends StatelessWidget {
     this.tint,
     this.onOpen,
     this.emptyLine,
+    this.rowStyle = ItemRowStyle.dividers,
   });
 
   @override
@@ -622,7 +637,10 @@ class _Section extends StatelessWidget {
         if (entries.isEmpty && emptyLine != null)
           Text(emptyLine!, style: SubdockText.summary),
         for (var i = 0; i < entries.length; i++) ...[
-          if (i > 0) const SizedBox(height: SubdockSpacing.rowGap),
+          // No gap under the divider style: the rule is the separation, and a
+          // 10px moat on top of it would say it twice.
+          if (i > 0 && rowStyle == ItemRowStyle.cards)
+            const SizedBox(height: SubdockSpacing.rowGap),
           ItemRow(
             name: entries[i].name,
             iconName: entries[i].iconName,
@@ -632,6 +650,7 @@ class _Section extends StatelessWidget {
             date: entries[i].date,
             overdue: entries[i].overdue,
             trial: entries[i].trial,
+            style: rowStyle,
             onTap: () => onOpen?.call(entries[i]),
           ),
         ],
@@ -660,7 +679,7 @@ class _EmptyState extends StatelessWidget {
         children: [
           const EmptyPlacard(),
           const SizedBox(height: 20),
-          const Text(
+          Text(
             'Nothing tracked yet',
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -673,7 +692,7 @@ class _EmptyState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Add the first date you keep forgetting.',
             textAlign: TextAlign.center,
             style: SubdockText.summary,

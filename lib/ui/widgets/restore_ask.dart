@@ -61,18 +61,13 @@ class RestoreAsk extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     return BlurLayer(
       borderRadius: const BorderRadius.vertical(
         top: Radius.circular(SubdockRadius.sheet),
       ),
       child: Container(
-        decoration: const BoxDecoration(
-          color: SubdockColors.solid,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(SubdockRadius.sheet),
-          ),
-          boxShadow: SubdockShadow.sheet,
-        ),
+        decoration: SubdockSurface.sheet(),
         padding: const EdgeInsets.fromLTRB(22, 20, 22, 26),
         child: SafeArea(
           top: false,

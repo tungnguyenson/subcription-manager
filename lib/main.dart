@@ -10,6 +10,7 @@ import 'package:subdock/data/database.dart';
 import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/data/item_repository.dart';
 import 'package:subdock/data/settings_store.dart';
+import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/item_actions.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/platform/backup_files.dart';
@@ -19,11 +20,8 @@ import 'package:subdock/platform/notification_scheduler.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // The design commits to one light look, so the status bar is pinned rather
-  // than left to follow a system setting the app does not otherwise honour.
-  // `dark` here means dark *content* on a light ground, which is what a page
-  // with a #ECECEB background needs.
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
+  // The status bar is set by [SubdockApp] instead, because it now follows the
+  // palette and the palette can change while the app is open.
 
   // Portrait only. Every screen is a single column of rows; landscape would
   // stretch a 15px-padded card across a phone's long edge to no benefit.
@@ -50,6 +48,7 @@ Future<void> main() async {
   final repository = ItemRepository(database);
   final settings = SettingsStore(database);
   final filters = FilterStore(database);
+  final themes = ThemeStore(database);
   final backups = BackupStore(database, repository, settings);
 
   final scheduler = NotificationScheduler();
@@ -71,6 +70,7 @@ Future<void> main() async {
       repository: repository,
       settings: settings,
       filters: filters,
+      themes: themes,
       scheduler: scheduler,
       catalog: catalog,
       backups: backups,

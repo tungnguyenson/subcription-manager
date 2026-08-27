@@ -165,7 +165,7 @@ class _SourceFieldState extends State<SourceField> {
         // about to type a card number.
         if (_offered.isEmpty) ...[
           const SizedBox(height: 5),
-          const Text(_noCardNumbers, style: SubdockText.caption),
+          Text(_noCardNumbers, style: SubdockText.caption),
         ],
         const SizedBox(height: 10),
         Wrap(
@@ -243,7 +243,7 @@ class _SourceFieldState extends State<SourceField> {
                         onSubmitted: (_) => _create(),
                         textInputAction: TextInputAction.done,
                         style: SubdockText.fieldValue,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           border: InputBorder.none,
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(vertical: 11),
@@ -276,7 +276,7 @@ class _SourceFieldState extends State<SourceField> {
               // are no sources yet; this is the same sentence at the moment it
               // is actually load-bearing.
               const SizedBox(height: 8),
-              const Text(_noCardNumbers, style: SubdockText.caption),
+              Text(_noCardNumbers, style: SubdockText.caption),
               const SizedBox(height: 10),
               Row(
                 children: [
@@ -322,7 +322,7 @@ class _ClearButton extends StatelessWidget {
       child: InkResponse(
         onTap: onTap,
         radius: 20,
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 11, vertical: 11),
           child: Icon(
             Icons.cancel_rounded,
@@ -349,7 +349,7 @@ class _NewChip extends StatelessWidget {
         color: const Color(0x00000000),
         child: InkWell(
           onTap: onTap,
-          child: const Padding(
+          child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 12, vertical: 9),
             child: Row(
               mainAxisSize: MainAxisSize.min,

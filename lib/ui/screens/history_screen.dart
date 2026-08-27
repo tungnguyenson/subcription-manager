@@ -133,6 +133,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     final all = widget.done;
     final rows = switch (_filter) {
       HistoryFilter.all => all,
@@ -154,7 +155,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: widget.onBack),
-        const Text('History', style: SubdockText.screenTitle),
+        Text('History', style: SubdockText.screenTitle),
         const SizedBox(height: 12),
         Row(
           children: [

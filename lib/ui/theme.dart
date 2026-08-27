@@ -1,153 +1,155 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 
-/// The Glass design tokens, transcribed from `Subdock Glass App.dc.html`.
+import 'theme/palette.dart';
+
+export 'theme/palette.dart';
+
+/// The palette every token below reads from.
 ///
-/// The look is one idea, and it is the opposite of the Layered look this
-/// replaced: **the ground carries the colour and a surface is a hole cut in
-/// frosted glass.** There is a four-stop gradient behind everything, and a
-/// card is translucent white with a bright white hairline around it. Nothing
-/// casts a drop shadow. That is not a simplification of the design — the Glass
-/// theme sets `cardLg` and `cardSm` to a single `inset 0 0 0 1px
-/// rgba(255,255,255,.75)`, so the hairline *is* the whole separation.
+/// A mutable global rather than something threaded through `BuildContext`,
+/// and that is a deliberate trade. Roughly five hundred call sites say
+/// `SubdockColors.ink` or `SubdockText.body`, and a good third of them are
+/// inside static helpers — [SubdockSurface.card], `TabMark.tint`, a presenter
+/// building a row — that have no context to thread. Making the tokens
+/// context-bound would mean carrying a `BuildContext` into all of them.
+///
+/// The cost of the global is that setting it does **not** by itself repaint
+/// anything, and Flutter will not repaint a pushed route just because an
+/// ancestor rebuilt. That is what [SubdockTheme] is for, and why every screen
+/// starts its `build` with `SubdockTheme.watch(context)`.
+SubdockPalette _active = SubdockPalette.light;
+
+/// Publishes [palette] to every token, and repaints the screens that asked.
+///
+/// Two jobs, and both are needed. Setting `_active` is what makes
+/// `SubdockColors.ink` return the dark ink; the [InheritedWidget] underneath
+/// is what makes an already-pushed route notice.
+///
+/// The second half is the part that is easy to get wrong. A route's page is
+/// built once and cached by `_ModalScopeState`, so rebuilding this widget
+/// hands the Navigator the same child instance and Flutter short-circuits the
+/// whole subtree. An inherited dependency is the one channel that reaches
+/// inside a cached route — but only the widgets that actually registered one.
+/// Hence the rule: **a screen, sheet or dialog calls
+/// [SubdockTheme.watch] at the top of its `build`.** A screen that forgets it
+/// keeps the old palette until something else happens to rebuild it, which on
+/// a system-driven theme change is a half-dark screen.
+class SubdockTheme extends StatelessWidget {
+  final SubdockPalette palette;
+  final Widget child;
+
+  const SubdockTheme({super.key, required this.palette, required this.child});
+
+  /// The palette in force. Falls back to whatever is active when there is no
+  /// scope above — a widget test that builds one screen under a bare
+  /// `MaterialApp` is the normal case for that, and it should not have to
+  /// know this class exists.
+  static SubdockPalette of(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<_PaletteScope>()?.palette ??
+      _active;
+
+  /// Registers this build as depending on the palette. Call it first thing in
+  /// the `build` of anything that is the root of a route.
+  static void watch(BuildContext context) => of(context);
+
+  @override
+  Widget build(BuildContext context) {
+    _active = palette;
+    return _PaletteScope(palette: palette, child: child);
+  }
+}
+
+class _PaletteScope extends InheritedWidget {
+  final SubdockPalette palette;
+
+  const _PaletteScope({required this.palette, required super.child});
+
+  @override
+  bool updateShouldNotify(_PaletteScope old) => old.palette != palette;
+}
+
+/// The colour tokens.
+///
+/// The Glass look is one idea: **the ground carries the colour and a surface
+/// is a hole cut in frosted glass.** There is a four-stop gradient behind
+/// everything, and a card is a translucent wash with a hairline around it.
+/// Nothing casts a drop shadow — [SubdockShadow] is empty for cards on
+/// purpose, because the hairline *is* the whole separation.
 ///
 /// Two consequences worth knowing before editing anything here:
 ///
-/// 1. A card drawn with a drop shadow instead of the hairline disappears. The
-///    gradient and the card are within a few percent of the same lightness, so
-///    a shadow alone gives no edge to find.
-/// 2. An opaque white card also breaks it, in the other direction: it reads as
-///    a sheet of paper laid on the gradient rather than as part of it. Every
-///    surface here is translucent on purpose, which is why the fills below
-///    carry an alpha and are not hex triples.
+/// 1. A card drawn with a drop shadow instead of the hairline disappears. In
+///    light the gradient and the card are within a few percent of the same
+///    lightness; in dark there is nothing left for a shadow to darken.
+/// 2. An opaque card breaks it in the other direction: it reads as a sheet of
+///    paper laid on the gradient rather than as part of it. Every surface here
+///    is translucent on purpose, which is why the fills carry an alpha and are
+///    not hex triples.
+///
+/// The values live in [SubdockPalette]; this class is the reader. Adding a
+/// colour means adding a field there — in **both** variants — and a getter
+/// here.
 ///
 /// The design frames are 390x844 at 1x, so every number is already in Flutter
 /// logical pixels and can be transcribed literally.
 abstract final class SubdockColors {
-  /// The flat mid-tone of [SubdockGradients.page].
-  ///
-  /// Not the app background — that is the gradient. This is the fill for the
-  /// few places that need one opaque colour and cannot take a gradient behind
-  /// them: a platform date picker, a screenshot placeholder, a test that wants
-  /// a deterministic ground.
-  static const Color canvas = Color(0xFFEEF0F4);
+  static Color get canvas => _active.canvas;
+  static Color get card => _active.card;
+  static Color get glassEdge => _active.glassEdge;
+  static Color get glassEdgeSm => _active.glassEdgeSm;
+  static Color get solid => _active.solid;
+  static Color get sheetEdge => _active.sheetEdge;
+  static Color get scrim => _active.scrim;
+  static Color get tabBar => _active.tabBar;
+  static Color get tabBarEdge => _active.tabBarEdge;
+  static Color get banner => _active.banner;
+  static Color get thumb => _active.thumb;
+  static Color get thumbEdge => _active.thumbEdge;
+  static Color get segmentSelected => _active.segmentSelected;
+  static Color get knob => _active.knob;
+  static Color get lockScreen => _active.lockScreen;
 
-  /// Every card, field, chip and the tab bar. Translucent by design; see the
-  /// class comment before making it opaque.
-  static const Color card = Color(0x8CFFFFFF); // rgba(255,255,255,.55)
+  static Color get ink => _active.ink;
+  static Color get inkSecondary => _active.inkSecondary;
+  static Color get inkMuted => _active.inkMuted;
+  static Color get hairline => _active.hairline;
 
-  /// The bright hairline that gives a translucent surface its edge. This, not
-  /// a shadow, is what separates a card from the ground.
-  static const Color glassEdge = Color(0xBFFFFFFF); // rgba(255,255,255,.75)
+  static Color get accent => _active.accent;
+  static Color get onAccent => _active.onAccent;
+  static Color get onAccentSoft => _active.onAccentSoft;
+  static Color get accentEdge => _active.accentEdge;
+  static Color get accentSoft => _active.accentSoft;
+  static Color get accentFaint => _active.accentFaint;
+  static Color get chartAhead => _active.chartAhead;
+  static Color get chartAheadSelected => _active.chartAheadSelected;
 
-  /// Where a surface has to be opaque because something is sliding under it:
-  /// the toast, and the sheet that asks for notification permission.
-  static const Color solid = Color(0xFAFCFCFB);
+  static Color get danger => _active.danger;
+  static Color get onDanger => _active.onDanger;
+  static Color get dangerTint => _active.dangerTint;
+  static Color get dangerEdge => _active.dangerEdge;
 
-  static const Color ink = Color(0xFF1B2230);
-
-  /// A row's label, a subtitle, a paragraph — `rgba(27,34,48,.62)`.
-  ///
-  /// The stronger of the two greys. Secondary text *says something* about the
-  /// thing beside it.
-  static const Color inkSecondary = Color(0x9E1B2230);
-
-  /// A section heading, small print, an idle tab, a literal date under a
-  /// countdown — `rgba(27,34,48,.5)`.
-  ///
-  /// The weaker grey, and the design is consistent about which is which: this
-  /// one is for text that *names* a thing rather than telling you about it.
-  static const Color inkMuted = Color(0x801B2230);
-
-  /// The rule between two rows inside a card — `rgba(27,34,48,.10)`. Also the
-  /// fill behind an inset control (`softBg` in the design tokens).
-  static const Color hairline = Color(0x1A1B2230);
-
-  /// The one accent — `oklch(.55 .13 262)`. Primary actions, the selected
-  /// chip, the add button, a trial.
-  static const Color accent = Color(0xFF466FBD);
-
-  /// The accent as an outline around a card that needs marking without being
-  /// filled: a trial row, the "did you see the date" prompt — 40%.
-  static const Color accentEdge = Color(0x66466FBD);
-
-  /// An inactive toggle track, and the bars on the spending chart — 22%.
-  static const Color accentSoft = Color(0x38466FBD);
-
-  /// The ground under the add form's summary block, and a selected flat
-  /// chip — 12%.
-  static const Color accentFaint = Color(0x1F466FBD);
+  static Color get savings => _active.savings;
+  static Color get onSavings => _active.onSavings;
+  static Color get savingsEdge => _active.savingsEdge;
+  static Color get savingsFaint => _active.savingsFaint;
 
   /// Kept for the few call sites that predate the Glass tokens. [accentEdge]
   /// and [accentSoft] are the named equivalents; prefer those.
-  static const Color accentHalf = accentEdge;
-  static const Color accentTrack = accentSoft;
-  static const Color accentBar = accentSoft;
+  static Color get accentHalf => accentEdge;
+  static Color get accentTrack => accentSoft;
+  static Color get accentBar => accentSoft;
 
-  /// Overdue — `oklch(.52 .21 26)`.
-  ///
-  /// Its own hue family, deliberately not a tint of the accent: the accent
-  /// means "you can act here" and this means "you already didn't".
-  static const Color danger = Color(0xFFC5031B);
-
-  /// The ground of an overdue row: the danger mixed 10% into the card fill,
-  /// so it stays a piece of glass rather than becoming a red panel.
-  static const Color dangerTint = Color(0x98FDEAE8);
-
-  /// The hairline around an overdue row, replacing [glassEdge] there — 32%.
-  static const Color dangerEdge = Color(0x52C5031B);
-
-  /// Money the user would stop spending — `oklch(.53 .12 152)`.
-  ///
-  /// The second hue in the app, and it exists for one screen. Savings are the
-  /// only place where a number is *good* news, and the accent cannot say that:
-  /// it is already spent on "you can act here".
-  static const Color savings = Color(0xFF267F47);
-  static const Color savingsEdge = Color(0x61267F47); // 38%
-  static const Color savingsFaint = Color(0x1F267F47); // 12%
-
-  /// The tab bar, which sits over scrolling content and so is slightly more
-  /// opaque than a card — `rgba(255,255,255,.62)`.
-  static const Color tabBar = Color(0x9EFFFFFF);
-
-  /// The banner that says notifications are off — `rgba(255,255,255,.42)`.
-  /// Fainter than a card: it is a notice, not a thing to act on.
-  static const Color banner = Color(0x6BFFFFFF);
-
-  /// An empty tile inside a field, and its brighter edge.
-  static const Color thumb = Color(0x80FFFFFF);
-  static const Color thumbEdge = Color(0xCCFFFFFF);
-
-  /// The knob of a toggle. Fully opaque — a translucent knob on a translucent
-  /// track has nothing left to read.
-  static const Color knob = Color(0xFFFFFFFF);
-
-  /// Behind the lock-screen mock-up on the onboarding screen.
-  static const Color lockScreen = Color(0xFFE4E7EE);
+  /// The letter inside a service tile, which does not follow the theme: it
+  /// sits on the provider's brand tint, and that tint does not know what
+  /// theme it is in.
+  static const Color onBrand = Color(0xFFFFFFFF);
 }
 
-/// The gradients. There are two, and they are the same family: the page and
-/// anything that has to sit flush against it.
+/// The gradients. There is one, and everything sits on it.
 abstract final class SubdockGradients {
-  /// The app ground —
-  /// `linear-gradient(160deg,#dfe6f6 0%,#eef0f4 42%,#f6ece6 74%,#e3edf1 100%)`.
-  ///
-  /// Four stops, and the warm one at 74% is the point of it: a two-stop
-  /// blue-to-blue ramp reads as a flat wash, and the whole reason the surfaces
-  /// can be translucent is that there is something behind them worth seeing.
-  ///
-  /// CSS `160deg` points down and slightly right; in Flutter's y-down
-  /// alignment space that is `(sin 160°, -cos 160°)` = `(0.342, 0.940)`.
-  static const LinearGradient page = LinearGradient(
-    begin: Alignment(-0.342, -0.940),
-    end: Alignment(0.342, 0.940),
-    colors: [
-      Color(0xFFDFE6F6),
-      Color(0xFFEEF0F4),
-      Color(0xFFF6ECE6),
-      Color(0xFFE3EDF1),
-    ],
-    stops: [0.0, 0.42, 0.74, 1.0],
-  );
+  /// The app ground. See [SubdockPalette.page] for why it has four stops.
+  static LinearGradient get page => _active.page;
 }
 
 /// Corner radii. The design uses a small fixed set; a value outside it is a
@@ -229,35 +231,56 @@ abstract final class SubdockSpacing {
 
 /// The elevations.
 ///
-/// Three of the four are empty, and that is the Glass theme rather than an
-/// omission: `cardLg` and `cardSm` are both `inset 0 0 0 1px
-/// rgba(255,255,255,.75)`, which is a border and lives on the decoration, not
-/// here. See [SubdockSurface].
+/// Three of the four are empty in both variants, and that is the Glass theme
+/// rather than an omission: `cardLg` and `cardSm` are a border, which lives on
+/// the decoration and not here. See [SubdockSurface].
 ///
-/// What is left are the two places where something genuinely floats over
-/// content rather than sitting in the same plane as it.
+/// What is left are the places where something genuinely floats over content
+/// rather than sitting in the same plane as it — and **all of them are empty
+/// in dark.** A drop shadow needs something to darken, and a dark ground has
+/// nothing. Their job passes to [SubdockPalette.sheetEdge] and to the
+/// hairlines the surfaces already carry.
 abstract final class SubdockShadow {
   /// A card, a field, a button. Nothing — the hairline does this job.
   static const List<BoxShadow> card = [];
   static const List<BoxShadow> soft = [];
   static const List<BoxShadow> tabBar = [];
 
-  /// The sheet that rises over the list to ask for notification permission —
+  /// The sheet that rises over the list —
   /// `0 -20px 44px rgba(20,22,26,.22)`.
-  static const List<BoxShadow> sheet = [
-    BoxShadow(color: Color(0x3814161A), offset: Offset(0, -20), blurRadius: 44),
-  ];
+  static List<BoxShadow> get sheet => _active.isDark
+      ? const []
+      : const [
+          BoxShadow(
+            color: Color(0x3814161A),
+            offset: Offset(0, -20),
+            blurRadius: 44,
+          ),
+        ];
 
   /// The toast — `0 10px 24px rgba(20,22,26,.28)`.
-  static const List<BoxShadow> toast = [
-    BoxShadow(color: Color(0x4714161A), offset: Offset(0, 10), blurRadius: 24),
-  ];
+  static List<BoxShadow> get toast => _active.isDark
+      ? const []
+      : const [
+          BoxShadow(
+            color: Color(0x4714161A),
+            offset: Offset(0, 10),
+            blurRadius: 24,
+          ),
+        ];
 
-  /// The knob of a toggle. The one shadow the design keeps on a control,
-  /// because the knob has to read as a solid object on a tinted track.
-  static const List<BoxShadow> knob = [
-    BoxShadow(color: Color(0x4D14161A), offset: Offset(0, 1), blurRadius: 2),
-  ];
+  /// The knob of a toggle. The one shadow the light design keeps on a control,
+  /// because the knob has to read as a solid object on a tinted track. In dark
+  /// the knob is near-white on a translucent track and already does.
+  static List<BoxShadow> get knob => _active.isDark
+      ? const []
+      : const [
+          BoxShadow(
+            color: Color(0x4D14161A),
+            offset: Offset(0, 1),
+            blurRadius: 2,
+          ),
+        ];
 }
 
 /// The decorations every translucent surface is built from.
@@ -269,6 +292,11 @@ abstract final class SubdockShadow {
 /// the look, so there is no reason for one to exist.
 abstract final class SubdockSurface {
   /// A card, a field, a chip at rest. The default surface.
+  ///
+  /// The hairline weakens on a small surface, which is the design's `cardSm`.
+  /// Read off the radius rather than asked for: every small surface in the app
+  /// is already the one that takes [SubdockRadius.chip], so a second parameter
+  /// would only be a way to get the pair wrong.
   static BoxDecoration card({
     double radius = SubdockRadius.card,
     Color? color,
@@ -276,7 +304,13 @@ abstract final class SubdockSurface {
   }) => BoxDecoration(
     color: color ?? SubdockColors.card,
     borderRadius: BorderRadius.circular(radius),
-    border: Border.all(color: edge ?? SubdockColors.glassEdge),
+    border: Border.all(
+      color:
+          edge ??
+          (radius <= SubdockRadius.chip
+              ? SubdockColors.glassEdgeSm
+              : SubdockColors.glassEdge),
+    ),
   );
 
   /// An overdue row: the same shape, carrying the danger hue in both halves.
@@ -302,6 +336,27 @@ abstract final class SubdockSurface {
         color: SubdockColors.card,
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(color: SubdockColors.savingsEdge, width: 1.5),
+      );
+
+  /// A sheet that rises over the list.
+  ///
+  /// Opaque, unlike every other surface here: the list is sliding underneath,
+  /// and a translucent sheet would let the row the user just acted on show
+  /// through the sentence about it.
+  ///
+  /// The separation swaps hands between the variants. In light it is the drop
+  /// shadow; in dark that shadow has nothing to darken, so a hairline along
+  /// the top edge takes over. The border is dropped rather than drawn
+  /// transparent where it is not wanted, because a 1px transparent side still
+  /// takes 1px out of the sheet's inside.
+  static BoxDecoration sheet({double radius = SubdockRadius.sheet}) =>
+      BoxDecoration(
+        color: SubdockColors.solid,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(radius)),
+        border: SubdockColors.sheetEdge.a == 0
+            ? null
+            : Border(top: BorderSide(color: SubdockColors.sheetEdge)),
+        boxShadow: SubdockShadow.sheet,
       );
 }
 
@@ -362,7 +417,7 @@ abstract final class SubdockText {
   // ---- titles ----
 
   /// The big title on a root screen: Upcoming, Money, Savings, Settings.
-  static const TextStyle screenTitle = TextStyle(
+  static TextStyle get screenTitle => TextStyle(
     fontFamily: family,
     fontSize: 34,
     height: 1.15,
@@ -372,7 +427,7 @@ abstract final class SubdockText {
   );
 
   /// The title on a screen that is filling something in.
-  static const TextStyle editorTitle = TextStyle(
+  static TextStyle get editorTitle => TextStyle(
     fontFamily: family,
     fontSize: 28,
     height: 1.2,
@@ -382,7 +437,7 @@ abstract final class SubdockText {
   );
 
   /// An item's name at the top of its detail screen, beside the tile.
-  static const TextStyle detailTitle = TextStyle(
+  static TextStyle get detailTitle => TextStyle(
     fontFamily: family,
     fontSize: 24,
     height: 1.25,
@@ -391,7 +446,7 @@ abstract final class SubdockText {
     color: SubdockColors.ink,
   );
 
-  static const TextStyle onboardTitle = TextStyle(
+  static TextStyle get onboardTitle => TextStyle(
     fontFamily: family,
     fontSize: 34,
     height: 1.25,
@@ -404,7 +459,7 @@ abstract final class SubdockText {
 
   /// The uppercase heading above a card, and the label above a field. One
   /// style for both: the design does not distinguish them.
-  static const TextStyle sectionLabel = TextStyle(
+  static TextStyle get sectionLabel => TextStyle(
     fontFamily: family,
     fontSize: 12.5,
     height: 1,
@@ -416,7 +471,7 @@ abstract final class SubdockText {
   // ---- rows ----
 
   /// The left half of a label/value row.
-  static const TextStyle rowLabel = TextStyle(
+  static TextStyle get rowLabel => TextStyle(
     fontFamily: family,
     fontSize: 16,
     height: 1,
@@ -425,7 +480,7 @@ abstract final class SubdockText {
   );
 
   /// The right half. Heavier and darker, because the value is the answer.
-  static const TextStyle rowValue = TextStyle(
+  static TextStyle get rowValue => TextStyle(
     fontFamily: family,
     fontSize: 16,
     height: 1,
@@ -434,7 +489,7 @@ abstract final class SubdockText {
   );
 
   /// A plain row that is a destination rather than a fact: a settings entry.
-  static const TextStyle rowLink = TextStyle(
+  static TextStyle get rowLink => TextStyle(
     fontFamily: family,
     fontSize: 16,
     height: 1,
@@ -443,7 +498,7 @@ abstract final class SubdockText {
   );
 
   /// An item's name in the Upcoming list.
-  static const TextStyle itemName = TextStyle(
+  static TextStyle get itemName => TextStyle(
     fontFamily: family,
     fontSize: 17,
     height: 1.3,
@@ -453,7 +508,7 @@ abstract final class SubdockText {
   );
 
   /// The second line of a list row: the amount, the instalment count.
-  static const TextStyle itemSubtitle = TextStyle(
+  static TextStyle get itemSubtitle => TextStyle(
     fontFamily: family,
     fontSize: 14,
     height: 1.4,
@@ -463,7 +518,7 @@ abstract final class SubdockText {
 
   /// The payment source appended to that second line. A shade quieter, so
   /// "· Momo" never outranks the amount it follows.
-  static const TextStyle itemAside = TextStyle(
+  static TextStyle get itemAside => TextStyle(
     fontFamily: family,
     fontSize: 13,
     height: 1.4,
@@ -474,7 +529,7 @@ abstract final class SubdockText {
   // ---- prose ----
 
   /// The line under a screen title.
-  static const TextStyle summary = TextStyle(
+  static TextStyle get summary => TextStyle(
     fontFamily: family,
     fontSize: 15,
     height: 1.45,
@@ -483,7 +538,7 @@ abstract final class SubdockText {
   );
 
   /// A paragraph. Only onboarding and the empty state have one.
-  static const TextStyle body = TextStyle(
+  static TextStyle get body => TextStyle(
     fontFamily: family,
     fontSize: 17,
     height: 1.7,
@@ -492,7 +547,7 @@ abstract final class SubdockText {
   );
 
   /// The small print under a card.
-  static const TextStyle footnote = TextStyle(
+  static TextStyle get footnote => TextStyle(
     fontFamily: family,
     fontSize: 13.5,
     height: 1.5,
@@ -501,7 +556,7 @@ abstract final class SubdockText {
   );
 
   /// The smallest print: a provenance line, a caveat about a figure.
-  static const TextStyle caption = TextStyle(
+  static TextStyle get caption => TextStyle(
     fontFamily: family,
     fontSize: 13,
     height: 1.5,
@@ -511,7 +566,7 @@ abstract final class SubdockText {
 
   // ---- controls ----
 
-  static const TextStyle button = TextStyle(
+  static TextStyle get button => TextStyle(
     fontFamily: family,
     fontSize: 17,
     height: 1,
@@ -520,7 +575,7 @@ abstract final class SubdockText {
   );
 
   /// A text-only action, the quietest of the three action weights.
-  static const TextStyle quietAction = TextStyle(
+  static TextStyle get quietAction => TextStyle(
     fontFamily: family,
     fontSize: 16,
     height: 1,
@@ -528,7 +583,7 @@ abstract final class SubdockText {
     color: SubdockColors.inkSecondary,
   );
 
-  static const TextStyle chip = TextStyle(
+  static TextStyle get chip => TextStyle(
     fontFamily: family,
     fontSize: 14,
     height: 1,
@@ -536,16 +591,16 @@ abstract final class SubdockText {
     color: SubdockColors.inkSecondary,
   );
 
-  static const TextStyle chipSelected = TextStyle(
+  static TextStyle get chipSelected => TextStyle(
     fontFamily: family,
     fontSize: 14,
     height: 1,
     fontWeight: SubdockWeight.regular,
-    color: Color(0xFFFFFFFF),
+    color: SubdockColors.onAccent,
   );
 
   /// The text typed into a field, and a field's placeholder at the same size.
-  static const TextStyle fieldValue = TextStyle(
+  static TextStyle get fieldValue => TextStyle(
     fontFamily: family,
     fontSize: 16,
     height: 1.2,
@@ -553,7 +608,7 @@ abstract final class SubdockText {
     color: SubdockColors.ink,
   );
 
-  static const TextStyle tab = TextStyle(
+  static TextStyle get tab => TextStyle(
     fontFamily: family,
     fontSize: 13,
     height: 1,
@@ -564,7 +619,7 @@ abstract final class SubdockText {
   /// The selected tab. Same size and weight, and only the colour changes —
   /// the Glass tab bar has no slab behind the selected mark, so a weight jump
   /// here would make the row of five words visibly ragged.
-  static const TextStyle tabActive = TextStyle(
+  static TextStyle get tabActive => TextStyle(
     fontFamily: family,
     fontSize: 13,
     height: 1,
@@ -573,18 +628,18 @@ abstract final class SubdockText {
   );
 
   /// The letter inside a service tile.
-  static const TextStyle tileLetter = TextStyle(
+  static TextStyle get tileLetter => TextStyle(
     fontFamily: family,
     fontSize: 16,
     height: 1,
     fontWeight: SubdockWeight.semibold,
-    color: Color(0xFFFFFFFF),
+    color: SubdockColors.onBrand,
   );
 
   // ---- mono ----
 
   /// The countdown on a list row: `Tomorrow`, `6d`, `Late`.
-  static const TextStyle when = TextStyle(
+  static TextStyle get when => TextStyle(
     fontFamily: mono,
     fontSize: 15,
     height: 1.2,
@@ -594,7 +649,7 @@ abstract final class SubdockText {
   );
 
   /// The literal date under it.
-  static const TextStyle whenDate = TextStyle(
+  static TextStyle get whenDate => TextStyle(
     fontFamily: mono,
     fontSize: 13,
     height: 1.2,
@@ -604,7 +659,7 @@ abstract final class SubdockText {
   );
 
   /// A figure in the right-hand column of a card row.
-  static const TextStyle monoValue = TextStyle(
+  static TextStyle get monoValue => TextStyle(
     fontFamily: mono,
     fontSize: 15.5,
     height: 1.2,
@@ -614,7 +669,7 @@ abstract final class SubdockText {
   );
 
   /// The one big number on the Spending screen.
-  static const TextStyle figure = TextStyle(
+  static TextStyle get figure => TextStyle(
     fontFamily: mono,
     fontSize: 36,
     height: 1.2,
@@ -628,7 +683,7 @@ abstract final class SubdockText {
   /// Light and large rather than heavy and large. It is the only figure in the
   /// app the user is not being asked to pay, and 300 weight is how the design
   /// keeps it from reading as another bill.
-  static const TextStyle figureLight = TextStyle(
+  static TextStyle get figureLight => TextStyle(
     fontFamily: family,
     fontSize: 40,
     height: 1.05,
@@ -638,7 +693,7 @@ abstract final class SubdockText {
   );
 
   /// A date sitting inside a sentence.
-  static const TextStyle monoInline = TextStyle(
+  static TextStyle get monoInline => TextStyle(
     fontFamily: mono,
     fontSize: 14,
     height: 1.4,
@@ -648,23 +703,52 @@ abstract final class SubdockText {
   );
 }
 
-ThemeData buildSubdockTheme() {
+/// The Material theme, which the app barely uses.
+///
+/// Almost everything is drawn from the tokens above rather than from
+/// `Theme.of`. What is left here is the handful of things Flutter reaches for
+/// on its own: the text selection handles, a platform date picker, the ripple.
+///
+/// [palette]'s brightness is the one thing the framework genuinely needs told
+/// — a `CupertinoDatePicker` and the on-screen keyboard both read it, and
+/// neither looks at [SubdockColors]. It defaults to
+/// [SubdockPalette.light] so a widget test that only wants *a* theme does not
+/// have to name one.
+ThemeData buildSubdockTheme([SubdockPalette palette = SubdockPalette.light]) {
+  final dark = palette.isDark;
   return ThemeData(
     useMaterial3: true,
-    brightness: Brightness.light,
-    // Transparent, not [SubdockColors.canvas]: the gradient is painted by
+    brightness: palette.brightness,
+    // Transparent, not [SubdockPalette.canvas]: the gradient is painted by
     // [GlassBackground] under the whole app, and an opaque scaffold would
     // cover it.
     scaffoldBackgroundColor: const Color(0x00000000),
     fontFamily: SubdockText.family,
-    colorScheme: const ColorScheme.light(
-      surface: SubdockColors.canvas,
-      surfaceContainer: SubdockColors.canvas,
-      primary: SubdockColors.accent,
-      onPrimary: Color(0xFFFFFFFF),
-      outline: SubdockColors.hairline,
-      error: SubdockColors.danger,
+    colorScheme: ColorScheme(
+      brightness: palette.brightness,
+      surface: palette.canvas,
+      onSurface: palette.ink,
+      primary: palette.accent,
+      onPrimary: palette.onAccent,
+      secondary: palette.accent,
+      onSecondary: palette.onAccent,
+      outline: palette.hairline,
+      error: palette.danger,
+      onError: palette.onDanger,
     ),
-    splashFactory: InkSparkle.splashFactory,
+    // Named explicitly because ColorScheme derives it from `surface`, and the
+    // derivation lands on a container that is lighter than the sheet it would
+    // sit in.
+    canvasColor: palette.canvas,
+    splashFactory: dark ? InkRipple.splashFactory : InkSparkle.splashFactory,
   );
 }
+
+/// What the status bar and the Android navigation bar should draw over the
+/// gradient.
+///
+/// `dark` here means dark *content* on a light ground, which is what the light
+/// variant needs, and it is the value the app used to pin at startup back when
+/// there was only one look.
+SystemUiOverlayStyle subdockOverlayStyle(SubdockPalette palette) =>
+    palette.isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark;

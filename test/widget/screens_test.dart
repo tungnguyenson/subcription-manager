@@ -30,6 +30,24 @@ void main() {
   final today = LocalDate.parse('2026-08-15');
   LocalDate d(String iso) => LocalDate.parse(iso);
 
+  /// The decoration [ItemRow] draws itself with, for the row carrying [name].
+  /// The row's own Container is the outermost one under it.
+  BoxDecoration rowBoxOf(WidgetTester tester, String name) =>
+      tester
+              .widget<Container>(
+                find
+                    .descendant(
+                      of: find.ancestor(
+                        of: find.textContaining(name),
+                        matching: find.byType(ItemRow),
+                      ),
+                      matching: find.byType(Container),
+                    )
+                    .first,
+              )
+              .decoration
+          as BoxDecoration;
+
   Future<void> show(WidgetTester tester, Widget child) async {
     await tester.pumpWidget(
       MaterialApp(
@@ -117,6 +135,57 @@ void main() {
             .first,
       );
       expect((pill.decoration as BoxDecoration).color, SubdockColors.danger);
+    });
+
+    // The rows are a list, and a list is read by running an eye down it. Each
+    // row used to be its own translucent card, which put four edges and a 10px
+    // moat around every line: a screen of eight items read as eight separate
+    // objects that happened to be stacked.
+    testWidgets('rows are ruled, not carded', (tester) async {
+      await show(
+        tester,
+        UpcomingScreen(view: UpcomingPresenter.build(sample, today)),
+      );
+
+      final row = rowBoxOf(tester, 'Netflix');
+      expect(row.color, isNull, reason: 'a ruled row has no fill');
+      expect(row.borderRadius, isNull);
+      expect(row.boxShadow, anyOf(isNull, isEmpty));
+      expect(
+        (row.border as Border).bottom.color,
+        SubdockColors.hairline,
+        reason: 'the rule under it is the whole separation',
+      );
+    });
+
+    // The cost of dropping the card, named out loud: an overdue row can no
+    // longer carry a danger fill and a danger edge, because there is nothing
+    // left to fill. Its countdown pill carries it alone -- and that pill is
+    // the loudest thing on the row either way.
+    testWidgets('an overdue row signals with the pill, not a red panel', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        UpcomingScreen(view: UpcomingPresenter.build(sample, today)),
+      );
+
+      final row = rowBoxOf(tester, 'Viettel');
+      expect(row.color, isNull);
+      expect((row.border as Border).bottom.color, SubdockColors.hairline);
+    });
+
+    testWidgets('the card look can be asked for back', (tester) async {
+      await show(
+        tester,
+        UpcomingScreen(
+          view: UpcomingPresenter.build(sample, today),
+          rowStyle: ItemRowStyle.cards,
+        ),
+      );
+
+      expect(rowBoxOf(tester, 'Netflix').color, SubdockColors.card);
+      expect(rowBoxOf(tester, 'Viettel').color, SubdockColors.dangerTint);
     });
 
     // Every bucket on this screen is open. A section that arrives folded hides
@@ -530,8 +599,10 @@ void main() {
 
     // A chevron promises a picker. Currency, language and the widget row have
     // none, so none of them gets one.
+    // Tall, because the screen no longer fits a phone: the Appearance tray
+    // sits above Backup, and a ListView does not build what is below the fold.
     testWidgets('value rows do not pretend to lead anywhere', (tester) async {
-      await show(tester, const SettingsScreen());
+      await showTall(tester, const SettingsScreen());
 
       expect(find.text('VND'), findsOneWidget);
       expect(find.text('English'), findsOneWidget);

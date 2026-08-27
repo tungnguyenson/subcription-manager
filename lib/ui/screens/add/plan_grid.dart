@@ -256,7 +256,7 @@ class _PlanTile extends StatelessWidget {
                   option.label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: SubdockText.family,
                     fontSize: 13,
                     height: 1.3,
@@ -324,7 +324,7 @@ class _OtherTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 5),
-                const Text(
+                Text(
                   'Type it yourself',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

@@ -326,6 +326,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     // Step one, for a new item only.
     if (_picking) {
       return ServicePicker(
@@ -628,7 +629,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             if (!_isEdit)
               InkWell(
                 onTap: () => setState(() => _picking = true),
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 4),
                   child: Text('\u2039 Back', style: SubdockText.quietAction),
                 ),
@@ -637,7 +638,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             if (widget.onScan != null) ...[
               InkWell(
                 onTap: widget.onScan,
-                child: const Padding(
+                child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 4),
                   child: Text('Scan', style: SubdockText.quietAction),
                 ),
@@ -646,7 +647,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             ],
             InkWell(
               onTap: widget.onCancel ?? () => Navigator.of(context).maybePop(),
-              child: const Padding(
+              child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 4),
                 child: Text('Cancel', style: SubdockText.quietAction),
               ),
@@ -732,7 +733,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 // Both words give way before the field between them does: the
                 // number is the part being read, and at a large text size a
                 // rigid row would push it off the card instead.
-                const Flexible(
+                Flexible(
                   child: Text(
                     'Stops after',
                     maxLines: 1,
@@ -753,7 +754,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                const Flexible(
+                Flexible(
                   child: Text(
                     'payments',
                     maxLines: 1,
@@ -871,7 +872,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 _nameFocus.requestFocus();
               },
               radius: 20,
-              child: const SizedBox(
+              child: SizedBox(
                 width: 28,
                 height: 28,
                 child: Icon(
@@ -967,13 +968,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 Icons.open_in_new_rounded,
                 size: 15,
                 color: SubdockColors.accent,
               ),
               const SizedBox(width: 6),
-              const Flexible(
+              Flexible(
                 child: Text(
                   // Not `Open Netflix account`, the way the detail screen
                   // words it. There the item exists and the sentence is about
@@ -1069,7 +1070,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Repeats forever',
                         style: SubdockText.rowLink,
@@ -1116,7 +1117,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         children: [
           Row(
             children: [
-              const Flexible(
+              Flexible(
                 child: Text(
                   'Every',
                   maxLines: 1,

@@ -37,7 +37,7 @@ class FilterSheet extends StatefulWidget {
   });
 
   /// The overlay behind the sheet — `rgba(20,22,26,.36)`.
-  static const Color scrim = Color(0x5C14161A);
+  static Color get scrim => SubdockColors.scrim;
 
   /// How much of the screen the sheet may take before it starts scrolling.
   static const double maxHeightFraction = 0.78;
@@ -81,6 +81,7 @@ class _FilterSheetState extends State<FilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     final options = widget.options;
     final shown = widget.countFor(_filter);
 
@@ -90,17 +91,7 @@ class _FilterSheetState extends State<FilterSheet> {
         top: Radius.circular(SubdockRadius.sheet),
       ),
       child: Container(
-        decoration: const BoxDecoration(
-          // Nearly opaque for the same reason the permission sheet is: the
-          // list is right underneath and sliding as the filter changes, and a
-          // translucent sheet would let it move behind the chips that are
-          // moving it.
-          color: SubdockColors.solid,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(SubdockRadius.sheet),
-          ),
-          boxShadow: SubdockShadow.sheet,
-        ),
+        decoration: SubdockSurface.sheet(),
         padding: const EdgeInsets.fromLTRB(22, 22, 22, 26),
         child: SafeArea(
           top: false,

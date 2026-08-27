@@ -223,17 +223,17 @@ class _Row {
   /// from the item's name. "1,200,000 đ" four times in a row looks like a bug;
   /// "1,200,000 đ · payment 4 of 6" is a plan running to schedule.
   ///
-  /// A trial says the amount is not being charged yet. "260,000 đ" on a row
-  /// whose whole point is that nothing has been taken is the one wrong thing
-  /// this line could say.
+  /// A trial priced at nothing is the one case this line has to answer for
+  /// itself. It used to answer for both: a trial row read "Free now · then
+  /// 260,000 đ", which spent the whole width of the line saying what the
+  /// `FREE TRIAL` badge two millimetres above it already said, and buried the
+  /// number the reader came for behind four words. The badge says the state;
+  /// this line says the amount. With no amount to say there is nothing left
+  /// but the state, so it says that instead of going blank.
   static String? subtitleOf(TrackedItem item, LocalDate today) {
     final money = item.money;
 
-    // if (item.isTrialOn(today)) {
-    //   return money == null
-    //       ? 'Free now'
-    //       : 'Free now · then ${MoneyFormat.full(money)}';
-    // }
+    if (money == null && item.isTrialOn(today)) return 'Free now';
 
     final parts = <String>[];
     if (money != null) parts.add(MoneyFormat.full(money));

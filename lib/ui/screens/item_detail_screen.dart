@@ -96,6 +96,7 @@ class ItemDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     final position = Instalments.of(item);
     final money = item.money;
     final saving = AnnualSavingPresenter.of(
@@ -120,7 +121,7 @@ class ItemDetailScreen extends StatelessWidget {
             if (onEdit != null)
               InkWell(
                 onTap: onEdit,
-                child: const Padding(
+                child: Padding(
                   // Matches BackLink's own padding so the two links sit on one
                   // baseline at either end of the row.
                   padding: EdgeInsets.fromLTRB(12, 2, 0, 14),
@@ -335,9 +336,7 @@ class _PaymentProgress extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(
-                child: Text('Payment', style: SubdockText.rowLabel),
-              ),
+              Expanded(child: Text('Payment', style: SubdockText.rowLabel)),
               Text(
                 '${position.index} of ${position.total}',
                 style: SubdockText.rowValue.copyWith(

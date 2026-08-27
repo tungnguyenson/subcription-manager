@@ -120,13 +120,14 @@ class _SourcesScreenState extends State<SourcesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     return ListView(
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: widget.onBack),
-        const Text('Payment sources', style: SubdockText.screenTitle),
+        Text('Payment sources', style: SubdockText.screenTitle),
         const SizedBox(height: 6),
-        const Text(
+        Text(
           'A name you recognise, so a reminder can tell you which card or '
           'account is about to be charged. Nothing is connected to your bank.',
           style: SubdockText.summary,
@@ -160,7 +161,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
             ],
           ),
         ] else
-          const Padding(
+          Padding(
             padding: EdgeInsets.only(top: 20),
             child: Text(
               'No sources yet. Add the card or account you pay most bills '
@@ -194,7 +195,7 @@ class _SourcesScreenState extends State<SourcesScreen> {
             const SizedBox(height: 10),
             PrimaryButton('Add source', onPressed: _canAdd ? _add : null),
             const SizedBox(height: 10),
-            const Text(
+            Text(
               'A nickname is enough. Never enter a full card number.',
               style: SubdockText.caption,
             ),
@@ -230,7 +231,7 @@ class _NameField extends StatelessWidget {
         onSubmitted: (_) => onSubmit(),
         textInputAction: TextInputAction.done,
         style: SubdockText.fieldValue,
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
           border: InputBorder.none,
           isDense: true,
           contentPadding: EdgeInsets.symmetric(vertical: 12),
@@ -296,7 +297,7 @@ class _SourceListRow extends StatelessWidget {
           const SizedBox(width: 8),
           InkWell(
             onTap: onRemove,
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
               child: Text(
                 'Remove',

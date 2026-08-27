@@ -35,13 +35,14 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     return ListView(
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: onBack),
-        const Text('About', style: SubdockText.screenTitle),
+        Text('About', style: SubdockText.screenTitle),
         const SizedBox(height: 6),
-        const Text(
+        Text(
           'Subdock tracks anything with an expiry date and reminds you before '
           'it lapses.',
           style: SubdockText.summary,

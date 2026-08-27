@@ -71,21 +71,13 @@ class NotificationAsk extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     return BlurLayer(
       borderRadius: const BorderRadius.vertical(
         top: Radius.circular(SubdockRadius.sheet),
       ),
       child: Container(
-        decoration: const BoxDecoration(
-          // Nearly opaque, unlike every other surface in this theme: the list
-          // is sliding underneath and a translucent sheet would let the row
-          // the user just created show through the sentence about it.
-          color: SubdockColors.solid,
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(SubdockRadius.sheet),
-          ),
-          boxShadow: SubdockShadow.sheet,
-        ),
+        decoration: SubdockSurface.sheet(),
         padding: const EdgeInsets.fromLTRB(22, 20, 22, 26),
         child: SafeArea(
           top: false,
@@ -122,14 +114,14 @@ class NotificationAsk extends StatelessWidget {
                           style: SubdockText.itemName,
                         ),
                         const SizedBox(height: 3),
-                        const Text(
+                        Text(
                           'Added to Subdock',
                           style: SubdockText.itemSubtitle,
                         ),
                       ],
                     ),
                   ),
-                  const Icon(
+                  Icon(
                     Icons.check_circle_rounded,
                     size: 22,
                     color: SubdockColors.accent,
@@ -154,7 +146,7 @@ class NotificationAsk extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.schedule_rounded,
                       size: 19,
                       color: SubdockColors.accent,
@@ -174,7 +166,7 @@ class NotificationAsk extends StatelessWidget {
               const SizedBox(height: 6),
               QuietButton('Not now', onPressed: onLater),
               const SizedBox(height: 4),
-              const Center(
+              Center(
                 child: Text(
                   // The scope of what is being asked for, on the sheet rather
                   // than in a privacy policy. This app sends exactly one kind

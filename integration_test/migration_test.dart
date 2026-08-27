@@ -15,6 +15,7 @@ import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/data/settings_store.dart';
+import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
 
 import '../test/fixtures/schema_v1.dart';
@@ -80,6 +81,7 @@ void main() {
         repository: repo,
         settings: SettingsStore(db),
         filters: FilterStore(db),
+        themes: ThemeStore(db),
         scheduler: NotificationScheduler(),
         catalog: ServiceCatalog(const []),
         backups: BackupStore(db, repo, SettingsStore(db)),

@@ -44,7 +44,7 @@ class TrialField extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Text(
                     'In a free trial now',
                     style: SubdockText.rowLink,

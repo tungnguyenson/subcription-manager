@@ -32,7 +32,7 @@ class MonthBar extends StatelessWidget {
           child: Text(
             label,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: SubdockText.family,
               fontSize: 16,
               height: 1,
@@ -59,7 +59,7 @@ class _Arrow extends StatelessWidget {
     return Container(
       width: 34,
       height: 34,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: SubdockColors.card,
       ),
@@ -118,7 +118,7 @@ class MonthGrid extends StatelessWidget {
                   child: Text(
                     day,
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: SubdockText.family,
                       fontSize: 10.5,
                       height: 1,
@@ -222,7 +222,7 @@ class _Cell extends StatelessWidget {
                     // list says the same thing with a whole section; here it
                     // is one number, because a grid has no room for a heading.
                     color: cell.selected
-                        ? const Color(0xFFFFFFFF)
+                        ? SubdockColors.onAccent
                         : cell.overdue
                         ? SubdockColors.danger
                         : cell.count > 0
@@ -281,7 +281,7 @@ class _Marks extends StatelessWidget {
               height: 1,
               fontWeight: SubdockWeight.medium,
               color: cell.selected
-                  ? const Color(0xCCFFFFFF)
+                  ? SubdockColors.onAccentSoft
                   : SubdockColors.inkMuted,
             ),
           ),

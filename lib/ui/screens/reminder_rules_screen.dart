@@ -58,11 +58,12 @@ class ReminderRulesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SubdockTheme.watch(context);
     return ListView(
       padding: SubdockSpacing.screenPadding(context),
       children: [
         BackLink(onTap: onBack),
-        const Text('Reminders', style: SubdockText.screenTitle),
+        Text('Reminders', style: SubdockText.screenTitle),
         const SectionLabel('Default schedule'),
         GroupedCard(
           children: [

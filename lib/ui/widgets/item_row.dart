@@ -4,13 +4,30 @@ import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/glass.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 
-/// One line in the Upcoming list, and its own card.
-///
-/// Its own card, not a ruled row inside a shared one. The Glass design puts a
-/// 10px gap between rows and gives each its own hairline, and that is what lets
-/// an overdue row carry the danger edge while the rows above and below it stay
-/// plain. A single ruled card can only have one edge, so the overdue row would
-/// have to signal itself with colour on its text alone.
+/// How a run of rows is separated.
+enum ItemRowStyle {
+  /// A rule under each row, and nothing else: no fill, no radius, no gap. The
+  /// default, and what Upcoming draws.
+  ///
+  /// The rows on Upcoming are a *list*, and a list is read by running an eye
+  /// down it. Giving each row its own translucent card put four edges and a
+  /// 10px moat around every line, so a screen of eight items read as eight
+  /// separate objects that happened to be stacked — and the moats and the
+  /// hairlines together spent about a fifth of the screen saying nothing. A
+  /// rule says the same thing in one pixel.
+  ///
+  /// The cost is real and worth naming: an overdue row can no longer carry a
+  /// danger fill and a danger edge, because with no card there is nothing to
+  /// fill. It signals with its countdown pill instead, which is the loudest
+  /// thing on the row either way.
+  dividers,
+
+  /// Each row its own translucent card, with a gap between them. Kept for a
+  /// caller that wants the old look back.
+  cards,
+}
+
+/// One line in the Upcoming list.
 ///
 /// Three columns: the service mark, the name and what it costs, and the
 /// countdown. The countdown column is mono and right-aligned, which is what
@@ -37,10 +54,13 @@ class ItemRow extends StatelessWidget {
   /// The literal date under it, or how long ago it lapsed.
   final String date;
 
-  /// Puts the countdown in a filled danger pill and swaps the row's edge for
-  /// the danger one. The name and amount are untouched — an overdue item is
-  /// still the same item, and re-colouring the whole row would make the list
-  /// look like a list of errors.
+  /// Puts the countdown in a filled danger pill. The name and amount are
+  /// untouched — an overdue item is still the same item, and re-colouring the
+  /// whole row would make the list look like a list of errors.
+  ///
+  /// Under [ItemRowStyle.cards] it also swaps the row's fill and edge for the
+  /// danger pair. Under [ItemRowStyle.dividers] there is no fill to swap, and
+  /// the pill carries it alone.
   final bool overdue;
 
   /// A free trial: the name is followed by a `FREE TRIAL` badge.
@@ -52,6 +72,9 @@ class ItemRow extends StatelessWidget {
   /// into a list that looks four-fifths highlighted. The word says it exactly,
   /// and it says it to a reader who cannot tell the accent from the ink.
   final bool trial;
+
+  /// How this row separates itself from the one under it. See [ItemRowStyle].
+  final ItemRowStyle style;
 
   final VoidCallback? onTap;
 
@@ -65,32 +88,58 @@ class ItemRow extends StatelessWidget {
     required this.date,
     this.overdue = false,
     this.trial = false,
+    this.style = ItemRowStyle.dividers,
     this.onTap,
   });
 
+  /// The rule under a row, and the row's own padding.
+  ///
+  /// 2px of side padding rather than 14: with no card around it the row has
+  /// nothing to be inset from, and the name should start on the same left edge
+  /// as the section heading above it. 15px top and bottom because the row now
+  /// has to hold its own height instead of borrowing it from a card.
+  static const EdgeInsets _dividerPadding = EdgeInsets.symmetric(
+    horizontal: 2,
+    vertical: 15,
+  );
+
+  static const EdgeInsets _cardPadding = EdgeInsets.symmetric(
+    horizontal: 14,
+    vertical: 13,
+  );
+
   @override
   Widget build(BuildContext context) {
-    // Overdue still takes the whole card. That one *is* urgency: something has
-    // already gone wrong and the row has to be findable from across the list.
-    final decoration = overdue
-        ? SubdockSurface.overdue()
-        : SubdockSurface.card();
+    final cards = style == ItemRowStyle.cards;
+
+    // Overdue takes the whole card, but only where there is one. That one *is*
+    // urgency: something has already gone wrong and the row has to be findable
+    // from across the list. With no card the pill carries it alone.
+    final decoration = cards
+        ? (overdue ? SubdockSurface.overdue() : SubdockSurface.card())
+        : BoxDecoration(
+            border: Border(bottom: BorderSide(color: SubdockColors.hairline)),
+          );
 
     return Container(
       decoration: decoration,
-      clipBehavior: Clip.antiAlias,
+      // Only a card clips: the rule is drawn on the outside of the padding and
+      // an antialiased clip on a border-only box costs a saveLayer per row.
+      clipBehavior: cards ? Clip.antiAlias : Clip.none,
       child: Material(
         color: const Color(0x00000000),
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+            padding: cards ? _cardPadding : _dividerPadding,
             child: Row(
               children: [
                 ServiceTile(
                   name,
                   iconName: iconName,
                   size: ServiceTile.listSize,
+                  radius: ServiceTile.listRadius,
+                  fontSize: ServiceTile.listFontSize,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -207,7 +256,7 @@ class AlertBanner extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: SubdockText.family,
                     fontSize: 16,
                     height: 1.3,
@@ -238,12 +287,12 @@ class AlertBanner extends StatelessWidget {
                   ),
                   child: Text(
                     actionLabel!,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: SubdockText.family,
                       fontSize: 15,
                       height: 1,
                       fontWeight: SubdockWeight.medium,
-                      color: Color(0xFFFFFFFF),
+                      color: SubdockColors.onAccent,
                     ),
                   ),
                 ),
