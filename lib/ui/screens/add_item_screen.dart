@@ -24,6 +24,7 @@ import 'package:subdock/ui/screens/add/summary_block.dart';
 import 'package:subdock/ui/screens/add/trial_field.dart';
 import 'package:subdock/ui/widgets/icon_gallery.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 // The form's output type lives beside the presenter, not here, because the
 // merge back onto an existing item is domain reasoning rather than layout.
@@ -303,7 +304,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   /// item without one — see the note on [_save].
   String get _savedName {
     final typed = _name.text.trim();
-    return typed.isEmpty ? 'Untitled item' : typed;
+    return typed.isEmpty ? S.t.untitledItem : typed;
   }
 
   bool get _canSave => _dueDate != null && !_saved;
@@ -370,7 +371,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             children: [
               _gutter(_header()),
               const SizedBox(height: 18),
-              _gutter(Field(label: 'Name', child: _nameField())),
+              _gutter(Field(label: S.t.fieldName, child: _nameField())),
               if (showSuggestions) ...[
                 const SizedBox(height: 12),
                 _gutter(_suggestionList()),
@@ -389,9 +390,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   // eleven blocks all answer in place, and the one thing it
                   // did better -- showing what the choices are -- is what the
                   // sheet behind this row does with the whole screen.
-                  label: 'Category',
+                  label: S.t.fieldCategory,
                   child: PickerField(
-                    value: _chosen?.label ?? 'Pick a category',
+                    value: _chosen?.label ?? S.t.fieldPickCategory,
                     placeholder: _chosen == null,
                     onTap: _pickCategory,
                   ),
@@ -413,7 +414,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 const SizedBox(height: SubdockSpacing.formBlock),
                 _gutter(
                   Field(
-                    label: 'Plan',
+                    label: S.t.fieldPlan,
                     child: PlanGrid(
                       options: plans,
                       selected: _planTier,
@@ -444,7 +445,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   // `Billing cycle` when setting one up. The hand-off words
                   // them differently and both readings are right: one is a
                   // fact about the item, the other is a choice being made.
-                  label: _isEdit ? 'Repeats' : 'Billing cycle',
+                  label: _isEdit ? S.t.fieldRepeats : S.t.fieldBillingCycle,
                   child: _cycleField(),
                 ),
               ),
@@ -483,7 +484,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
               const SizedBox(height: SubdockSpacing.formBlock),
               _gutter(
                 Field(
-                  label: _isEdit ? 'Free trial' : null,
+                  label: _isEdit ? S.t.fieldFreeTrial : null,
                   child: TrialField(
                     value: _inTrial,
                     onChanged: (on) => setState(() => _inTrial = on),
@@ -506,7 +507,11 @@ class _AddItemScreenState extends State<AddItemScreen> {
               // reminders editor that can say all of them.
               if (!_isEdit) ...[
                 const SizedBox(height: SubdockSpacing.formBlock),
-                Field(label: 'Remind me', bleed: true, child: _leadRail()),
+                Field(
+                  label: S.t.fieldRemindMe,
+                  bleed: true,
+                  child: _leadRail(),
+                ),
               ],
               const SizedBox(height: SubdockSpacing.formBlock),
               _gutter(
@@ -528,7 +533,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             12,
           ),
           child: PrimaryButton(
-            _isEdit ? 'Save changes' : 'Save item',
+            _isEdit ? S.t.saveChanges : S.t.saveItem,
             onPressed: _canSave ? _save : null,
           ),
         ),
@@ -635,7 +640,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 onTap: () => setState(() => _picking = true),
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 4),
-                  child: Text('\u2039 Back', style: SubdockText.quietAction),
+                  child: Text(
+                    '\u2039 ${S.t.back}',
+                    style: SubdockText.quietAction,
+                  ),
                 ),
               ),
             const Spacer(),
@@ -644,7 +652,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 onTap: widget.onScan,
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 4),
-                  child: Text('Scan', style: SubdockText.quietAction),
+                  child: Text(S.t.scan, style: SubdockText.quietAction),
                 ),
               ),
               const SizedBox(width: 16),
@@ -653,14 +661,14 @@ class _AddItemScreenState extends State<AddItemScreen> {
               onTap: widget.onCancel ?? () => Navigator.of(context).maybePop(),
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 4),
-                child: Text('Cancel', style: SubdockText.quietAction),
+                child: Text(S.t.cancel, style: SubdockText.quietAction),
               ),
             ),
           ],
         ),
         const SizedBox(height: 10),
         Text(
-          _isEdit ? 'Edit item' : _title,
+          _isEdit ? S.t.editItem : _title,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           style: SubdockText.editorTitle,
@@ -670,7 +678,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         // of forty was opened.
         if (_isEdit) ...[
           const SizedBox(height: 6),
-          Text('Editing $_editingName', style: SubdockText.monoInline),
+          Text(S.t.editingName(_editingName), style: SubdockText.monoInline),
         ],
       ],
     );
@@ -681,7 +689,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   String get _title {
     final typed = _name.text.trim();
     if (typed.isNotEmpty) return typed;
-    return _matched?.name ?? 'New item';
+    return _matched?.name ?? S.t.newItem;
   }
 
   /// When the series stops, in the two ways a person says it.
@@ -708,7 +716,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         children: [
           SegmentedRow(
             weighted: true,
-            labels: const ['After a number of payments', 'On a date'],
+            labels: [S.t.afterANumberOfPayments, S.t.onADate],
             selected: _endsOnDate ? 1 : 0,
             onSelect: (i) {
               if (i == 1) {
@@ -721,13 +729,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
           const SizedBox(height: 13),
           if (_endsOnDate)
             Field(
-              label: 'Last payment on',
+              label: S.t.fieldLastPaymentOn,
               child: PickerField(
                 value: _endsOn == null
-                    ? 'Choose a date'
+                    ? S.t.fieldChooseADate
                     : DateCopy.longDate(_endsOn!),
                 placeholder: _endsOn == null,
-                hint: _endsOn == null ? 'Tap to open the calendar' : null,
+                hint: _endsOn == null ? S.t.fieldTapToOpenCalendar : null,
                 onTap: _pickRepeatUntil,
               ),
             )
@@ -739,7 +747,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 // rigid row would push it off the card instead.
                 Flexible(
                   child: Text(
-                    'Stops after',
+                    S.t.stopsAfter,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: SubdockText.rowLabel,
@@ -760,7 +768,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 const SizedBox(width: 12),
                 Flexible(
                   child: Text(
-                    'payments',
+                    S.t.paymentsUnit,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: SubdockText.rowLabel,
@@ -780,7 +788,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
               children: [
                 for (final n in quick)
                   FlatChip(
-                    label: '$n payments',
+                    label: S.t.paymentsCount(n),
                     selected: count == n,
                     onTap: () => _setRepeatCount(n),
                   ),
@@ -803,7 +811,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
   Widget _costBlock() => _gutter(
     Field(
-      label: _amount.text.isEmpty ? 'Cost (optional)' : 'Cost',
+      label: _amount.text.isEmpty ? S.t.fieldCostOptional : S.t.fieldCost,
       child: CostField(
         controller: _amount,
         focusNode: _amountFocus,
@@ -852,7 +860,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 isDense: true,
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
-                hintText: 'e.g. Spotify',
+                hintText: S.t.fieldNameHint,
                 hintStyle: SubdockText.fieldValue.copyWith(
                   color: SubdockColors.inkMuted,
                 ),
@@ -901,7 +909,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             onTap: () => _pick(entry),
           ),
         SuggestionRow(
-          name: 'Use "${_name.text.trim()}" as a custom name',
+          name: S.t.useCustomName(_name.text.trim()),
           muted: true,
           onTap: _keepTyped,
         ),
@@ -937,7 +945,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     FocusScope.of(context).unfocus();
     final picked = await chooseOption<String>(
       context,
-      title: 'Category',
+      title: S.t.fieldCategory,
       options: [
         for (final category in widget.categories.all)
           (category.id, category.label),
@@ -985,7 +993,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   // that item; here it is a way out to go and read a number
                   // off a page, and the vendor's name is already the heading
                   // of this screen.
-                  'Open subscription page',
+                  S.t.fieldOpenSubscriptionPage,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: SubdockText.quietAction,
@@ -1017,7 +1025,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             // card is gone, so the prompt is now the only thing naming what
             // the date is for.
             value: expiresOn == null
-                ? 'Next payment date'
+                ? S.t.fieldNextPaymentDate
                 : DateCopy.longDate(expiresOn),
             placeholder: expiresOn == null,
             // Two lines either way, so the card never changes height under
@@ -1026,7 +1034,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             // answer a calendar date does not give at a glance, and the half
             // that catches a month picked wrong.
             hint: expiresOn == null
-                ? 'Tap to open the calendar'
+                ? S.t.fieldTapToOpenCalendar
                 : DateCopy.relative(widget.today, expiresOn),
             onTap: _pickDate,
           ),
@@ -1076,7 +1084,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Repeats forever',
+                        S.t.repeatsForever,
                         style: SubdockText.rowLink,
                       ),
                     ),
@@ -1106,11 +1114,11 @@ class _AddItemScreenState extends State<AddItemScreen> {
   /// validity is sold in days — `30 days`, `180 days` — and that is the one
   /// item in this app whose lapse cannot be undone.
   Widget _everyRow() {
-    const units = [
-      (CycleField.day, 'Days'),
-      (CycleField.week, 'Weeks'),
-      (CycleField.month, 'Months'),
-      (CycleField.year, 'Years'),
+    final units = [
+      (CycleField.day, S.t.unitDays),
+      (CycleField.week, S.t.unitWeeks),
+      (CycleField.month, S.t.unitMonths),
+      (CycleField.year, S.t.unitYears),
     ];
 
     return Container(
@@ -1123,7 +1131,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             children: [
               Flexible(
                 child: Text(
-                  'Every',
+                  S.t.every,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: SubdockText.rowLabel,
@@ -1239,9 +1247,9 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     return SegmentedRow(
       labels: [
-        'Monthly',
-        'Yearly',
-        monthly || yearly ? 'Other' : _cycleLabel(cycle),
+        S.t.cycleMonthly,
+        S.t.cycleYearly,
+        monthly || yearly ? S.t.cycleOther : _cycleLabel(cycle),
       ],
       // Weighted, because `Every 2 months` beside `Yearly` in equal thirds
       // truncates the one segment carrying information the other two do not.
@@ -1297,7 +1305,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   onTap: () => setState(() => _cycle = preset),
                 ),
             ChoiceChipPill(
-              'One-off',
+              S.t.cycleOneOff,
               selected: cycle == null,
               onTap: () => setState(() {
                 _cycle = null;
@@ -1307,7 +1315,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
               }),
             ),
             ChoiceChipPill(
-              'Every…',
+              S.t.cycleEveryEllipsis,
               selected: custom,
               // Two months, not one: one month is already a segment above, so
               // a user who came this far means something else. An interval
@@ -1320,8 +1328,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
         if (named) ...[
           const SizedBox(height: 8),
           Text(
-            'Currently ${_cycleLabel(cycle).toLowerCase()} — tap another to '
-            'change it.',
+            S.t.currentlyCycle(_cycleLabel(cycle).toLowerCase()),
             style: SubdockText.caption.copyWith(fontSize: 13.5),
           ),
         ],
@@ -1335,7 +1342,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   /// payment. Everything else, custom intervals included, is the presenter's
   /// wording — the field is full width, so `Every 2 months` fits.
   static String _cycleLabel(Cycle? cycle) =>
-      cycle == null ? 'One-off' : ItemPresenter.cycleLabel(cycle);
+      cycle == null ? S.t.cycleOneOff : ItemPresenter.cycleLabel(cycle);
 
   /// The same figure in the other currency.
   ///
@@ -1395,7 +1402,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
           ),
         ChoiceChipPill(
           Reminders.offered.contains(_lead)
-              ? 'Custom…'
+              ? S.t.customEllipsis
               : ItemPresenter.leadLabel(_lead),
           selected: !Reminders.offered.contains(_lead),
           onTap: _pickLead,
@@ -1509,7 +1516,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   Future<void> _pickLead() async {
     final picked = await chooseOption<int>(
       context,
-      title: 'Remind me',
+      title: S.t.fieldRemindMe,
       options: [
         for (final lead in const [0, 1, 2, 3, 5, 7, 14, 30, 60])
           (lead, ItemPresenter.leadLabel(lead)),

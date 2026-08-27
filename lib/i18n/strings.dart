@@ -1,6 +1,7 @@
 import 'parts/common.dart';
 import 'parts/currency.dart';
 import 'parts/dates.dart';
+import 'parts/form.dart';
 import 'parts/item.dart';
 import 'parts/money.dart';
 import 'parts/onboarding.dart';
@@ -12,6 +13,7 @@ import 'parts/upcoming.dart';
 export 'parts/common.dart';
 export 'parts/currency.dart';
 export 'parts/dates.dart';
+export 'parts/form.dart';
 export 'parts/item.dart';
 export 'parts/money.dart';
 export 'parts/onboarding.dart';
@@ -36,6 +38,7 @@ abstract class Strings
         CommonStrings,
         CurrencyStrings,
         DateStrings,
+        FormStrings,
         ItemStrings,
         MoneyStrings,
         OnboardingStrings,

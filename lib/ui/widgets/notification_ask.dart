@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/glass.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// The sheet that asks for notification permission, the moment after the user
 /// has saved their first item.
@@ -115,7 +116,7 @@ class NotificationAsk extends StatelessWidget {
                         ),
                         const SizedBox(height: 3),
                         Text(
-                          'Added to Subdock',
+                          S.t.addedToSubdock,
                           style: SubdockText.itemSubtitle,
                         ),
                       ],
@@ -162,9 +163,9 @@ class NotificationAsk extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 18),
-              PrimaryButton('Turn on reminders', onPressed: onAllow),
+              PrimaryButton(S.t.turnOnReminders, onPressed: onAllow),
               const SizedBox(height: 6),
-              QuietButton('Not now', onPressed: onLater),
+              QuietButton(S.t.notNow, onPressed: onLater),
               const SizedBox(height: 4),
               Center(
                 child: Text(
@@ -172,7 +173,7 @@ class NotificationAsk extends StatelessWidget {
                   // than in a privacy policy. This app sends exactly one kind
                   // of notification and nothing would ever make it send
                   // another, so saying so costs nothing and buys the tap.
-                  'Only due-date reminders. Nothing else.',
+                  S.t.onlyDueDateReminders,
                   style: SubdockText.caption,
                 ),
               ),

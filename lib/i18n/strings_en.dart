@@ -907,4 +907,248 @@ class EnStrings implements Strings {
       'This device is not allowing alarms at an exact time, so reminders '
       'arrive when the system next wakes rather than at the minute above. '
       'Allow "Alarms & reminders" in system settings to fix it.';
+
+  // ---- the form ----
+
+  @override
+  String get newItem => 'New item';
+  @override
+  String get pickerStep => 'Step 1 of 2 · pick a service';
+  @override
+  String get searchServices => 'Search services';
+  @override
+  String get pickerNoMatch =>
+      'Nothing matches that. Add it under the name you typed.';
+  @override
+  String get pickerNotInList => 'Not in the list?';
+  @override
+  String get enterManually => 'Enter manually';
+  @override
+  String get scan => 'Scan';
+
+  @override
+  String editingName(String name) => 'Editing $name';
+  @override
+  String get editItem => 'Edit item';
+  @override
+  String get untitledItem => 'Untitled item';
+
+  @override
+  String get fieldName => 'Name';
+  @override
+  String get fieldNameHint => 'e.g. Spotify';
+  @override
+  String get fieldCategory => 'Category';
+  @override
+  String get fieldPickCategory => 'Pick a category';
+  @override
+  String get fieldPlan => 'Plan';
+  @override
+  String get fieldRepeats => 'Repeats';
+  @override
+  String get fieldBillingCycle => 'Billing cycle';
+  @override
+  String get fieldFreeTrial => 'Free trial';
+  @override
+  String get fieldInFreeTrialNow => 'In a free trial now';
+  @override
+  String get fieldRemindMe => 'Remind me';
+  @override
+  String get fieldCost => 'Cost';
+  @override
+  String get fieldCostOptional => 'Cost (optional)';
+  @override
+  String get fieldNextPaymentDate => 'Next payment date';
+  @override
+  String get fieldLastPaymentOn => 'Last payment on';
+  @override
+  String get fieldChooseADate => 'Choose a date';
+  @override
+  String get fieldTapToOpenCalendar => 'Tap to open the calendar';
+  @override
+  String get fieldOpenSubscriptionPage => 'Open subscription page';
+
+  @override
+  String get saveChanges => 'Save changes';
+  @override
+  String get saveItem => 'Save item';
+
+  @override
+  String useCustomName(String typed) => 'Use "$typed" as a custom name';
+
+  @override
+  String get repeatsForever => 'Repeats forever';
+  @override
+  String get stopsAfter => 'Stops after';
+  @override
+  String get afterANumberOfPayments => 'After a number of payments';
+  @override
+  String get onADate => 'On a date';
+  @override
+  String paymentsCount(int count) =>
+      '$count ${count == 1 ? 'payment' : 'payments'}';
+  @override
+  String get paymentsUnit => 'payments';
+
+  @override
+  String get cycleOther => 'Other';
+  @override
+  String get cycleEveryEllipsis => 'Every…';
+  @override
+  String get cycleOneOff => 'One-off';
+  @override
+  String get unitDays => 'Days';
+  @override
+  String get unitWeeks => 'Weeks';
+  @override
+  String get unitMonths => 'Months';
+  @override
+  String get unitYears => 'Years';
+  @override
+  String get every => 'Every';
+  @override
+  String currentlyCycle(String cycle) =>
+      'Currently $cycle — tap another to change it.';
+
+  @override
+  String get planOtherAmount => 'Other amount';
+  @override
+  String get planTypeItYourself => 'Type it yourself';
+
+  @override
+  String get paysFrom => 'PAYS FROM';
+  @override
+  String get optionalSuffix => ' · optional';
+  @override
+  String get sourceNotSet => 'Not set';
+  @override
+  String get sourceNew => 'New';
+  @override
+  String get sourceClearName => 'Clear name';
+  @override
+  String get sourceHelp => 'A name you recognise. Never a card number.';
+
+  @override
+  String get summaryAmountNotSet => 'an amount you have not set yet';
+  @override
+  String get summaryNoDate =>
+      'Set the next payment date and this is where the charge shows up.';
+  @override
+  String summaryTrial(String date, String money) =>
+      'Free until $date — then $money is charged.';
+  @override
+  String summaryCharge(String money, String date) =>
+      'You will be charged $money on $date.';
+  @override
+  String summaryReminderOnTheDay(String date) => 'Reminder on the day, $date.';
+  @override
+  String summaryReminderBefore(String lead, String date) =>
+      'Reminder $lead, on $date.';
+
+  @override
+  String get searchIcons => 'Search icons';
+  @override
+  String get galleryCategories => 'Categories';
+  @override
+  String get galleryServices => 'Services';
+  @override
+  String galleryNoIcon(String query) => 'No icon called "$query"';
+  @override
+  String get galleryClearSearch => 'Clear the search to pick a shape instead.';
+  @override
+  String get customEllipsis => 'Custom…';
+
+  @override
+  String get addedToSubdock => 'Added to Subdock';
+  @override
+  String get turnOnReminders => 'Turn on reminders';
+  @override
+  String get notNow => 'Not now';
+  @override
+  String get onlyDueDateReminders => 'Only due-date reminders. Nothing else.';
+
+  @override
+  String get restoreAskTitle => 'Restore this backup?';
+  @override
+  String get restoreAskReplaceTitle => 'Replace everything with this backup?';
+  @override
+  String get restoreAskFrom => 'From the file';
+  @override
+  String restoreAskSummary(String incoming, String takenOn) =>
+      '$incoming · $takenOn';
+  @override
+  String get restoreAskLost => 'Deleted from this phone';
+  @override
+  String get restoreAskKeep => 'Keep what I have';
+  @override
+  String get restoreAskConfirm => 'Restore';
+  @override
+  String get restoreAskReplace => 'Replace everything';
+
+  @override
+  String get backupNow => 'Now';
+  @override
+  String get backupActions => 'Actions';
+  @override
+  String get backupNever => 'Never';
+  @override
+  String get backupCloudTitle => 'iCloud';
+  @override
+  String get backupCloudIntro =>
+      'Subdock keeps a copy of your list in your own iCloud, and writes it '
+      'again whenever something changes. There is no account and no Subdock '
+      'server involved.';
+  @override
+  String get backupStatus => 'Status';
+  @override
+  String get backupLastCopy => 'Last copy';
+  @override
+  String get backupLastExport => 'Last export';
+  @override
+  String get backupRestoreFromCloud => 'Restore from iCloud';
+  @override
+  String get backupCloudRestoreNote =>
+      'Restoring replaces everything in the app with what is in iCloud. It '
+      'does not merge.';
+  @override
+  String get backupFileTitle => 'File';
+  @override
+  String get backupFileIntro =>
+      'One JSON file holding every item, shelf, payment source and recorded '
+      'payment. Yours to keep wherever you like, and to read.';
+  @override
+  String get backupRestoreFromFile => 'Restore from a file';
+  @override
+  String get backupFileRestoreNote =>
+      'Restoring replaces everything in the app with what is in the file. It '
+      'does not merge.';
+  @override
+  String get backupNothingSaved => 'Nothing has been backed up';
+  @override
+  String backupNothingSavedBody(int confirmed) =>
+      'Your list is only on this phone, and '
+      '${confirmed == 1 ? 'one of its dates was' : '$confirmed of its dates '
+                'were'} confirmed with a provider. Removing the app removes them.';
+  @override
+  String get backupStateSaved => 'Saved';
+  @override
+  String get backupStateSignedOut => 'Sign in to iCloud';
+  @override
+  String get backupStateFailed => 'Could not save';
+  @override
+  String get backupStateWaiting => 'Waiting for a change';
+  @override
+  String get backupNoteWholeDevice =>
+      'Subdock has no account and no server. Your list is in this '
+      "iPhone's own backup, but iOS restores that only by restoring the "
+      'whole phone.';
+  @override
+  String get backupNotePerApp =>
+      'Subdock has no account and no server. Your list is in this '
+      "phone's Google backup and moves to a new phone by itself, but "
+      'Subdock cannot check whether that backup has ever run.';
+  @override
+  String get backupNoteUnknown =>
+      'Subdock has no account and no server. What you see in the app is the '
+      'only copy, and removing the app removes it.';
 }

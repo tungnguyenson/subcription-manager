@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// The free-trial control: one switch, and nothing else.
 ///
@@ -46,7 +47,7 @@ class TrialField extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'In a free trial now',
+                    S.t.fieldInFreeTrialNow,
                     style: SubdockText.rowLink,
                   ),
                 ),

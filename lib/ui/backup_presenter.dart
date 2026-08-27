@@ -5,6 +5,7 @@ import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/ui/money_format.dart';
+import 'package:subdock/i18n.dart';
 
 /// Where a copy of the list ends up without the user doing anything.
 ///
@@ -99,8 +100,8 @@ class BackupView {
     required this.lastBackup,
     required this.note,
     this.cloud,
-    this.cloudLine = 'Never',
-    this.fileLine = 'Never',
+    this.cloudLine = '',
+    this.fileLine = '',
     this.warningTitle,
     this.warningBody,
   });
@@ -125,7 +126,7 @@ abstract final class BackupPresenter {
     final problem = _cloudProblem(cloud);
 
     return BackupView(
-      lastBackup: newest == null ? 'Never' : MoneyFormat.date(newest),
+      lastBackup: newest == null ? S.t.backupNever : MoneyFormat.date(newest),
       note: _note(device),
       cloud: _cloud(cloud),
       // The problem outranks the date. A row reading `25/06/2026` beside an
@@ -136,14 +137,9 @@ abstract final class BackupPresenter {
       // Only when there is something to lose *and* nothing has been saved
       // anywhere. A warning that fires on an empty list is a warning the user
       // learns to scroll past before the day it means something.
-      warningTitle: !saved.any && confirmed > 0
-          ? 'Nothing has been backed up'
-          : null,
+      warningTitle: !saved.any && confirmed > 0 ? S.t.backupNothingSaved : null,
       warningBody: !saved.any && confirmed > 0
-          ? 'Your list is only on this phone, and '
-                '${confirmed == 1 ? "one of its dates was" : "$confirmed of "
-                          "its dates were"} confirmed with a provider. '
-                'Removing the app removes them.'
+          ? S.t.backupNothingSavedBody(confirmed)
           : null,
     );
   }
@@ -157,36 +153,30 @@ abstract final class BackupPresenter {
     if (state == null) return null;
 
     return BackupPage(
-      title: 'iCloud',
-      intro:
-          'Subdock keeps a copy of your list in your own iCloud, and writes '
-          'it again whenever something changes. There is no account and no '
-          'Subdock server involved.',
-      facts: [('Status', state), ('Last copy', _date(saved.cloud))],
+      title: S.t.backupCloudTitle,
+      intro: S.t.backupCloudIntro,
+      facts: [
+        (S.t.backupStatus, state),
+        (S.t.backupLastCopy, _date(saved.cloud)),
+      ],
       // Nothing to press for the copy itself. The app writes on its own, and a
       // button here would suggest it does not.
-      restoreLabel: 'Restore from iCloud',
-      note:
-          'Restoring replaces everything in the app with what is in iCloud. '
-          'It does not merge.',
+      restoreLabel: S.t.backupRestoreFromCloud,
+      note: S.t.backupCloudRestoreNote,
     );
   }
 
   static BackupPage filePage({required LastBackups saved}) => BackupPage(
-    title: 'File',
-    intro:
-        'One JSON file holding every item, shelf, payment source and recorded '
-        'payment. Yours to keep wherever you like, and to read.',
-    facts: [('Last export', _date(saved.file))],
-    backUpLabel: 'Export a backup',
-    restoreLabel: 'Restore from a file',
-    note:
-        'Restoring replaces everything in the app with what is in the file. '
-        'It does not merge.',
+    title: S.t.backupFileTitle,
+    intro: S.t.backupFileIntro,
+    facts: [(S.t.backupLastExport, _date(saved.file))],
+    backUpLabel: S.t.exportABackup,
+    restoreLabel: S.t.backupRestoreFromFile,
+    note: S.t.backupFileRestoreNote,
   );
 
   static String _date(LocalDate? on) =>
-      on == null ? 'Never' : MoneyFormat.date(on);
+      on == null ? S.t.backupNever : MoneyFormat.date(on);
 
   static LocalDate? _newest(LastBackups saved) =>
       switch ((saved.file, saved.cloud)) {
@@ -230,32 +220,24 @@ abstract final class BackupPresenter {
   /// avoid.
   static String? _cloud(CloudResult result) => switch (result.state) {
     CloudState.unsupported => null,
-    CloudState.saved => 'Saved',
+    CloudState.saved => S.t.backupStateSaved,
     // Named so the user knows the fix is theirs and where it lives. "Failed"
     // would send them looking for a bug in the app.
-    CloudState.signedOut => 'Sign in to iCloud',
-    CloudState.failed => 'Could not save',
-    CloudState.idle => 'Waiting for a change',
+    CloudState.signedOut => S.t.backupStateSignedOut,
+    CloudState.failed => S.t.backupStateFailed,
+    CloudState.idle => S.t.backupStateWaiting,
     // Only ever comes back from a read, and this row reports the last write.
     // Left explicit rather than folded into a wildcard so that adding a state
     // to [CloudState] stays a compile error here.
-    CloudState.missing => 'Waiting for a change',
+    CloudState.missing => S.t.backupStateWaiting,
   };
 
   /// Answers section 11.2 of the product spec: say in the interface whether
   /// the database is in the device's own backup, so the user knows what they
   /// are trusting.
   static String _note(DeviceBackup device) => switch (device) {
-    DeviceBackup.wholeDeviceOnly =>
-      'Subdock has no account and no server. Your list is in this '
-          "iPhone's own backup, but iOS restores that only by restoring the "
-          'whole phone.',
-    DeviceBackup.perAppUnverifiable =>
-      'Subdock has no account and no server. Your list is in this '
-          "phone's Google backup and moves to a new phone by itself, but "
-          'Subdock cannot check whether that backup has ever run.',
-    DeviceBackup.unknown =>
-      'Subdock has no account and no server. What you see in the app is the '
-          'only copy, and removing the app removes it.',
+    DeviceBackup.wholeDeviceOnly => S.t.backupNoteWholeDevice,
+    DeviceBackup.perAppUnverifiable => S.t.backupNotePerApp,
+    DeviceBackup.unknown => S.t.backupNoteUnknown,
   };
 }

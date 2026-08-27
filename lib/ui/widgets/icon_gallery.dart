@@ -4,6 +4,7 @@ import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/ui/widgets/search_field.dart';
 import 'package:subdock/ui/widgets/service_mark.dart';
+import 'package:subdock/i18n.dart';
 
 /// The icon gallery, shown in a sheet from the tile beside the name field.
 ///
@@ -81,7 +82,7 @@ class _IconGalleryState extends State<IconGallery> {
             // often as to look something up, and a keyboard that arrives
             // uninvited eats the half of the grid the sheet was made taller
             // for.
-            child: SearchField(controller: _query, hint: 'Search icons'),
+            child: SearchField(controller: _query, hint: S.t.searchIcons),
           ),
           Expanded(
             child: glyphs.isEmpty && brands.isEmpty
@@ -100,7 +101,7 @@ class _IconGalleryState extends State<IconGallery> {
                         children: [
                           if (glyphs.isNotEmpty)
                             _Group(
-                              label: 'Categories',
+                              label: S.t.galleryCategories,
                               keys: glyphs,
                               selected: widget.selected,
                               onPick: widget.onPick,
@@ -109,7 +110,7 @@ class _IconGalleryState extends State<IconGallery> {
                             const SizedBox(height: 20),
                           if (brands.isNotEmpty)
                             _Group(
-                              label: 'Services',
+                              label: S.t.galleryServices,
                               keys: brands,
                               selected: widget.selected,
                               onPick: widget.onPick,
@@ -263,13 +264,13 @@ class _NoHits extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'No icon called "$query"',
+            S.t.galleryNoIcon(query),
             textAlign: TextAlign.center,
             style: SubdockText.summary,
           ),
           const SizedBox(height: 6),
           Text(
-            'Clear the search to pick a shape instead.',
+            S.t.galleryClearSearch,
             textAlign: TextAlign.center,
             style: SubdockText.caption,
           ),

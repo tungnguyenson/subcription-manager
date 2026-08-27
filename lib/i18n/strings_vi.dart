@@ -873,4 +873,246 @@ class ViStrings implements Strings {
       'Máy này không cho app đặt báo thức đúng phút, nên nhắc hạn sẽ tới lúc '
       'hệ thống thức dậy chứ không phải đúng giờ ở trên. Cho phép mục "Báo '
       'thức và lời nhắc" trong cài đặt hệ thống để sửa.';
+
+  // ---- the form ----
+
+  @override
+  String get newItem => 'Mục mới';
+  @override
+  String get pickerStep => 'Bước 1 trên 2 · chọn dịch vụ';
+  @override
+  String get searchServices => 'Tìm dịch vụ';
+  @override
+  String get pickerNoMatch =>
+      'Không có gì khớp. Thêm nó theo đúng tên bạn vừa gõ.';
+  @override
+  String get pickerNotInList => 'Không có trong danh sách?';
+  @override
+  String get enterManually => 'Tự nhập';
+  @override
+  String get scan => 'Quét';
+
+  @override
+  String editingName(String name) => 'Đang sửa $name';
+  @override
+  String get editItem => 'Sửa mục';
+  @override
+  String get untitledItem => 'Mục chưa đặt tên';
+
+  @override
+  String get fieldName => 'Tên';
+  @override
+  String get fieldNameHint => 'ví dụ Spotify';
+  @override
+  String get fieldCategory => 'Nhóm';
+  @override
+  String get fieldPickCategory => 'Chọn một nhóm';
+  @override
+  String get fieldPlan => 'Gói';
+  @override
+  String get fieldRepeats => 'Lặp lại';
+  @override
+  String get fieldBillingCycle => 'Chu kỳ tính tiền';
+  @override
+  String get fieldFreeTrial => 'Dùng thử';
+  @override
+  String get fieldInFreeTrialNow => 'Đang trong kỳ dùng thử';
+  @override
+  String get fieldRemindMe => 'Nhắc tôi';
+  @override
+  String get fieldCost => 'Giá';
+  @override
+  String get fieldCostOptional => 'Giá (không bắt buộc)';
+  @override
+  String get fieldNextPaymentDate => 'Ngày trả tiền kế tiếp';
+  @override
+  String get fieldLastPaymentOn => 'Kỳ cuối vào ngày';
+  @override
+  String get fieldChooseADate => 'Chọn một ngày';
+  @override
+  String get fieldTapToOpenCalendar => 'Chạm để mở lịch';
+  @override
+  String get fieldOpenSubscriptionPage => 'Mở trang thuê bao';
+
+  @override
+  String get saveChanges => 'Lưu thay đổi';
+  @override
+  String get saveItem => 'Lưu mục';
+
+  @override
+  String useCustomName(String typed) => 'Dùng "$typed" làm tên riêng';
+
+  @override
+  String get repeatsForever => 'Lặp mãi';
+  @override
+  String get stopsAfter => 'Dừng sau';
+  @override
+  String get afterANumberOfPayments => 'Sau một số kỳ trả';
+  @override
+  String get onADate => 'Vào một ngày';
+  @override
+  String paymentsCount(int count) => '$count kỳ';
+  @override
+  String get paymentsUnit => 'kỳ trả';
+
+  @override
+  String get cycleOther => 'Khác';
+  @override
+  String get cycleEveryEllipsis => 'Mỗi…';
+  @override
+  String get cycleOneOff => 'Một lần';
+  @override
+  String get unitDays => 'Ngày';
+  @override
+  String get unitWeeks => 'Tuần';
+  @override
+  String get unitMonths => 'Tháng';
+  @override
+  String get unitYears => 'Năm';
+  @override
+  String get every => 'Mỗi';
+  @override
+  String currentlyCycle(String cycle) =>
+      'Đang là $cycle — chạm cái khác để đổi.';
+
+  @override
+  String get planOtherAmount => 'Số tiền khác';
+  @override
+  String get planTypeItYourself => 'Tự gõ vào';
+
+  @override
+  String get paysFrom => 'TRẢ BẰNG';
+  @override
+  String get optionalSuffix => ' · không bắt buộc';
+  @override
+  String get sourceNotSet => 'Chưa đặt';
+  @override
+  String get sourceNew => 'Thêm';
+  @override
+  String get sourceClearName => 'Xoá tên';
+  @override
+  String get sourceHelp => 'Một cái tên bạn nhận ra. Đừng bao giờ là số thẻ.';
+
+  @override
+  String get summaryAmountNotSet => 'một số tiền bạn chưa nhập';
+  @override
+  String get summaryNoDate =>
+      'Nhập ngày trả tiền kế tiếp thì khoản đó sẽ hiện ở đây.';
+  @override
+  String summaryTrial(String date, String money) =>
+      'Miễn phí tới $date — rồi bị trừ $money.';
+  @override
+  String summaryCharge(String money, String date) =>
+      'Bạn sẽ bị trừ $money vào $date.';
+  @override
+  String summaryReminderOnTheDay(String date) => 'Nhắc đúng ngày, $date.';
+  @override
+  String summaryReminderBefore(String lead, String date) =>
+      'Nhắc $lead, vào $date.';
+
+  @override
+  String get searchIcons => 'Tìm icon';
+  @override
+  String get galleryCategories => 'Nhóm';
+  @override
+  String get galleryServices => 'Dịch vụ';
+  @override
+  String galleryNoIcon(String query) => 'Không có icon nào tên "$query"';
+  @override
+  String get galleryClearSearch => 'Xoá ô tìm để chọn một hình chung.';
+  @override
+  String get customEllipsis => 'Tự chọn…';
+
+  @override
+  String get addedToSubdock => 'Đã thêm vào Subdock';
+  @override
+  String get turnOnReminders => 'Bật nhắc hạn';
+  @override
+  String get notNow => 'Để sau';
+  @override
+  String get onlyDueDateReminders => 'Chỉ nhắc ngày đến hạn. Không gì khác.';
+
+  @override
+  String get restoreAskTitle => 'Khôi phục bản sao lưu này?';
+  @override
+  String get restoreAskReplaceTitle => 'Thay toàn bộ bằng bản sao lưu này?';
+  @override
+  String get restoreAskFrom => 'Từ tệp';
+  @override
+  String restoreAskSummary(String incoming, String takenOn) =>
+      '$incoming · $takenOn';
+  @override
+  String get restoreAskLost => 'Bị xoá khỏi máy này';
+  @override
+  String get restoreAskKeep => 'Giữ cái đang có';
+  @override
+  String get restoreAskConfirm => 'Khôi phục';
+  @override
+  String get restoreAskReplace => 'Thay toàn bộ';
+
+  @override
+  String get backupNow => 'Hiện tại';
+  @override
+  String get backupActions => 'Việc có thể làm';
+  @override
+  String get backupNever => 'Chưa bao giờ';
+  @override
+  String get backupCloudTitle => 'iCloud';
+  @override
+  String get backupCloudIntro =>
+      'Subdock giữ một bản chép danh sách của bạn trong iCloud của chính bạn, '
+      'và ghi lại mỗi khi có gì đổi. Không có tài khoản nào và không có máy '
+      'chủ Subdock nào dính vào.';
+  @override
+  String get backupStatus => 'Trạng thái';
+  @override
+  String get backupLastCopy => 'Bản gần nhất';
+  @override
+  String get backupLastExport => 'Lần xuất gần nhất';
+  @override
+  String get backupRestoreFromCloud => 'Khôi phục từ iCloud';
+  @override
+  String get backupCloudRestoreNote =>
+      'Khôi phục là thay toàn bộ những gì đang có trong app bằng những gì nằm '
+      'trong iCloud. Nó không trộn.';
+  @override
+  String get backupFileTitle => 'Tệp';
+  @override
+  String get backupFileIntro =>
+      'Một tệp JSON chứa mọi mục, mọi nhóm, mọi nguồn tiền và mọi lần trả đã '
+      'ghi. Của bạn, cất ở đâu tuỳ ý, và đọc được.';
+  @override
+  String get backupRestoreFromFile => 'Khôi phục từ một tệp';
+  @override
+  String get backupFileRestoreNote =>
+      'Khôi phục là thay toàn bộ những gì đang có trong app bằng những gì nằm '
+      'trong tệp. Nó không trộn.';
+  @override
+  String get backupNothingSaved => 'Chưa có gì được sao lưu';
+  @override
+  String backupNothingSavedBody(int confirmed) =>
+      'Danh sách của bạn chỉ nằm trên máy này, và $confirmed ngày trong đó đã '
+      'được hỏi lại nhà cung cấp. Gỡ app là mất chúng.';
+  @override
+  String get backupStateSaved => 'Đã lưu';
+  @override
+  String get backupStateSignedOut => 'Hãy đăng nhập iCloud';
+  @override
+  String get backupStateFailed => 'Không lưu được';
+  @override
+  String get backupStateWaiting => 'Đang chờ có gì đổi';
+  @override
+  String get backupNoteWholeDevice =>
+      'Subdock không có tài khoản và không có máy chủ. Danh sách của bạn nằm '
+      'trong bản sao lưu của chính chiếc iPhone này, nhưng iOS chỉ khôi phục '
+      'nó bằng cách khôi phục cả máy.';
+  @override
+  String get backupNotePerApp =>
+      'Subdock không có tài khoản và không có máy chủ. Danh sách của bạn nằm '
+      'trong bản sao lưu Google của máy này và tự đi theo sang máy mới, nhưng '
+      'Subdock không kiểm được bản sao lưu đó đã từng chạy hay chưa.';
+  @override
+  String get backupNoteUnknown =>
+      'Subdock không có tài khoản và không có máy chủ. Những gì bạn thấy trong '
+      'app là bản duy nhất, và gỡ app là mất nó.';
 }

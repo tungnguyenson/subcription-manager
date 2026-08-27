@@ -4,6 +4,7 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/ui/widgets/source_mark.dart';
+import 'package:subdock/i18n.dart';
 
 /// The "pays from" control: pick a source, or add one without leaving the form.
 ///
@@ -41,7 +42,10 @@ class SourceField extends StatefulWidget {
 
 /// The one rule this field exists to state, in the two places a user could
 /// still be about to break it.
-const String _noCardNumbers = 'A name you recognise. Never a card number.';
+///
+/// A getter, not a `const`: it is a sentence, and a sentence moves with the
+/// language.
+String get _noCardNumbers => S.t.sourceHelp;
 
 class _SourceFieldState extends State<SourceField> {
   final TextEditingController _name = TextEditingController();
@@ -145,11 +149,11 @@ class _SourceFieldState extends State<SourceField> {
       children: [
         Text.rich(
           TextSpan(
-            text: 'PAYS FROM',
+            text: S.t.paysFrom,
             style: SubdockText.sectionLabel,
             children: [
               TextSpan(
-                text: ' · optional',
+                text: S.t.optionalSuffix,
                 style: SubdockText.sectionLabel.copyWith(
                   fontWeight: SubdockWeight.regular,
                   letterSpacing: 0,
@@ -180,7 +184,7 @@ class _SourceFieldState extends State<SourceField> {
                 onTap: () => widget.onSelect(source.id),
               ),
             ChoiceChipPill(
-              'Not set',
+              S.t.sourceNotSet,
               selected: widget.selected == null,
               icon: const Icon(Icons.block_rounded),
               onTap: () => widget.onSelect(null),
@@ -247,7 +251,7 @@ class _SourceFieldState extends State<SourceField> {
                           border: InputBorder.none,
                           isDense: true,
                           contentPadding: EdgeInsets.symmetric(vertical: 11),
-                          hintText: 'e.g. VCB 4412',
+                          hintText: S.t.sourcesNameHint,
                           hintStyle: TextStyle(
                             fontFamily: SubdockText.family,
                             fontSize: 15.5,
@@ -282,13 +286,13 @@ class _SourceFieldState extends State<SourceField> {
                 children: [
                   Expanded(
                     child: PrimaryButton(
-                      'Add source',
+                      S.t.sourcesAddTitle,
                       onPressed: _name.text.trim().isEmpty ? null : _create,
                     ),
                   ),
                   const SizedBox(width: 9),
                   QuietButton(
-                    'Cancel',
+                    S.t.cancel,
                     onPressed: () => setState(() {
                       _adding = false;
                       _name.clear();
@@ -318,7 +322,7 @@ class _ClearButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: 'Clear name',
+      label: S.t.sourceClearName,
       child: InkResponse(
         onTap: onTap,
         radius: 20,
@@ -357,7 +361,7 @@ class _NewChip extends StatelessWidget {
                 Icon(Icons.add_rounded, size: 16, color: SubdockColors.accent),
                 SizedBox(width: 6),
                 Text(
-                  'New',
+                  S.t.sourceNew,
                   style: TextStyle(
                     fontFamily: SubdockText.family,
                     fontSize: 14,

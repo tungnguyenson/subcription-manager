@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/glass.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// The last thing between a backup file and the list it overwrites.
 ///
@@ -88,15 +89,17 @@ class RestoreAsk extends StatelessWidget {
               const SizedBox(height: 20),
               Text(
                 existing == null
-                    ? 'Restore this backup?'
-                    : 'Replace everything with this backup?',
+                    ? S.t.restoreAskTitle
+                    : S.t.restoreAskReplaceTitle,
                 style: SubdockText.detailTitle.copyWith(fontSize: 25),
               ),
               const SizedBox(height: 16),
               _Line(
                 icon: Icons.download_rounded,
-                label: 'From the file',
-                value: takenOn == null ? incoming : '$incoming · $takenOn',
+                label: S.t.restoreAskFrom,
+                value: takenOn == null
+                    ? incoming
+                    : S.t.restoreAskSummary(incoming, takenOn!),
               ),
               if (existing case final onDevice?) ...[
                 const SizedBox(height: 8),
@@ -105,16 +108,18 @@ class RestoreAsk extends StatelessWidget {
                 // can tell whether they picked the right file.
                 _Line(
                   icon: Icons.delete_outline_rounded,
-                  label: 'Deleted from this phone',
+                  label: S.t.restoreAskLost,
                   value: onDevice,
                   danger: true,
                 ),
               ],
               const SizedBox(height: 18),
-              PrimaryButton('Keep what I have', onPressed: onCancel),
+              PrimaryButton(S.t.restoreAskKeep, onPressed: onCancel),
               const SizedBox(height: 6),
               QuietButton(
-                existing == null ? 'Restore' : 'Replace everything',
+                existing == null
+                    ? S.t.restoreAskConfirm
+                    : S.t.restoreAskReplace,
                 onPressed: onConfirm,
                 danger: existing != null,
               ),

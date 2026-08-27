@@ -4,6 +4,7 @@ import 'package:subdock/ui/backup_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// One backup channel: what it is, when it last worked, and what can be done
 /// with it.
@@ -48,7 +49,7 @@ class BackupScreen extends StatelessWidget {
         const SizedBox(height: 6),
         Text(page.intro, style: SubdockText.summary),
         if (page.facts.isNotEmpty) ...[
-          const SectionLabel('Now'),
+          SectionLabel(S.t.backupNow),
           GroupedCard(
             children: [
               for (final (label, value) in page.facts)
@@ -56,7 +57,7 @@ class BackupScreen extends StatelessWidget {
             ],
           ),
         ],
-        const SectionLabel('Actions'),
+        SectionLabel(S.t.backupActions),
         GroupedCard(
           children: [
             if (page.backUpLabel case final label?)

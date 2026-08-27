@@ -6,6 +6,7 @@ import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/theme.dart';
+import 'package:subdock/i18n.dart';
 
 /// One tier of a service, at the cycle the vendor sells it on.
 @immutable
@@ -310,7 +311,7 @@ class _OtherTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Other amount',
+                  S.t.planOtherAmount,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
@@ -325,7 +326,7 @@ class _OtherTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Text(
-                  'Type it yourself',
+                  S.t.planTypeItYourself,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(

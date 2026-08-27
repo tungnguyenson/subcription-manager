@@ -6,6 +6,7 @@ import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/ui/widgets/search_field.dart';
+import 'package:subdock/i18n.dart';
 
 /// Step one of adding an item: which service is this?
 ///
@@ -126,12 +127,12 @@ class _ServicePickerState extends State<ServicePicker> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('New item', style: SubdockText.editorTitle),
+                        Text(S.t.newItem, style: SubdockText.editorTitle),
                         SizedBox(height: 6),
                         Text(
                           // Short enough to hold one line at 390pt in mono,
                           // which the longer wording did not.
-                          'Step 1 of 2 · pick a service',
+                          S.t.pickerStep,
                           style: SubdockText.monoInline,
                         ),
                       ],
@@ -141,7 +142,7 @@ class _ServicePickerState extends State<ServicePicker> {
                     onTap: widget.onCancel,
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(12, 5, 0, 8),
-                      child: Text('Cancel', style: SubdockText.quietAction),
+                      child: Text(S.t.cancel, style: SubdockText.quietAction),
                     ),
                   ),
                 ],
@@ -149,7 +150,7 @@ class _ServicePickerState extends State<ServicePicker> {
               const SizedBox(height: 16),
               SearchField(
                 controller: _query,
-                hint: 'Search services',
+                hint: S.t.searchServices,
                 onSubmitted: _useTyped,
               ),
             ],
@@ -195,17 +196,17 @@ class _ServicePickerState extends State<ServicePicker> {
                     // Names the way out and says what it keeps. The old line
                     // sent the user to a button without telling them the name
                     // they had just typed would survive the trip.
-                    'Nothing matches that. Add it under the name you typed.',
+                    S.t.pickerNoMatch,
                     style: SubdockText.summary,
                   ),
                 ),
               const SizedBox(height: 22),
               Divider(height: 1, thickness: 1, color: SubdockColors.hairline),
               const SizedBox(height: 16),
-              Text('Not in the list?', style: SubdockText.summary),
+              Text(S.t.pickerNotInList, style: SubdockText.summary),
               const SizedBox(height: 10),
               SecondaryButton(
-                'Enter manually',
+                S.t.enterManually,
                 accent: true,
                 onPressed: () => widget.onManual?.call(_query.text.trim()),
               ),

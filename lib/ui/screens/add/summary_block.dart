@@ -6,6 +6,7 @@ import 'package:subdock/ui/date_copy.dart';
 import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/theme.dart';
+import 'package:subdock/i18n.dart';
 
 /// What the app will actually do, in two sentences.
 ///
@@ -38,21 +39,23 @@ class SummaryBlock extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final money = amount == null
-        ? 'an amount you have not set yet'
+        ? S.t.summaryAmountNotSet
         : MoneyFormat.full(amount!);
 
     final charge = due == null
-        ? 'Set the next payment date and this is where the charge shows up.'
+        ? S.t.summaryNoDate
         : (trial
-              ? 'Free until ${DateCopy.longDate(due!)} — then $money is charged.'
-              : 'You will be charged $money on ${DateCopy.longDate(due!)}.');
+              ? S.t.summaryTrial(DateCopy.longDate(due!), money)
+              : S.t.summaryCharge(money, DateCopy.longDate(due!)));
 
     final remind = due == null
         ? null
         : (leadDays == 0
-              ? 'Reminder on the day, ${DateCopy.longDate(due!)}.'
-              : 'Reminder ${ItemPresenter.leadLabel(leadDays).toLowerCase()}, on '
-                    '${DateCopy.longDate(due!.minusDays(leadDays))}.');
+              ? S.t.summaryReminderOnTheDay(DateCopy.longDate(due!))
+              : S.t.summaryReminderBefore(
+                  ItemPresenter.leadLabel(leadDays).toLowerCase(),
+                  DateCopy.longDate(due!.minusDays(leadDays)),
+                ));
 
     return Container(
       decoration: BoxDecoration(
