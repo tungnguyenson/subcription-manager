@@ -15,6 +15,8 @@ import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/data/settings_store.dart';
+import 'package:subdock/data/currency_store.dart';
+import 'package:subdock/data/locale_store.dart';
 import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
 
@@ -82,6 +84,8 @@ void main() {
         settings: SettingsStore(db),
         filters: FilterStore(db),
         themes: ThemeStore(db),
+        locales: LocaleStore(db),
+        currencies: CurrencyStore(db),
         scheduler: NotificationScheduler(),
         catalog: ServiceCatalog(const []),
         backups: BackupStore(db, repo, SettingsStore(db)),

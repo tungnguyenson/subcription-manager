@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:subdock/domain/fx.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/money.dart';
+import 'package:subdock/i18n.dart';
 import 'package:subdock/ui/money_format.dart';
 
 void main() {
@@ -19,13 +20,28 @@ void main() {
     expect(MoneyFormat.full(Money.usd(0, 5)), r'$0.05');
   });
 
-  test('a currency with no symbol falls back to its code', () {
-    expect(MoneyFormat.full(Money(5000, 'EUR')), '50.00 EUR');
-    expect(MoneyFormat.full(Money(1000, 'JPY')), '1,000 JPY');
+  test('a currency the catalog carries prints with its own mark', () {
+    expect(MoneyFormat.full(Money(5000, 'EUR')), '€50.00');
+    expect(MoneyFormat.full(Money(1000, 'JPY')), '¥1,000');
+  });
+
+  test('a currency with no mark of its own falls back to its code', () {
+    // Trailing, and spaced. `XPF1,000` reads as one token and the eye cannot
+    // find where the code stops and the number starts.
+    expect(MoneyFormat.full(Money(1000, 'XPF')), '1,000 XPF');
+    expect(MoneyFormat.full(Money(5000, 'CHF')), '50.00 CHF');
   });
 
   test('a three-decimal currency keeps all three', () {
     expect(MoneyFormat.full(Money(1234, 'KWD')), '1.234 KWD');
+  });
+
+  test('the mark goes on the side its own currency writes it', () {
+    // Read off the currency, never off the number of decimals. The old rule
+    // keyed off the exponent and so put the yen's mark behind the digits
+    // because the dong's goes there.
+    expect(MoneyFormat.full(Money(1200, 'JPY')), '¥1,200');
+    expect(MoneyFormat.full(Money.vnd(1200)), '1,200 ₫');
   });
 
   test('grouping inserts a comma every three digits', () {
@@ -37,9 +53,20 @@ void main() {
   });
 
   test('large figures abbreviate on a stat card', () {
-    expect(MoneyFormat.short(Money.vnd(14900000)), '14.9 triệu ₫');
-    expect(MoneyFormat.short(Money.vnd(120000000)), '120 triệu ₫');
+    expect(MoneyFormat.short(Money.vnd(14900000)), '14.9M ₫');
+    expect(MoneyFormat.short(Money.vnd(120000000)), '120M ₫');
     expect(MoneyFormat.short(Money.vnd(861200)), '861,200 ₫');
+  });
+
+  test('the abbreviation follows the language, the digits do not', () {
+    S.publish(AppLocale.vi);
+    addTearDown(() => S.publish(AppLocale.en));
+
+    // `triệu` is a word and moves; the grouping and the decimals are
+    // properties of the money and stay put.
+    expect(MoneyFormat.short(Money.vnd(14900000)), '14.9 triệu ₫');
+    expect(MoneyFormat.short(Money.vnd(861200)), '861,200 ₫');
+    expect(MoneyFormat.full(Money.usd(20)), r'$20.00');
   });
 
   test(

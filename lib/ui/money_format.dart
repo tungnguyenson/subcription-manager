@@ -1,37 +1,59 @@
+import 'package:subdock/domain/currency_catalog.dart';
 import 'package:subdock/domain/fx.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/money.dart';
+import 'package:subdock/i18n.dart';
 
-/// Rendering money for a Vietnamese reader.
+/// Rendering money.
 ///
 /// Deliberately hand-written rather than `intl`'s `NumberFormat`. Two reasons:
 /// the exponent has to come from [Currencies], which already owns the ISO 4217
 /// table and knows VND has no minor unit, and formatting must not follow the
-/// device locale. An amount the user typed as 260.000 must not come back as
+/// *device* locale. An amount the user typed as 260.000 must not come back as
 /// 260,000.00 because their phone is set to English.
+///
+/// The one thing that does follow the app's language is the abbreviation on a
+/// stat card, because that is a word rather than a number. Everything else
+/// here — grouping, decimals, which side the symbol goes on — is a property of
+/// the currency and stays put when the interface changes tongue.
 abstract final class MoneyFormat {
   /// The full amount with its symbol: `260,000 ₫`, `$20.00`.
   static String full(Money money) {
     final exponent = money.exponent;
-    final symbol = _symbols[money.currency.toUpperCase()];
 
     if (exponent == 0) {
-      final digits = grouped(money.minor);
-      return symbol == null ? '$digits ${money.currency}' : '$digits $symbol';
+      return _withSymbol(grouped(money.minor), money.currency);
     }
 
     final unit = Currencies.pow10(exponent);
     final major = money.minor ~/ unit;
     final minor = (money.minor % unit).abs().toString().padLeft(exponent, '0');
-    final digits = '${grouped(major)}.$minor';
 
-    return symbol == null ? '$digits ${money.currency}' : '$symbol$digits';
+    return _withSymbol('${grouped(major)}.$minor', money.currency);
+  }
+
+  /// Puts the currency's mark on the side that currency writes it.
+  ///
+  /// A code with no symbol of its own prints as `1,200 XPF`, spaced, because
+  /// `XPF1,200` reads as one token and the reader cannot tell where the code
+  /// stops and the number starts.
+  static String _withSymbol(String digits, String currency) {
+    final info = CurrencyCatalog.find(currency);
+    // A currency whose "symbol" is its own code has no glyph -- `CHF`, `KWD`,
+    // and anything the catalog has never heard of. Those trail the digits with
+    // a space: `KWD1.234` reads as one token and the eye cannot find where the
+    // code stops and the number starts.
+    if (info == null || info.symbol == info.code) {
+      return '$digits ${info?.symbol ?? currency.toUpperCase()}';
+    }
+    if (!info.symbolLeads) return '$digits ${info.symbol}';
+    return '${info.symbol}$digits';
   }
 
   /// Abbreviated for a small stat card, where the exact figure is available a
   /// tap away and the column is 150px wide.
   static String short(Money money) {
-    final symbol = _symbols[money.currency.toUpperCase()] ?? money.currency;
+    final symbol = CurrencyCatalog.symbolOf(money.currency);
     final major = money.minor / Currencies.pow10(money.exponent);
 
     if (major.abs() >= 1000000) {
@@ -42,7 +64,11 @@ abstract final class MoneyFormat {
       final text = millions
           .toStringAsFixed(1)
           .replaceFirst(RegExp(r'\.0$'), '');
-      return money.exponent == 0 ? '$text triệu $symbol' : '$symbol${text}M';
+      // Whether the word or the letter is used follows the currency, not the
+      // language: `14.2 triệu ₫` is how a seven-figure dong amount is spoken
+      // in either tongue, and `$14.2M` is how a dollar one is. The language
+      // only decides which word stands in for `triệu`.
+      return S.t.millions(text, symbol, minorUnits: money.exponent > 0);
     }
     return full(money);
   }
@@ -158,8 +184,8 @@ abstract final class MoneyFormat {
   /// The rate itself, e.g. `26,046 ₫/$`.
   static String rate(FxRate rate) {
     final whole = rate.scaled ~/ Currencies.pow10(rate.scale);
-    final from = _symbols[rate.from.toUpperCase()] ?? rate.from;
-    final to = _symbols[rate.to.toUpperCase()] ?? rate.to;
+    final from = CurrencyCatalog.symbolOf(rate.from);
+    final to = CurrencyCatalog.symbolOf(rate.to);
     return '${grouped(whole)} $to/$from';
   }
 
@@ -171,6 +197,4 @@ abstract final class MoneyFormat {
       '${_pad(date.day)}/${_pad(date.month)}';
 
   static String _pad(int value) => value.toString().padLeft(2, '0');
-
-  static const Map<String, String> _symbols = {'VND': '₫', 'USD': r'$'};
 }

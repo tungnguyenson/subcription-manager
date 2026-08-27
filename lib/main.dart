@@ -10,6 +10,8 @@ import 'package:subdock/data/database.dart';
 import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/data/item_repository.dart';
 import 'package:subdock/data/settings_store.dart';
+import 'package:subdock/data/currency_store.dart';
+import 'package:subdock/data/locale_store.dart';
 import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/item_actions.dart';
 import 'package:subdock/domain/local_date.dart';
@@ -49,6 +51,8 @@ Future<void> main() async {
   final settings = SettingsStore(database);
   final filters = FilterStore(database);
   final themes = ThemeStore(database);
+  final locales = LocaleStore(database);
+  final currencies = CurrencyStore(database);
   final backups = BackupStore(database, repository, settings);
 
   final scheduler = NotificationScheduler();
@@ -71,6 +75,8 @@ Future<void> main() async {
       settings: settings,
       filters: filters,
       themes: themes,
+      locales: locales,
+      currencies: currencies,
       scheduler: scheduler,
       catalog: catalog,
       backups: backups,

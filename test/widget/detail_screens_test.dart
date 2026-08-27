@@ -16,7 +16,8 @@ import 'package:subdock/ui/screens/add/plan_grid.dart';
 import 'package:subdock/ui/screens/add_item_screen.dart';
 import 'package:subdock/ui/screens/history_screen.dart';
 import 'package:subdock/ui/screens/item_detail_screen.dart';
-import 'package:subdock/ui/screens/onboarding_screen.dart';
+import 'package:subdock/i18n.dart';
+import 'package:subdock/ui/screens/onboarding/onboarding_screen.dart';
 import 'package:subdock/ui/screens/reminder_rules_screen.dart';
 import 'package:subdock/ui/screens/reminders_screen.dart';
 import 'package:subdock/ui/screens/review_extraction_screen.dart';
@@ -791,76 +792,167 @@ void main() {
   });
 
   group('Onboarding', () {
-    testWidgets('names the three things the app does, in order', (
-      tester,
-    ) async {
-      await show(tester, const OnboardingScreen());
+    /// Onboarding is the one screen with animations that never stop, so it
+    /// cannot be pumped to a standstill. Reduce Motion is a real code path --
+    /// the marquee and the arriving notifications both honour it -- so the
+    /// tests take that path and get a still frame with every element in it.
+    /// A fresh [key] on every call: `pumpWidget` puts a widget of the same
+    /// type in the same seat and Flutter keeps the old `State` with it, so a
+    /// second call without one would arrive on whichever page the first one
+    /// was left on. Same trap the add form has with its save latch.
+    var shown = 0;
 
-      expect(find.text('Never miss a due date again.'), findsOneWidget);
-      expect(find.text('Add what you pay for'), findsOneWidget);
-      expect(find.text('Pick when to be reminded'), findsOneWidget);
-      expect(find.text('Allow notifications'), findsOneWidget);
-    });
+    Future<void> showOnboarding(
+      WidgetTester tester, {
+      String currency = 'VND',
+      AppLocale locale = AppLocale.en,
+      ValueChanged<String>? onCurrency,
+      ValueChanged<AppLocale>? onLocale,
+      VoidCallback? onStart,
+    }) async {
+      tester.view.physicalSize = const Size(1170, 2532);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
 
-    testWidgets('the permission is asked for here, not at first launch', (
-      tester,
-    ) async {
-      var allowed = false;
-      var started = false;
-      await show(
-        tester,
-        OnboardingScreen(
-          onAllowNotifications: () => allowed = true,
-          onStart: () => started = true,
+      await tester.pumpWidget(
+        SubdockTheme(
+          palette: SubdockPalette.light,
+          locale: locale,
+          currency: currency,
+          child: MaterialApp(
+            theme: buildSubdockTheme(),
+            home: MediaQuery(
+              data: const MediaQueryData(disableAnimations: true),
+              child: Scaffold(
+                body: OnboardingScreen(
+                  key: ValueKey(shown++),
+                  currency: currency,
+                  locale: locale,
+                  onCurrency: onCurrency ?? (_) {},
+                  onLocale: onLocale ?? (_) {},
+                  onStart: onStart,
+                ),
+              ),
+            ),
+          ),
         ),
       );
+      await tester.pumpAndSettle();
+    }
 
-      await tester.tap(find.text('Allow notifications'));
-      await tester.tap(find.text('Get started'));
-      expect(allowed, isTrue);
-      expect(started, isTrue);
-    });
-
-    testWidgets('once granted, the ask is replaced rather than repeated', (
+    testWidgets('the first page shows the app rather than describing it', (
       tester,
     ) async {
-      await show(tester, const OnboardingScreen(notificationsGranted: true));
+      await showOnboarding(tester);
 
-      expect(find.text('Allow notifications'), findsNothing);
-      expect(find.text('Notifications are on'), findsOneWidget);
+      expect(find.text('Never miss a due date again.'), findsOneWidget);
+      expect(find.text('Everything with a date, in one list'), findsOneWidget);
+      expect(find.text('Told before the date, not after'), findsOneWidget);
+      expect(find.text('See what it adds up to'), findsOneWidget);
+
+      // The marquee draws the real list rows, and the lock screen the real
+      // notification. A card that only made the claim in words would be a
+      // slide.
+      expect(find.text('Netflix'), findsWidgets);
+      expect(find.textContaining('Mobile SIM expires in 3 days'), findsOne);
     });
 
-    // This screen is what someone sees after reinstalling or on a new phone,
-    // which is exactly the moment a backup is worth having. Leaving the only
-    // way in under Settings makes the person who needs it most walk past a
-    // screen about adding their first item.
-    testWidgets('someone reinstalling can restore without going in first', (
+    testWidgets('the sample figures follow the currency in force', (
       tester,
     ) async {
-      var restored = 0;
-      var started = 0;
-      await show(
-        tester,
-        OnboardingScreen(onStart: () => started++, onRestore: () => restored++),
-      );
+      await showOnboarding(tester, currency: 'VND');
+      expect(find.text('14,208,000 ₫'), findsOneWidget);
 
-      await tester.tap(find.text('I already have a backup'));
+      await showOnboarding(tester, currency: 'USD');
+      // Not the dong figure converted: a made-up total should look made up,
+      // and 545.31 reads as a real number someone might go looking for.
+      expect(find.text(r'$592.00'), findsOneWidget);
+    });
+
+    testWidgets('the currency question comes after the three cards', (
+      tester,
+    ) async {
+      await showOnboarding(tester);
+
+      expect(find.text('Which currency do you pay in?'), findsNothing);
+      await tester.tap(find.text('Continue'));
       await tester.pumpAndSettle();
 
-      expect((restored, started), (1, 0));
+      expect(find.text('Which currency do you pay in?'), findsOneWidget);
+      expect(find.text('Continue'), findsNothing);
+      expect(find.text('Get started'), findsOneWidget);
     });
 
-    // Most people opening this screen are starting from nothing, and a second
-    // filled button would make the restore look like half the point.
-    testWidgets('the restore is quiet, and absent when nothing wires it', (
+    testWidgets('both answers are handed back as they are tapped', (
       tester,
     ) async {
-      await show(tester, OnboardingScreen(onRestore: () {}));
-      expect(find.byType(PrimaryButton), findsOneWidget);
-      expect(find.byType(QuietButton), findsOneWidget);
+      final currencies = <String>[];
+      final locales = <AppLocale>[];
+      var started = 0;
 
-      await show(tester, const OnboardingScreen());
-      expect(find.text('I already have a backup'), findsNothing);
+      await showOnboarding(
+        tester,
+        onCurrency: currencies.add,
+        onLocale: locales.add,
+        onStart: () => started++,
+      );
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('USD'));
+      await tester.tap(find.text('Tiếng Việt'));
+      await tester.tap(find.text('Get started'));
+      await tester.pumpAndSettle();
+
+      expect(currencies, ['USD']);
+      expect(locales, [AppLocale.vi]);
+      expect(started, 1);
+    });
+
+    // The tile has to be readable by the one person it is for: someone who
+    // cannot read the language currently on screen.
+    testWidgets('each language tile is written in its own language', (
+      tester,
+    ) async {
+      await showOnboarding(tester, locale: AppLocale.vi);
+      await tester.tap(find.text('Tiếp tục'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tiếng Việt'), findsOneWidget);
+      expect(find.text('English'), findsOneWidget);
+    });
+
+    // The app carries one exchange rate. Picking a third currency is allowed
+    // and everything still adds up per currency, but the single combined
+    // figure goes away -- and the screen has to say so before the tap, not
+    // leave it to be discovered on the Money screen.
+    testWidgets('a currency with no bundled rate says what it costs', (
+      tester,
+    ) async {
+      await showOnboarding(tester, currency: 'VND');
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('no single combined total'), findsNothing);
+
+      await showOnboarding(tester, currency: 'EUR');
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+      expect(find.textContaining('no single combined total'), findsOneWidget);
+    });
+
+    // A pick made in the sheet has to stay visible on the page behind it.
+    // Substituting it into the four would move the other rows under the
+    // user's finger the moment they came back.
+    testWidgets('a currency picked from the full list joins the four', (
+      tester,
+    ) async {
+      await showOnboarding(tester, currency: 'GBP');
+      await tester.tap(find.text('Continue'));
+      await tester.pumpAndSettle();
+
+      for (final code in ['VND', 'USD', 'EUR', 'JPY', 'GBP']) {
+        expect(find.text(code), findsOneWidget, reason: code);
+      }
     });
   });
 

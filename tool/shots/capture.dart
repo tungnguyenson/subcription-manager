@@ -20,13 +20,18 @@ import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/data/settings_store.dart';
+import 'package:subdock/data/currency_store.dart';
+import 'package:subdock/data/locale_store.dart';
 import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
+import 'package:subdock/i18n.dart';
+import 'package:subdock/ui/screens/onboarding/onboarding_screen.dart';
 import 'package:subdock/ui/theme.dart';
+import 'package:subdock/ui/widgets/glass.dart';
 
 const String outDir =
     '/private/tmp/claude-501/-Volumes-DATA-dev-projects-subcription-reminder/'
@@ -235,6 +240,8 @@ void main() {
         settings: settings,
         filters: FilterStore(db),
         themes: ThemeStore(db),
+        locales: LocaleStore(db),
+        currencies: CurrencyStore(db),
         scheduler: _StubScheduler(),
         catalog: catalog,
         backups: BackupStore(db, repository, settings),
@@ -404,6 +411,51 @@ void main() {
     await tester.pumpAndSettle();
     await tapText('New');
     await shot('add-source');
+
+    // Onboarding, last, and pumped on its own rather than reached through the
+    // app: it only appears on a database with nothing in it, and everything
+    // above needs a seeded one. Reduce Motion is on for the same reason the
+    // widget tests turn it on -- the marquee and the arriving notifications
+    // never stop, so `pumpAndSettle` would never return.
+    for (final (name, page) in [('onboarding', 0), ('onboarding-setup', 1)]) {
+      await tester.pumpWidget(
+        SubdockTheme(
+          palette: SubdockPalette.light,
+          currency: 'VND',
+          child: MaterialApp(
+            theme: buildSubdockTheme(),
+            debugShowCheckedModeBanner: false,
+            home: MediaQuery(
+              data: const MediaQueryData(disableAnimations: true),
+              child: GlassBackground(
+                child: Scaffold(
+                  backgroundColor: const Color(0x00000000),
+                  body: SafeArea(
+                    child: OnboardingScreen(
+                      key: ValueKey(name),
+                      currency: 'VND',
+                      locale: AppLocale.en,
+                      onCurrency: (_) {},
+                      onLocale: (_) {},
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      if (page == 1) {
+        await tester.tap(find.text('Continue'));
+        await tester.pumpAndSettle();
+      }
+      drain();
+      await expectLater(
+        find.byType(MaterialApp),
+        matchesGoldenFile('out/$prefix$name.png'),
+      );
+    }
 
     // Tear the tree down inside the test rather than in a tearDown callback.
     // Disposing `HomePage` cancels its drift subscriptions, and drift closes a

@@ -250,7 +250,7 @@ abstract final class MoneyPresenter {
     // out from the whole list so that every month of the card is laid out the
     // same way; see [MoneyView.alternateTotal].
     final restate = live.any(
-      (item) => item.money != null && item.money!.currency != Fx.baseCurrency,
+      (item) => item.money != null && item.money!.currency != Fx.base,
     );
 
     if (span == MoneySpan.year) {

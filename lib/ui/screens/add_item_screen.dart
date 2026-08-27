@@ -116,7 +116,11 @@ class _AddItemScreenState extends State<AddItemScreen> {
   String? _iconName;
   Cycle? _cycle = Cycle.monthly;
   int? _repeatCount;
-  String _currency = 'VND';
+
+  /// A new amount starts in the currency the app counts in. Not a constant:
+  /// someone who told onboarding they pay in dollars should not have to change
+  /// the chip on every item they add.
+  String _currency = Fx.base;
   int _lead = Reminders.defaultLead;
 
   /// Which of the two steps a *new* item is on. An edit never sees step one:
@@ -1347,7 +1351,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
     final rate = Fx.bundledUsdVnd;
     final money = Money(minor, _currency);
-    final converted = switch (_currency) {
+    // Only the one pair the app carries a rate for. An amount typed in a third
+    // currency simply gets no second line, which is the honest outcome: this
+    // app never invents a rate to fill a gap.
+    final converted = switch (_currency.toUpperCase()) {
       'USD' => rate.convert(money),
       'VND' => rate.invert(money),
       _ => null,

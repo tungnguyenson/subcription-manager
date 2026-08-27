@@ -597,19 +597,34 @@ void main() {
       expect(find.byType(AlertBanner), findsNothing);
     });
 
-    // A chevron promises a picker. Currency, language and the widget row have
-    // none, so none of them gets one.
+    // A chevron promises a picker. Currency and language now have one each --
+    // they are answered in onboarding, and the row that shows the answer has
+    // to be the row that changes it. The widget row still has none.
     // Tall, because the screen no longer fits a phone: the Appearance tray
     // sits above Backup, and a ListView does not build what is below the fold.
-    testWidgets('value rows do not pretend to lead anywhere', (tester) async {
-      await showTall(tester, const SettingsScreen());
+    testWidgets('the rows that lead somewhere are the ones with a picker', (
+      tester,
+    ) async {
+      var currency = 0;
+      var language = 0;
+      await showTall(
+        tester,
+        SettingsScreen(
+          onOpenCurrency: () => currency++,
+          onOpenLanguage: () => language++,
+        ),
+      );
 
       expect(find.text('VND'), findsOneWidget);
       expect(find.text('English'), findsOneWidget);
       expect(find.text('Not yet'), findsOneWidget);
-      // Four destinations, the one backup channel that exists without a cloud
-      // behind it, and About at the very bottom.
-      expect(find.text('›'), findsNWidgets(6));
+      // Four destinations, currency, language, the one backup channel that
+      // exists without a cloud behind it, and About at the very bottom.
+      expect(find.text('›'), findsNWidgets(8));
+
+      await tester.tap(find.text('VND'));
+      await tester.tap(find.text('English'));
+      expect((currency, language), (1, 1));
     });
 
     // The only copy of anything is on the phone, and no other screen says so.

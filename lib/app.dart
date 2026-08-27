@@ -9,8 +9,12 @@ import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/data/item_repository.dart';
 import 'package:subdock/data/settings_store.dart';
+import 'package:subdock/data/currency_store.dart';
+import 'package:subdock/data/locale_store.dart';
 import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/category_book.dart';
+import 'package:subdock/domain/fx.dart';
+import 'package:subdock/i18n.dart';
 import 'package:subdock/domain/item_actions.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
@@ -39,7 +43,7 @@ import 'package:subdock/ui/screens/money_screen.dart';
 import 'package:subdock/ui/screens/savings_screen.dart';
 import 'package:subdock/ui/screens/services_screen.dart';
 import 'package:subdock/ui/screens/sources_screen.dart';
-import 'package:subdock/ui/screens/onboarding_screen.dart';
+import 'package:subdock/ui/screens/onboarding/onboarding_screen.dart';
 import 'package:subdock/ui/screens/reminder_rules_screen.dart';
 import 'package:subdock/ui/screens/reminders_screen.dart';
 import 'package:subdock/ui/screens/about_screen.dart';
@@ -48,7 +52,9 @@ import 'package:subdock/ui/screens/settings_screen.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
+import 'package:subdock/ui/widgets/currency_sheet.dart';
 import 'package:subdock/ui/widgets/delete_ask.dart';
+import 'package:subdock/ui/widgets/language_sheet.dart';
 import 'package:subdock/ui/widgets/restore_ask.dart';
 import 'package:subdock/ui/widgets/filter_sheet.dart';
 import 'package:subdock/ui/widgets/glass.dart';
@@ -62,6 +68,8 @@ class SubdockApp extends StatefulWidget {
   final SettingsStore settings;
   final FilterStore filters;
   final ThemeStore themes;
+  final LocaleStore locales;
+  final CurrencyStore currencies;
   final NotificationScheduler scheduler;
   final ServiceCatalog catalog;
   final BackupStore backups;
@@ -74,6 +82,8 @@ class SubdockApp extends StatefulWidget {
     required this.settings,
     required this.filters,
     required this.themes,
+    required this.locales,
+    required this.currencies,
     required this.scheduler,
     required this.catalog,
     required this.backups,
@@ -96,6 +106,16 @@ class SubdockApp extends StatefulWidget {
 class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
   ThemeChoice _choice = ThemeChoice.system;
 
+  /// Null until the stored answer comes back, and null again if there is none.
+  ///
+  /// Kept nullable rather than seeded with a default, because "we have not
+  /// asked yet" and "they chose English" are different facts and onboarding
+  /// needs to tell them apart. [_locale] below is what the interface actually
+  /// reads, and it falls back to the phone's language while the question is
+  /// still open.
+  AppLocale? _chosenLocale;
+  String? _chosenCurrency;
+
   /// Read from the platform dispatcher, not from `MediaQuery`. This state sits
   /// above [MaterialApp] and so has no MediaQuery to ask; the dispatcher is
   /// the same value the MediaQuery would be built from.
@@ -108,6 +128,28 @@ class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     unawaited(_loadChoice());
   }
+
+  /// The language in force: what the user picked, or the phone's if they have
+  /// not been asked yet, or English if the phone speaks neither.
+  ///
+  /// Following the phone before the question is answered is not the same as
+  /// answering it. Onboarding shows the guess as the selected tile, and the
+  /// user either confirms it with the button they were pressing anyway or
+  /// moves it. What must not happen is the *question itself* arriving in a
+  /// language the reader does not have.
+  AppLocale get _locale =>
+      _chosenLocale ??
+      AppLocale.forDevice(
+        WidgetsBinding.instance.platformDispatcher.locale.languageCode,
+      ) ??
+      AppLocale.en;
+
+  /// The same shape for money, seeded off the phone's region.
+  String get _currency =>
+      _chosenCurrency ??
+      CurrencyStore.suggestFor(
+        WidgetsBinding.instance.platformDispatcher.locale.countryCode,
+      );
 
   @override
   void dispose() {
@@ -126,15 +168,33 @@ class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
   }
 
   Future<void> _loadChoice() async {
-    final stored = await widget.themes.read();
-    if (!mounted || stored == _choice) return;
-    setState(() => _choice = stored);
+    final theme = await widget.themes.read();
+    final locale = await widget.locales.read();
+    final currency = await widget.currencies.read();
+    if (!mounted) return;
+    setState(() {
+      _choice = theme;
+      _chosenLocale = locale;
+      _chosenCurrency = currency;
+    });
   }
 
   void _setChoice(ThemeChoice choice) {
     if (choice == _choice) return;
     setState(() => _choice = choice);
     unawaited(widget.themes.save(choice));
+  }
+
+  void _setLocale(AppLocale locale) {
+    if (locale == _chosenLocale) return;
+    setState(() => _chosenLocale = locale);
+    unawaited(widget.locales.save(locale));
+  }
+
+  void _setCurrency(String code) {
+    if (code == _chosenCurrency) return;
+    setState(() => _chosenCurrency = code);
+    unawaited(widget.currencies.save(code));
   }
 
   SubdockPalette get _palette => switch (_choice) {
@@ -157,6 +217,8 @@ class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
 
     return SubdockTheme(
       palette: palette,
+      locale: _locale,
+      currency: _currency,
       child: MaterialApp(
         title: 'Subdock',
         debugShowCheckedModeBanner: false,
@@ -172,6 +234,10 @@ class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
           catalog: widget.catalog,
           themeChoice: _choice,
           onThemeChoice: _setChoice,
+          locale: _locale,
+          onLocale: _setLocale,
+          currency: _currency,
+          onCurrency: _setCurrency,
         ),
       ),
     );
@@ -194,6 +260,13 @@ class HomePage extends StatefulWidget {
   final ThemeChoice themeChoice;
   final ValueChanged<ThemeChoice>? onThemeChoice;
 
+  /// The language and the currency, owned by [SubdockApp] for the reason the
+  /// palette is: all three are published above the Navigator.
+  final AppLocale locale;
+  final ValueChanged<AppLocale>? onLocale;
+  final String currency;
+  final ValueChanged<String>? onCurrency;
+
   const HomePage({
     super.key,
     required this.repository,
@@ -206,6 +279,10 @@ class HomePage extends StatefulWidget {
     required this.cloud,
     this.themeChoice = ThemeChoice.system,
     this.onThemeChoice,
+    this.locale = AppLocale.en,
+    this.onLocale,
+    this.currency = Fx.defaultBase,
+    this.onCurrency,
   });
 
   @override
@@ -553,6 +630,23 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (mounted) setState(() => _cloud = result);
   }
 
+  /// The two answers onboarding asked for, changeable afterwards.
+  ///
+  /// Sheets rather than pushed screens, and both land back on Settings with
+  /// the row already showing the new answer. Neither rewrites anything: an
+  /// amount keeps the currency it was entered in and only the combined totals
+  /// move, and the language is a property of the reader rather than of the
+  /// list.
+  Future<void> _pickCurrency() async {
+    final picked = await CurrencySheet.show(context, widget.currency);
+    if (picked != null) widget.onCurrency?.call(picked);
+  }
+
+  Future<void> _pickLanguage() async {
+    final picked = await LanguageSheet.show(context, widget.locale);
+    if (picked != null) widget.onLocale?.call(picked);
+  }
+
   /// Recomputes the plan against the clock and puts it on the device.
   ///
   /// The clock is an input, not just the data. An alert set for 08:30 today is
@@ -605,14 +699,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           backgroundColor: const Color(0x00000000),
           body: SafeArea(
             child: OnboardingScreen(
-              notificationsGranted: _notificationsGranted,
-              onAllowNotifications: _requestNotifications,
+              currency: widget.currency,
+              locale: widget.locale,
+              onCurrency: (code) => widget.onCurrency?.call(code),
+              onLocale: (locale) => widget.onLocale?.call(locale),
               onStart: () => setState(() => _onboardingDismissed = true),
-              // Tries iCloud first and falls back to the file picker. Unlike
-              // Settings, this screen gets one button rather than two: there
-              // is no list here to endanger, so guessing the likely source
-              // costs nothing and saves the one person in a hurry a decision.
-              onRestore: () => unawaited(_restoreOnArrival()),
             ),
           ),
         ),
@@ -758,6 +849,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           onOpenFileBackup: _openFileBackup,
           themeChoice: widget.themeChoice,
           onThemeChoice: widget.onThemeChoice,
+          currencyLabel: widget.currency,
+          languageLabel: widget.locale.label,
+          onOpenCurrency: _pickCurrency,
+          onOpenLanguage: _pickLanguage,
           onAbout: _openAbout,
         );
     }
@@ -1476,25 +1571,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     } on Exception catch (error) {
       if (mounted) _confirm('Could not export: $error');
     }
-  }
-
-  /// The restore offered on an empty database.
-  ///
-  /// Looks in the cloud first, because someone staring at this screen has just
-  /// reinstalled or moved phone, and the copy the app kept for them is the one
-  /// they are most likely to want. Anything other than finding it falls
-  /// through to the file picker rather than stopping with an explanation: they
-  /// came here to get their list back, not to hear about iCloud.
-  Future<void> _restoreOnArrival() async {
-    if (widget.cloud.isSupported) {
-      final fetch = await widget.cloud.latest();
-      if (!mounted) return;
-      if (fetch.copy case final copy?) {
-        await _restoreFrom(copy.contents, from: BackupChannel.cloud);
-        return;
-      }
-    }
-    await _importBackup();
   }
 
   /// Restores the copy the app keeps in the user's own cloud.

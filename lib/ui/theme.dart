@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemUiOverlayStyle;
 
+import 'package:subdock/domain/fx.dart';
+import 'package:subdock/i18n.dart';
+
 import 'theme/palette.dart';
 
 export 'theme/palette.dart';
@@ -37,36 +40,77 @@ SubdockPalette _active = SubdockPalette.light;
 /// a system-driven theme change is a half-dark screen.
 class SubdockTheme extends StatelessWidget {
   final SubdockPalette palette;
+
+  /// The language, carried by the same scope as the colours.
+  ///
+  /// One scope rather than three, and that is the whole point. All three
+  /// globals have the same repaint problem and the same fix, and a second
+  /// inherited widget would mean a second line every screen has to remember. A
+  /// screen that already follows the palette rule follows these for free; a
+  /// screen that forgets it fails at all three at once, which is far easier to
+  /// spot than a screen that recoloured but did not retranslate.
+  final AppLocale locale;
+
+  /// The currency the combined totals are stated in. Published here for the
+  /// same reason [locale] is: `MoneyFormat` and every presenter read it as a
+  /// global, so a change to it has to reach inside routes that are already
+  /// built.
+  final String currency;
+
   final Widget child;
 
-  const SubdockTheme({super.key, required this.palette, required this.child});
+  const SubdockTheme({
+    super.key,
+    required this.palette,
+    this.locale = AppLocale.en,
+    this.currency = Fx.defaultBase,
+    required this.child,
+  });
 
   /// The palette in force. Falls back to whatever is active when there is no
   /// scope above — a widget test that builds one screen under a bare
   /// `MaterialApp` is the normal case for that, and it should not have to
   /// know this class exists.
   static SubdockPalette of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<_PaletteScope>()?.palette ??
+      context.dependOnInheritedWidgetOfExactType<_ChromeScope>()?.palette ??
       _active;
 
-  /// Registers this build as depending on the palette. Call it first thing in
-  /// the `build` of anything that is the root of a route.
+  /// Registers this build as depending on the palette, the language *and* the
+  /// currency. Call it first thing in the `build` of anything that is the root
+  /// of a route.
   static void watch(BuildContext context) => of(context);
 
   @override
   Widget build(BuildContext context) {
     _active = palette;
-    return _PaletteScope(palette: palette, child: child);
+    S.publish(locale);
+    Fx.publishBase(currency);
+    return _ChromeScope(
+      palette: palette,
+      locale: locale,
+      currency: currency,
+      child: child,
+    );
   }
 }
 
-class _PaletteScope extends InheritedWidget {
+class _ChromeScope extends InheritedWidget {
   final SubdockPalette palette;
+  final AppLocale locale;
+  final String currency;
 
-  const _PaletteScope({required this.palette, required super.child});
+  const _ChromeScope({
+    required this.palette,
+    required this.locale,
+    required this.currency,
+    required super.child,
+  });
 
   @override
-  bool updateShouldNotify(_PaletteScope old) => old.palette != palette;
+  bool updateShouldNotify(_ChromeScope old) =>
+      old.palette != palette ||
+      old.locale != locale ||
+      old.currency != currency;
 }
 
 /// The colour tokens.

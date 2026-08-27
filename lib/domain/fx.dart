@@ -136,7 +136,25 @@ class MixedTotal {
 }
 
 abstract final class Fx {
-  static const String baseCurrency = 'VND';
+  /// What the app counts in before anyone has said otherwise.
+  ///
+  /// Only a starting point now. The currency the totals are actually shown in
+  /// is [base], which onboarding asks for and `CurrencyStore` remembers.
+  static const String defaultBase = 'VND';
+
+  static String _base = defaultBase;
+
+  /// The currency every combined total is stated in.
+  ///
+  /// A mutable global, the same trade the palette and the language make: it is
+  /// read by presenters and by static formatters that hold no `BuildContext`.
+  /// Unlike those two it changes nothing about what is *stored* — every
+  /// [Money] keeps the currency it was entered in, forever. This only decides
+  /// which one the sums are restated in.
+  static String get base => _base;
+
+  /// Called by the app when the stored choice is read, and when it changes.
+  static void publishBase(String code) => _base = code.toUpperCase();
 
   /// Past this age the converted line is hidden entirely rather than shown
   /// with a stale date. A confident wrong number is worse than no number.
@@ -165,8 +183,9 @@ abstract final class Fx {
     List<Money> amounts, {
     FxRate? rate,
     LocalDate? today,
-    String base = baseCurrency,
+    String? base,
   }) {
+    final target = (base ?? _base).toUpperCase();
     final perCurrency = <String, Money>{};
     for (final amount in amounts) {
       final running = perCurrency[amount.currency];
@@ -188,13 +207,24 @@ abstract final class Fx {
       final currency = entry.key;
       final money = entry.value;
 
-      if (currency == base) {
+      if (currency == target) {
         approx += money.minor;
         hasBaseContribution = true;
       } else if (usableRate != null &&
           usableRate.from == currency &&
-          usableRate.to == base) {
+          usableRate.to == target) {
         approx += usableRate.convert(money).minor;
+        hasBaseContribution = true;
+        converted = true;
+      } else if (usableRate != null &&
+          usableRate.to == currency &&
+          usableRate.from == target) {
+        // The same rate read backwards. The app bundles one figure, USD to
+        // VND, and which of the two is the base is the user's choice rather
+        // than the rate's — refusing to invert would leave someone who counts
+        // in dollars with no combined total at all, over a division this
+        // class already does exactly.
+        approx += usableRate.invert(money).minor;
         hasBaseContribution = true;
         converted = true;
       } else {
@@ -204,7 +234,7 @@ abstract final class Fx {
 
     return MixedTotal(
       perCurrency: Map.unmodifiable(perCurrency),
-      approximateBase: hasBaseContribution ? Money(approx, base) : null,
+      approximateBase: hasBaseContribution ? Money(approx, target) : null,
       converted: converted,
       rate: usableRate,
       unconvertedCount: unconverted,

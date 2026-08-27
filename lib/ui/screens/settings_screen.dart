@@ -16,6 +16,9 @@ class SettingsScreen extends StatelessWidget {
   final String currencyLabel;
   final String languageLabel;
 
+  final VoidCallback? onOpenCurrency;
+  final VoidCallback? onOpenLanguage;
+
   /// `8 · 2 off`. Answers "how much is in there" without opening the screen,
   /// and the `off` half is the only place outside Upcoming that says anything
   /// has been paused.
@@ -68,6 +71,8 @@ class SettingsScreen extends StatelessWidget {
     this.droppedReminders = const [],
     this.currencyLabel = 'VND',
     this.languageLabel = 'English',
+    this.onOpenCurrency,
+    this.onOpenLanguage,
     this.servicesLine,
     this.sourcesLine,
     this.backup,
@@ -142,11 +147,20 @@ class SettingsScreen extends StatelessWidget {
               onTap: onOpenSources,
             ),
             DetailRow.nav(label: 'History', onTap: onOpenHistory),
-            // Value rows, not destinations. There is one base currency and one
-            // language, and a chevron on either would promise a picker that
-            // does not exist.
-            DetailRow(label: 'Currency', value: currencyLabel),
-            DetailRow(label: 'Language', value: languageLabel),
+            // Destinations now, not value rows. Both were answered once during
+            // onboarding, and the row that shows the answer has to be the row
+            // that changes it -- a person who picked the wrong one there has
+            // nowhere else to go looking.
+            DetailRow.nav(
+              label: 'Currency',
+              value: currencyLabel,
+              onTap: onOpenCurrency,
+            ),
+            DetailRow.nav(
+              label: 'Language',
+              value: languageLabel,
+              onTap: onOpenLanguage,
+            ),
           ],
         ),
         const SizedBox(height: 14),

@@ -83,6 +83,162 @@ class GroupedCard extends StatelessWidget {
   }
 }
 
+/// The tick that says which of a list of choices is the current one.
+///
+/// Drawn rather than taken from Material's icon set, like every other mark in
+/// this app. Two reasons here: the ring and the tick have to sit on the app's
+/// own hairline weight to belong beside a `Caret`, and the MaterialIcons font
+/// is not loaded under `flutter_test`, so an `Icon` would be an empty square
+/// in every screenshot the repo takes of a picker.
+class PickMark extends StatelessWidget {
+  final bool selected;
+  final double size;
+
+  const PickMark({super.key, required this.selected, this.size = 21});
+
+  @override
+  Widget build(BuildContext context) => SizedBox.square(
+    dimension: size,
+    child: CustomPaint(
+      painter: _PickMarkPainter(
+        selected: selected,
+        fill: SubdockColors.accent,
+        tick: SubdockColors.onAccent,
+        ring: SubdockColors.hairline,
+      ),
+    ),
+  );
+}
+
+class _PickMarkPainter extends CustomPainter {
+  final bool selected;
+  final Color fill;
+  final Color tick;
+  final Color ring;
+
+  const _PickMarkPainter({
+    required this.selected,
+    required this.fill,
+    required this.tick,
+    required this.ring,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final centre = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2 - 1;
+
+    if (!selected) {
+      canvas.drawCircle(
+        centre,
+        radius,
+        Paint()
+          ..color = ring
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.6,
+      );
+      return;
+    }
+
+    canvas.drawCircle(centre, radius, Paint()..color = fill);
+
+    // A tick sized off the box rather than off fixed points, so the same mark
+    // reads the same at 18 and at 24.
+    final unit = size.width / 21;
+    canvas.drawPath(
+      Path()
+        ..moveTo(centre.dx - 4.4 * unit, centre.dy - 0.2 * unit)
+        ..lineTo(centre.dx - 1.2 * unit, centre.dy + 3.1 * unit)
+        ..lineTo(centre.dx + 4.6 * unit, centre.dy - 3.4 * unit),
+      Paint()
+        ..color = tick
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2 * unit
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_PickMarkPainter old) =>
+      old.selected != selected ||
+      old.fill != fill ||
+      old.tick != tick ||
+      old.ring != ring;
+}
+
+/// A dashed outline around something that is standing in for a thing not
+/// there yet: an empty date slot, a row that opens a longer list.
+///
+/// Dashed rather than solid is the whole message. A solid hairline is what
+/// every real surface in this app wears, so a placeholder wearing one reads as
+/// a card the user can act on directly.
+class DashedBox extends StatelessWidget {
+  final Widget? child;
+  final double radius;
+
+  /// Null takes [SubdockColors.accentHalf].
+  final Color? color;
+
+  final EdgeInsetsGeometry padding;
+
+  const DashedBox({
+    super.key,
+    this.child,
+    this.radius = SubdockRadius.tile,
+    this.color,
+    this.padding = EdgeInsets.zero,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: DashedBorderPainter(
+        radius: radius,
+        color: color ?? SubdockColors.accentHalf,
+      ),
+      child: Padding(padding: padding, child: child),
+    );
+  }
+}
+
+class DashedBorderPainter extends CustomPainter {
+  static const double _dash = 3.2;
+  static const double _gap = 3;
+
+  final double radius;
+  final Color color;
+
+  const DashedBorderPainter({required this.radius, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round
+      ..color = color;
+
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(radius)),
+      );
+
+    for (final metric in path.computeMetrics()) {
+      var start = 0.0;
+      while (start < metric.length) {
+        final end = (start + _dash).clamp(0.0, metric.length);
+        canvas.drawPath(metric.extractPath(start, end), paint);
+        start = end + _gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(DashedBorderPainter old) =>
+      old.radius != radius || old.color != color;
+}
+
 /// The small downward triangle on a field that opens a picker.
 ///
 /// Drawn rather than set as `▾`. Neither bundled face carries U+25BE, so the

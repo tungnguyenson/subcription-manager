@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:subdock/ui/theme.dart';
+import 'package:subdock/ui/widgets/primitives.dart';
 
 /// The one drawing in the app: a miniature of a tracked item that has not been
 /// filled in, with the add button parked on its corner.
@@ -88,45 +89,8 @@ class _EmptySlot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: CustomPaint(painter: _DashedBorderPainter()),
-    );
+    return SizedBox(width: double.infinity, child: const DashedBox());
   }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  static const double _dash = 3.2;
-  static const double _gap = 3;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2
-      ..strokeCap = StrokeCap.round
-      ..color = SubdockColors.accentHalf;
-
-    final path = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          Offset.zero & size,
-          const Radius.circular(SubdockRadius.tile),
-        ),
-      );
-
-    for (final metric in path.computeMetrics()) {
-      var start = 0.0;
-      while (start < metric.length) {
-        final end = (start + _dash).clamp(0.0, metric.length);
-        canvas.drawPath(metric.extractPath(start, end), paint);
-        start = end + _gap;
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) => false;
 }
 
 /// The add button as the tab bar draws it, at illustration scale. Same fill,
