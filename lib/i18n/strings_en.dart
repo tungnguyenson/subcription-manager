@@ -1294,4 +1294,118 @@ class EnStrings implements Strings {
       'not fire on the minute.';
   @override
   String testSet(String at, String zone) => 'Test set for $at $zone.';
+
+  // ---- reading a bill ----
+
+  @override
+  String get scanTitle => 'Scan a bill';
+  @override
+  String get scanLead => 'Detected — check before saving';
+  @override
+  String get scanCaption =>
+      'Read from the image or the text you pasted. Nothing here is confirmed '
+      'until you save it.';
+  @override
+  String get scanRetake => 'Retake';
+  @override
+  String get scanCouldNotRead => 'could not read';
+  @override
+  String get scanNothingToQuote => 'nothing to quote';
+  @override
+  String get scanDue => 'Due';
+  @override
+  String get scanAmount => 'Amount';
+  @override
+  String scanUnitUnclear(String minor) => '$minor · unit unclear';
+  @override
+  String get scanDayBeforeMonth => 'day before month';
+  @override
+  String get scanMonthBeforeDay => 'month before day';
+
+  @override
+  String warnUnsupportedValue(String field) =>
+      'The $field was returned without pointing at anything in the image. '
+      'Check it.';
+  @override
+  String warnAmbiguousDate(String raw) =>
+      'The date $raw can be read two ways. Pick the right one.';
+  @override
+  String get warnMissingDate => 'No due date found. Type it in.';
+  @override
+  String get warnUnknownCurrency => 'Currency unclear. Choose dong or dollars.';
+  @override
+  String get warnLowConfidence =>
+      'The model was not sure about this read. Check every line before saving.';
+
+  @override
+  String get fieldServiceNameLower => 'service name';
+  @override
+  String get fieldDueLower => 'due date';
+  @override
+  String get fieldAmountLower => 'amount';
+
+  @override
+  String get errRateLimited => 'Busy right now. Try again in a few seconds.';
+  @override
+  String get errCreditExhausted =>
+      'The OpenAI account is out of credit. Top it up and try again.';
+  @override
+  String get errSpendLimit => 'You have hit the spend limit you set on OpenAI.';
+  @override
+  String get errInvalidKey =>
+      'The API key is wrong or has been revoked. Check it in Settings.';
+  @override
+  String get errRegionUnsupported => 'OpenAI does not support your region yet.';
+  @override
+  String get errUpstream => 'OpenAI is having trouble. Try again later.';
+  @override
+  String get errNoNetwork => 'No network connection.';
+  @override
+  String get errUnreadable => 'This content could not be read.';
+  @override
+  String get errTruncated => 'Too long to read all the way through.';
+  @override
+  String get errBadShape => 'The reply came back in the wrong shape.';
+  @override
+  String get errNoApiKey => 'No API key yet. Add one in Settings to use this.';
+
+  // ---- backup files ----
+
+  @override
+  String get backupNotOurs => 'That file is not a Subdock backup.';
+  @override
+  String get backupTooNew =>
+      'That backup was written by a newer version of Subdock.';
+  @override
+  String backupFileContains(String what) => 'The file contains $what.';
+  @override
+  String get backupWhatCategoryNoId => 'a category with no id';
+  @override
+  String get backupWhatCategory => 'a category';
+  @override
+  String get backupWhatSourceNoId => 'a payment source with no id';
+  @override
+  String get backupWhatItemNoId => 'an item with no id';
+  @override
+  String get backupWhatPaymentNoId => 'a recorded payment with no id';
+  @override
+  String get backupWhatPaymentNoItem => 'a recorded payment with no item';
+  @override
+  String backupItemHasNoDate(String name) => 'An item has no date: $name.';
+  @override
+  String get backupPaymentHasNoDate => 'A recorded payment has no date on it.';
+  @override
+  String backupSummaryItems(int count) =>
+      '$count ${count == 1 ? 'item' : 'items'}';
+  @override
+  String backupSummaryPayments(int count) =>
+      '$count ${count == 1 ? 'payment' : 'payments'}';
+  @override
+  String backupSummarySources(int count) =>
+      '$count payment ${count == 1 ? 'source' : 'sources'}';
+  @override
+  String get listJoin => ', ';
+
+  @override
+  String get fallbackShelf => 'Other';
 }

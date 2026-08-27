@@ -4,6 +4,7 @@ import 'package:subdock/extract/extraction_schema.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/widgets/headers.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/i18n.dart';
 
 /// Confirms what a model read out of a screenshot, field by field.
 ///
@@ -81,18 +82,18 @@ class _ReviewExtractionScreenState extends State<ReviewExtractionScreen> {
               12,
             ),
             children: [
-              EditorHeader(title: 'Scan a bill', onCancel: widget.onCancel),
+              EditorHeader(title: S.t.scanTitle, onCancel: widget.onCancel),
               if (widget.preview != null)
                 ClipRRect(
                   borderRadius: BorderRadius.circular(SubdockRadius.card),
                   child: SizedBox(height: 280, child: widget.preview),
                 ),
-              const SectionLabel('Detected — check before saving'),
+              SectionLabel(S.t.scanLead),
               GroupedCard(
                 children: [
                   _ReadRow(
-                    label: 'Name',
-                    value: _fields.serviceName ?? 'could not read',
+                    label: S.t.fieldName,
+                    value: _fields.serviceName ?? S.t.scanCouldNotRead,
                     quote: _fields.serviceNameRaw,
                     confidence: _confidenceOf('service name'),
                   ),
@@ -105,14 +106,14 @@ class _ReviewExtractionScreenState extends State<ReviewExtractionScreen> {
                     )
                   else
                     _ReadRow(
-                      label: 'Due',
-                      value: _fields.dueDateIso ?? 'could not read',
+                      label: S.t.scanDue,
+                      value: _fields.dueDateIso ?? S.t.scanCouldNotRead,
                       quote: _fields.dueDateRaw,
                       mono: true,
                       confidence: _confidenceOf('due date'),
                     ),
                   _ReadRow(
-                    label: 'Amount',
+                    label: S.t.scanAmount,
                     value: _amountLine(),
                     quote: _fields.amountRaw,
                     mono: true,
@@ -128,10 +129,7 @@ class _ReviewExtractionScreenState extends State<ReviewExtractionScreen> {
               // Save button exists: everything above came from a model reading
               // pixels, and none of it has been checked against the source it
               // claims to quote.
-              const Footnote(
-                'Read from the image or the text you pasted. Nothing here is '
-                'confirmed until you save it.',
-              ),
+              Footnote(S.t.scanCaption),
             ],
           ),
         ),
@@ -145,12 +143,15 @@ class _ReviewExtractionScreenState extends State<ReviewExtractionScreen> {
           child: Row(
             children: [
               Expanded(
-                child: SecondaryButton('Retake', onPressed: widget.onRetake),
+                child: SecondaryButton(
+                  S.t.scanRetake,
+                  onPressed: widget.onRetake,
+                ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: PrimaryButton(
-                  'Save',
+                  S.t.save,
                   onPressed: _canConfirm
                       ? () => widget.onConfirm?.call(_fields)
                       : null,
@@ -165,12 +166,12 @@ class _ReviewExtractionScreenState extends State<ReviewExtractionScreen> {
 
   String _amountLine() {
     final minor = _fields.amountMinor;
-    if (minor == null) return 'could not read';
+    if (minor == null) return S.t.scanCouldNotRead;
 
     final code = _fields.currencyCode;
     // A bare number with no symbol or code is not enough to know what it is,
     // and guessing "probably dong" is exactly the error this screen prevents.
-    return code == null ? '$minor · unit unclear' : '$minor $code';
+    return code == null ? S.t.scanUnitUnclear('$minor') : '$minor $code';
   }
 
   /// Confidence per field, derived from whether the model could quote it.
@@ -209,7 +210,7 @@ class _ReadRow extends StatelessWidget {
     final badge = switch (confidence) {
       _FieldConfidence.confident => null,
       _FieldConfidence.unsure => 'not sure',
-      _FieldConfidence.unsupported => 'nothing to quote',
+      _FieldConfidence.unsupported => S.t.scanNothingToQuote,
     };
 
     return Padding(
@@ -283,7 +284,7 @@ class _AmbiguousDateRow extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text('Due', style: SubdockText.rowLabel)),
+              Expanded(child: Text(S.t.scanDue, style: SubdockText.rowLabel)),
               const SizedBox(width: 12),
               Text(
                 'two readings',
@@ -299,7 +300,7 @@ class _AmbiguousDateRow extends StatelessWidget {
               Expanded(
                 child: _ReadingTile(
                   label: readings.$1,
-                  hint: 'day before month',
+                  hint: S.t.scanDayBeforeMonth,
                   selected: selected == 0,
                   onTap: () => onSelect(0),
                 ),
@@ -308,7 +309,7 @@ class _AmbiguousDateRow extends StatelessWidget {
               Expanded(
                 child: _ReadingTile(
                   label: readings.$2,
-                  hint: 'month before day',
+                  hint: S.t.scanMonthBeforeDay,
                   selected: selected == 1,
                   onTap: () => onSelect(1),
                 ),

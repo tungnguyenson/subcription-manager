@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:subdock/i18n.dart';
 
 /// What went wrong, and crucially whether retrying could ever help.
 ///
@@ -26,7 +27,7 @@ class RateLimited extends ExtractionError {
   bool get retryable => true;
 
   @override
-  String get message => 'Busy right now. Try again in a few seconds.';
+  String get message => S.t.errRateLimited;
 
   @override
   bool operator ==(Object other) =>
@@ -44,8 +45,7 @@ class CreditExhausted extends ExtractionError {
   bool get retryable => false;
 
   @override
-  String get message =>
-      'The OpenAI account is out of credit. Top it up and try again.';
+  String get message => S.t.errCreditExhausted;
 
   @override
   bool operator ==(Object other) => other is CreditExhausted;
@@ -62,7 +62,7 @@ class SpendLimitReached extends ExtractionError {
   bool get retryable => false;
 
   @override
-  String get message => 'You have hit the spend limit you set on OpenAI.';
+  String get message => S.t.errSpendLimit;
 
   @override
   bool operator ==(Object other) => other is SpendLimitReached;
@@ -79,8 +79,7 @@ class InvalidKey extends ExtractionError {
   bool get retryable => false;
 
   @override
-  String get message =>
-      'The API key is wrong or has been revoked. Check it in Settings.';
+  String get message => S.t.errInvalidKey;
 
   @override
   bool operator ==(Object other) => other is InvalidKey;
@@ -96,7 +95,7 @@ class RegionUnsupported extends ExtractionError {
   bool get retryable => false;
 
   @override
-  String get message => 'OpenAI does not support your region yet.';
+  String get message => S.t.errRegionUnsupported;
 
   @override
   bool operator ==(Object other) => other is RegionUnsupported;
@@ -114,7 +113,7 @@ class ServerError extends ExtractionError {
   bool get retryable => true;
 
   @override
-  String get message => 'OpenAI is having trouble. Try again later.';
+  String get message => S.t.errUpstream;
 
   @override
   bool operator ==(Object other) =>
@@ -131,7 +130,7 @@ class NoNetwork extends ExtractionError {
   bool get retryable => true;
 
   @override
-  String get message => 'No network connection.';
+  String get message => S.t.errNoNetwork;
 
   @override
   bool operator ==(Object other) => other is NoNetwork;
@@ -150,7 +149,7 @@ class Refused extends ExtractionError {
   bool get retryable => false;
 
   @override
-  String get message => 'This content could not be read.';
+  String get message => S.t.errUnreadable;
 
   @override
   bool operator ==(Object other) => other is Refused && other.reason == reason;
@@ -168,7 +167,7 @@ class Truncated extends ExtractionError {
   bool get retryable => true;
 
   @override
-  String get message => 'Too long to read all the way through.';
+  String get message => S.t.errTruncated;
 
   @override
   bool operator ==(Object other) => other is Truncated;
@@ -186,7 +185,7 @@ class Malformed extends ExtractionError {
   bool get retryable => false;
 
   @override
-  String get message => 'The reply came back in the wrong shape.';
+  String get message => S.t.errBadShape;
 
   @override
   bool operator ==(Object other) =>
@@ -203,7 +202,7 @@ class NoApiKey extends ExtractionError {
   bool get retryable => false;
 
   @override
-  String get message => 'No API key yet. Add one in Settings to use this.';
+  String get message => S.t.errNoApiKey;
 
   @override
   bool operator ==(Object other) => other is NoApiKey;

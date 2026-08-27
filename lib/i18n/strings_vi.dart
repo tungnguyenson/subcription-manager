@@ -1259,4 +1259,117 @@ class ViStrings implements Strings {
       'phút được.';
   @override
   String testSet(String at, String zone) => 'Đã hẹn thử lúc $at $zone.';
+
+  // ---- reading a bill ----
+
+  @override
+  String get scanTitle => 'Quét hoá đơn';
+  @override
+  String get scanLead => 'Đọc được — kiểm lại trước khi lưu';
+  @override
+  String get scanCaption =>
+      'Đọc từ ảnh hoặc từ đoạn chữ bạn dán vào. Chưa có gì ở đây được xác nhận '
+      'cho tới khi bạn lưu.';
+  @override
+  String get scanRetake => 'Chụp lại';
+  @override
+  String get scanCouldNotRead => 'không đọc được';
+  @override
+  String get scanNothingToQuote => 'không có gì để trích';
+  @override
+  String get scanDue => 'Hạn';
+  @override
+  String get scanAmount => 'Số tiền';
+  @override
+  String scanUnitUnclear(String minor) => '$minor · chưa rõ đơn vị';
+  @override
+  String get scanDayBeforeMonth => 'ngày trước tháng';
+  @override
+  String get scanMonthBeforeDay => 'tháng trước ngày';
+
+  @override
+  String warnUnsupportedValue(String field) =>
+      'Mục $field trả về mà không chỉ vào chỗ nào trong ảnh. Kiểm lại đi.';
+  @override
+  String warnAmbiguousDate(String raw) =>
+      'Ngày $raw đọc được theo hai kiểu. Chọn kiểu đúng.';
+  @override
+  String get warnMissingDate => 'Không tìm thấy ngày đến hạn. Tự gõ vào.';
+  @override
+  String get warnUnknownCurrency => 'Chưa rõ loại tiền. Chọn đồng hay đô la.';
+  @override
+  String get warnLowConfidence =>
+      'Mô hình không chắc về lần đọc này. Kiểm từng dòng trước khi lưu.';
+
+  @override
+  String get fieldServiceNameLower => 'tên dịch vụ';
+  @override
+  String get fieldDueLower => 'ngày đến hạn';
+  @override
+  String get fieldAmountLower => 'số tiền';
+
+  @override
+  String get errRateLimited => 'Đang bận. Thử lại sau vài giây.';
+  @override
+  String get errCreditExhausted =>
+      'Tài khoản OpenAI hết tiền rồi. Nạp thêm rồi thử lại.';
+  @override
+  String get errSpendLimit => 'Bạn đã chạm mức chi tiêu tự đặt trên OpenAI.';
+  @override
+  String get errInvalidKey =>
+      'Khoá API sai hoặc đã bị thu hồi. Kiểm lại trong Cài đặt.';
+  @override
+  String get errRegionUnsupported => 'OpenAI chưa hỗ trợ khu vực của bạn.';
+  @override
+  String get errUpstream => 'OpenAI đang trục trặc. Thử lại sau.';
+  @override
+  String get errNoNetwork => 'Không có kết nối mạng.';
+  @override
+  String get errUnreadable => 'Không đọc được nội dung này.';
+  @override
+  String get errTruncated => 'Dài quá, không đọc hết được.';
+  @override
+  String get errBadShape => 'Câu trả lời về sai định dạng.';
+  @override
+  String get errNoApiKey =>
+      'Chưa có khoá API. Thêm một cái trong Cài đặt để dùng được.';
+
+  // ---- backup files ----
+
+  @override
+  String get backupNotOurs => 'Tệp đó không phải bản sao lưu của Subdock.';
+  @override
+  String get backupTooNew =>
+      'Bản sao lưu đó do một phiên bản Subdock mới hơn ghi ra.';
+  @override
+  String backupFileContains(String what) => 'Trong tệp có $what.';
+  @override
+  String get backupWhatCategoryNoId => 'một nhóm không có id';
+  @override
+  String get backupWhatCategory => 'một nhóm';
+  @override
+  String get backupWhatSourceNoId => 'một nguồn tiền không có id';
+  @override
+  String get backupWhatItemNoId => 'một mục không có id';
+  @override
+  String get backupWhatPaymentNoId => 'một lần trả đã ghi không có id';
+  @override
+  String get backupWhatPaymentNoItem =>
+      'một lần trả đã ghi không gắn với mục nào';
+  @override
+  String backupItemHasNoDate(String name) => 'Một mục không có ngày: $name.';
+  @override
+  String get backupPaymentHasNoDate =>
+      'Một lần trả đã ghi không có ngày nào trên đó.';
+  @override
+  String backupSummaryItems(int count) => '$count mục';
+  @override
+  String backupSummaryPayments(int count) => '$count lần trả';
+  @override
+  String backupSummarySources(int count) => '$count nguồn tiền';
+  @override
+  String get listJoin => ', ';
+
+  @override
+  String get fallbackShelf => 'Khác';
 }

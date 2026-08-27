@@ -6,6 +6,8 @@ import 'local_date.dart';
 import 'model.dart';
 import 'reminders.dart';
 
+import 'package:subdock/i18n.dart';
+
 /// Everything the user typed, in one file they can keep.
 ///
 /// This app has no account and no server, so the database file on the device is
@@ -86,17 +88,12 @@ class Backup {
   /// What the file says on the tin, for the confirmation the import shows.
   String get summary {
     final parts = <String>[
-      _plural(items.length, 'item'),
-      _plural(history.length, 'payment'),
+      S.t.backupSummaryItems(items.length),
+      S.t.backupSummaryPayments(history.length),
+      if (sources.isNotEmpty) S.t.backupSummarySources(sources.length),
     ];
-    if (sources.isNotEmpty) {
-      parts.add(_plural(sources.length, 'payment source'));
-    }
-    return parts.join(', ');
+    return parts.join(S.t.listJoin);
   }
-
-  static String _plural(int n, String noun) =>
-      n == 1 ? '1 $noun' : '$n ${noun}s';
 }
 
 /// Raised when a file cannot be read as a backup.
@@ -130,23 +127,21 @@ abstract final class BackupCodec {
     try {
       parsed = jsonDecode(text);
     } on FormatException {
-      throw const BackupFormatException('That file is not a Subdock backup.');
+      throw BackupFormatException(S.t.backupNotOurs);
     }
 
     if (parsed is! Map<String, dynamic>) {
-      throw const BackupFormatException('That file is not a Subdock backup.');
+      throw BackupFormatException(S.t.backupNotOurs);
     }
     if (parsed['format'] != Backup.magic) {
-      throw const BackupFormatException('That file is not a Subdock backup.');
+      throw BackupFormatException(S.t.backupNotOurs);
     }
 
     // Only a *newer* format is refused. An older one is the normal case for a
     // backup and is handled by every field falling back to its default.
     final version = _int(parsed['version']) ?? 0;
     if (version > Backup.version) {
-      throw const BackupFormatException(
-        'That backup was written by a newer version of Subdock.',
-      );
+      throw BackupFormatException(S.t.backupTooNew);
     }
 
     return Backup(
@@ -264,8 +259,9 @@ abstract final class BackupCodec {
   // in one note is the wrong trade.
 
   static Category _category(Map<String, dynamic> row) => Category(
-    id: _required(row['id'], 'a category with no id'),
-    label: _string(row['label']) ?? _required(row['id'], 'a category'),
+    id: _required(row['id'], S.t.backupWhatCategoryNoId),
+    label:
+        _string(row['label']) ?? _required(row['id'], S.t.backupWhatCategory),
     iconName: _string(row['iconName']),
     wording: enumFromWire(
       CategoryWording.values,
@@ -281,7 +277,7 @@ abstract final class BackupCodec {
   );
 
   static PaymentSource _source(Map<String, dynamic> row) => PaymentSource(
-    id: _required(row['id'], 'a payment source with no id'),
+    id: _required(row['id'], S.t.backupWhatSourceNoId),
     name: _string(row['name']) ?? '',
     glyph: enumFromWire(
       SourceGlyph.values,
@@ -291,12 +287,14 @@ abstract final class BackupCodec {
   );
 
   static TrackedItem _item(Map<String, dynamic> row) {
-    final id = _required(row['id'], 'an item with no id');
+    final id = _required(row['id'], S.t.backupWhatItemNoId);
     // The two dates the item cannot exist without. Everything else has a
     // sensible blank; a row with no expiry is not an item at all.
     final expiresOn = _date(row['expiresOn']);
     if (expiresOn == null) {
-      throw BackupFormatException('An item has no date: ${row['name'] ?? id}.');
+      throw BackupFormatException(
+        S.t.backupItemHasNoDate('${row['name'] ?? id}'),
+      );
     }
 
     return TrackedItem(
@@ -358,13 +356,11 @@ abstract final class BackupCodec {
   static HandledEvent _event(Map<String, dynamic> row) {
     final forDueDate = _date(row['forDueDate']);
     if (forDueDate == null) {
-      throw const BackupFormatException(
-        'A recorded payment has no date on it.',
-      );
+      throw BackupFormatException(S.t.backupPaymentHasNoDate);
     }
     return HandledEvent(
-      id: _required(row['id'], 'a recorded payment with no id'),
-      itemId: _required(row['itemId'], 'a recorded payment with no item'),
+      id: _required(row['id'], S.t.backupWhatPaymentNoId),
+      itemId: _required(row['itemId'], S.t.backupWhatPaymentNoItem),
       handledAtEpochSeconds: _int(row['handledAt']) ?? 0,
       forDueDate: forDueDate,
       amountMinor: _int(row['amountMinor']),
@@ -426,7 +422,9 @@ abstract final class BackupCodec {
 
   static String _required(Object? raw, String what) {
     final value = _string(raw);
-    if (value == null) throw BackupFormatException('The file contains $what.');
+    if (value == null) {
+      throw BackupFormatException(S.t.backupFileContains(what));
+    }
     return value;
   }
 }

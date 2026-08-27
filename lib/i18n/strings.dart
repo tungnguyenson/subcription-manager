@@ -1,8 +1,10 @@
 import 'parts/app.dart';
+import 'parts/backup.dart';
 import 'parts/category.dart';
 import 'parts/common.dart';
 import 'parts/currency.dart';
 import 'parts/dates.dart';
+import 'parts/extract.dart';
 import 'parts/form.dart';
 import 'parts/item.dart';
 import 'parts/money.dart';
@@ -14,10 +16,12 @@ import 'parts/timeline.dart';
 import 'parts/upcoming.dart';
 
 export 'parts/app.dart';
+export 'parts/backup.dart';
 export 'parts/category.dart';
 export 'parts/common.dart';
 export 'parts/currency.dart';
 export 'parts/dates.dart';
+export 'parts/extract.dart';
 export 'parts/form.dart';
 export 'parts/item.dart';
 export 'parts/money.dart';
@@ -42,10 +46,12 @@ export 'parts/upcoming.dart';
 abstract class Strings
     implements
         AppStrings,
+        BackupStrings,
         CategoryStrings,
         CommonStrings,
         CurrencyStrings,
         DateStrings,
+        ExtractStrings,
         FormStrings,
         ItemStrings,
         MoneyStrings,

@@ -1,6 +1,8 @@
 import 'default_categories.dart';
 import 'model.dart';
 
+import 'package:subdock/i18n.dart';
+
 /// The shelves as they exist right now, indexed by id.
 ///
 /// Everywhere that used to switch on a five-value enum takes one of these and
@@ -41,9 +43,6 @@ class CategoryBook {
   /// Only reachable if the user has deleted every shelf, which the manager does
   /// not allow. It exists so that [operator []] can promise never to be null
   /// without any caller having to prove the list is non-empty.
-  static const Category _emptyBookShelf = Category(
-    id: fallbackCategoryId,
-    label: 'Other',
-    sortOrder: 0,
-  );
+  static Category get _emptyBookShelf =>
+      Category(id: fallbackCategoryId, label: S.t.fallbackShelf, sortOrder: 0);
 }

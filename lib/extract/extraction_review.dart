@@ -2,6 +2,8 @@ import 'package:meta/meta.dart';
 
 import 'extraction_schema.dart';
 
+import 'package:subdock/i18n.dart';
+
 /// Client-side checks on what the model returned, before any of it reaches a
 /// form the user might just tap through.
 ///
@@ -19,13 +21,13 @@ abstract final class ExtractionReview {
     // A value with no verbatim quote behind it is the model inventing
     // something. Cheap, mechanical falsifier.
     if (fields.serviceName != null && isBlank(fields.serviceNameRaw)) {
-      warnings.add(const UnsupportedValue('service name'));
+      warnings.add(UnsupportedValue(S.t.fieldServiceNameLower));
     }
     if (fields.amountMinor != null && isBlank(fields.amountRaw)) {
-      warnings.add(const UnsupportedValue('amount'));
+      warnings.add(UnsupportedValue(S.t.fieldAmountLower));
     }
     if (fields.dueDateIso != null && isBlank(fields.dueDateRaw)) {
-      warnings.add(const UnsupportedValue('due date'));
+      warnings.add(UnsupportedValue(S.t.fieldDueLower));
     }
 
     // 03/04 cannot be resolved from the text. The UI shows both readings as
@@ -75,12 +77,7 @@ abstract final class ExtractionReview {
     return ('$a ${_month(b)}', '$b ${_month(a)}');
   }
 
-  static const List<String> _months = [
-    'January', 'February', 'March', 'April', 'May', 'June', //
-    'July', 'August', 'September', 'October', 'November', 'December',
-  ];
-
-  static String _month(int month) => _months[month - 1];
+  static String _month(int month) => S.t.monthName(month);
 }
 
 @immutable
@@ -116,9 +113,7 @@ class UnsupportedValue extends Warning {
   bool get blocksAutoConfirm => true;
 
   @override
-  String get message =>
-      'The $field was returned without pointing at anything in the image. '
-      'Check it.';
+  String get message => S.t.warnUnsupportedValue(field);
 }
 
 class AmbiguousDate extends Warning {
@@ -130,8 +125,7 @@ class AmbiguousDate extends Warning {
   bool get blocksAutoConfirm => true;
 
   @override
-  String get message =>
-      'The date ${raw ?? ''} can be read two ways. Pick the right one.';
+  String get message => S.t.warnAmbiguousDate(raw ?? '');
 }
 
 class MissingDate extends Warning {
@@ -141,7 +135,7 @@ class MissingDate extends Warning {
   bool get blocksAutoConfirm => true;
 
   @override
-  String get message => 'No due date found. Type it in.';
+  String get message => S.t.warnMissingDate;
 }
 
 class UnknownCurrency extends Warning {
@@ -153,7 +147,7 @@ class UnknownCurrency extends Warning {
   bool get blocksAutoConfirm => true;
 
   @override
-  String get message => 'Currency unclear. Choose dong or dollars.';
+  String get message => S.t.warnUnknownCurrency;
 }
 
 class LowConfidence extends Warning {
@@ -163,7 +157,5 @@ class LowConfidence extends Warning {
   bool get blocksAutoConfirm => true;
 
   @override
-  String get message =>
-      'The model was not sure about this read. Check every line before '
-      'saving.';
+  String get message => S.t.warnLowConfidence;
 }
