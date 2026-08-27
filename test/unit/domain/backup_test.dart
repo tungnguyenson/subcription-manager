@@ -339,4 +339,18 @@ void main() {
       expect(empty.summary, '0 items, 0 payments');
     });
   });
+
+  group('what a backup deliberately leaves behind', () {
+    // Three settings live in stores of their own rather than on `AppSettings`,
+    // and none of them belongs in a file: a list restored onto a second phone
+    // has to look like *that* phone. The theme, the language and the currency
+    // are all properties of the reader, not of the list.
+    test('the theme, the language and the currency stay on the phone', () {
+      final json = BackupCodec.encode(full());
+
+      for (final key in ['theme_choice', 'app_locale', 'base_currency']) {
+        expect(json.contains(key), isFalse, reason: key);
+      }
+    });
+  });
 }
