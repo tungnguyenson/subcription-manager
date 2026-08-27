@@ -31,19 +31,36 @@ dart run build_runner build
 
 Bỏ bước này thì trình biên dịch báo thiếu `database.g.dart`. Đó là lỗi cố ý để dễ thấy, hơn là để một tệp sinh cũ nằm cạnh lược đồ đã sửa rồi ánh xạ sai cột mà không báo gì.
 
-**Dự án dùng cả Swift Package Manager lẫn CocoaPods, từ 26/08/2026.** Trước đó chỉ có SPM
-và không có tệp `Podfile`. Gói `icloud_storage` chưa hỗ trợ SPM, nên Flutter tự bật lại
-CocoaPods và sinh ra `ios/Podfile` cùng `ios/Podfile.lock`. Nó tự chạy `pod install` khi
-cần, không phải gõ tay, nhưng lần build đầu sau khi clone sẽ lâu hơn vì phải tải pod về.
-
-Flutter in ra cảnh báo này ở mỗi lần build iOS, và nó chỉ là cảnh báo:
+**Mọi plugin iOS của dự án đều là Swift Package, từ 27/08/2026.** Gói `icloud_storage` cũ
+không hỗ trợ SPM nên Flutter phải bật lại CocoaPods, và in cảnh báo này ở mỗi lần build:
 
 ```
 The following plugins do not support Swift Package Manager for ios:
   - icloud_storage
 ```
 
-Bỏ được cảnh báo khi gói đó chuyển sang SPM, hoặc khi thay nó bằng một plugin tự viết.
+Gói đó publish lần cuối tháng 1/2023 và đã bỏ, nên cảnh báo không tự hết. Nay thay bằng
+`icloud_storage_plus`, gói này có sẵn `Package.swift`. Xem bẫy 48 trong CLAUDE.md cho
+những gì đổi theo trong `lib/platform/cloud_backup.dart`.
+
+**CocoaPods đã gỡ hẳn cùng ngày.** Không còn `ios/Podfile`, `ios/Podfile.lock` hay
+`ios/Pods/`, và `pod install` không chạy ở lần build nào nữa. Build sạch trên máy này đi
+từ 78 giây xuống 65 giây.
+
+Bốn thứ đã sửa, ghi ra vì ba thứ sau không nằm trong `pod deintegrate`:
+
+- `pod deintegrate ios/Runner.xcodeproj` dọn `project.pbxproj`.
+- Hai tệp `ios/Flutter/Debug.xcconfig` và `Release.xcconfig` bỏ dòng
+  `#include? "Pods/..."`, chỉ còn `#include "Generated.xcconfig"`.
+- `ios/Runner.xcworkspace/contents.xcworkspacedata` bỏ `FileRef` trỏ vào
+  `Pods/Pods.xcodeproj`. Bỏ sót chỗ này thì workspace trỏ vào một project không còn tồn
+  tại, mà `flutter build` vẫn chạy được nên chỉ người mở Xcode mới thấy.
+- Xoá `ios/Podfile`, `ios/Podfile.lock` và thư mục `ios/Pods/`.
+
+**`pod deintegrate` cần locale UTF-8, nếu không nó chết giữa chừng** với một vệt Ruby
+stack trace và `Encoding::CompatibilityError`, ngay trên dòng cảnh báo nói đúng nguyên
+nhân. Chạy `LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 pod deintegrate ...`. Lệnh `pod install`
+do Flutter gọi thì không dính, vì Flutter tự đặt locale.
 
 ## 2. Chạy trên máy ảo
 

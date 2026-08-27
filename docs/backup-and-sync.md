@@ -205,7 +205,9 @@ Cách gỡ là ghi một tệp vào **iCloud Drive container của chính app**,
 
 - `ios/Runner/Runner.entitlements` khai container `iCloud.space.subdock.subdock`, và
   `CODE_SIGN_ENTITLEMENTS` được thêm vào cả ba cấu hình của target Runner.
-- Gói `icloud_storage`, bọc sau `lib/platform/cloud_backup.dart` để đổi được về sau.
+- Gói `icloud_storage_plus`, bọc sau `lib/platform/cloud_backup.dart` để đổi được về
+  sau. Lớp bọc đó đã trả công một lần: gói đầu tiên dùng là `icloud_storage`, và thay
+  nó không đụng tới dòng nào ngoài chính tệp ấy.
 - Ghi tự động sau mỗi thay đổi dữ liệu, hoãn 12 giây, và đẩy đi ngay khi app chuyển
   xuống nền.
 - Dòng `iCloud` trên màn Settings nói ra trạng thái thật của lần ghi gần nhất.
@@ -251,13 +253,17 @@ trong app Files. Giờ nó không còn là đường khôi phục duy nhất n�
 sao lưu không ai kiểm tra được là bản sao lưu chỉ phát hiện ra là rỗng vào đúng hôm cần
 tới nó.
 
-Một chi tiết của plugin phải nhớ: `download` trả về ngay khi *đặt lệnh tải*, không đợi
-tải xong. Tín hiệu duy nhất báo xong là luồng tiến độ đóng lại. `_download` chờ luồng đó
-tối đa 20 giây rồi **nuốt luôn cái quá hạn**, vì một tệp đã nằm sẵn dưới máy có thể về
-mà luồng không báo gì cả; chỗ gọi tự kiểm tệp thay vì tin vào tín hiệu.
+Một chi tiết của plugin phải nhớ: hỏi xem tệp có trên iCloud không thì phải hỏi metadata
+query bằng `gather`, không hỏi hệ thống tệp bằng `listContents` hay `getItemMetadata`.
+Người mở màn khôi phục thường vừa cài lại máy, mà trên máy chưa từng thấy container thì
+tệp mới chỉ là một lời hứa metadata query biết còn hệ thống tệp thì chưa. Đọc nội dung
+bằng `readInPlace`, ghi bằng `writeInPlace`, cả hai đi qua `UIDocument` nên không cần tệp
+tạm. Timeout 20 giây vẫn giữ, vì một lần mở có phối hợp trên tệp máy chưa tải về sẽ nằm
+chờ iCloud giao dữ liệu. Đầy đủ ở bẫy 48 trong CLAUDE.md.
 
-**Hệ quả lên cách build:** `icloud_storage` chưa hỗ trợ Swift Package Manager, nên dự án
-từ nay dùng cả SPM lẫn CocoaPods. Xem `docs/running.md` mục 1.
+**Hệ quả lên cách build:** `icloud_storage_plus` là Swift Package, nên cảnh báo SPM cũ đã
+hết và mọi plugin iOS của dự án nay đều là Swift Package. Dự án vẫn còn tích hợp
+CocoaPods; xem `docs/running.md` mục 1.
 
 ### 6.2 Android
 

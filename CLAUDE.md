@@ -94,7 +94,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Bốn mươi bảy cái bẫy đã vấp, đừng vấp lại
+## Bốn mươi tám cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -952,6 +952,55 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     nền tảng thật trả lời.
 
 
+48. **Đọc file trên iCloud phải hỏi metadata query, không hỏi hệ thống tệp.** Plugin
+    `icloud_storage` cũ đã bỏ từ tháng 1/2023 và không hỗ trợ Swift Package Manager, nên
+    Flutter cảnh báo mỗi lần build iOS. Nay dùng `icloud_storage_plus`, và bản 4 có ba
+    cách hỏi xem file có ở đó không. Chỉ một cách đúng cho việc này:
+
+    | Gọi cái gì | Hỏi ai | Thấy gì |
+    |---|---|---|
+    | `gather` | NSMetadataQuery | Cả file mới chỉ là lời hứa, chưa có mặt trên máy |
+    | `listContents` | FileManager | Chỉ file đã có mặt trên hệ thống tệp |
+    | `getItemMetadata` | FileManager | Như trên, cho đúng một đường dẫn |
+
+    `CloudBackup.latest` gọi `gather`, và đó là chỗ dễ sửa thành sai nhất, vì hai cách kia
+    ngắn hơn và chạy đúng trên máy của người viết code. Người mở màn khôi phục gần như
+    luôn là người vừa cài lại máy hoặc vừa đổi điện thoại, mà trên một máy chưa từng thấy
+    container thì file chỉ tồn tại dưới dạng một lời hứa metadata query biết còn hệ thống
+    tệp thì chưa. Hỏi hệ thống tệp là trả lời `Chưa có bản sao nào trên iCloud` cho đúng
+    người mà tính năng này sinh ra để phục vụ, và trả lời đúng cho mọi người khác.
+
+    Đọc nội dung thì `readInPlace`, ghi thì `writeInPlace`. Cả hai đi qua `UIDocument` nên
+    không cần file tạm nữa: đường ghi cũ dựng một file trong thư mục tạm rồi mới upload
+    theo đường dẫn, và để lại file đó sau mỗi lần sửa. Timeout 20 giây vẫn giữ, vì một lần
+    mở có phối hợp trên file máy chưa tải về sẽ nằm chờ iCloud giao dữ liệu, mà iCloud
+    không hứa nhanh.
+
+    Lỗi nay có kiểu thay vì so `PlatformException.code` bằng chuỗi.
+    `ICloudContainerAccessException` là chưa đăng nhập, tắt iCloud Drive, hoặc từ chối
+    quyền, tức là đúng ba thứ `CloudState.signedOut` nói ra;
+    `ICloudItemNotFoundException` là `missing`. Bắt hai cái này **trước**
+    `ICloudOperationException`, cả hai đều kế thừa từ nó.
+
+    Chốt chặn là `integration_test/cloud_backup_test.dart`, chạy trên máy ảo
+    (`flutter test integration_test/cloud_backup_test.dart -d <simulator-id>`). Máy ảo
+    không có container nên mọi lời gọi trả `signedOut`, và đó là cả bài test. Plugin không
+    được đăng ký sẽ ném `MissingPluginException`, mà nó cũng là `Exception` nên rơi vào
+    nhánh bắt tất và thành `CloudState.failed`. Trên màn hình hai thứ đó cách nhau rất xa:
+    `signedOut` in ra câu người dùng sửa được, `failed` in ra một lời xin lỗi vì có lỗi.
+    `integration_test/backup_test.dart` không thấy được chuyện này, vì nó thay hẳn
+    `CloudBackup` bằng một bản giả.
+
+    Sau khi đổi, **mọi plugin iOS của repo đều là Swift Package, và CocoaPods đã gỡ
+    hẳn.** Không còn `ios/Podfile`, `ios/Podfile.lock` hay `ios/Pods/`. Build sạch đi từ
+    78 giây xuống 65 giây.
+
+    `pod deintegrate` chỉ dọn `project.pbxproj`. Ba chỗ còn lại phải sửa tay, và chỗ thứ
+    ba là chỗ im lặng nhất: `contents.xcworkspacedata` còn một `FileRef` trỏ vào
+    `Pods/Pods.xcodeproj`, mà `flutter build` không đọc tệp đó nên nó chạy đúng mãi cho
+    tới hôm có người mở Xcode lên. Đủ bốn bước ở `docs/running.md` mục 1, kèm chuyện
+    `pod deintegrate` chết nếu locale không phải UTF-8.
+
 ## Viết tài liệu
 
 Tài liệu trong repo viết bằng **tiếng Việt**. Chữ trên giao diện app có **hai bản**,
@@ -980,6 +1029,6 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | Cái gì sắp xảy ra với một mục | `lib/ui/reminder_timeline.dart` cho phép dựng, `lib/ui/widgets/reminder_timeline_card.dart` cho khối trên màn Detail |
 | Bộ lọc màn Upcoming | `lib/domain/upcoming_filter.dart` cho luật khớp, `lib/ui/filter_presenter.dart` cho danh sách chip và dòng tóm tắt, `lib/ui/widgets/filter_sheet.dart` cho sheet |
 | Lịch tháng trên Upcoming | `lib/ui/calendar_presenter.dart` cho phép dựng lưới và luật chọn ngày, `lib/ui/widgets/month_grid.dart` cho cái card |
-| Sao lưu, khôi phục, và câu hỏi đồng bộ | `docs/backup-and-sync.md`. Bẫy 43 và 44 cho hai kênh hiện tại, `lib/ui/csv_export.dart` cho tệp bảng tính |
+| Sao lưu, khôi phục, và câu hỏi đồng bộ | `docs/backup-and-sync.md`. Bẫy 43 và 44 cho hai kênh hiện tại, bẫy 48 cho plugin iCloud, `lib/ui/csv_export.dart` cho tệp bảng tính |
 | Việc còn dang dở | `data/services/_verify.md` |
 | Khối so sánh gói năm và nút trang thuê bao | `docs/design-spec-annual-saving.md`, đã dựng, logic ở `lib/ui/annual_saving_presenter.dart` và `lib/ui/manage_presenter.dart` |

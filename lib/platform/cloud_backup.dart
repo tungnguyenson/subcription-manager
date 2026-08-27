@@ -1,11 +1,7 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/foundation.dart' show TargetPlatform, immutable;
-import 'package:flutter/services.dart' show PlatformException;
-import 'package:icloud_storage/icloud_storage.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
+import 'package:icloud_storage_plus/icloud_storage.dart';
 
 /// How the last write to the user's own cloud went.
 enum CloudState {
@@ -58,11 +54,16 @@ class CloudCopy {
   final String contents;
 
   /// When the copy was last written, off the file itself rather than off the
-  /// backup inside it. Shown on the confirmation so someone with an old phone
-  /// still switched on can see which copy they are about to take.
-  final DateTime changedAt;
+  /// backup inside it.
+  ///
+  /// Nullable because the metadata query is allowed to come back without it,
+  /// and a date invented here would be indistinguishable on screen from one
+  /// the file actually carries. Nothing displays it today; it is kept because
+  /// the confirmation is the place it belongs, and reading it back off the
+  /// file is the only honest source for it.
+  final DateTime? changedAt;
 
-  const CloudCopy({required this.contents, required this.changedAt});
+  const CloudCopy({required this.contents, this.changedAt});
 }
 
 /// What a read found.
@@ -123,35 +124,42 @@ class CloudBackup {
   /// print, because this runs on a timer with nobody watching: an exception
   /// here would be swallowed by the caller's `unawaited` and the user would go
   /// on believing they are backed up.
+  ///
+  /// Written in place rather than staged to a temporary file and copied in.
+  /// The backup is tens of kilobytes, which is the size the in-place API is
+  /// for, and it removes a file this app used to leave in the temporary
+  /// directory after every edit.
   Future<CloudResult> save(String contents) async {
     if (!isSupported) return CloudResult.unsupported;
 
     try {
-      final staged = await _stage(contents);
-      await ICloudStorage.upload(
+      await ICloudStorage.writeInPlace(
         containerId: containerId,
-        filePath: staged.path,
-        destinationRelativePath: fileName,
+        relativePath: fileName,
+        contents: contents,
       );
       return const CloudResult(CloudState.saved);
-    } on PlatformException catch (error) {
+    } on ICloudContainerAccessException {
       // The one failure the user can act on, and the one the app must not
       // dress up as a bug: signed out of iCloud, iCloud Drive off, or
       // permission refused for this app.
-      if (error.code == PlatformExceptionCode.iCloudConnectionOrPermission) {
-        return const CloudResult(CloudState.signedOut);
-      }
+      return const CloudResult(CloudState.signedOut);
+    } on ICloudOperationException catch (error) {
       return CloudResult(CloudState.failed, detail: error.message);
     } on Exception catch (error) {
       return CloudResult(CloudState.failed, detail: '$error');
     }
   }
 
-  /// How long a download is given before the app stops waiting on it.
+  /// How long a read is given before the app stops waiting on it.
   ///
   /// A file this size is a few tens of kilobytes, so anything past this is a
   /// network that is not going to finish. The user is holding the phone
   /// waiting for an answer, and no answer at all is the worst one.
+  ///
+  /// Needed even though the read is a single await: a coordinated open on a
+  /// file the phone has not downloaded yet blocks until iCloud hands the bytes
+  /// over, and iCloud is under no obligation to hurry.
   static const Duration _fetchTimeout = Duration(seconds: 20);
 
   /// Reads back the single file in the container, if it is there.
@@ -164,95 +172,57 @@ class CloudBackup {
     if (!isSupported) return const CloudFetch(CloudState.unsupported);
 
     try {
-      final files = await ICloudStorage.gather(containerId: containerId);
-      final match = files
+      // `gather` runs a metadata query; `listContents` and `getItemMetadata`
+      // read the local filesystem. The difference decides this call. Whoever
+      // opens this screen has usually just reinstalled or changed phone, and
+      // on a device that has never seen the container the file exists only as
+      // a promise the metadata query knows about and the filesystem does not
+      // yet. Asking the filesystem would answer `missing` to exactly the
+      // person this feature is for.
+      final gathered = await ICloudStorage.gather(containerId: containerId);
+      final match = gathered.files
           .where((file) => file.relativePath == fileName)
           .firstOrNull;
       if (match == null) return const CloudFetch(CloudState.missing);
 
-      final destination = File(
-        p.join((await getTemporaryDirectory()).path, 'cloud', 'restore.json'),
-      );
-      destination.parent.createSync(recursive: true);
-      if (destination.existsSync()) destination.deleteSync();
+      final contents = await ICloudStorage.readInPlace(
+        containerId: containerId,
+        relativePath: fileName,
+      ).timeout(_fetchTimeout);
 
-      await _download(destination);
-
-      // The wait can end without the file arriving, and an empty read would
-      // reach the format check as "not a Subdock backup", which blames the
-      // user's file for a network that timed out.
-      if (!destination.existsSync() || destination.lengthSync() == 0) {
+      // An empty read would reach the format check as "not a Subdock backup",
+      // which blames the user's file for a download that came back with
+      // nothing.
+      if (contents.isEmpty) {
         return const CloudFetch(
           CloudState.failed,
-          detail: 'the copy did not finish downloading',
+          detail: 'the copy came back empty',
         );
       }
 
       return CloudFetch(
         CloudState.saved,
         copy: CloudCopy(
-          contents: await destination.readAsString(),
+          contents: contents,
           changedAt: match.contentChangeDate,
         ),
       );
-    } on PlatformException catch (error) {
-      if (error.code == PlatformExceptionCode.iCloudConnectionOrPermission) {
-        return const CloudFetch(CloudState.signedOut);
-      }
-      if (error.code == PlatformExceptionCode.fileNotFound) {
-        return const CloudFetch(CloudState.missing);
-      }
+    } on TimeoutException {
+      return const CloudFetch(
+        CloudState.failed,
+        detail: 'the copy did not finish downloading',
+      );
+    } on ICloudItemNotFoundException {
+      // The metadata query saw it and the read did not. A file deleted from
+      // another device between the two calls lands here, and `missing` is the
+      // honest answer: there is nothing to restore.
+      return const CloudFetch(CloudState.missing);
+    } on ICloudContainerAccessException {
+      return const CloudFetch(CloudState.signedOut);
+    } on ICloudOperationException catch (error) {
       return CloudFetch(CloudState.failed, detail: error.message);
     } on Exception catch (error) {
       return CloudFetch(CloudState.failed, detail: '$error');
     }
-  }
-
-  /// Waits for a download the plugin starts but does not wait for.
-  ///
-  /// `download` returns as soon as the request is filed, so the only signal
-  /// that it finished is the progress stream closing. Bounded by
-  /// [_fetchTimeout] and swallowing the timeout on purpose: a file already
-  /// held locally can arrive without the stream ever reporting anything, and
-  /// the caller checks the file itself rather than trusting this.
-  Future<void> _download(File destination) async {
-    final done = Completer<void>();
-
-    await ICloudStorage.download(
-      containerId: containerId,
-      relativePath: fileName,
-      destinationFilePath: destination.path,
-      onProgress: (stream) => stream.listen(
-        (_) {},
-        onDone: () {
-          if (!done.isCompleted) done.complete();
-        },
-        onError: (Object error) {
-          if (!done.isCompleted) done.completeError(error);
-        },
-        cancelOnError: true,
-      ),
-    );
-
-    try {
-      await done.future.timeout(_fetchTimeout);
-    } on TimeoutException {
-      // Deliberately not an error here. See the doc comment.
-    }
-  }
-
-  /// Staged in the temporary directory because the plugin uploads from a path.
-  ///
-  /// A fixed name, overwritten each time, so a phone that backs up every day
-  /// for a year does not leave a year of files in a directory nobody looks at.
-  Future<File> _stage(String contents) async {
-    final directory = Directory(
-      p.join((await getTemporaryDirectory()).path, 'cloud'),
-    );
-    if (!directory.existsSync()) directory.createSync(recursive: true);
-
-    final file = File(p.join(directory.path, fileName));
-    await file.writeAsString(contents);
-    return file;
   }
 }
