@@ -129,6 +129,11 @@ abstract final class ReminderTimelinePresenter {
         .where((a) => a.itemId == item.id && a.reason != AlertReason.nag)
         .length;
 
+    // Nags included here, unlike [myDropped]. The question this one answers is
+    // why *nothing at all* is scheduled, and a nag that did not fit is as much
+    // a reason as a lead rung that did not.
+    final crowdedOut = dropped.any((a) => a.itemId == item.id);
+
     final stops = <TimelineStop>[
       ..._trialStop(item, today),
       ..._markers(item, category, today),
@@ -139,8 +144,11 @@ abstract final class ReminderTimelinePresenter {
 
     return ReminderTimeline(
       stops: stops,
-      silence: _silence(item, mine),
-      droppedForItem: myDropped,
+      silence: _silence(item, mine, crowdedOut),
+      // Zeroed when the silence sentence is already the budget one, or the
+      // footnote says the same thing twice in two shapes: "nothing fits" and
+      // then "N more did not fit".
+      droppedForItem: mine.isEmpty && crowdedOut ? 0 : myDropped,
     );
   }
 
@@ -332,13 +340,23 @@ abstract final class ReminderTimelinePresenter {
 
   /// Said out loud rather than left to an empty block.
   ///
-  /// Three causes, and they are not the same problem: the switch on the
-  /// service list is one tap to undo, an inactive item is not coming back on
-  /// its own, and an empty ladder is a trip to the Reminders screen.
-  static String? _silence(TrackedItem item, List<PlannedAlert> mine) {
+  /// Four causes, and they are not the same problem: the switch on the service
+  /// list is one tap to undo, an inactive item is not coming back on its own,
+  /// a crowded budget fixes itself as the nearer dates pass, and an empty
+  /// ladder is a trip to the Reminders screen.
+  ///
+  /// The budget case used to fall through to the ladder sentence, which told
+  /// the user every rung had passed on an item whose rungs were all still
+  /// ahead of it -- and sent them to a screen where nothing was wrong.
+  static String? _silence(
+    TrackedItem item,
+    List<PlannedAlert> mine,
+    bool crowdedOut,
+  ) {
     if (mine.isNotEmpty) return null;
     if (item.paused) return S.t.timelineSilentPaused;
     if (item.state != ItemState.active) return S.t.timelineSilentClosed;
+    if (crowdedOut) return S.t.timelineSilentBudget(NotificationPlanner.budget);
     return S.t.timelineSilentLadderDone;
   }
 

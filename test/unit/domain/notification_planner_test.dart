@@ -108,13 +108,97 @@ void main() {
     expect(plan.alerts.every((a) => a.date >= today), isTrue);
   });
 
-  test('alerts past the horizon are not scheduled', () {
+  // The whole point of the change that removed the sixty-day ceiling from lead
+  // rungs. A passport eighteen months out used to produce an empty plan, and
+  // the detail screen then told the user every step of its ladder had already
+  // passed -- for a ladder that had not started. Both platforms take a trigger
+  // dated any distance ahead, so the app asks for it now rather than promising
+  // to ask later.
+  test('a rung far past the horizon is still scheduled', () {
     final plan = NotificationPlanner.plan(
       [item('far', CategoryBook.shipped['DOCUMENTS'], expiresOn: '2027-06-01')],
       CategoryBook.shipped,
       now,
     );
-    expect(plan.alerts, isEmpty, reason: 'nothing within 60 days');
+
+    final leads =
+        plan.alerts
+            .where((a) => a.reason == AlertReason.lead)
+            .map((a) => a.date)
+            .toList()
+          ..sort();
+
+    // DOCUMENTS ships `leadDays: [30, 7]`, both of them roughly ten months out.
+    expect(leads, [d('2027-05-02'), d('2027-05-25')]);
+  });
+
+  // A nag has no last step -- it repeats for as long as the thing stays
+  // undone -- so it is the one kind that still needs a ceiling. Countable
+  // alerts do not, and mixing the two jobs into one constant is what put the
+  // ceiling on the rungs.
+  test('a nag is still bounded by the horizon', () {
+    final plan = NotificationPlanner.plan(
+      [
+        item(
+          'bill',
+          CategoryBook.shipped['UTILITIES'],
+          expiresOn: '2026-08-14',
+          leadDays: const [],
+          nag: NagPolicy.daily,
+        ),
+      ],
+      CategoryBook.shipped,
+      now,
+      budget: 1000,
+    );
+
+    final nags =
+        plan.alerts
+            .where((a) => a.reason == AlertReason.nag)
+            .map((a) => a.date)
+            .toList()
+          ..sort();
+
+    // Daily from the day after the deadline to the horizon, both ends
+    // included. The budget is raised well above it here so the ceiling under
+    // test is the horizon and not the fifty slots.
+    expect(nags.first, d('2026-08-15'));
+    expect(nags.last, today.plusDays(NotificationPlanner.horizonDays));
+    expect(nags.length, NotificationPlanner.horizonDays + 1);
+  });
+
+  // One overdue item nagging daily generates sixty near dates. Sorted by date
+  // alone it took every slot and the rest of the list went silent, with
+  // nothing on any screen saying so. Round zero is one alert per item, so a
+  // list of fewer items than the budget can never have an item hear nothing.
+  test('every item gets a slot before any item gets a second', () {
+    final noisy = item(
+      'overdue',
+      CategoryBook.shipped['UTILITIES'],
+      expiresOn: '2026-08-14',
+      leadDays: const [],
+      nag: NagPolicy.daily,
+    );
+    final quiet = [
+      for (var i = 0; i < 20; i++)
+        item(
+          'q$i',
+          CategoryBook.shipped['STREAMING'],
+          expiresOn: '2026-09-${(i + 1).toString().padLeft(2, '0')}',
+          leadDays: const [3],
+          nag: NagPolicy.none,
+        ),
+    ];
+
+    final plan = NotificationPlanner.plan(
+      [noisy, ...quiet],
+      CategoryBook.shipped,
+      now,
+    );
+
+    for (final q in quiet) {
+      expect(plan.alerts.any((a) => a.itemId == q.id), isTrue, reason: q.id);
+    }
   });
 
   test('archived items are skipped', () {

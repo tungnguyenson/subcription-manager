@@ -562,6 +562,10 @@ class EnStrings implements Strings {
       'No reminders are scheduled. Every step of the ladder for this item has '
       'already passed.';
   @override
+  String timelineSilentBudget(int budget) =>
+      'Nothing is scheduled for this item yet: all $budget slots the app can '
+      'hold are taken by sooner reminders. It gets one as those pass.';
+  @override
   String timelineDropped(int count, int budget) =>
       '$count further ${count == 1 ? 'reminder' : 'reminders'} for this item '
       'did not fit the $budget slots the app schedules, and will be picked up '

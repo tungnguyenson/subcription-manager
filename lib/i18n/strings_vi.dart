@@ -539,6 +539,10 @@ class ViStrings implements Strings {
   String get timelineSilentLadderDone =>
       'Không còn nhắc hạn nào. Mọi nấc của thang nhắc cho mục này đều đã qua.';
   @override
+  String timelineSilentBudget(int budget) =>
+      'Mục này chưa được đặt nhắc hạn nào: cả $budget suất app giữ được đều '
+      'đang dành cho những mốc gần hơn. Nó sẽ có suất khi các mốc đó trôi qua.';
+  @override
   String timelineDropped(int count, int budget) =>
       '$count nhắc hạn nữa của mục này không lọt vào $budget suất app đặt '
       'được, và sẽ được nhặt lại khi các mốc gần trôi qua.';

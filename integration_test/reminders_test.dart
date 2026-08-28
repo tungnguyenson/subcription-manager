@@ -148,6 +148,26 @@ void main() {
     expect(await leadsOf('vps'), [7, 3, 1]);
   });
 
+  /// The value on the detail screen's `Remind me` row.
+  ///
+  /// Scoped to that row rather than matched on the text alone. The timeline
+  /// block on the same screen labels a lead alert with the same words, so a
+  /// bare `find.text('3 days before')` reads whichever the app happens to be
+  /// drawing -- and passes or fails on the reminder horizon rather than on
+  /// anything this test is about.
+  String remindRow(WidgetTester tester) => tester
+      .widgetList<Text>(
+        find.descendant(
+          of: find
+              .ancestor(of: find.text('Remind me'), matching: find.byType(Row))
+              .last,
+          matching: find.byType(Text),
+        ),
+      )
+      .map((t) => t.data)
+      .whereType<String>()
+      .firstWhere((t) => t != 'Remind me');
+
   // The other end of the same freeze. The detail screen is the route this one
   // was pushed from, and it was handed its own snapshot -- so coming back from
   // a change made here left it reporting the ladder as it stood before.
@@ -157,7 +177,7 @@ void main() {
 
     await tester.tap(find.text('OVH VPS'));
     await tester.pumpAndSettle();
-    expect(find.text('3 days before'), findsOneWidget, reason: 'Remind me row');
+    expect(remindRow(tester), '3 days before');
 
     await tapPastTabBar(tester, find.text('Edit reminders'));
     await tester.tap(
@@ -177,7 +197,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // The soonest rung is the one the row names, and 7 is now sooner than 3.
-    expect(find.text('7 days before'), findsOneWidget);
-    expect(find.text('3 days before'), findsNothing);
+    expect(remindRow(tester), '7 days before');
   });
 }

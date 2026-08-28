@@ -22,6 +22,7 @@ void main() {
 
   TrackedItem item({
     required String expiresOn,
+    String id = 'i1',
     Category? category,
     List<int> leadDays = const [3, 1],
     NagPolicy nag = NagPolicy.none,
@@ -36,7 +37,7 @@ void main() {
   }) {
     final shelf = category ?? streaming;
     return TrackedItem(
-      id: 'i1',
+      id: id,
       name: 'Netflix',
       categoryId: shelf.id,
       expiresOn: d(expiresOn),
@@ -281,6 +282,50 @@ void main() {
 
     test('nothing is said while any reminder is still coming', () {
       expect(build(item(expiresOn: '2026-08-28')).silence, isNull);
+    });
+
+    // A date far enough out that the planner used to skip it entirely. It now
+    // schedules the rung, so this block carries a reminder row and has nothing
+    // to explain -- which is the whole fix. Saying `already passed` about a
+    // ladder that had not started was the worst thing this footnote could say.
+    test('a date a year and a half out still shows its reminder', () {
+      final timeline = build(item(expiresOn: '2028-02-01'));
+
+      expect(
+        timeline.stops.where((s) => s.kind == TimelineKind.lead),
+        isNotEmpty,
+      );
+      expect(timeline.silence, isNull);
+    });
+
+    // Crowded out rather than finished. Told apart because the fixes differ:
+    // this one comes right on its own as the nearer dates pass, while a spent
+    // ladder is a trip to the Reminders screen.
+    test('an item the budget could not fit says so, not that it is done', () {
+      final mine = item(expiresOn: '2026-09-30');
+      final hogs = [
+        for (var i = 0; i < 3; i++)
+          item(id: 'hog$i', expiresOn: '2026-08-31', leadDays: const [3]),
+      ];
+
+      final plan = NotificationPlanner.plan(
+        [...hogs, mine],
+        CategoryBook.shipped,
+        now,
+        budget: 3,
+      );
+      final timeline = ReminderTimelinePresenter.of(
+        item: mine,
+        category: streaming,
+        alerts: plan.alerts,
+        dropped: plan.dropped,
+        today: today,
+      );
+
+      expect(timeline.silence, contains('slots'));
+      expect(timeline.silence, isNot(contains('already passed')));
+      // One sentence, not the budget line twice in two shapes.
+      expect(timeline.note, timeline.silence);
     });
   });
 

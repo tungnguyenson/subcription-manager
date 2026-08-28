@@ -45,6 +45,14 @@ abstract class TimelineStrings {
   String get timelineSilentClosed;
   String get timelineSilentLadderDone;
 
+  /// Nothing scheduled because every slot is spent on something sooner.
+  ///
+  /// Distinct from [timelineSilentLadderDone] on purpose: one says the ladder
+  /// is over, the other says it has not been reached yet. Telling a user the
+  /// first when the second is true sends them to the Reminders screen to fix a
+  /// ladder that is not broken.
+  String timelineSilentBudget(int budget);
+
   /// What the budget could not fit. Nag rows are deliberately not counted:
   /// an overdue item with a daily nag overflows the budget on its own, and
   /// the planner picks those up again as the nearer alerts pass.

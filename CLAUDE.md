@@ -107,7 +107,7 @@ for f in integration_test/*_test.dart; do flutter test "$f" -d <device-id>; done
 Mất khoảng bốn phút mỗi file trên máy ảo, nên đừng chạy sau từng lần sửa nhỏ. Nhưng
 phải chạy trước khi tin rằng một thay đổi về điều hướng hay bố cục đã xong.
 
-## Năm mươi chín cái bẫy đã vấp, đừng vấp lại
+## Sáu mươi cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -1478,6 +1478,45 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
 
     Luật rút ra: **màn hình nào đã push mà hiển thị hoặc sửa dữ liệu sống thì phải đi qua
     `_liveItem`**, không được nhận một `TrackedItem` dựng sẵn.
+
+60. **Chân trời 60 ngày chỉ chặn nag, không chặn nấc thang. Và ngân sách 50 chia theo
+    vòng, mỗi mục một suất trước khi mục nào có suất thứ hai.** Trước đây
+    `NotificationPlanner.horizonDays` chặn tất: `_alertsFor` lọc mọi loại alert bằng
+    `isBetween(earliest, horizon)`, nên một hộ chiếu hết hạn sau mười tám tháng sinh ra
+    một plan rỗng. Màn Detail đọc plan rỗng đó và in `Every step of the ladder for this
+    item has already passed`, cho một cái thang chưa hề bắt đầu, kèm lời mời sang màn
+    Reminders sửa một thứ không hỏng.
+
+    **Chân trời làm hai việc, và chỉ một việc là chính đáng.** Nag là bộ sinh vô hạn: một
+    alert mỗi bước, mãi mãi, chừng nào việc chưa xong. Phải có chỗ dừng, và đó là chân
+    trời. Lead, snooze và verify thì **đếm được**: bao nhiêu nấc thì bấy nhiêu alert, một
+    snooze, một verify. Chúng bị chặn theo số mục, nên ngân sách 50 đã là thứ duy nhất
+    cần chia phần. Đem chân trời chặn cả nhóm đếm được là đổi một cái đếm được lấy một
+    màn hình hứa nhắc hạn mà không hề đặt.
+
+    Không có lý do nền tảng nào để giữ lại. iOS lẫn Android đều nhận trigger cách bao xa
+    cũng được, và Android đăng ký lại sau khi khởi động máy qua
+    `ScheduledNotificationBootReceiver` đã khai trong manifest. Nên nấc năm trăm ngày
+    được đặt ngay bây giờ, thay vì hẹn sẽ đặt khi người dùng tình cờ mở app trong một cửa
+    sổ 60 ngày ở năm sau.
+
+    **Việc chia ngân sách đổi từ sắp theo ngày sang chia vòng, và đó là điều kiện để lời
+    hứa trên là thật.** `_ranking` sắp toàn bộ theo ngày, mà một mục quá hạn có nag hằng
+    ngày sinh ra sáu mươi cái ngày gần nhất. Nó chiếm sạch năm mươi suất và **mọi mục
+    khác trong danh sách im hoàn toàn**, không màn nào nói ra. `_ordered` giờ đi theo
+    vòng: vòng 0 lấy alert sớm nhất của từng mục, vòng 1 lấy cái thứ hai, và trong một
+    vòng vẫn sắp theo ngày. Danh sách ít mục hơn ngân sách thì không mục nào bị bỏ đói.
+
+    Thứ tự vòng là thứ tự `items` đi vào, tức là thứ tự của người gọi và ổn định giữa hai
+    lần lập lịch. Điều đó cần thiết ở mép ngân sách, đúng lý do mà `_ranking` có mệnh đề
+    so `identifier` ở cuối.
+
+    **`_silence` có nhánh thứ tư, và phải có.** Bị ngân sách cắt khác hẳn với thang đã
+    chạy hết: cái thứ nhất tự hết khi các mốc gần trôi qua, cái thứ hai là một chuyến đi
+    sang màn Reminders. Gộp lại là nói với người dùng rằng thang đã qua trong khi mọi nấc
+    còn ở phía trước. Khi nhánh này bắn thì `droppedForItem` đặt về 0, không thì footnote
+    nói cùng một chuyện hai lần bằng hai giọng: "không có suất nào" rồi "còn N cái nữa
+    không lọt".
 
 ## Viết tài liệu
 

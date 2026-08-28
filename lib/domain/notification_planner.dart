@@ -113,8 +113,25 @@ abstract final class NotificationPlanner {
   /// Applied on Android too -- see the note on this class.
   static const int budget = 50;
 
-  /// Alerts further out than this are not scheduled; a later re-plan picks
-  /// them up.
+  /// How far ahead a nag is enumerated, and nothing else.
+  ///
+  /// It used to bound every alert, and that was one job too many. A lead rung,
+  /// a snooze and a verify are *countable*: an item has as many lead alerts as
+  /// it has rungs, one snooze and one verify, so the whole list is bounded by
+  /// the items themselves and the [budget] is the only rationing needed. A nag
+  /// is not countable -- it is one alert per step for as long as the thing
+  /// stays undone, forever -- so something has to say where to stop, and this
+  /// is it.
+  ///
+  /// Bounding the countable ones too is what made a passport eighteen months
+  /// out show `What happens next` with the deadline on it and no reminder,
+  /// under a footnote saying every step of its ladder had already passed. Both
+  /// halves were wrong: the ladder had not started, and the app was not going
+  /// to be reminded of it by anything other than the user opening the app
+  /// inside a sixty-day window five hundred days from now. Both iOS and
+  /// Android take a trigger dated any distance ahead, and Android re-registers
+  /// them after a reboot through `ScheduledNotificationBootReceiver`, so there
+  /// was never a platform reason to hold one back.
   static const int horizonDays = 60;
 
   /// [now] is the clock, not just the calendar day.
@@ -135,28 +152,58 @@ abstract final class NotificationPlanner {
   }) {
     final horizon = now.date.plusDays(horizonDays);
 
-    final candidates = <PlannedAlert>[
+    // Grouped by item rather than poured into one list, because the budget is
+    // shared out a round at a time -- see [_ordered].
+    final byItem = <List<PlannedAlert>>[
       for (final item in items)
         // `isLive` and not a bare state check: an item the user switched off
         // on the service list is still ACTIVE, and the whole promise of that
         // switch is that it stops sending reminders. One predicate for the
         // list and the planner, so they can never disagree about it.
         if (item.isLive && item.state == ItemState.active)
-          ..._alertsFor(item, categories[item.categoryId], now, horizon),
-    ]..sort(_ranking);
+          _alertsFor(item, categories[item.categoryId], now, horizon)
+            ..sort(_ranking),
+    ];
+
+    final ordered = _ordered(byItem);
 
     return NotificationPlan(
-      alerts: List.unmodifiable(candidates.take(budget)),
-      dropped: List.unmodifiable(candidates.skip(budget)),
+      alerts: List.unmodifiable(ordered.take(budget)),
+      dropped: List.unmodifiable(ordered.skip(budget)),
     );
   }
 
-  /// Soonest first.
+  /// Every item heard from once before any item is heard from twice.
   ///
-  /// There is no severity axis to rank by any more, so the budget is spent on
-  /// what happens next. That is the honest allocation once every item is equal:
-  /// the alerts that get dropped are the ones furthest out, and a later re-plan
-  /// picks them up once they come inside the horizon.
+  /// Round 0 is each item's soonest alert, round 1 each item's second, and so
+  /// on; inside a round it is still soonest first. Sorting the whole pile by
+  /// date instead -- which is what this did -- hands the budget to whichever
+  /// item happens to generate the densest run of near dates, and one overdue
+  /// item nagging daily generates sixty of them. It took all fifty slots and
+  /// every other item on the list went silent, with nothing on any screen
+  /// saying so.
+  ///
+  /// Round order is the order [items] came in, which is the caller's order and
+  /// therefore stable across re-plans. That matters at the budget edge for the
+  /// same reason the identifier tiebreaker in [_ranking] does.
+  static List<PlannedAlert> _ordered(List<List<PlannedAlert>> byItem) {
+    final out = <PlannedAlert>[];
+    final deepest = byItem.fold(0, (n, l) => l.length > n ? l.length : n);
+
+    for (var round = 0; round < deepest; round++) {
+      final take = [
+        for (final alerts in byItem)
+          if (round < alerts.length) alerts[round],
+      ]..sort(_ranking);
+      out.addAll(take);
+    }
+    return out;
+  }
+
+  /// Soonest first, within one item and within one round of [_ordered].
+  ///
+  /// There is no severity ranking to apply any more, so what is left is what
+  /// happens next. That is the honest allocation once every item is equal.
   ///
   /// The identifier tiebreaker at the end is not cosmetic. Dart's [List.sort]
   /// is not guaranteed stable, so a comparator that returns 0 for two distinct
@@ -200,11 +247,15 @@ abstract final class NotificationPlanner {
 
     for (final lead in item.leadDays) {
       final fireOn = actBy.minusDays(lead);
-      // Range check rather than a clamp: a lead rung names a specific day
-      // relative to the deadline. Once today's has passed it is gone, and
-      // moving it to tomorrow would tell the user "3 days before" on the day
-      // that is two days before.
-      if (fireOn.isBetween(earliest, horizon)) {
+      // Floor rather than a clamp: a lead rung names a specific day relative
+      // to the deadline. Once today's has passed it is gone, and moving it to
+      // tomorrow would tell the user "3 days before" on the day that is two
+      // days before.
+      //
+      // No ceiling. A rung five hundred days out is scheduled five hundred
+      // days out, because the alternative is a screen that promises a reminder
+      // it has not asked the system for. See [horizonDays].
+      if (fireOn >= earliest) {
         out.add(
           _alert(item, category, fireOn, lead, AlertReason.lead, note: note),
         );
@@ -214,13 +265,13 @@ abstract final class NotificationPlanner {
     // A snooze is what the user asked for by name, so it is scheduled even
     // when the ladder for this item is empty.
     final snoozed = item.snoozedUntil;
-    if (snoozed != null && snoozed.isBetween(earliest, horizon)) {
+    if (snoozed != null && snoozed >= earliest) {
       out.add(_alert(item, category, snoozed, 0, AlertReason.snoozed));
     }
 
     out.addAll(_nagAlerts(item, category, actBy, earliest, horizon));
 
-    final verify = _verifyAlert(item, category, earliest, horizon);
+    final verify = _verifyAlert(item, category, earliest);
     if (verify != null) out.add(verify);
 
     return out;
@@ -266,7 +317,6 @@ abstract final class NotificationPlanner {
     TrackedItem item,
     Category category,
     LocalDate earliest,
-    LocalDate horizon,
   ) {
     final every = item.verifyEveryDays;
     if (every == null) return null;
@@ -276,9 +326,7 @@ abstract final class NotificationPlanner {
     // Clamped for the same reason as a nag: a prompt to re-check a date keeps
     // being worth sending, so a missed one moves rather than disappears.
     final fireOn = LocalDate.max(due, earliest);
-    return fireOn <= horizon
-        ? _alert(item, category, fireOn, 0, AlertReason.verify)
-        : null;
+    return _alert(item, category, fireOn, 0, AlertReason.verify);
   }
 
   static PlannedAlert _alert(
