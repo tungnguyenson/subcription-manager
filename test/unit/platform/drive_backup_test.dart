@@ -24,8 +24,10 @@ class _RealTokens extends DriveBackup {
 class _TestDrive extends DriveBackup {
   _TestDrive(http.Client client) : super(client: client);
 
-  /// The real getter is false without a build-time client id, which would
-  /// short-circuit every method below before it reached the network.
+  /// Pinned rather than inherited so that these stay about the requests. The
+  /// real getter follows the client id, and a run that blanked it with
+  /// `--dart-define` would short-circuit every method below before it reached
+  /// the network.
   @override
   bool get isSupported => true;
 
@@ -36,6 +38,23 @@ class _TestDrive extends DriveBackup {
   Future<Map<String, String>?> authHeaders() async => headers;
 }
 
+/// Counts the calls into the plugin, and fails the first one.
+class _CountingStart extends _TestDrive {
+  _CountingStart(super.client);
+
+  int starts = 0;
+  bool fail = true;
+
+  @override
+  Future<void> initializePlugin() async {
+    starts++;
+    if (fail) {
+      fail = false;
+      throw StateError('play services busy');
+    }
+  }
+}
+
 void main() {
   /// Every request the fake saw, in order.
   late List<http.Request> seen;
@@ -44,13 +63,16 @@ void main() {
   /// else with [reply].
   MockClient serving({
     List<Map<String, Object?>> files = const [],
+    int listStatus = 200,
     http.Response Function(http.Request)? reply,
   }) => MockClient((request) async {
     seen.add(request);
     final isList =
         request.method == 'GET' && !request.url.path.contains('/upload/');
     if (isList && !request.url.queryParameters.containsKey('alt')) {
-      return http.Response(jsonEncode({'files': files}), 200);
+      return listStatus == 200
+          ? http.Response(jsonEncode({'files': files}), 200)
+          : http.Response('{}', listStatus);
     }
     return reply?.call(request) ?? http.Response('{}', 200);
   });
@@ -60,6 +82,106 @@ void main() {
   http.Request? requestTo(String method, String fragment) => seen
       .where((r) => r.method == method && r.url.toString().contains(fragment))
       .firstOrNull;
+
+  group('the shipped client id', () {
+    /// The id lives in the source, so a plain `flutter run` offers the Drive
+    /// row. It used to arrive by `--dart-define`, which meant every command
+    /// that forgot the flag dropped the row with nothing said about it.
+    ///
+    /// This test runs with no dart-defines at all, which is exactly the case
+    /// that used to be broken.
+    test('a build with no dart-define still offers the row', () {
+      expect(DriveBackup.serverClientId, isNotEmpty);
+    });
+
+    /// A truncated or mistyped id passes [DriveBackup.isSupported] and then
+    /// fails on a real phone as `clientConfigurationError`, which the docs
+    /// call the hardest failure here to reproduce at a desk. Shape is all a
+    /// test can check without a Google account, and shape is what an edit
+    /// during a project rotation gets wrong.
+    test('the shipped id has the shape Google issues', () {
+      expect(
+        DriveBackup.serverClientId,
+        matches(
+          RegExp(r'^\d{6,}-[a-z0-9]{20,}\.apps\.googleusercontent\.com$'),
+        ),
+      );
+    });
+  });
+
+  group('the lookup that runs before every request', () {
+    /// The lookup throws its own exception type, and for a long time nothing
+    /// caught it: it fell through to the catch-all that prints the error, and
+    /// `_HttpProblem` has no `toString`. So a user who had removed this app in
+    /// their Drive settings was told `Instance of '_HttpProblem'` instead of
+    /// being offered the one tap that fixes it.
+    ///
+    /// Both verbs run the same lookup first, so both are on trial here.
+    test('a revoked authorization is an account to reconnect, not a bug', () {
+      for (final status in [401, 403]) {
+        expect(
+          _TestDrive(serving(listStatus: status)).save('{}'),
+          completion(
+            isA<CloudResult>().having(
+              (r) => r.state,
+              'state',
+              CloudState.signedOut,
+            ),
+          ),
+          reason: 'save, $status',
+        );
+        expect(
+          _TestDrive(serving(listStatus: status)).latest(),
+          completion(
+            isA<CloudFetch>().having(
+              (f) => f.state,
+              'state',
+              CloudState.signedOut,
+            ),
+          ),
+          reason: 'restore, $status',
+        );
+      }
+    });
+
+    /// Anything else really is a failure, but it still has to name the status
+    /// rather than leak the exception's class name. `app.dart` prints this
+    /// string to the user on a failed restore.
+    test('any other answer names the status rather than the class', () async {
+      final saved = await _TestDrive(serving(listStatus: 500)).save('{}');
+      final read = await _TestDrive(serving(listStatus: 500)).latest();
+
+      expect(saved.state, CloudState.failed);
+      expect(saved.detail, 'Drive answered 500');
+      expect(read.state, CloudState.failed);
+      expect(read.detail, 'Drive answered 500');
+    });
+  });
+
+  group('starting the plugin', () {
+    /// A rejected future is not null, so memoizing one with a bare `??=` hands
+    /// the same failure to every later call. The user taps Connect, it fails,
+    /// and the button is dead until the app is force-quit.
+    test('a failed start is not remembered as the answer', () async {
+      final drive = _CountingStart(serving());
+
+      await expectLater(drive.start(), throwsA(isA<StateError>()));
+      await drive.start();
+
+      expect(drive.starts, 2);
+    });
+
+    /// The other half of the same memo: a start that worked is not repeated,
+    /// which is what makes it a memo at all.
+    test('a start that worked is not repeated', () async {
+      final drive = _CountingStart(serving())..fail = false;
+
+      await drive.start();
+      await drive.start();
+
+      expect(drive.starts, 1);
+    });
+  });
 
   // The reason this whole class remembers the account itself. The plugin's
   // "lightweight" sign-in makes a second call on Android whenever the first

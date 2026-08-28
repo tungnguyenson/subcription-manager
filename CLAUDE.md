@@ -1169,10 +1169,21 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
     `test/unit/platform/drive_backup_test.dart`, và nó kiểm bằng cách khẳng định **không
     một request nào rời khỏi app**.
 
-    **`DriveBackup.isSupported` đọc `--dart-define=GOOGLE_SERVER_CLIENT_ID`.** Không có
-    thì hàng Google Drive không hiện và app chạy y như cũ. Đó là chủ ý: một checkout
-    không có dự án Google đứng sau vẫn build và vẫn chạy được, thay vì mọc ra một hàng
-    mở màn đăng nhập rồi chết bằng một lỗi cấu hình người dùng không sửa được.
+    **Client id nằm thẳng trong `drive_backup.dart`, và `--dart-define` giờ chỉ để tắt
+    đi.** Chuỗi đó không phải bí mật: nó đi trong mọi bản app đã phát hành và ai cũng
+    đọc ra được, nên giấu nó sau một cờ dòng lệnh chỉ đổi lấy việc mỗi lần
+    `flutter run` thiếu cờ là hàng Google Drive lặng lẽ biến mất. Thứ phải giữ kín là
+    client secret đứng cạnh nó trong Console, chuỗi bắt đầu bằng `GOCSPX`; app này
+    không dùng tới nó và nó không được xuất hiện ở đâu trong repo.
+
+    Đường tắt vẫn còn và vẫn cần: `--dart-define=GOOGLE_SERVER_CLIENT_ID=` để rỗng thì
+    `isSupported` trả `false`, hàng Google Drive không hiện, và app chạy y như cũ. Đó
+    là cho một checkout có dự án Google khác đứng sau, hoặc không có dự án nào.
+
+    Nó là đường tắt chứ không phải tấm lưới. OAuth client kiểu Android khớp theo dấu
+    vân tay SHA-1, nên một bản fork build bằng chính id này sẽ thấy hàng Drive và nó
+    chết ở `clientConfigurationError` cho tới khi dấu vân tay của họ được khai. Xem
+    `docs/backup-and-sync.md` mục 6.2bis.
 
     **Scope phải giữ nguyên là `drive.appdata`.** Nó thuộc nhóm non-sensitive, nên không
     phải nộp duyệt, không có đánh giá an ninh hằng năm, và không có màn hình "Google
@@ -1190,6 +1201,26 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
     bắt buộc có `spaces=appDataFolder`; thiếu nó là Drive đi tìm trong My Drive, chỗ app
     này không có quyền và cũng không có việc gì phải tìm. Chốt chặn là
     `test/unit/platform/drive_backup_test.dart`, chạy được không cần tài khoản nào.
+
+    **Phép tra tên tệp chạy trước cả `save` lẫn `latest`, và lỗi của nó phải được bắt
+    riêng.** `_find` ném `_HttpProblem`, mà `_HttpProblem` không có `toString`, nên
+    thiếu mệnh đề `on _HttpProblem` là nó rơi xuống `on Exception` và người dùng đọc
+    được đúng chữ `Instance of '_HttpProblem'`. Đường khôi phục in ra to nhất, vì
+    `app.dart` lấy thẳng `fetch.detail` đặt vào câu báo lỗi.
+
+    Mất mát không chỉ là một câu xấu. `toResult` và `toFetch` sinh ra để dịch 401 và
+    403 thành `signedOut`, tức là một cú bấm kết nối lại. Không bắt thì người vừa gỡ
+    Subdock trong phần ứng dụng đã kết nối của Drive nhận về một lời báo lỗi, đúng cái
+    mà doc comment của chính `_HttpProblem` gọi là một lời nói dối khoác áo lỗi kỹ
+    thuật. Test cũ không thấy vì `serving()` luôn trả 200 cho phép tra; mã lỗi chỉ được
+    tiêm vào lượt tải lên.
+
+    **`start()` phải quên đi một lần khởi tạo đã hỏng.** Một `Future` bị reject vẫn
+    khác `null`, nên `_started ??= initializePlugin()` trơn giữ luôn cái hỏng đó: bấm
+    Connect lỗi một lần là mọi `connect`, `save`, `latest` sau đó await lại đúng nó và
+    ném lại đúng lỗi đó, cho tới khi tắt hẳn app. Play Services bận một nhịp là đủ để
+    tới đó. Vì vậy `_startOnce` xoá `_started` trong `catch` rồi mới `rethrow`, và
+    `initializePlugin` tách ra thành một hàm riêng để test làm nó hỏng được.
 
     Thêm `google_sign_in` **không** kéo CocoaPods quay lại: `google_sign_in_ios` có
     `Package.swift`. Bẫy 48 vẫn nguyên vẹn, đã kiểm bằng `flutter build ios`.

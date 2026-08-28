@@ -271,19 +271,29 @@ Bước 4 không bỏ được. Đây đúng là loại lỗi không tự báo, 
 
 ## 5bis. Sao lưu lên Google Drive, chỉ Android
 
-Hàng **Google Drive** trong Settings chỉ hiện khi bản build có client id của Google.
-Không có nó thì `DriveBackup.isSupported` trả `false`, hàng đó biến mất, và app chạy y
-như trước. Đó là chủ ý, để một checkout không có dự án Google đứng sau vẫn build được.
+Hàng **Google Drive** trong Settings hiện sẵn, không cần truyền gì thêm:
 
 ```bash
-flutter run -d <android-device> \
-  --dart-define=GOOGLE_SERVER_CLIENT_ID=<web-client-id>
+flutter run -d <android-device>
 ```
 
-`<web-client-id>` là client id của **OAuth client kiểu Web**, không phải kiểu Android.
-Bốn bước dựng nó nằm ở `docs/backup-and-sync.md` mục 6.2bis, kèm cái bẫy SHA-1 của Play
-App Signing: khai thiếu dấu vân tay đó thì đăng nhập chạy ngon lúc tự thử và hỏng với
-mọi người tải từ Store.
+Client id nằm trong `lib/platform/drive_backup.dart`. Nó là client id của **OAuth
+client kiểu Web**, không phải kiểu Android, và nó không phải bí mật: mọi bản app đã
+phát hành đều mang nó và ai cũng đọc ra được. Thứ phải giữ kín là client secret đứng
+cạnh nó trong Console, chuỗi bắt đầu bằng `GOCSPX`, và app này không dùng tới nó.
+
+Muốn tắt hẳn kênh này thì truyền một chuỗi rỗng:
+
+```bash
+flutter run -d <android-device> --dart-define=GOOGLE_SERVER_CLIENT_ID=
+```
+
+Lúc đó `DriveBackup.isSupported` trả `false`, hàng Google Drive biến mất, và app chạy
+y như trước. Đó là đường cho một checkout có dự án Google khác đứng sau.
+
+Bốn bước dựng client id nằm ở `docs/backup-and-sync.md` mục 6.2bis, kèm cái bẫy SHA-1
+của Play App Signing: khai thiếu dấu vân tay đó thì đăng nhập chạy ngon lúc tự thử và
+hỏng với mọi người tải từ Store.
 
 Lỗi cấu hình hiện ra dưới dạng một thông báo bắt đầu bằng `Không kết nối được tài
 khoản`, kèm nguyên văn phần mô tả Google trả về. Đừng nuốt phần mô tả đó đi, nó là manh

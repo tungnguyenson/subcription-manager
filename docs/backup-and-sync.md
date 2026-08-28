@@ -302,16 +302,17 @@ tức là tài khoản Apple của họ; Drive App Data là đúng chuyện đó
 
 ### 6.2bis Cấu hình phải làm bên Google Cloud Console
 
-Không làm phần này thì `DriveBackup.isSupported` trả `false`, hàng Google Drive không
-hiện ra, và app chạy y như trước. Đó là chủ ý: một checkout không có dự án Google đứng
-sau vẫn build được và vẫn chạy được.
+Repo này đã có sẵn một dự án Google đứng sau, nên phần dưới đây là để dựng lại từ đầu,
+hoặc để trỏ app sang một dự án khác. Không có dự án nào thì truyền
+`--dart-define=GOOGLE_SERVER_CLIENT_ID=` để rỗng: `DriveBackup.isSupported` trả `false`,
+hàng Google Drive không hiện ra, và app chạy y như trước.
 
 1. Tạo một dự án trên Google Cloud Console, bật **Google Drive API**.
 2. Dựng màn hình đồng ý (OAuth consent screen), thêm scope
    `https://www.googleapis.com/auth/drive.appdata`, rồi **chuyển trạng thái sang
    Production**. Để ở Testing thì trần cứng 100 tài khoản, bất kể scope loại gì.
-3. Tạo một **OAuth client kiểu Web**. Chuỗi client id của nó là giá trị truyền vào
-   `--dart-define=GOOGLE_SERVER_CLIENT_ID=...`. Của dự án này là:
+3. Tạo một **OAuth client kiểu Web**. Chuỗi client id của nó là giá trị nằm ở
+   `_serverClientId` trong `lib/platform/drive_backup.dart`. Của dự án này là:
 
    ```
    1014667804289-k3atk3dlklg5fbioc1p1h9urp6koavsm.apps.googleusercontent.com
@@ -332,12 +333,21 @@ sau vẫn build được và vẫn chạy được.
    người tải từ Store**, mà không tái hiện được ở nhà. Lấy chuỗi đó trong Play Console,
    mục Setup rồi App integrity.
 
-Chạy thử:
+Chạy thử, không cần truyền gì thêm vì id đã nằm trong code:
+
+```bash
+flutter run -d <android-device>
+```
+
+Trỏ sang một dự án khác mà không sửa code thì truyền đè:
 
 ```bash
 flutter run -d <android-device> \
-  --dart-define=GOOGLE_SERVER_CLIENT_ID=1014667804289-k3atk3dlklg5fbioc1p1h9urp6koavsm.apps.googleusercontent.com
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=<web-client-id-cua-ban>
 ```
+
+Nhưng đó chỉ hợp cho một lần thử. Sửa hẳn `_serverClientId` mới là chỗ nó thuộc về, vì
+mọi lệnh `flutter run` và `flutter build` khác đều sẽ quay về id trong code.
 
 Lỗi cấu hình quay về dưới dạng `GoogleSignInException` mã `clientConfigurationError`, và
 `DriveBackup._fromSignIn` **giữ nguyên phần mô tả** thay vì nuốt đi, đúng vì lý do ở

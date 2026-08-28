@@ -41,16 +41,29 @@ class DriveBackup extends CloudBackup {
   /// user pays for to hold versions no screen in the app can offer them.
   static const String fileName = 'subdock-latest.json';
 
-  /// The OAuth client the Android sign-in identifies itself with, supplied at
-  /// build time by `--dart-define=GOOGLE_SERVER_CLIENT_ID=...`.
+  /// The OAuth client the Android sign-in identifies itself with.
   ///
-  /// Not a secret, and not hardcoded either. A build without it is a build
-  /// where this whole channel reports [isSupported] false, so a checkout with
-  /// no Google project behind it still compiles, still runs, and simply does
-  /// not offer the row. That is better than a row that opens a sign-in sheet
-  /// and fails with a configuration error the user cannot act on.
-  static const String _serverClientId = String.fromEnvironment(
+  /// Not a secret. It ships inside every released build and anyone can read it
+  /// back out, which is why it sits here in the clear. The secret that stands
+  /// beside it in the Console, the string starting `GOCSPX`, is not used by
+  /// this app and must never appear in the repo.
+  ///
+  /// Still overridable, and the override is what keeps [isSupported] honest.
+  /// Passing `--dart-define=GOOGLE_SERVER_CLIENT_ID=` blanks it, and a blank
+  /// value turns this whole channel off: no Drive row, no sign-in sheet, and a
+  /// build that otherwise runs exactly as before. That is the escape hatch for
+  /// a checkout with a different Google project behind it, or none at all.
+  ///
+  /// It is only an escape hatch, not a safety net. The Android OAuth client is
+  /// matched by SHA-1 fingerprint, so a fork building with this id gets a Drive
+  /// row that fails at `clientConfigurationError` until its own fingerprints
+  /// are registered. See `docs/backup-and-sync.md` section 6.2bis.
+  @visibleForTesting
+  static const String serverClientId = String.fromEnvironment(
     'GOOGLE_SERVER_CLIENT_ID',
+    defaultValue:
+        '1014667804289-k3atk3dlklg5fbioc1p1h9urp6koavsm'
+        '.apps.googleusercontent.com',
   );
 
   final http.Client _client;
@@ -67,7 +80,7 @@ class DriveBackup extends CloudBackup {
   Future<void>? _started;
 
   @override
-  bool get isSupported => _serverClientId.isNotEmpty;
+  bool get isSupported => serverClientId.isNotEmpty;
 
   @override
   CloudKind get kind => CloudKind.drive;
@@ -95,16 +108,37 @@ class DriveBackup extends CloudBackup {
   /// all is the worst one.
   static const Duration _timeout = Duration(seconds: 20);
 
-  Future<void> _start() => _started ??= GoogleSignIn.instance.initialize(
-    serverClientId: _serverClientId,
-  );
+  /// The one call into the plugin, pulled out so a test can fail it.
+  @visibleForTesting
+  Future<void> initializePlugin() =>
+      GoogleSignIn.instance.initialize(serverClientId: serverClientId);
+
+  /// Runs [initializePlugin] once per process, and once more after a failure.
+  ///
+  /// The memo has to drop a rejected attempt, and that is the whole reason
+  /// this is not a bare `??=`. A rejected future is not null, so caching one
+  /// hands the same failure back to every later call: the user taps Connect,
+  /// it fails, and the button is dead for the rest of the process with nothing
+  /// on screen saying why. Play Services being busy for a moment is enough to
+  /// get there, and force-quitting the app is the only way out.
+  @visibleForTesting
+  Future<void> start() => _started ??= _startOnce();
+
+  Future<void> _startOnce() async {
+    try {
+      await initializePlugin();
+    } catch (_) {
+      _started = null;
+      rethrow;
+    }
+  }
 
   @override
   Future<CloudResult> connect() async {
     if (!isSupported) return CloudResult.unsupported;
 
     try {
-      await _start();
+      await start();
       final user = await GoogleSignIn.instance.authenticate(
         scopeHint: const [scope],
       );
@@ -171,7 +205,7 @@ class DriveBackup extends CloudBackup {
   @visibleForTesting
   Future<Map<String, String>?> authHeaders() async {
     if (_account == null) return null;
-    await _start();
+    await start();
     return GoogleSignIn.instance.authorizationClient.authorizationHeaders(
       const [scope],
     );
@@ -207,6 +241,12 @@ class DriveBackup extends CloudBackup {
       return response.statusCode >= 200 && response.statusCode < 300
           ? const CloudResult(CloudState.saved)
           : _httpProblem(response).toResult();
+    } on _HttpProblem catch (problem) {
+      // Thrown by the lookup that runs before the upload. Without this the
+      // whole class of answers that lookup gives lands in the catch-all below
+      // as `Instance of '_HttpProblem'`, and a revoked authorization reads as
+      // a bug rather than as the one tap that fixes it.
+      return problem.toResult();
     } on TimeoutException {
       return const CloudResult(
         CloudState.failed,
@@ -250,6 +290,12 @@ class DriveBackup extends CloudBackup {
         CloudState.saved,
         copy: CloudCopy(contents: contents, changedAt: found.changedAt),
       );
+    } on _HttpProblem catch (problem) {
+      // Same lookup, same reason as in [save]. This path is the louder of the
+      // two: `app.dart` prints `detail` straight to the user on a failed
+      // restore, so the unmapped throw put `Instance of '_HttpProblem'` on
+      // screen.
+      return problem.toFetch();
     } on TimeoutException {
       return const CloudFetch(
         CloudState.failed,
