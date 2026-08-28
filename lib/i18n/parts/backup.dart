@@ -62,5 +62,5 @@ abstract class BackupStrings {
 
   String get csvStateActive;
   String get csvStateCancelled;
-  String get csvStateArchived;
+  String get csvStateInactive;
 }

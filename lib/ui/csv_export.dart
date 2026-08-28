@@ -33,7 +33,7 @@ abstract final class CsvExport {
 
   /// The whole file, ready to hand to the share sheet.
   ///
-  /// Every item, archived ones included, with a column that says which is
+  /// Every item, inactive ones included, with a column that says which is
   /// which. Someone exporting their list to read it is entitled to the parts
   /// they have put away; the app already knows how to leave them out of a
   /// screen, and a file is not a screen.
@@ -131,6 +131,6 @@ abstract final class CsvExport {
   static String _state(ItemState state) => switch (state) {
     ItemState.active => S.t.csvStateActive,
     ItemState.cancelledStillActive => S.t.csvStateCancelled,
-    ItemState.archived => S.t.csvStateArchived,
+    ItemState.inactive => S.t.csvStateInactive,
   };
 }

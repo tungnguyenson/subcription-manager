@@ -263,7 +263,7 @@ void main() {
       final timeline = build(
         item(
           expiresOn: '2026-09-30',
-          state: ItemState.archived,
+          state: ItemState.inactive,
           leadDays: const [],
         ),
       );

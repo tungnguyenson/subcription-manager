@@ -182,7 +182,7 @@ void main() {
     test('an archived item does not keep the warning alive', () {
       final view = build(
         items: [
-          item(dateSource: DateSource.userConfirmed, state: ItemState.archived),
+          item(dateSource: DateSource.userConfirmed, state: ItemState.inactive),
         ],
       );
 

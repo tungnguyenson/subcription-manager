@@ -333,7 +333,7 @@ abstract final class ReminderTimelinePresenter {
   /// Said out loud rather than left to an empty block.
   ///
   /// Three causes, and they are not the same problem: the switch on the
-  /// service list is one tap to undo, an archived item is not coming back on
+  /// service list is one tap to undo, an inactive item is not coming back on
   /// its own, and an empty ladder is a trip to the Reminders screen.
   static String? _silence(TrackedItem item, List<PlannedAlert> mine) {
     if (mine.isNotEmpty) return null;

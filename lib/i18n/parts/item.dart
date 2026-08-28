@@ -137,4 +137,19 @@ abstract class ItemStrings {
   String recordedPayments(int count);
   String get pendingRemindersNone;
   String pendingReminders(int count);
+
+  // -- the sheet that stands in front of "Cancel this subscription" --
+  String cancelAskTitle(String name);
+  String cancelAskStopTitle(int payment);
+  String get cancelAskRemindersKept;
+  String get cancelAskUsableLabel;
+  String get cancelAskLapsedLabel;
+  String cancelAskUsableUntil(String date);
+  String get cancelAskClosesNow;
+  String get cancelAskPlanLabel;
+  String cancelAskPlanPayments(int kept, int planned);
+  String get cancelAskKeptLabel;
+  String get cancelAskKeptValue;
+  String get cancelAskConfirm;
+  String get cancelAskStopConfirm;
 }

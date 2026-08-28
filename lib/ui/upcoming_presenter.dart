@@ -122,6 +122,7 @@ abstract final class UpcomingPresenter {
       iconName: row.iconName,
       overdue: overdue,
       trial: row.trial,
+      cancelled: row.cancelled,
     );
   }
 }
@@ -188,6 +189,7 @@ class _Row {
   final String? iconName;
   final LocalDate actBy;
   final bool trial;
+  final bool cancelled;
 
   const _Row({
     required this.id,
@@ -197,6 +199,7 @@ class _Row {
     this.iconName,
     required this.actBy,
     this.trial = false,
+    this.cancelled = false,
   });
 
   /// [actBy] overrides the item's next act-by date, for a view plotting an
@@ -216,6 +219,7 @@ class _Row {
     iconName: item.iconName,
     actBy: actBy ?? item.actBy,
     trial: item.isTrialOn(today),
+    cancelled: item.state == ItemState.cancelledStillActive,
   );
 
   /// The second line: what it costs, and which instalment this is.

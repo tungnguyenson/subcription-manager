@@ -18,12 +18,22 @@ class ServiceToggle {
   final String? iconName;
   final bool on;
 
+  /// Cancelled, with the paid-up period still running.
+  ///
+  /// Distinct from [on] being false, and both can be true at once. The switch
+  /// is about whether the user wants to hear about it; this is about what has
+  /// happened to the subscription. Without the badge the two are the same row
+  /// -- and the switch, which is the loudest thing on it, would be describing
+  /// the smaller of the two facts.
+  final bool cancelled;
+
   const ServiceToggle({
     required this.id,
     required this.name,
     required this.subtitle,
     this.iconName,
     required this.on,
+    this.cancelled = false,
   });
 }
 
@@ -154,13 +164,27 @@ class _ToggleRow extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            row.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: SubdockText.itemName.copyWith(
-                              fontSize: 16.5,
-                            ),
+                          Row(
+                            children: [
+                              // Flexible rather than Expanded, so the badge
+                              // sits against the name instead of being pushed
+                              // out to a column of its own. Same reasoning as
+                              // the badge on `ItemRow`.
+                              Flexible(
+                                child: Text(
+                                  row.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: SubdockText.itemName.copyWith(
+                                    fontSize: 16.5,
+                                  ),
+                                ),
+                              ),
+                              if (row.cancelled) ...[
+                                const SizedBox(width: 8),
+                                StatusBadge(S.t.cancelledBadge, quiet: true),
+                              ],
+                            ],
                           ),
                           const SizedBox(height: 3),
                           Text(

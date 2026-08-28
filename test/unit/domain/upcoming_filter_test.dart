@@ -60,8 +60,8 @@ void main() {
     final items = [
       item('live'),
       item('muted', paused: true),
-      item('gone', state: ItemState.archived),
-      item('muted and gone', paused: true, state: ItemState.archived),
+      item('gone', state: ItemState.inactive),
+      item('muted and gone', paused: true, state: ItemState.inactive),
     ];
 
     test('normally it is the items Upcoming already shows', () {

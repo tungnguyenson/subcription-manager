@@ -252,12 +252,29 @@ enum PurchaseChannel with WireNamed {
   final String wireName;
 }
 
+/// What has happened to the subscription itself. Not whether the user wants
+/// to hear about it -- that is [TrackedItem.paused], and the two are kept
+/// apart so a cancelled plan with time left on it can still be switched off.
 enum ItemState with WireNamed {
   active('ACTIVE'),
 
-  /// Cancelled but still usable until the period ends. Not the same as deleted.
+  /// Cancelled but still usable until the period ends. Not the same as
+  /// deleted, and not the end of the story: once [TrackedItem.expiresOn] goes
+  /// by, the period this state is naming has run out and the item becomes
+  /// [inactive]. `ItemActions.lapsed` is where that happens.
   cancelledStillActive('CANCELLED_STILL_ACTIVE'),
-  archived('ARCHIVED');
+
+  /// Nothing more will be charged and nothing more will be reminded: a course
+  /// whose last instalment is paid, a one-off that is done, a cancelled plan
+  /// whose period has run out.
+  ///
+  /// **The wire name stays `ARCHIVED` and must not be changed.** It is the
+  /// string sitting in every installed database and every backup file already
+  /// written, and [enumFromWire] falls back to [active] on a value it does not
+  /// know -- so renaming it would raise every finished item in the world back
+  /// to being tracked, reminders and all. The Dart name is what reads on
+  /// screen; the wire name is a promise to files that already exist.
+  inactive('ARCHIVED');
 
   const ItemState(this.wireName);
 
@@ -497,7 +514,7 @@ class TrackedItem {
   /// Not a fourth [ItemState]. Pausing says "be quiet about this", and the
   /// three states say what has happened to the subscription itself, so a
   /// cancelled-but-still-running item can also be paused. Folding the two
-  /// would make un-pausing an archived item impossible to express.
+  /// would make un-pausing an inactive item impossible to express.
   final bool paused;
 
   /// What the user said about moving this to a yearly plan. See [YearlyChoice].
@@ -642,7 +659,7 @@ class TrackedItem {
   /// Whether reminders should be scheduled and whether the item belongs on
   /// Upcoming. The one predicate for both, so the list and the notifications
   /// can never disagree about what the user turned off.
-  bool get isLive => !paused && state != ItemState.archived;
+  bool get isLive => !paused && state != ItemState.inactive;
 
   /// Whether losing this item would cost the user more than retyping it.
   ///
@@ -651,14 +668,14 @@ class TrackedItem {
   /// warning measures the first kind and ignores the second, so the number it
   /// quotes is the cost of losing the list rather than its length.
   ///
-  /// Archived items are out, because they are out of the user's way already
+  /// Inactive items are out, because they are out of the user's way already
   /// and counting them would keep a warning alive over a list nobody is using.
   ///
   /// Lives here rather than on the presenter because [BackupStore] records the
   /// same set when a copy lands. Two copies of this rule would drift, and the
   /// drift would show up as a warning that never clears or never fires.
   bool get isCostlyToRebuild =>
-      dateSource == DateSource.userConfirmed && state != ItemState.archived;
+      dateSource == DateSource.userConfirmed && state != ItemState.inactive;
 
   TrackedItem copyWith({
     String? id,

@@ -59,7 +59,7 @@ abstract final class FilterPresenter {
   /// cycle nobody has never appear -- a chip that can only ever return nothing
   /// is a chip that wasted a tap.
   ///
-  /// [items] is every non-archived item, muted ones included, and not the pool
+  /// [items] is every item that is not inactive, muted ones included, and not the pool
   /// the filter is currently drawing from. Turning "Reminders off" on would
   /// otherwise rebuild the chip rows underneath the user's finger, and half the
   /// chips they had already picked would vanish from the sheet while staying
@@ -73,7 +73,7 @@ abstract final class FilterPresenter {
     CategoryBook categories, {
     List<PaymentSource> sources = const [],
   }) {
-    final live = items.where((i) => i.state != ItemState.archived).toList();
+    final live = items.where((i) => i.state != ItemState.inactive).toList();
 
     final usedCategories = <String>{for (final item in live) item.categoryId};
     final shelves =

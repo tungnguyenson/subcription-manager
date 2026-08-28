@@ -1,5 +1,4 @@
 import 'package:drift/native.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:subdock/app.dart';
@@ -19,6 +18,8 @@ import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
+
+import 'scroll_reach.dart';
 
 /// Deleting an item, driven through the real app.
 ///
@@ -107,13 +108,7 @@ void main() {
     await tester.tap(find.text('Claude Pro'));
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(
-      find.text('Delete this item'),
-      240,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(find.text('Delete this item'));
-    await tester.pumpAndSettle();
+    await tapPastTabBar(tester, find.text('Delete this item'));
   }
 
   Future<List<String>> ids() async =>

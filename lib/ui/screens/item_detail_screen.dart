@@ -150,6 +150,18 @@ class ItemDetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(item.name, style: SubdockText.detailTitle),
+                  // Under the name, not beside it. The title runs to two lines
+                  // on a long name and wraps at whatever width is left, so a
+                  // badge on that row would land in a different place on every
+                  // item. The list rows can put it beside the name because
+                  // they cut the name off at one line.
+                  if (item.state == ItemState.cancelledStillActive) ...[
+                    const SizedBox(height: 7),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: StatusBadge(S.t.cancelledBadge, quiet: true),
+                    ),
+                  ],
                   const SizedBox(height: 5),
                   Text(
                     ItemPresenter.summary(item, category, today),

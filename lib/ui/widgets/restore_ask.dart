@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:subdock/ui/theme.dart';
+import 'package:subdock/ui/widgets/ask_line.dart';
 import 'package:subdock/ui/widgets/glass.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/i18n.dart';
@@ -94,7 +95,7 @@ class RestoreAsk extends StatelessWidget {
                 style: SubdockText.detailTitle.copyWith(fontSize: 25),
               ),
               const SizedBox(height: 16),
-              _Line(
+              AskLine(
                 icon: Icons.download_rounded,
                 label: S.t.restoreAskFrom,
                 value: takenOn == null
@@ -106,7 +107,7 @@ class RestoreAsk extends StatelessWidget {
                 // Named, not summarised as "your data". The user is about to
                 // delete rows they typed, and the count is the only way they
                 // can tell whether they picked the right file.
-                _Line(
+                AskLine(
                   icon: Icons.delete_outline_rounded,
                   label: S.t.restoreAskLost,
                   value: onDevice,
@@ -126,53 +127,6 @@ class RestoreAsk extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _Line extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final bool danger;
-
-  const _Line({
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.danger = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final tint = danger ? SubdockColors.danger : SubdockColors.accent;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: SubdockColors.hairline,
-        borderRadius: BorderRadius.circular(SubdockRadius.card),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 19, color: tint),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: SubdockText.caption),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: SubdockText.footnote.copyWith(fontSize: 14.5),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

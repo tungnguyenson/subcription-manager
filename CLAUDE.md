@@ -107,7 +107,7 @@ for f in integration_test/*_test.dart; do flutter test "$f" -d <device-id>; done
 Mất khoảng bốn phút mỗi file trên máy ảo, nên đừng chạy sau từng lần sửa nhỏ. Nhưng
 phải chạy trước khi tin rằng một thay đổi về điều hướng hay bố cục đã xong.
 
-## Năm mươi hai cái bẫy đã vấp, đừng vấp lại
+## Năm mươi bốn cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -1217,6 +1217,100 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
     `test/unit/ui/upcoming_presenter_test.dart` và nhóm `monthsUntil` trong
     `test/unit/domain/local_date_test.dart`. Lịch tháng dùng chung `UpcomingCopy.when`
     nên nó đi theo, đúng luật ở bẫy 31.
+
+54. **Huỷ một gói đi qua `CancelAsk`, và trạng thái `cancelledStillActive` giờ mới thật
+    sự kết thúc.** Trước đây nút `Huỷ gói này` gọi thẳng `repository.upsert` rồi pop, không
+    hỏi gì, và cái tên trạng thái hứa một điều không code nào thực hiện.
+
+    Ba chỗ hỏng cùng lúc, và chúng nối nhau:
+
+    - **Nút không nói nó làm gì.** Mất mát là mọi nhắc hạn của mục đó bị gỡ, mà với một
+      app cả việc là gửi nhắc hạn thì đó là thứ lớn nhất một cú bấm làm được. Tệ hơn, chữ
+      `Huỷ gói này` đọc ra được thành "app sẽ huỷ hộ tôi bên nhà cung cấp", việc mà nó
+      không làm và không nói ở đâu là không làm.
+    - **Kỳ đã trả tiền không bao giờ hết.** `advanced` cuộn mục sang kỳ sau mà giữ nguyên
+      `state`, nên một gói đã huỷ nằm trên Upcoming vô hạn.
+    - **Chart Money cộng tiền mãi.** `countedOccurrences` đi tới theo chu kỳ và không hỏi
+      `state`, nên nó vẽ một cột cho mọi tháng sau đó, cho gói người dùng đã dừng.
+
+    Nay có `ItemActions.hasLapsed` và `lapsed`, cộng `_sweepLapsed()` trong `app.dart`.
+
+    - **Phép quét chạy ở stream mục và lúc app resume, đúng chỗ `_replan()` chạy**, và vì
+      đúng lý do ở bẫy 25: đồng hồ đi qua một ngày mà không dòng nào trong cơ sở dữ liệu
+      đổi. Nó ghi xuống, và lần ghi đó lại kích hoạt stream gọi nó lần nữa; lần thứ hai
+      không tìm thấy gì nên không ghi gì, thế là dừng.
+    - **`lapsed` trả `null` khi không có gì để làm, không trả lại chính mục đó.** Trả lại
+      mục thì lời gọi không phân biệt được cái nào đã đổi, và phép quét sẽ ghi đè cả bảng
+      mỗi lần mở app.
+    - **So là *qua hẳn* ngày, không phải đúng ngày.** Ngày cuối của một kỳ đã trả tiền là
+      ngày dịch vụ còn chạy. Đóng vào sáng hôm đó là gỡ mục khỏi danh sách trong khi người
+      dùng vẫn dùng được nó.
+    - **Là một lần ghi chứ không phải phép suy lúc đọc**, ngược với cặp `inTrial` /
+      `isTrialOn` ở bẫy 14. Khác nhau ở chỗ cờ dùng thử ghi một sự thật về quá khứ, còn
+      đây là một trạng thái mới, và trạng thái thì đi vào tệp CSV lẫn file sao lưu, hai
+      thứ không mang theo ngày hôm nay để tự tính lại.
+
+    **`ItemState.archived` đổi tên thành `inactive`, nhưng `wireName` vẫn là `'ARCHIVED'`
+    và không được đổi.** `enumFromWire` rơi về `ItemState.active` khi gặp giá trị lạ, nên
+    đổi chuỗi lưu xuống sẽ làm **mọi mục đã đóng trong mọi máy đang chạy và mọi file sao
+    lưu cũ sống dậy thành đang theo dõi**, kèm nhắc hạn. Tên Dart là thứ đọc trên màn
+    hình; wire name là lời hứa với những file đã tồn tại.
+
+    Chart Money bị cắt ở hai chỗ, và cả hai đều cần. `countedOccurrences` dừng sau kỳ
+    `expiresOn`, còn `_year` bỏ hẳn mục đã huỷ: `NEXT 12 MONTHS` là một mức chi theo năm,
+    và nhân một gói còn đúng một kỳ lên thành mười hai là tính dư mười một lần. Cắt theo
+    từng kỳ chứ không bỏ mục ra khỏi cả năm, vì các khoản **trước** lúc huỷ đã đi thật và
+    thuộc về đúng tháng chúng rơi vào.
+
+    **Badge `ĐÃ HUỶ` là `StatusBadge(quiet: true)`, không dùng màu nhấn.** `FREE TRIAL`
+    nhấn xanh vì đó là tin người đọc muốn nghe. Cái này ngược lại: dòng còn trên màn hình
+    chỉ vì chưa hết kỳ, và một danh sách mà những mục đã kết thúc sáng nhất là danh sách
+    đọc ngược. Badge có ở cả ba chỗ: Upcoming (`ItemRow`, lịch tháng ăn theo), All services,
+    và màn Detail.
+
+    **Một chỗ đặt badge, và huỷ thắng dùng thử.** Hai badge sau cái tên để lại cho tên
+    khoảng bốn ký tự, trên đúng cái dòng sinh ra để hiện tên. Huỷ thắng vì nó là điều vừa
+    thay đổi và là điều có một quyết định đứng sau; kỳ dùng thử thì đằng nào cũng sắp hết.
+    Riêng màn Detail đặt badge **dưới** tên chứ không cạnh tên, vì tiêu đề ở đó xuống hai
+    dòng với tên dài nên badge sẽ rơi vào một chỗ khác nhau ở mỗi mục.
+
+    Sheet có hai bản chữ, và chỉ bản huỷ mặc mực đỏ. Nhánh trả góp chỉ ghim số kỳ, không
+    đụng nhắc hạn, và sửa lại được bằng cách vào Edit đổi số kỳ; tô đỏ chỗ không mất gì là
+    dạy người dùng đọc lướt qua màu đỏ. Ngày trên sheet in **đủ năm**, không dùng
+    `shortDate` như dòng danh sách: một gói năm huỷ hôm nay chạy tới một ngày mười một
+    tháng nữa, và `05/09` đọc vào tháng Chín là một ngày vừa trôi qua.
+
+    Ba `_Line` giống hệt nhau trong `delete_ask.dart`, `restore_ask.dart` và sheet mới đã
+    gộp thành `AskLine` ở `lib/ui/widgets/ask_line.dart`.
+
+    Chốt chặn là `integration_test/cancel_test.dart`, chạy trên máy ảo. Phải là integration
+    test vì sheet nằm trong `app.dart`, đúng bẫy 28, và vì phép quét không có nút nào gọi
+    nó: bài cuối trong file không chạm vào gì cả, chỉ mở app lên. Một chi tiết của bài đó
+    đáng nhớ: `openCancel` cuộn tới `Delete this item` chứ không cuộn tới chính cái nút cần
+    bấm, vì màn Detail giữ tab bar (bẫy 17) và dừng cuộn ngay khi nút vừa lọt vào khung sẽ
+    để nó nằm dưới tab bar, chỗ mà cú chạm rơi vào khoảng không và bài test đọc ra thành
+    "sheet không mở".
+
+    Chuyện đó không chỉ là của bài test mới. Dò tới nơi thì `delete_test.dart` đã đỏ **3
+    trên 3** và `navigation_test.dart` đỏ **3 trên 8** từ trước, và đã kiểm bằng cách chạy
+    lại ở HEAD trong một worktree riêng. Hai nguyên nhân, cả hai đều là lỗi im lặng đúng
+    kiểu CLAUDE.md cảnh báo:
+
+    - **`scrollUntilVisible` dừng quá sớm.** Nó trả về ngay khi widget lọt vào viewport,
+      mà viewport chạy xuống **dưới** tab bar vì `AppShell` dùng `Scaffold(extendBody:
+      true)` cho lớp mờ có cái để làm mờ. Cú chạm rơi vào `BackdropFilter` của tab bar và
+      **không mất đi**, nó chỉ không làm gì, nên bài test đọc ra thành một cái nút không
+      phản hồi và người sửa sẽ đi soi cái nút. Danh sách luôn cuộn thêm được, vì
+      `SubdockSpacing.screenPadding` đã cộng chiều cao tab bar vào phần đệm đáy. Lời giải
+      là `tapPastTabBar` trong `integration_test/scroll_reach.dart`, dùng chung cho cả ba
+      file.
+    - **`declineReminders` hỏi đúng một lần, và hỏi quá sớm.** Từ bẫy 50, `_saveDraft` pop
+      form rồi chờ hết `_formExit` mới mở sheet xin quyền, mà một `Future.delayed` không
+      sinh khung hình nào nên `pumpAndSettle` trả về ngay giữa quãng chờ đó. Bài test đi
+      tiếp, không bấm `Để sau`, và cái toast xác nhận nó đang kiểm không bao giờ bắn.
+      Thấy được widget cũng chưa đủ: sheet trượt lên, nên nút tồn tại trong cây khoảng
+      200ms trước khi nó tới chỗ ngón tay chạm được, khung đầu tiên đặt nó ở dưới mép màn
+      hình cả một màn rưỡi. Phải chờ nó xuất hiện **rồi** `pumpAndSettle` cho nó vào xong.
 
 ## Viết tài liệu
 

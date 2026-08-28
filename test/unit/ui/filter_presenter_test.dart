@@ -75,7 +75,7 @@ void main() {
 
     test('an archived item contributes nothing', () {
       final options = FilterPresenter.options([
-        item('gone', categoryId: 'PHONE', state: ItemState.archived),
+        item('gone', categoryId: 'PHONE', state: ItemState.inactive),
       ], book);
 
       expect(options.categories, isEmpty);

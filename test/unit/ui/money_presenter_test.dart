@@ -105,12 +105,68 @@ void main() {
       expect(month.items, hasLength(1));
     });
 
-    test('an archived item does not', () {
+    test('an inactive item does not', () {
       final month = view([
-        item('Netflix', state: ItemState.archived),
+        item('Netflix', state: ItemState.inactive),
       ], MoneySpan.month);
 
       expect(month.items, isEmpty);
+    });
+  });
+
+  // A cancellation is the user saying no more money goes here after this one.
+  // The chart used to hear none of it: it walks forward from the anchor by the
+  // cycle, so a cancelled monthly plan went on drawing a column in every month
+  // of the year, and the headline figure was a bill for a subscription that had
+  // been stopped.
+  group('a cancelled subscription', () {
+    TrackedItem cancelled(String name, {String expiresOn = '2026-08-20'}) =>
+        item(
+          name,
+          expiresOn: expiresOn,
+          anchorDate: '2026-01-20',
+        ).copyWith(state: ItemState.cancelledStillActive);
+
+    test('still counts in the month it is paid up to', () {
+      final month = view([cancelled('Netflix')], MoneySpan.month);
+
+      expect(month.items.map((i) => i.name), ['Netflix']);
+    });
+
+    test('is gone from every month after it', () {
+      final september = MoneyPresenter.build(
+        categories: CategoryBook.shipped,
+        items: [cancelled('Netflix')],
+        today: today,
+        span: MoneySpan.month,
+        month: 9,
+      );
+
+      expect(september.items, isEmpty);
+    });
+
+    // The charges before the cancellation really did happen, and they belong in
+    // the months they landed in. The cut is by occurrence, not by dropping the
+    // item out of the year.
+    test('keeps the months it was charged in', () {
+      final march = MoneyPresenter.build(
+        categories: CategoryBook.shipped,
+        items: [cancelled('Netflix')],
+        today: today,
+        span: MoneySpan.month,
+        month: 3,
+      );
+
+      expect(march.items.map((i) => i.name), ['Netflix']);
+    });
+
+    // The other half of the same card. `NEXT 12 MONTHS` is a rate, and
+    // annualising something with one payment left in it charges the reader
+    // eleven times over for a plan they have ended.
+    test('is not a rate any more, so the year view leaves it out', () {
+      final year = view([cancelled('Netflix')], MoneySpan.year);
+
+      expect(year.total.perCurrency, isEmpty);
     });
   });
 
@@ -563,7 +619,7 @@ void main() {
     test('an archived item is gone from the chart as well', () {
       expect(
         bars([
-          item('Netflix', expiresOn: '2026-03-05', state: ItemState.archived),
+          item('Netflix', expiresOn: '2026-03-05', state: ItemState.inactive),
         ]),
         isEmpty,
       );

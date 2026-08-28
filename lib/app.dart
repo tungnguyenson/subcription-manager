@@ -15,6 +15,7 @@ import 'package:subdock/data/locale_store.dart';
 import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/i18n.dart';
+import 'package:subdock/domain/instalments.dart';
 import 'package:subdock/domain/item_actions.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
@@ -55,6 +56,7 @@ import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
 import 'package:subdock/ui/widgets/currency_picker.dart';
+import 'package:subdock/ui/widgets/cancel_ask.dart';
 import 'package:subdock/ui/widgets/delete_ask.dart';
 import 'package:subdock/ui/widgets/language_sheet.dart';
 import 'package:subdock/ui/widgets/restore_ask.dart';
@@ -497,6 +499,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         _loaded = true;
       });
       _replan();
+      unawaited(_sweepLapsed());
       _scheduleCloudBackup();
     });
 
@@ -641,6 +644,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     // observe -- `requestExactAlarmsPermission` only opens it, and the answer
     // exists nowhere until someone asks again.
     _replan();
+    unawaited(_sweepLapsed());
     unawaited(_refreshPermission());
 
     final itemId = _openedProviderPageFor;
@@ -755,6 +759,35 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
     });
     unawaited(_applyPlan());
+  }
+
+  /// Closes cancelled plans whose paid-up period has now run out.
+  ///
+  /// Nothing else can. [ItemState.cancelledStillActive] names a window that
+  /// ends on a date, and a date going by writes no row -- exactly the shape of
+  /// the stale-plan problem [_replan] exists for, which is why this runs in
+  /// the same two places: on the item stream, and on resume. Left undone, a
+  /// cancelled subscription sat on Upcoming for good and the Money chart drew
+  /// a charge for it in every month after the one it was actually paid up to.
+  ///
+  /// A write rather than a predicate read at display time, unlike the trial
+  /// flag it otherwise resembles. The state is a column: it goes into the CSV
+  /// export and into the backup file, and neither of those carries today's
+  /// date to work it out from again.
+  ///
+  /// The write feeds the item stream, which calls this again -- and the second
+  /// pass finds nothing to close and writes nothing, so it stops there.
+  Future<void> _sweepLapsed() async {
+    final today = LocalDate.today();
+    final closed = [
+      for (final item in _items) ?ItemActions.lapsed(item, today),
+    ];
+    if (closed.isEmpty) return;
+
+    final now = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    for (final item in closed) {
+      await widget.repository.upsert(item, now);
+    }
   }
 
   Future<void> _applyPlan() async {
@@ -998,7 +1031,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   String get _servicesLine {
-    final live = _items.where((i) => i.state != ItemState.archived).length;
+    final live = _items.where((i) => i.state != ItemState.inactive).length;
     final off = _items.where((i) => i.paused).length;
     return off == 0 ? '$live' : '$live · $off off';
   }
@@ -1971,7 +2004,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   /// Ends the series after the payment that is currently due.
+  /// Ends a subscription, once the user has said so on a sheet that named the
+  /// consequences.
+  ///
+  /// Asking is not politeness here either, though what is at stake differs
+  /// from the delete sheet next to it. Nothing is destroyed: the loss is that
+  /// every reminder for this item is dropped, and for an app whose entire job
+  /// is sending reminders that is the largest thing a single tap can do. The
+  /// button said `Cancel this subscription`, which a reader can just as easily
+  /// take to mean the app is about to cancel it *with the vendor* -- something
+  /// it cannot do and does not claim anywhere else on the screen.
   Future<void> _stop(TrackedItem item) async {
+    final today = LocalDate.today();
+    final confirmed = await CancelAsk.show(
+      context,
+      name: item.name,
+      position: Instalments.of(item),
+      usableUntil: item.expiresOn,
+      alreadyLapsed: today > item.expiresOn,
+      reminderCount: _plan.alerts.where((a) => a.itemId == item.id).length,
+    );
+    if (confirmed != true) return;
+
     final stopped = ItemActions.stopped(item);
 
     await widget.repository.upsert(

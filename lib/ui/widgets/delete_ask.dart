@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:subdock/ui/theme.dart';
+import 'package:subdock/ui/widgets/ask_line.dart';
 import 'package:subdock/ui/widgets/glass.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
 import 'package:subdock/i18n.dart';
@@ -99,14 +100,14 @@ class DeleteAsk extends StatelessWidget {
                 style: SubdockText.detailTitle.copyWith(fontSize: 25),
               ),
               const SizedBox(height: 16),
-              _Line(
+              AskLine(
                 icon: Icons.receipt_long_rounded,
                 label: S.t.deleteAskLost,
                 value: paymentLine(paymentCount),
                 danger: paymentCount > 0,
               ),
               const SizedBox(height: 8),
-              _Line(
+              AskLine(
                 icon: Icons.notifications_off_rounded,
                 label: S.t.deleteAskRemindersStopped,
                 value: reminderLine(reminderCount),
@@ -122,53 +123,6 @@ class DeleteAsk extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _Line extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  final bool danger;
-
-  const _Line({
-    required this.icon,
-    required this.label,
-    required this.value,
-    this.danger = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final tint = danger ? SubdockColors.danger : SubdockColors.accent;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: SubdockColors.hairline,
-        borderRadius: BorderRadius.circular(SubdockRadius.card),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 19, color: tint),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: SubdockText.caption),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: SubdockText.footnote.copyWith(fontSize: 14.5),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

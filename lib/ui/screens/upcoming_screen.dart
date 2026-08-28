@@ -38,6 +38,12 @@ class UpcomingEntry {
   /// [date] is free.
   final bool trial;
 
+  /// Cancelled, and still on the list because the paid-up period has not run
+  /// out. Nothing about the row says so otherwise: the reminders are gone but
+  /// silence is what an item with none looks like anyway, so without this the
+  /// row is indistinguishable from one that is still running.
+  final bool cancelled;
+
   const UpcomingEntry({
     required this.id,
     required this.when,
@@ -48,6 +54,7 @@ class UpcomingEntry {
     this.iconName,
     this.overdue = false,
     this.trial = false,
+    this.cancelled = false,
   });
 }
 
@@ -653,6 +660,7 @@ class _Section extends StatelessWidget {
             date: entries[i].date,
             overdue: entries[i].overdue,
             trial: entries[i].trial,
+            cancelled: entries[i].cancelled,
             style: rowStyle,
             onTap: () => onOpen?.call(entries[i]),
           ),

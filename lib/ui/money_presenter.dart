@@ -230,11 +230,11 @@ abstract final class MoneyPresenter {
     /// month the user is in, which is where the screen opens.
     int? month,
   }) {
-    // Archived is gone; paused is not. A service switched off is still being
+    // Inactive is gone; paused is not. A service switched off is still being
     // charged — the switch stops reminders, not the vendor — so leaving it out
     // of a spending total would understate the bill.
     final live = items
-        .where((i) => i.state != ItemState.archived)
+        .where((i) => i.state != ItemState.inactive)
         .toList(growable: false);
 
     final trials = [
@@ -461,6 +461,14 @@ abstract final class MoneyPresenter {
   /// `inTrial` and not `isTrialOn(today)`. Those months stay free once the day
   /// passes; asking against today would refill them the morning after and
   /// rewrite spending the user had already read.
+  ///
+  /// A cancelled plan stops after the occurrence it is paid up to. Same
+  /// reasoning as the counted plan above and the opposite end of the trial:
+  /// [ItemState.cancelledStillActive] says the user has ended this and owes
+  /// one last charge, so drawing a column for the month after it is drawing
+  /// money that is not going to move. The cut is by occurrence rather than by
+  /// dropping the item, because the charges *before* the cancellation really
+  /// did happen and belong in the months they landed in.
   @visibleForTesting
   static Iterable<LocalDate> countedOccurrences(
     TrackedItem item, {
@@ -474,10 +482,13 @@ abstract final class MoneyPresenter {
       return;
     }
 
+    final cancelled = item.state == ItemState.cancelledStillActive;
+
     final instalments = item.repeatCount;
     for (var n = 0; instalments == null || n < instalments; n++) {
       final on = Recurrence.occurrenceAfter(item.anchorDate, cycle, n);
       if (on.year > year) return;
+      if (cancelled && on > item.expiresOn) return;
       if (item.inTrial && on < item.expiresOn) continue;
       if (on.year == year) yield on;
     }
@@ -501,6 +512,12 @@ abstract final class MoneyPresenter {
 
     for (final item in live) {
       if (!item.countsTowardSpend(categories[item.categoryId])) continue;
+      // A cancelled plan is not a rate any more. This card answers "what does
+      // the list cost me a year from here", and annualising something the
+      // user has ended charges them eleven times over for a subscription with
+      // one payment left in it. The month chart cuts the same item off after
+      // its last occurrence, and the two halves of the screen have to agree.
+      if (item.state == ItemState.cancelledStillActive) continue;
       final yearly = annualised(item);
       if (yearly == null) continue;
 

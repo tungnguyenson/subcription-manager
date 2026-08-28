@@ -270,11 +270,11 @@ abstract final class SavingsPresenter {
     required LocalDate today,
     required List<int> defaultLeadDays,
   }) {
-    // Archived items are gone; paused ones are not. A service switched off is
+    // Inactive items are gone; paused ones are not. A service switched off is
     // still being paid for, so it still belongs in a screen about money going
     // out — hiding it here would be the app losing track of a charge.
     final live = items
-        .where((i) => i.state != ItemState.archived)
+        .where((i) => i.state != ItemState.inactive)
         .toList(growable: false);
 
     // Only what the user could choose to stop paying. An obligation -- a bill,
@@ -355,7 +355,7 @@ abstract final class SavingsPresenter {
   ) => items
       .where(
         (i) =>
-            i.state != ItemState.archived &&
+            i.state != ItemState.inactive &&
             !categories[i.categoryId].isObligation &&
             !i.isTrialOn(today) &&
             _billedMoreOftenThanYearly(i.cycle),

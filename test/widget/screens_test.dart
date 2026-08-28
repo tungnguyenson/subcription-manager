@@ -19,6 +19,8 @@ import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/data/backup_store.dart';
 import 'package:subdock/ui/backup_presenter.dart';
 import 'package:subdock/ui/widgets/primitives.dart';
+import 'package:subdock/domain/instalments.dart';
+import 'package:subdock/ui/widgets/cancel_ask.dart';
 import 'package:subdock/ui/widgets/restore_ask.dart';
 import 'package:subdock/ui/theme.dart';
 import 'package:subdock/ui/upcoming_presenter.dart';
@@ -1245,6 +1247,177 @@ void main() {
       expect(find.text('Restore this backup?'), findsOneWidget);
       expect(find.text('Restore'), findsOneWidget);
       expect(find.textContaining('Deleted from this phone'), findsNothing);
+    });
+  });
+
+  // `Cancel this subscription` wrote to the database and popped, with no word
+  // about what it did. Two of the things it does are visible nowhere else in
+  // the app: how many reminders it drops, and the date the item goes on being
+  // charged until.
+  group('Cancel confirmation', () {
+    testWidgets('names the reminders it drops and the date it runs to', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        CancelAsk(
+          name: 'Netflix',
+          usableUntil: d('2026-09-05'),
+          reminderCount: 4,
+        ),
+      );
+
+      expect(find.text('Cancel Netflix?'), findsOneWidget);
+      expect(find.text('4 pending reminders'), findsOneWidget);
+      expect(find.textContaining('05/09/2026'), findsOneWidget);
+    });
+
+    // The item is not deleted and the reader has a delete button two taps
+    // away, so the sheet has to draw the line between them.
+    testWidgets('says what it does not take', (tester) async {
+      await show(
+        tester,
+        CancelAsk(name: 'Netflix', usableUntil: d('2026-09-05')),
+      );
+
+      expect(find.text('Recorded payments, dates and amounts'), findsOneWidget);
+    });
+
+    // Saying "usable until 20/08" on the 28th describes a window that shut
+    // last week. The item closes on the next sweep instead.
+    testWidgets('does not promise a window that has already shut', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        CancelAsk(
+          name: 'Netflix',
+          usableUntil: d('2026-08-01'),
+          alreadyLapsed: true,
+        ),
+      );
+
+      expect(find.textContaining('01/08/2026'), findsNothing);
+      expect(find.text('That date has gone, so it closes now'), findsOneWidget);
+      // The label follows the value. `Usable until` over `That date has gone`
+      // is a row arguing with itself.
+      expect(find.text('Usable until'), findsNothing);
+      expect(find.text('The paid-up period'), findsOneWidget);
+    });
+
+    // Shortening a counted plan touches no reminders and can be undone by
+    // editing the count, so it is not dressed in the same ink. Red where
+    // nothing is at risk teaches people to read past red.
+    testWidgets('a counted plan is a different sheet', (tester) async {
+      await show(
+        tester,
+        const CancelAsk(
+          name: 'Course',
+          position: Instalments(index: 4, total: 6),
+        ),
+      );
+
+      expect(find.text('Stop after payment 4?'), findsOneWidget);
+      expect(find.text('4 payments instead of 6'), findsOneWidget);
+      expect(find.text('They run on to the last payment'), findsOneWidget);
+      expect(
+        tester.widget<QuietButton>(find.byType(QuietButton)).danger,
+        isFalse,
+      );
+    });
+
+    testWidgets('the filled button is the one that changes nothing', (
+      tester,
+    ) async {
+      var confirmed = 0;
+      var cancelled = 0;
+      await show(
+        tester,
+        CancelAsk(
+          name: 'Netflix',
+          usableUntil: d('2026-09-05'),
+          onConfirm: () => confirmed++,
+          onCancel: () => cancelled++,
+        ),
+      );
+
+      await tester.tap(find.byType(PrimaryButton));
+      await tester.pumpAndSettle();
+      expect((confirmed, cancelled), (0, 1));
+
+      await tester.tap(find.text('Cancel it'));
+      await tester.pumpAndSettle();
+      expect((confirmed, cancelled), (1, 1));
+    });
+  });
+
+  // The row is the only thing on Upcoming that can say a subscription is
+  // cancelled. Its reminders are gone, and a row with no reminders looks
+  // exactly like every other quiet row.
+  group('the cancelled badge', () {
+    testWidgets('marks a cancelled row and leaves the rest alone', (
+      tester,
+    ) async {
+      await show(
+        tester,
+        Column(
+          children: [
+            ItemRow(
+              name: 'Netflix',
+              when: '5d',
+              date: '05/09',
+              cancelled: true,
+            ),
+            ItemRow(name: 'Spotify', when: '9d', date: '09/09'),
+          ],
+        ),
+      );
+
+      expect(find.text('CANCELLED'), findsOneWidget);
+    });
+
+    // One slot, and cancelled takes it. Two badges after the name leave the
+    // name about four characters, on the line the row exists to show.
+    testWidgets('takes the slot from the trial badge', (tester) async {
+      await show(
+        tester,
+        ItemRow(
+          name: 'Netflix',
+          when: '5d',
+          date: '05/09',
+          trial: true,
+          cancelled: true,
+        ),
+      );
+
+      expect(find.text('CANCELLED'), findsOneWidget);
+      expect(find.text('FREE TRIAL'), findsNothing);
+    });
+
+    // Accent is for news the reader wants. This row is on screen only because
+    // it has not run out yet, and a list whose ended items are the brightest
+    // is a list read backwards.
+    testWidgets('does not use the accent the trial badge uses', (tester) async {
+      await show(
+        tester,
+        Column(
+          children: [
+            ItemRow(
+              name: 'Netflix',
+              when: '5d',
+              date: '05/09',
+              cancelled: true,
+            ),
+            ItemRow(name: 'Spotify', when: '9d', date: '09/09', trial: true),
+          ],
+        ),
+      );
+
+      Color inkOf(String label) =>
+          tester.widget<Text>(find.text(label)).style!.color!;
+
+      expect(inkOf('FREE TRIAL'), SubdockColors.accent);
+      expect(inkOf('CANCELLED'), SubdockColors.inkMuted);
     });
   });
 }

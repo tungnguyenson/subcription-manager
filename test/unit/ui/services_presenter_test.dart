@@ -113,16 +113,33 @@ void main() {
       );
     });
 
-    // Archived is finished, not paused: the last instalment of a course, a
+    // Inactive is finished, not paused: the last instalment of a course, a
     // cancelled plan whose period has run out. A switch on one would promise to
     // bring it back, which it cannot.
-    test('an archived item is not on the list', () {
+    test('an inactive item is not on the list', () {
       final groups = groupsOf([
         item('Netflix'),
-        item('Old course', state: ItemState.archived),
+        item('Old course', state: ItemState.inactive),
       ]);
 
       expect(groups.single.rows.map((r) => r.name), ['Netflix']);
+    });
+
+    // Cancelled is not the same as switched off, and the row carries both. The
+    // switch is the loudest thing on it and it answers the smaller question --
+    // whether the user wants to hear about this -- so without the badge a
+    // cancelled service and a muted one are the same row.
+    test('a cancelled item stays on the list and is marked', () {
+      final rows = groupsOf([
+        item('Netflix').copyWith(state: ItemState.cancelledStillActive),
+      ]).single.rows;
+
+      expect(rows.single.cancelled, isTrue);
+      expect(rows.single.on, isTrue);
+    });
+
+    test('an ordinary item is not marked', () {
+      expect(groupsOf([item('Netflix')]).single.rows.single.cancelled, isFalse);
     });
 
     test('an item with no amount shows only its date', () {

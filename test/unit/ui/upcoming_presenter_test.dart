@@ -80,12 +80,53 @@ void main() {
     expect(byActBy.thisWeek.map((e) => e.id), [trial]);
   });
 
-  test('archived items do not appear at all', () {
+  test('inactive items do not appear at all', () {
     final view = UpcomingPresenter.build([
-      item('gone', expiresOn: '2026-08-18', state: ItemState.archived),
+      item('gone', expiresOn: '2026-08-18', state: ItemState.inactive),
     ], today);
 
     expect(view.isEmpty, isTrue);
+  });
+
+  // A cancelled plan stays on the list until its period runs out, and the row
+  // is the only place that can say so. Its reminders are gone, but a row with
+  // no reminders looks exactly like every other quiet row, so without the badge
+  // it is indistinguishable from one that is still running.
+  group('a cancelled subscription still inside its period', () {
+    UpcomingEntry only(TrackedItem tracked) =>
+        everything(UpcomingPresenter.build([tracked], today)).single;
+
+    test('is on the list, and says it is cancelled', () {
+      final entry = only(
+        item(
+          'Netflix',
+          expiresOn: '2026-08-20',
+        ).copyWith(state: ItemState.cancelledStillActive),
+      );
+
+      expect(entry.cancelled, isTrue);
+    });
+
+    test('an ordinary item claims nothing', () {
+      expect(only(item('Netflix', expiresOn: '2026-08-20')).cancelled, isFalse);
+    });
+
+    // One badge slot, and cancelled takes it. Two badges after the name leave
+    // the name about four characters on the line the row exists to show, and
+    // the trial is ending either way -- the cancellation is the fact that
+    // changed. `ItemRow` decides which is drawn; both flags travel so it can.
+    test('a cancelled trial reports both, and the row picks', () {
+      final entry = only(
+        item(
+          'Netflix',
+          expiresOn: '2026-08-20',
+          inTrial: true,
+        ).copyWith(state: ItemState.cancelledStillActive),
+      );
+
+      expect(entry.cancelled, isTrue);
+      expect(entry.trial, isTrue);
+    });
   });
 
   // Off means off. Upcoming used to carry a line naming the switched-off

@@ -20,6 +20,8 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
 
+import 'scroll_reach.dart';
+
 /// Runs the real app on a device against a real database.
 ///
 /// Widget tests build one screen in isolation, so they cannot see the two
@@ -117,13 +119,7 @@ void main() {
   /// The add form is taller than a phone, so most of what these tests reach
   /// for starts off the bottom of it.
   Future<void> tapVisible(WidgetTester tester, Finder target) async {
-    await tester.scrollUntilVisible(
-      target,
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.tap(target);
-    await tester.pumpAndSettle();
+    await tapPastTabBar(tester, target);
   }
 
   /// Dismisses the notification sheet the first save raises.
@@ -132,8 +128,28 @@ void main() {
   /// against a list that was sitting behind it. Declining is the right answer
   /// here: what is under test is the route into the form and out again, not
   /// whether reminders get switched on.
+  ///
+  /// Waits for the sheet rather than asking once. `_saveDraft` pops the form
+  /// and then holds for `_formExit` before raising the sheet, deliberately --
+  /// the sheet names the item just saved and has to sit over a list that
+  /// already has it. A bare `Future.delayed` schedules no frames, so
+  /// `pumpAndSettle` returns during that gap and a single look finds nothing.
+  /// The test then walks on, never declines, and the save confirmation it was
+  /// actually checking for never fires.
+  ///
+  /// Still returns quietly if the sheet never comes: the callers that have
+  /// already answered this question once do not raise it again.
   Future<void> declineReminders(WidgetTester tester) async {
+    for (var i = 0; i < 20 && find.text('Not now').evaluate().isEmpty; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
     if (find.text('Not now').evaluate().isEmpty) return;
+
+    // Mounted is not arrived. The sheet slides up, so the button exists in the
+    // tree a good 200ms before it is anywhere the pointer can reach it -- the
+    // first frame puts it a screen and a half below the bottom edge.
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Not now'));
     await tester.pumpAndSettle();
   }
@@ -192,9 +208,7 @@ void main() {
     await tester.tap(find.text('Claude Pro'));
     await tester.pumpAndSettle();
 
-    await tester.scrollUntilVisible(find.textContaining('Edit reminders'), 200);
-    await tester.tap(find.textContaining('Edit reminders'));
-    await tester.pumpAndSettle();
+    await tapPastTabBar(tester, find.textContaining('Edit reminders'));
 
     expect(find.text('Reminders'), findsOneWidget);
     // Not `iOS allows`. The budget is an iOS figure applied to both platforms

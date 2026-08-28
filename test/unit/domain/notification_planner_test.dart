@@ -124,7 +124,7 @@ void main() {
           'gone',
           CategoryBook.shipped['STREAMING'],
           expiresOn: '2026-08-20',
-          state: ItemState.archived,
+          state: ItemState.inactive,
         ),
       ],
       CategoryBook.shipped,

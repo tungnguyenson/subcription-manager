@@ -207,8 +207,9 @@ void main() {
       expect(cells(rows(encode([item()])).last)[7], 'No');
     });
 
-    // Cancelled and archived are different facts and the file must not merge
-    // them: one is a subscription that ends, the other is a row put away.
+    // Cancelled and inactive are different facts and the file must not merge
+    // them: one is a subscription that is ending, the other is one that has
+    // finished. A cancelled row is still being charged.
     test('each state has its own word', () {
       String stateOf(ItemState state) =>
           cells(rows(encode([item(state: state)])).last)[8];
@@ -220,16 +221,16 @@ void main() {
         stateOf(ItemState.cancelledStillActive),
         'Cancelled (still usable)',
       );
-      expect(stateOf(ItemState.archived), 'Archived');
+      expect(stateOf(ItemState.inactive), 'Inactive');
     });
 
     // The app hides these on every screen. A file is not a screen, and someone
     // reading their own list is entitled to the parts they have put away.
-    test('an archived item is in the file', () {
+    test('an inactive item is in the file', () {
       final out = rows(
         encode([
           item(id: 'a', name: 'Netflix'),
-          item(id: 'b', name: 'Old thing', state: ItemState.archived),
+          item(id: 'b', name: 'Old thing', state: ItemState.inactive),
         ]),
       );
 

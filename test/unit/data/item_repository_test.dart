@@ -88,7 +88,7 @@ void main() {
 
   test('only active items appear in the active query', () async {
     await repo.upsert(sampleItem(id: 'live'), 1);
-    await repo.upsert(sampleItem(id: 'gone', state: ItemState.archived), 1);
+    await repo.upsert(sampleItem(id: 'gone', state: ItemState.inactive), 1);
 
     expect((await repo.observeActive().first).map((e) => e.id), ['live']);
     expect((await repo.observeAll().first).length, 2);

@@ -27,7 +27,7 @@ abstract final class ServicesPresenter {
   /// are on. A shelf the app promotes by name is a shelf the user cannot demote
   /// when the app guessed wrong about them.
   ///
-  /// Archived items are left out. They are not paused, they are finished — the
+  /// Inactive items are left out. They are not paused, they are finished — the
   /// last instalment of a course, a cancelled plan whose period has run out --
   /// and a switch on one would promise to bring it back, which it cannot.
   static List<ServiceGroup> groups(
@@ -38,7 +38,7 @@ abstract final class ServicesPresenter {
     final byCategory = <String, List<ServiceToggle>>{};
 
     for (final item in items) {
-      if (item.state == ItemState.archived) continue;
+      if (item.state == ItemState.inactive) continue;
 
       byCategory
           .putIfAbsent(item.categoryId, () => [])
@@ -49,6 +49,7 @@ abstract final class ServicesPresenter {
               subtitle: _subtitle(item, today),
               iconName: item.iconName,
               on: !item.paused,
+              cancelled: item.state == ItemState.cancelledStillActive,
             ),
           );
     }

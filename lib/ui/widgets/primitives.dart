@@ -852,13 +852,23 @@ class ChoiceChipPill extends StatelessWidget {
 class StatusBadge extends StatelessWidget {
   final String label;
 
-  const StatusBadge(this.label, {super.key});
+  /// Says the fact without asking to be looked at.
+  ///
+  /// `FREE TRIAL` is accent because it is news the reader wants: this one is
+  /// costing nothing at the moment. `CANCELLED` is the opposite kind of fact
+  /// -- something the user themselves switched off, and the row is on screen
+  /// only because it has not run out yet. Tinting that in accent would put a
+  /// highlight on the least active row in the list, and a list where the ended
+  /// items are the brightest is a list read backwards.
+  final bool quiet;
+
+  const StatusBadge(this.label, {super.key, this.quiet = false});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: SubdockColors.accentFaint,
+        color: quiet ? SubdockColors.hairline : SubdockColors.accentFaint,
         borderRadius: BorderRadius.circular(SubdockRadius.chip),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
@@ -871,7 +881,7 @@ class StatusBadge extends StatelessWidget {
           height: 1.25,
           letterSpacing: 0.7,
           fontWeight: SubdockWeight.semibold,
-          color: SubdockColors.accent,
+          color: quiet ? SubdockColors.inkMuted : SubdockColors.accent,
         ),
       ),
     );

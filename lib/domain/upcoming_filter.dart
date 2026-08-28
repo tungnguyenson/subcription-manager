@@ -91,10 +91,10 @@ class UpcomingFilter {
 
   /// The items this filter draws from, before any of its predicates run.
   ///
-  /// Archived items are gone from both branches: archiving is not muting, and
-  /// nothing on Upcoming brings an archived item back.
+  /// Inactive items are gone from both branches: being finished is not being
+  /// muted, and nothing on Upcoming brings an inactive item back.
   List<TrackedItem> pool(List<TrackedItem> items) => mutedOnly
-      ? items.where((i) => i.paused && i.state != ItemState.archived).toList()
+      ? items.where((i) => i.paused && i.state != ItemState.inactive).toList()
       : items.where((i) => i.isLive).toList();
 
   /// Whether [item] survives the narrowing conditions.

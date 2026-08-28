@@ -74,6 +74,16 @@ class ItemRow extends StatelessWidget {
   /// and it says it to a reader who cannot tell the accent from the ink.
   final bool trial;
 
+  /// Cancelled, with the paid-up period still running.
+  ///
+  /// Takes the badge slot from [trial] when both are true, and there is one
+  /// slot on purpose: two badges after the name leave the name about four
+  /// characters, on the line the row exists to show. Cancelled wins because it
+  /// is the fact that changed and the one with a decision behind it -- the
+  /// trial is ending either way, and the amount on the second line already
+  /// says what the trial was about.
+  final bool cancelled;
+
   /// How this row separates itself from the one under it. See [ItemRowStyle].
   final ItemRowStyle style;
 
@@ -89,6 +99,7 @@ class ItemRow extends StatelessWidget {
     required this.date,
     this.overdue = false,
     this.trial = false,
+    this.cancelled = false,
     this.style = ItemRowStyle.dividers,
     this.onTap,
   });
@@ -161,7 +172,10 @@ class ItemRow extends StatelessWidget {
                               style: SubdockText.itemName,
                             ),
                           ),
-                          if (trial) ...[
+                          if (cancelled) ...[
+                            const SizedBox(width: 8),
+                            StatusBadge(S.t.cancelledBadge, quiet: true),
+                          ] else if (trial) ...[
                             const SizedBox(width: 8),
                             StatusBadge(S.t.freeTrialBadge),
                           ],

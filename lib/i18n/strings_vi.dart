@@ -208,6 +208,8 @@ class ViStrings implements Strings {
   @override
   String get freeTrialBadge => 'DÙNG THỬ';
   @override
+  String get cancelledBadge => 'ĐÃ HUỶ';
+  @override
   String get freeNow => 'Đang miễn phí';
 
   @override
@@ -453,6 +455,34 @@ class ViStrings implements Strings {
   String get pendingRemindersNone => 'Không có cái nào đang chờ';
   @override
   String pendingReminders(int count) => '$count nhắc hạn đang chờ';
+
+  @override
+  String cancelAskTitle(String name) => 'Huỷ $name?';
+  @override
+  String cancelAskStopTitle(int payment) => 'Dừng sau kỳ $payment?';
+  @override
+  String get cancelAskRemindersKept => 'Vẫn chạy tới kỳ cuối';
+  @override
+  String get cancelAskUsableLabel => 'Còn dùng tới';
+  @override
+  String get cancelAskLapsedLabel => 'Kỳ đã trả tiền';
+  @override
+  String cancelAskUsableUntil(String date) => '$date, sau đó mục tự đóng';
+  @override
+  String get cancelAskClosesNow => 'Ngày đó đã qua, nên mục đóng luôn';
+  @override
+  String get cancelAskPlanLabel => 'Kế hoạch rút còn';
+  @override
+  String cancelAskPlanPayments(int kept, int planned) =>
+      '$kept kỳ thay vì $planned kỳ';
+  @override
+  String get cancelAskKeptLabel => 'Giữ nguyên';
+  @override
+  String get cancelAskKeptValue => 'Lịch sử đã trả, ngày và số tiền';
+  @override
+  String get cancelAskConfirm => 'Huỷ gói';
+  @override
+  String get cancelAskStopConfirm => 'Dừng lại';
 
   // ---- the timeline ----
 
@@ -1472,5 +1502,5 @@ class ViStrings implements Strings {
   @override
   String get csvStateCancelled => 'Đã huỷ (còn hạn dùng)';
   @override
-  String get csvStateArchived => 'Đã cất đi';
+  String get csvStateInactive => 'Đã ngừng';
 }

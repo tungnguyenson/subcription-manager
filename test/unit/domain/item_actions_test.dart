@@ -93,11 +93,11 @@ void main() {
         repeatCount: 6,
       );
 
-      expect(ItemActions.advanced(last).state, ItemState.archived);
+      expect(ItemActions.advanced(last).state, ItemState.inactive);
     });
 
     test('a one-off is done when it is done', () {
-      expect(ItemActions.advanced(item(cycle: null)).state, ItemState.archived);
+      expect(ItemActions.advanced(item(cycle: null)).state, ItemState.inactive);
     });
 
     // Keyed by the due date, so recording the same payment twice replaces one
@@ -122,6 +122,51 @@ void main() {
 
     test('an open-ended item is cancelled but still runs its period', () {
       expect(ItemActions.stopped(item()).state, ItemState.cancelledStillActive);
+    });
+  });
+
+  // The period a cancellation names has to end somewhere, and nothing used to
+  // end it. A cancelled subscription sat on Upcoming for good and the money
+  // chart drew a charge for it every month after the last one it was paid up
+  // to, for something the user had told the app they had stopped.
+  group('a cancelled period running out', () {
+    TrackedItem cancelled({String expiresOn = '2026-08-21'}) =>
+        item(expiresOn: expiresOn)
+            .copyWith(state: ItemState.cancelledStillActive);
+
+    test('closes the item once the date has gone', () {
+      final closed = ItemActions.lapsed(cancelled(), d('2026-08-22'));
+
+      expect(closed, isNotNull);
+      expect(closed!.state, ItemState.inactive);
+    });
+
+    // The last day of a period paid for is a day the service still works.
+    // Closing that morning takes the row off the list while the user can still
+    // use the thing it is about.
+    test('leaves it alone on the day itself', () {
+      expect(ItemActions.lapsed(cancelled(), d('2026-08-21')), isNull);
+      expect(ItemActions.lapsed(cancelled(), d('2026-08-20')), isNull);
+    });
+
+    test('does not touch an item nobody cancelled', () {
+      expect(ItemActions.lapsed(item(), d('2027-01-01')), isNull);
+    });
+
+    // Null rather than the item unchanged, so the sweep that calls this can
+    // write only the rows that moved. Returning the item would have it rewrite
+    // the whole table every time the app is opened.
+    test('says so by returning nothing, not by returning the same item', () {
+      expect(ItemActions.hasLapsed(cancelled(), d('2026-08-22')), isTrue);
+      expect(ItemActions.hasLapsed(cancelled(), d('2026-08-21')), isFalse);
+    });
+
+    // Whatever closed it, it is closed. Running the sweep twice must not
+    // produce a second write, or the item stream feeding it would never settle.
+    test('has nothing left to do once the item is closed', () {
+      final closed = ItemActions.lapsed(cancelled(), d('2026-08-22'))!;
+
+      expect(ItemActions.lapsed(closed, d('2026-08-23')), isNull);
     });
   });
 
@@ -194,7 +239,7 @@ void main() {
     test('is not live, and neither is archived', () {
       expect(item().isLive, isTrue);
       expect(item(paused: true).isLive, isFalse);
-      expect(item().copyWith(state: ItemState.archived).isLive, isFalse);
+      expect(item().copyWith(state: ItemState.inactive).isLive, isFalse);
     });
 
     // A cancelled-but-still-running subscription can also be paused, which is

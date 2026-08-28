@@ -221,6 +221,8 @@ class EnStrings implements Strings {
   @override
   String get freeTrialBadge => 'FREE TRIAL';
   @override
+  String get cancelledBadge => 'CANCELLED';
+  @override
   String get freeNow => 'Free now';
 
   @override
@@ -480,6 +482,34 @@ class EnStrings implements Strings {
   @override
   String pendingReminders(int count) =>
       '$count pending ${count == 1 ? 'reminder' : 'reminders'}';
+
+  @override
+  String cancelAskTitle(String name) => 'Cancel $name?';
+  @override
+  String cancelAskStopTitle(int payment) => 'Stop after payment $payment?';
+  @override
+  String get cancelAskRemindersKept => 'They run on to the last payment';
+  @override
+  String get cancelAskUsableLabel => 'Usable until';
+  @override
+  String get cancelAskLapsedLabel => 'The paid-up period';
+  @override
+  String cancelAskUsableUntil(String date) => '$date, then it closes itself';
+  @override
+  String get cancelAskClosesNow => 'That date has gone, so it closes now';
+  @override
+  String get cancelAskPlanLabel => 'The plan shortens to';
+  @override
+  String cancelAskPlanPayments(int kept, int planned) =>
+      '$kept payments instead of $planned';
+  @override
+  String get cancelAskKeptLabel => 'Kept';
+  @override
+  String get cancelAskKeptValue => 'Recorded payments, dates and amounts';
+  @override
+  String get cancelAskConfirm => 'Cancel it';
+  @override
+  String get cancelAskStopConfirm => 'Stop it';
 
   // ---- the timeline ----
 
@@ -1511,5 +1541,5 @@ class EnStrings implements Strings {
   @override
   String get csvStateCancelled => 'Cancelled (still usable)';
   @override
-  String get csvStateArchived => 'Archived';
+  String get csvStateInactive => 'Inactive';
 }

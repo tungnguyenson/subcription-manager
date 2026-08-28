@@ -240,7 +240,7 @@ void main() {
 
     test('an archived item does not', () {
       final view = build(
-        [item('Netflix Premium', state: ItemState.archived)],
+        [item('Netflix Premium', state: ItemState.inactive)],
         [netflix()],
       );
 

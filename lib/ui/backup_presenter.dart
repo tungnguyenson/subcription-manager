@@ -346,7 +346,7 @@ abstract final class BackupPresenter {
   /// calls to a hotline. [DateSource] already records which is which, so the
   /// app can measure the cost of losing the list rather than its length.
   ///
-  /// Archived items do not count. They are out of the user's way already, and
+  /// Inactive items do not count. They are out of the user's way already, and
   /// counting them would keep a warning alive over a list nobody is using.
   static int confirmedDates(List<TrackedItem> items) =>
       items.where((item) => item.isCostlyToRebuild).length;

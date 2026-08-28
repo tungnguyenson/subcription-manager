@@ -35,6 +35,10 @@ abstract class UpcomingStrings {
   /// The badge on a row, in capitals.
   String get freeTrialBadge;
 
+  /// On a row whose subscription is cancelled but whose paid-up period is
+  /// still running. Short: it shares a line with the item name.
+  String get cancelledBadge;
+
   /// A trial with no price at all. The only case where this line answers for
   /// the state rather than the amount, because there is no amount to give.
   String get freeNow;
