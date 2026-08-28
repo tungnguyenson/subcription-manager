@@ -308,11 +308,7 @@ class ItemDetailScreen extends StatelessWidget {
     return ItemPresenter.leadLabel(leads.first);
   }
 
-  String _costLabel(Money money) {
-    final per = ItemPresenter.cyclePer(item.cycle);
-    final amount = MoneyFormat.full(money);
-    return per == null ? amount : '$amount $per';
-  }
+  String _costLabel(Money money) => ItemPresenter.cost(money, item.cycle);
 
   /// `Mark payment 4 as paid` while there are instalments left to count, and
   /// plain `Mark as paid` otherwise. The number is what tells the user the app

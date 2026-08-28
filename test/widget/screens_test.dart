@@ -378,7 +378,7 @@ void main() {
         ),
       );
 
-      expect(find.text('1,200,000 ₫ · payment 4 of 6'), findsOneWidget);
+      expect(find.text('1,200,000\u00A0₫/m · payment 4 of 6'), findsOneWidget);
     });
   });
 

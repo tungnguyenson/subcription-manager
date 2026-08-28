@@ -174,6 +174,10 @@ class _ServicePickerState extends State<ServicePicker> {
         ],
         Expanded(
           child: ListView(
+            // Scrolling the results is a way of saying the search box is done
+            // with, and the keyboard covering half of them is what makes the
+            // scroll necessary in the first place.
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             padding: const EdgeInsets.fromLTRB(
               SubdockSpacing.screenH,
               18,

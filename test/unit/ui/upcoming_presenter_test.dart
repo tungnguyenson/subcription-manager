@@ -273,7 +273,10 @@ void main() {
         ),
       ], today);
 
-      expect(view.thisWeek.single.subtitle, '1,200,000 ₫ · payment 4 of 6');
+      expect(
+        view.thisWeek.single.subtitle,
+        '1,200,000\u00A0₫/m · payment 4 of 6',
+      );
     });
 
     test('an open-ended item says nothing about counts', () {
@@ -287,7 +290,7 @@ void main() {
         ),
       ], today);
 
-      expect(view.thisWeek.single.subtitle, '260,000 ₫');
+      expect(view.thisWeek.single.subtitle, '260,000\u00A0₫/m');
     });
 
     // The badge says the state; this line says the amount. It used to say both
@@ -307,7 +310,7 @@ void main() {
       ], today);
 
       expect(view.thisWeek.single.trial, isTrue);
-      expect(view.thisWeek.single.subtitle, '260,000 ₫');
+      expect(view.thisWeek.single.subtitle, '260,000\u00A0₫/m');
     });
 
     // The one case the line still has to answer for itself. With no amount

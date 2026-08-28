@@ -462,7 +462,7 @@ void main() {
       );
 
       await tester.tap(find.text('Edit'));
-      await tester.tap(find.text(r'$20.00 / mo'));
+      await tester.tap(find.text(r'$20.00/m'));
       await tester.tap(find.text('Streaming'));
       await tester.pumpAndSettle();
 
@@ -1228,6 +1228,34 @@ void main() {
       expect(saved?.note, 'Shared with Minh, he pays half.');
     });
 
+    // The cost box and the two count boxes open a number pad, and a number pad
+    // carries no Done key. Without a tap that gives the keyboard up, one raised
+    // here stays up over the Save button for the rest of the form.
+    testWidgets('a tap beside a field gives the keyboard up', (tester) async {
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (_) {},
+        ),
+      );
+
+      await tester.ensureVisible(noteBox);
+      await tester.pumpAndSettle();
+      await tester.tap(noteBox);
+      await tester.pumpAndSettle();
+      expect(tester.testTextInput.isVisible, isTrue);
+
+      // The field's own label: a word on the form that has no tap of its own,
+      // which is exactly the space a keyboard gets dismissed on.
+      await tester.tap(find.text('NOTE'));
+      await tester.pumpAndSettle();
+
+      expect(tester.testTextInput.isVisible, isFalse);
+    });
+
     // A box holding spaces is a box somebody cleared. It has to come back as
     // null, because null is what the detail screen reads to decide whether the
     // row is drawn at all -- whitespace would draw an empty one.
@@ -1705,8 +1733,8 @@ void main() {
 
       // Both cycles on the grid at once, told apart by the unit under the
       // price rather than by a control the user has not touched yet.
-      expect(find.textContaining('/ mo'), findsOneWidget);
-      expect(find.textContaining('/ yr'), findsOneWidget);
+      expect(find.textContaining('/m'), findsOneWidget);
+      expect(find.textContaining('/y'), findsOneWidget);
 
       // One slug, two prices: a tile lit by its slug alone would light both,
       // which reads as the user having chosen two amounts at once.

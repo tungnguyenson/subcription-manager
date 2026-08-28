@@ -377,191 +377,206 @@ class _AddItemScreenState extends State<AddItemScreen> {
     final showSuggestions = _suggestions.isNotEmpty && _nameFocus.hasFocus;
     final plans = _planOptions;
 
-    return Column(
-      children: [
-        Expanded(
-          // No horizontal padding here: the chip rails have to reach the edge
-          // of the screen, so every other block asks for the gutter itself.
-          child: ListView(
-            padding: const EdgeInsets.fromLTRB(0, 6, 0, 12),
-            children: [
-              _gutter(_header()),
-              const SizedBox(height: 18),
-              _gutter(Field(label: S.t.fieldName, child: _nameField())),
-              if (showSuggestions) ...[
-                const SizedBox(height: 12),
-                _gutter(_suggestionList()),
-              ],
-              // A block of its own, with its own gap above it. It used to be
-              // pulled up tight under the name field on the grounds that what
-              // a thing is called and what kind of thing it is are one answer
-              // given twice -- but a form whose gaps vary from block to block
-              // reads as groupings that were never meant, so this one takes
-              // the same 22 as every other.
-              const SizedBox(height: SubdockSpacing.formBlock),
-              _gutter(
-                Field(
-                  // One row, never a rail. Twenty-two shelves scrolling
-                  // sideways is a browsing control on a form whose other
-                  // eleven blocks all answer in place, and the one thing it
-                  // did better -- showing what the choices are -- is what the
-                  // sheet behind this row does with the whole screen.
-                  label: S.t.fieldCategory,
-                  child: PickerField(
-                    value: _chosen?.displayLabel ?? S.t.fieldPickCategory,
-                    placeholder: _chosen == null,
-                    onTap: _pickCategory,
-                  ),
-                ),
-              ),
-              // The provider's own page, where the two answers this form is
-              // waiting for actually live. Someone adding a service they have
-              // never looked up does not know the renewal date or the amount,
-              // and this is the one place in the app that can send them to
-              // where both are written down.
-              if (_manageUrl case final url?) ...[
-                const SizedBox(height: 14),
-                _gutter(_manageLink(url)),
-              ],
-              // The plans of the chosen service. Above the cost field, and
-              // above the cycle: picking a tile fills both of them, so a user
-              // who recognises their plan never reads the two blocks below.
-              if (plans.isNotEmpty) ...[
+    // A tap on the empty space beside a field is how a keyboard gets closed
+    // everywhere else, and on iOS and Android a TextField does nothing with
+    // it by default. This form cannot afford that: the cost box and the two
+    // count boxes open a number pad, which has no Done key, so a keyboard
+    // raised there stays up over the Save button until the form is left.
+    // Children with taps of their own still win the gesture arena, so this
+    // only picks up the taps nothing else wanted.
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Column(
+        children: [
+          Expanded(
+            // No horizontal padding here: the chip rails have to reach the edge
+            // of the screen, so every other block asks for the gutter itself.
+            child: ListView(
+              // The other half of the same promise: a drag over the list puts
+              // the keyboard away before it has covered whatever is being
+              // scrolled to.
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              padding: const EdgeInsets.fromLTRB(0, 6, 0, 12),
+              children: [
+                _gutter(_header()),
+                const SizedBox(height: 18),
+                _gutter(Field(label: S.t.fieldName, child: _nameField())),
+                if (showSuggestions) ...[
+                  const SizedBox(height: 12),
+                  _gutter(_suggestionList()),
+                ],
+                // A block of its own, with its own gap above it. It used to be
+                // pulled up tight under the name field on the grounds that what
+                // a thing is called and what kind of thing it is are one answer
+                // given twice -- but a form whose gaps vary from block to block
+                // reads as groupings that were never meant, so this one takes
+                // the same 22 as every other.
                 const SizedBox(height: SubdockSpacing.formBlock),
                 _gutter(
                   Field(
-                    label: S.t.fieldPlan,
-                    child: PlanGrid(
-                      options: plans,
-                      selected: _planTier,
-                      onSelect: _pickPlan,
-                      // The way past the grid, as the last tile in it. The
-                      // provenance line that used to sit under here -- "listed
-                      // prices, checked 30 Jul 2026" -- is gone with it: the
-                      // tiles are a shortcut to a number the user can
-                      // overwrite in the field below, and a caveat about
-                      // staleness under every one of them charged the reader
-                      // for a doubt they can settle by looking at their own
-                      // statement.
-                      onOther: _costOpen
-                          ? null
-                          : () => setState(() => _costOpen = true),
+                    // One row, never a rail. Twenty-two shelves scrolling
+                    // sideways is a browsing control on a form whose other
+                    // eleven blocks all answer in place, and the one thing it
+                    // did better -- showing what the choices are -- is what the
+                    // sheet behind this row does with the whole screen.
+                    label: S.t.fieldCategory,
+                    child: PickerField(
+                      value: _chosen?.displayLabel ?? S.t.fieldPickCategory,
+                      placeholder: _chosen == null,
+                      onTap: _pickCategory,
                     ),
                   ),
                 ),
-              ],
-              if (plans.isEmpty || _costOpen) ...[
+                // The provider's own page, where the two answers this form is
+                // waiting for actually live. Someone adding a service they have
+                // never looked up does not know the renewal date or the amount,
+                // and this is the one place in the app that can send them to
+                // where both are written down.
+                if (_manageUrl case final url?) ...[
+                  const SizedBox(height: 14),
+                  _gutter(_manageLink(url)),
+                ],
+                // The plans of the chosen service. Above the cost field, and
+                // above the cycle: picking a tile fills both of them, so a user
+                // who recognises their plan never reads the two blocks below.
+                if (plans.isNotEmpty) ...[
+                  const SizedBox(height: SubdockSpacing.formBlock),
+                  _gutter(
+                    Field(
+                      label: S.t.fieldPlan,
+                      child: PlanGrid(
+                        options: plans,
+                        selected: _planTier,
+                        onSelect: _pickPlan,
+                        // The way past the grid, as the last tile in it. The
+                        // provenance line that used to sit under here -- "listed
+                        // prices, checked 30 Jul 2026" -- is gone with it: the
+                        // tiles are a shortcut to a number the user can
+                        // overwrite in the field below, and a caveat about
+                        // staleness under every one of them charged the reader
+                        // for a doubt they can settle by looking at their own
+                        // statement.
+                        onOther: _costOpen
+                            ? null
+                            : () => setState(() => _costOpen = true),
+                      ),
+                    ),
+                  ),
+                ],
+                if (plans.isEmpty || _costOpen) ...[
+                  const SizedBox(height: SubdockSpacing.formBlock),
+                  _costBlock(),
+                ],
                 const SizedBox(height: SubdockSpacing.formBlock),
-                _costBlock(),
-              ],
-              const SizedBox(height: SubdockSpacing.formBlock),
-              _gutter(
-                Field(
-                  // `Repeats` when editing an item that already does,
-                  // `Billing cycle` when setting one up. The hand-off words
-                  // them differently and both readings are right: one is a
-                  // fact about the item, the other is a choice being made.
-                  label: _isEdit ? S.t.fieldRepeats : S.t.fieldBillingCycle,
-                  child: _cycleField(),
-                ),
-              ),
-              // The cycles nobody bills on often enough to earn a segment.
-              // A sub-block of the tray above rather than a block of its own:
-              // it is the second half of one answer.
-              if (_cycleOther) ...[
-                const SizedBox(height: 9),
-                _gutter(_otherCycles()),
-              ],
-              // The interval nothing on the list covers, typed out.
-              if (_isCustomCycle) ...[
-                const SizedBox(height: 9),
-                _gutter(_everyRow()),
-              ],
-              // Asked once, trial or not. For a trial this date is the day
-              // the free period ends, which is the same day the first charge
-              // lands -- see the trial card's own note.
-              const SizedBox(height: SubdockSpacing.formBlock),
-              Field(
-                // No heading, on either form. The card says `Next payment
-                // date` while it is still a prompt and shows the date itself
-                // once it has one, so an uppercase `NEXT PAYMENT` above it is
-                // the screen saying the same thing twice in two type sizes.
-                label: null,
-                bleed: true,
-                child: _dateField(),
-              ),
-              // Hidden for a one-off. There is no series to end, and a
-              // `Repeats forever` toggle over a payment that happens once is
-              // a question with no true answer.
-              if (_cycle != null) ...[
-                const SizedBox(height: SubdockSpacing.formBlock),
-                _gutter(_repeatsBlock()),
-              ],
-              const SizedBox(height: SubdockSpacing.formBlock),
-              _gutter(
-                Field(
-                  label: _isEdit ? S.t.fieldFreeTrial : null,
-                  child: TrialField(
-                    value: _inTrial,
-                    onChanged: (on) => setState(() => _inTrial = on),
+                _gutter(
+                  Field(
+                    // `Repeats` when editing an item that already does,
+                    // `Billing cycle` when setting one up. The hand-off words
+                    // them differently and both readings are right: one is a
+                    // fact about the item, the other is a choice being made.
+                    label: _isEdit ? S.t.fieldRepeats : S.t.fieldBillingCycle,
+                    child: _cycleField(),
                   ),
                 ),
-              ),
-              const SizedBox(height: SubdockSpacing.formBlock),
-              _gutter(
-                SourceField(
-                  sources: widget.sources,
-                  selected: _sourceId,
-                  onSelect: (id) => setState(() => _sourceId = id),
-                  onCreate: widget.onCreateSource,
-                ),
-              ),
-              // Editing does not show the reminder ladder. An item can hold
-              // several leads and this rail holds one, so offering it here
-              // would silently flatten "14, 7, 3, 1, 0 days before" down to
-              // whichever chip happened to be lit. The item's own screen has a
-              // reminders editor that can say all of them.
-              if (!_isEdit) ...[
+                // The cycles nobody bills on often enough to earn a segment.
+                // A sub-block of the tray above rather than a block of its own:
+                // it is the second half of one answer.
+                if (_cycleOther) ...[
+                  const SizedBox(height: 9),
+                  _gutter(_otherCycles()),
+                ],
+                // The interval nothing on the list covers, typed out.
+                if (_isCustomCycle) ...[
+                  const SizedBox(height: 9),
+                  _gutter(_everyRow()),
+                ],
+                // Asked once, trial or not. For a trial this date is the day
+                // the free period ends, which is the same day the first charge
+                // lands -- see the trial card's own note.
                 const SizedBox(height: SubdockSpacing.formBlock),
                 Field(
-                  label: S.t.fieldRemindMe,
+                  // No heading, on either form. The card says `Next payment
+                  // date` while it is still a prompt and shows the date itself
+                  // once it has one, so an uppercase `NEXT PAYMENT` above it is
+                  // the screen saying the same thing twice in two type sizes.
+                  label: null,
                   bleed: true,
-                  child: _leadRail(),
+                  child: _dateField(),
+                ),
+                // Hidden for a one-off. There is no series to end, and a
+                // `Repeats forever` toggle over a payment that happens once is
+                // a question with no true answer.
+                if (_cycle != null) ...[
+                  const SizedBox(height: SubdockSpacing.formBlock),
+                  _gutter(_repeatsBlock()),
+                ],
+                const SizedBox(height: SubdockSpacing.formBlock),
+                _gutter(
+                  Field(
+                    label: _isEdit ? S.t.fieldFreeTrial : null,
+                    child: TrialField(
+                      value: _inTrial,
+                      onChanged: (on) => setState(() => _inTrial = on),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: SubdockSpacing.formBlock),
+                _gutter(
+                  SourceField(
+                    sources: widget.sources,
+                    selected: _sourceId,
+                    onSelect: (id) => setState(() => _sourceId = id),
+                    onCreate: widget.onCreateSource,
+                  ),
+                ),
+                // Editing does not show the reminder ladder. An item can hold
+                // several leads and this rail holds one, so offering it here
+                // would silently flatten "14, 7, 3, 1, 0 days before" down to
+                // whichever chip happened to be lit. The item's own screen has a
+                // reminders editor that can say all of them.
+                if (!_isEdit) ...[
+                  const SizedBox(height: SubdockSpacing.formBlock),
+                  Field(
+                    label: S.t.fieldRemindMe,
+                    bleed: true,
+                    child: _leadRail(),
+                  ),
+                ],
+                // Last, and on both forms. Everything above it is a fact the
+                // app acts on -- a date it reminds against, an amount it totals,
+                // a shelf it files under -- and this is the one box that asks
+                // for what only the user knows. Asking it before the form has
+                // finished asking its own questions would read as a required
+                // field.
+                const SizedBox(height: SubdockSpacing.formBlock),
+                _gutter(Field(label: S.t.fieldNote, child: _noteField())),
+                const SizedBox(height: SubdockSpacing.formBlock),
+                _gutter(
+                  SummaryBlock(
+                    due: _dueDate,
+                    amount: _parsedAmount,
+                    trial: _inTrial,
+                    leadDays: _lead,
+                  ),
                 ),
               ],
-              // Last, and on both forms. Everything above it is a fact the
-              // app acts on -- a date it reminds against, an amount it totals,
-              // a shelf it files under -- and this is the one box that asks
-              // for what only the user knows. Asking it before the form has
-              // finished asking its own questions would read as a required
-              // field.
-              const SizedBox(height: SubdockSpacing.formBlock),
-              _gutter(Field(label: S.t.fieldNote, child: _noteField())),
-              const SizedBox(height: SubdockSpacing.formBlock),
-              _gutter(
-                SummaryBlock(
-                  due: _dueDate,
-                  amount: _parsedAmount,
-                  trial: _inTrial,
-                  leadDays: _lead,
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(
-            SubdockSpacing.screenH,
-            12,
-            SubdockSpacing.screenH,
-            12,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              SubdockSpacing.screenH,
+              12,
+              SubdockSpacing.screenH,
+              12,
+            ),
+            child: PrimaryButton(
+              _isEdit ? S.t.saveChanges : S.t.saveItem,
+              onPressed: _canSave ? _save : null,
+            ),
           ),
-          child: PrimaryButton(
-            _isEdit ? S.t.saveChanges : S.t.saveItem,
-            onPressed: _canSave ? _save : null,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -575,7 +590,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
   /// matching whatever the tray happened to be set to, which hid a vendor's
   /// yearly prices behind a control the user had not touched — and the yearly
   /// figure is the one most worth seeing before committing. Every tile now
-  /// carries its own `/ mo` or `/ yr`, and tapping one sets the tray.
+  /// carries its own `/m` or `/y`, and tapping one sets the tray.
   List<PlanOption> get _planOptions {
     final entry = _matched;
     if (entry == null) return const [];
@@ -591,7 +606,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
     setState(() {
       _planTier = plan.id;
       _currency = plan.price.currency;
-      // The tile says `/ mo` or `/ yr`, so the tray under it has to agree.
+      // The tile says `/m` or `/y`, so the tray under it has to agree.
       // Filling the amount and leaving the cycle alone is how a yearly price
       // would end up saved as a monthly charge -- twelve times the money, with
       // nothing on screen contradicting it.

@@ -107,7 +107,7 @@ for f in integration_test/*_test.dart; do flutter test "$f" -d <device-id>; done
 Mất khoảng bốn phút mỗi file trên máy ảo, nên đừng chạy sau từng lần sửa nhỏ. Nhưng
 phải chạy trước khi tin rằng một thay đổi về điều hướng hay bố cục đã xong.
 
-## Năm mươi bốn cái bẫy đã vấp, đừng vấp lại
+## Năm mươi sáu cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -564,7 +564,7 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
     đây lưới lọc theo `_cycle` đang chọn, nên bảng giá năm của hãng nằm sau một cái
     nút người dùng chưa hề chạm vào, mà con số năm mới là con số đáng xem trước khi
     quyết. Nay `PlanGrid.optionsFor` trả về mọi kỳ hạn của một vùng, mỗi ô ghi thêm
-    `/ mo` hay `/ yr` cạnh giá, và bấm một ô là **đặt luôn chu kỳ** chứ không chỉ đặt
+    `/m` hay `/y` cạnh giá, và bấm một ô là **đặt luôn chu kỳ** chứ không chỉ đặt
     giá. Bỏ phần đặt chu kỳ đi là một giá năm được lưu thành khoản trừ hàng tháng, gấp
     mười hai lần số tiền, mà trên màn hình không có gì nói ngược lại.
 
@@ -1249,7 +1249,60 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
     `test/unit/domain/local_date_test.dart`. Lịch tháng dùng chung `UpcomingCopy.when`
     nên nó đi theo, đúng luật ở bẫy 31.
 
-54. **Huỷ một gói đi qua `CancelAsk`, và trạng thái `cancelledStillActive` giờ mới thật
+54. **Form Add và Edit phải tự nhận cú bấm ra ngoài để đóng bàn phím.** Trên iOS và
+    Android, `TextField` mặc định không làm gì với cú bấm ra ngoài, còn ô tiền và hai ô
+    đếm mở bàn phím số, mà bàn phím số không có phím Done. Hệ quả: bàn phím dựng lên rồi
+    ở đó, che luôn nút Lưu, cho tới khi người dùng rời hẳn form.
+
+    Vì vậy `build` của `add_item_screen.dart` bọc cả `Column` trong một `GestureDetector`
+    với `HitTestBehavior.translucent`, gọi `FocusScope.of(context).unfocus()`. Widget con
+    có cử chỉ riêng vẫn thắng trong gesture arena, nên nó chỉ nhặt những cú bấm không ai
+    nhận. `ListView` của form và của màn chọn dịch vụ đều thêm
+    `keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag`, vì kéo danh sách
+    cũng là một cách nói rằng đã gõ xong.
+
+    Chốt chặn là bài `a tap beside a field gives the keyboard up` trong
+    `test/widget/detail_screens_test.dart`, đo bằng `tester.testTextInput.isVisible`.
+
+55. **Giá trên danh sách đi kèm chu kỳ, và đi qua đúng một hàm.** `ItemPresenter.cost`
+    là chỗ duy nhất ghép số tiền với hậu tố: `260,000 ₫/m`. Màn Detail đã viết như vậy
+    từ lâu, còn hai danh sách thì in số trần, nên cùng một mục đọc ra hai kiểu. Số trần
+    còn tệ hơn thế: `1,200,000 ₫` của một gói năm nằm dưới `260,000 ₫` của một gói tháng
+    thì mục rẻ hơn lại đứng trên.
+
+    Ba chỗ gọi nó: `UpcomingPresenter.subtitleOf` (lịch tháng ăn theo, đúng bẫy 31),
+    `ServicesPresenter._subtitle`, và ô `Giá` của màn Detail. Mục một lần không có hậu
+    tố, vì không có chu kỳ nào để gọi tên.
+
+    **Đừng gọi nó cho một con số nói về một ngày cụ thể.** Mốc hạn trên cột
+    `reminder_timeline.dart`, dòng trong lịch sử đã trả, và câu trong sheet xin quyền đều
+    nói về một lần trừ tiền đã có ngày đứng cạnh; dán `/ tháng` vào đó là nói tiền lại đi
+    tiếp vào đúng ngày đó. Màn Money cũng không gọi, vì con số ở đó là tổng của tháng
+    đang xem, đã nhân theo số kỳ rơi vào tháng.
+
+    Ba quyết định về chữ, đừng đảo lại mà không đọc:
+
+    - **Đơn vị bên tiếng Anh là một chữ cái: `/w`, `/m`, `/y`.** Hậu tố này đi theo mọi
+      giá trên mọi danh sách, mà thứ người ta đọc là cái giá, nên nó phải nhỏ hết mức còn
+      đọc được. Hàng quý và nửa năm viết `/3m` và `/6m` chứ không viết `/qtr` và `/6 mo`,
+      để không có ô nào phá nhịp một chữ cái. Chu kỳ tự gõ theo cùng luật: `/2w`, `/10d`.
+    - **Bản tiếng Việt vẫn viết đủ chữ, `260,000 ₫/tháng`, và không có khoảng trắng quanh
+      dấu gạch**, vì đó là cách hoá đơn tiếng Việt viết, và vì dòng phụ màn Tất cả dịch vụ
+      đã tràn đúng bẫy 40. Tiếng Việt chưa có cách viết tắt nào đủ rõ cho `tháng` và
+      `tuần`, nên nó chưa rút; đó là việc còn để ngỏ chứ không phải đã chốt. Chỗ ghép nằm
+      ở `S.t.costEvery`, một phương thức của bản dịch chứ không phải một phép nối trong
+      Dart, vì hai thứ tiếng ghép hai kiểu khác nhau.
+    - **Khoảng trắng trong số tiền thành khoảng trắng không ngắt khi có hậu tố.** Dòng phụ
+      màn Tất cả dịch vụ được phép xuống hai dòng, và không có nó thì `5,290,000` đứng
+      cuối dòng trên còn `₫/năm` rơi xuống dòng dưới. Font Be Vietnam Pro cho hai loại
+      khoảng trắng cùng bề rộng, đã đo, nên không có gì xê dịch. Hệ quả cho test: chuỗi
+      mong đợi phải viết `'260,000\u00A0₫/m'`.
+    - **Dòng phụ màn Tất cả dịch vụ nhận `maxLines: 2`.** Bản tiếng Anh vẫn gọn một dòng,
+      nên hàng chỉ cao lên ở đúng thứ tiếng cần chỗ. Dòng trên màn Upcoming thì vẫn một
+      dòng: ở đó tên nguồn tiền không được cắt, và cắt bớt dòng phụ là luật cũ của
+      `_SecondLine`.
+
+56. **Huỷ một gói đi qua `CancelAsk`, và trạng thái `cancelledStillActive` giờ mới thật
     sự kết thúc.** Trước đây nút `Huỷ gói này` gọi thẳng `repository.upsert` rồi pop, không
     hỏi gì, và cái tên trạng thái hứa một điều không code nào thực hiện.
 

@@ -1,6 +1,7 @@
 import 'package:subdock/domain/instalments.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/domain/money.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/i18n.dart';
 import 'package:subdock/ui/money_format.dart';
@@ -101,7 +102,7 @@ abstract final class ItemPresenter {
     };
   }
 
-  /// The interval abbreviated to fit a segment or a pill: `5 mo`, `2 wk`.
+  /// The interval abbreviated as far as it goes: `5m`, `2w`.
   static String cycleEveryShort(Cycle cycle) {
     final (count, field) = cycle.inLargestField;
     return switch (field) {
@@ -112,7 +113,35 @@ abstract final class ItemPresenter {
     };
   }
 
-  /// The suffix on a cost: `$20.00 / mo`.
+  /// A cost with the interval it repeats on: `260,000 ₫/m`.
+  ///
+  /// One helper rather than a line of its own at each call site, because half
+  /// the app was printing the amount bare. `260,000 ₫` against a weekly plan
+  /// and against a yearly one are fifty-two times apart, and a list that says
+  /// only the number leaves the reader to remember which -- for forty items.
+  /// The detail screen has carried the suffix all along, which is what made
+  /// the lists read as a second, smaller number for the same item.
+  ///
+  /// A one-off gets the amount on its own. There is no interval to name, and
+  /// `/ once` would spend width saying that nothing repeats.
+  ///
+  /// Not for a figure that names a single date. A charge on the timeline, a
+  /// row in the payment history and the sentence in the save sheet are all
+  /// about one occurrence that already has its day printed beside it; a
+  /// per-cycle suffix there says the money moves again on that same date.
+  static String cost(Money money, Cycle? cycle) {
+    final per = cyclePer(cycle);
+    final amount = MoneyFormat.full(money);
+    if (per == null) return amount;
+    // The amount goes in with its space made non-breaking. The services list
+    // gives this line two lines to fall on, and `5,290,000` at the end of one
+    // with `₫/năm` under it splits a figure the eye reads as one token. Glued,
+    // the only place left to break is the dot between the date and the money,
+    // which is where a break belongs.
+    return S.t.costEvery(amount.replaceAll(' ', '\u00a0'), per);
+  }
+
+  /// The suffix on a cost: `$20.00/m`.
   static String? cyclePer(Cycle? cycle) {
     if (cycle == null) return null;
     return switch ((cycle.unit, cycle.step)) {

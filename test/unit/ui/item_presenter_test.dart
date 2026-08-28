@@ -3,6 +3,7 @@ import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/instalments.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/domain/money.dart';
 import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/ui/item_presenter.dart';
 
@@ -162,8 +163,54 @@ void main() {
 
     test('a one-off cost carries no per-cycle suffix', () {
       expect(ItemPresenter.cyclePer(null), isNull);
-      expect(ItemPresenter.cyclePer(Cycle.monthly), '/ mo');
-      expect(ItemPresenter.cyclePer(Cycle.yearly), '/ yr');
+      expect(ItemPresenter.cyclePer(Cycle.monthly), '/m');
+      expect(ItemPresenter.cyclePer(Cycle.yearly), '/y');
+    });
+
+    // Every form the lists can print, in one place. A price without its
+    // interval is half an answer -- the same 260,000 ₫ is a year of one plan
+    // and a fortnight of another -- and the detail screen was the only screen
+    // saying which until the lists were made to agree with it.
+    test('a cost reads with the interval it repeats on', () {
+      final money = Money(260000, 'VND');
+
+      // The one form with no suffix: nothing repeats, so there is no interval
+      // to name and `/ once` would only say so at the cost of the width.
+      expect(ItemPresenter.cost(money, null), '260,000 ₫');
+
+      // The `\u00A0` is the space inside the amount, made non-breaking: the
+      // services list lets this line wrap, and a figure split across two of
+      // them stops reading as one number.
+      expect(ItemPresenter.cost(money, Cycle.weekly), '260,000\u00A0₫/w');
+      expect(ItemPresenter.cost(money, Cycle.monthly), '260,000\u00A0₫/m');
+      expect(ItemPresenter.cost(money, Cycle.quarterly), '260,000\u00A0₫/3m');
+      expect(ItemPresenter.cost(money, Cycle.semiannual), '260,000\u00A0₫/6m');
+      expect(ItemPresenter.cost(money, Cycle.yearly), '260,000\u00A0₫/y');
+
+      // An interval with no name of its own reads back in the unit it was
+      // typed in, same as the `Repeats` row does.
+      expect(
+        ItemPresenter.cost(money, Cycle.every(2, CycleField.week)),
+        '260,000\u00A0₫/2w',
+      );
+      expect(
+        ItemPresenter.cost(money, Cycle.every(5, CycleField.month)),
+        '260,000\u00A0₫/5m',
+      );
+      expect(
+        ItemPresenter.cost(money, Cycle.every(10, CycleField.day)),
+        '260,000\u00A0₫/10d',
+      );
+      expect(
+        ItemPresenter.cost(money, Cycle.every(3, CycleField.year)),
+        '260,000\u00A0₫/3y',
+      );
+
+      // A foreign amount keeps its own currency and takes the same suffix.
+      expect(
+        ItemPresenter.cost(Money(2000, 'USD'), Cycle.monthly),
+        '\$20.00/m',
+      );
     });
 
     // An interval the app has no name for still has to read as one, and read
@@ -181,13 +228,10 @@ void main() {
         ItemPresenter.cycleLabel(Cycle.every(45, CycleField.day)),
         'Every 45 days',
       );
-      expect(
-        ItemPresenter.cyclePer(Cycle.every(5, CycleField.month)),
-        '/ 5 mo',
-      );
+      expect(ItemPresenter.cyclePer(Cycle.every(5, CycleField.month)), '/5m');
       expect(
         ItemPresenter.cycleEveryShort(Cycle.every(2, CycleField.week)),
-        '2 wk',
+        '2w',
       );
     });
 

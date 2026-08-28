@@ -382,26 +382,31 @@ class EnStrings implements Strings {
   String intervalYears(int count) => count == 1 ? 'year' : '$count years';
 
   @override
-  String intervalShortDays(int count) => '$count d';
+  String intervalShortDays(int count) => '${count}d';
   @override
-  String intervalShortWeeks(int count) => '$count wk';
+  String intervalShortWeeks(int count) => '${count}w';
   @override
-  String intervalShortMonths(int count) => '$count mo';
+  String intervalShortMonths(int count) => '${count}m';
   @override
-  String intervalShortYears(int count) => '$count yr';
+  String intervalShortYears(int count) => '${count}y';
 
   @override
-  String get perWeek => '/ wk';
+  String get perWeek => '/w';
   @override
-  String get perMonth => '/ mo';
+  String get perMonth => '/m';
+  // Three months and six months rather than `qtr` and `6 mo`: the unit is
+  // already a single letter everywhere else on this list, and a quarter spelled
+  // out is the one that would break the pattern.
   @override
-  String get perQuarter => '/ qtr';
+  String get perQuarter => '/3m';
   @override
-  String get perHalfYear => '/ 6 mo';
+  String get perHalfYear => '/6m';
   @override
-  String get perYear => '/ yr';
+  String get perYear => '/y';
   @override
-  String perInterval(String shortInterval) => '/ $shortInterval';
+  String perInterval(String shortInterval) => '/$shortInterval';
+  @override
+  String costEvery(String amount, String per) => '$amount$per';
   @override
   String get aYear => ' a year';
 

@@ -367,18 +367,29 @@ class ViStrings implements Strings {
   @override
   String intervalShortYears(int count) => '$count năm';
 
+  // Không có khoảng trắng quanh dấu gạch, khác bản tiếng Anh. Đây là cách
+  // người Việt viết giá trên chính hoá đơn họ nhận: 260.000đ/tháng. Nó cũng
+  // là hai ký tự phải tiết kiệm: dòng phụ trên màn Tất cả dịch vụ mang cả
+  // ngày lẫn số tiền, và bản tiếng Việt của nó đã tràn một lần, đúng bẫy 40.
+  // `\u2060` là word joiner, một ký tự không vẽ ra gì. Nó ở đây để chỗ xuống
+  // dòng không rơi vào ngay sau dấu gạch: dòng phụ trên màn Tất cả dịch vụ
+  // được phép xuống hai dòng, và không có nó thì `5,290,000 đ/` đứng cuối
+  // dòng trên còn `năm` rơi xuống dòng dưới. Cả cụm tiền phải đi liền, để chỗ
+  // ngắt rơi vào dấu chấm giữa hai vế.
   @override
-  String get perWeek => '/ tuần';
+  String get perWeek => '/\u2060tuần';
   @override
-  String get perMonth => '/ tháng';
+  String get perMonth => '/\u2060tháng';
   @override
-  String get perQuarter => '/ quý';
+  String get perQuarter => '/\u2060quý';
   @override
-  String get perHalfYear => '/ 6 tháng';
+  String get perHalfYear => '/\u20606 tháng';
   @override
-  String get perYear => '/ năm';
+  String get perYear => '/\u2060năm';
   @override
-  String perInterval(String shortInterval) => '/ $shortInterval';
+  String perInterval(String shortInterval) => '/\u2060$shortInterval';
+  @override
+  String costEvery(String amount, String per) => '$amount$per';
   @override
   String get aYear => ' một năm';
 

@@ -202,8 +202,8 @@ class ItemRow extends StatelessWidget {
 /// The amount, then the source after a middot.
 ///
 /// A [Row] rather than one interpolated string, because the two halves have to
-/// truncate differently: a long service plan name ("Free now · then $20.00 /
-/// mo") may be cut, and "· Momo" never may — a source that ellipsises to "· M"
+/// truncate differently: a long cost line ("1,200,000 ₫/m · payment 4 of 6")
+/// may be cut, and "· Momo" never may — a source that ellipsises to "· M"
 /// is worse than no source at all.
 class _SecondLine extends StatelessWidget {
   final String? subtitle;

@@ -64,19 +64,28 @@ abstract class ItemStrings {
   String intervalMonths(int count);
   String intervalYears(int count);
 
-  /// The same, short enough for a segment or a pill: `5 mo`.
+  /// The interval as short as it goes, for the suffix on a cost: `5m`.
   String intervalShortDays(int count);
   String intervalShortWeeks(int count);
   String intervalShortMonths(int count);
   String intervalShortYears(int count);
 
-  /// The suffix on a cost: `$20.00 / mo`.
+  /// The suffix on a cost: `$20.00/m`. One letter for the unit, because it
+  /// rides on every price in every list and the price is what is being read.
   String get perWeek;
   String get perMonth;
   String get perQuarter;
   String get perHalfYear;
   String get perYear;
   String perInterval(String shortInterval);
+
+  /// An amount and that suffix as one string: `$20.00/m`.
+  ///
+  /// A method rather than a join in Dart, because the two halves do not go
+  /// together the same way in both languages: English spaces the slash off the
+  /// number, Vietnamese writes it against the number the way a Vietnamese bill
+  /// does -- `260.000đ/tháng`.
+  String costEvery(String amount, String per);
 
   /// The suffix on the yearly-plan comparison: `... a year`.
   String get aYear;

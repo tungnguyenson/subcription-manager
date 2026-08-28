@@ -189,7 +189,14 @@ class _ToggleRow extends StatelessWidget {
                           const SizedBox(height: 3),
                           Text(
                             row.subtitle,
-                            maxLines: 1,
+                            // Two lines, not one. The line carries a date and
+                            // a price with its interval, and in Vietnamese
+                            // that runs past the switch on the longer names:
+                            // `Kỳ tới 05/09 · 5,290,000 ₫/n…` cuts off the
+                            // half a reader cannot infer. English still fits
+                            // on one line, so the rows only grow where the
+                            // words actually need the room.
+                            maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: SubdockText.caption.copyWith(fontSize: 13.5),
                           ),

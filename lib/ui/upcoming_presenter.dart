@@ -2,7 +2,7 @@ import 'package:subdock/domain/instalments.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/upcoming_filter.dart';
-import 'package:subdock/ui/money_format.dart';
+import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/screens/upcoming_screen.dart';
 import 'package:subdock/i18n.dart';
 
@@ -241,7 +241,10 @@ class _Row {
     if (money == null && item.isTrialOn(today)) return S.t.freeNow;
 
     final parts = <String>[];
-    if (money != null) parts.add(MoneyFormat.full(money));
+    // With the interval on it, because a row is read at a glance and against
+    // thirty-nine other rows. `1,200,000 ₫` on a yearly plan sitting under
+    // `260,000 ₫` on a monthly one puts the cheaper item on top.
+    if (money != null) parts.add(ItemPresenter.cost(money, item.cycle));
 
     final position = Instalments.of(item);
     if (position != null) {

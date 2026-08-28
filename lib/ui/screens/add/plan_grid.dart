@@ -28,7 +28,7 @@ class PlanOption {
   ///
   /// Carried per option rather than passed to the grid because the grid now
   /// shows every cycle at once: a vendor's monthly and yearly tiers sit side
-  /// by side, told apart by the `/ mo` and `/ yr` under the price, and tapping
+  /// by side, told apart by the `/m` and `/y` under the price, and tapping
   /// one sets the form's billing cycle as well as its amount. Filtering the
   /// grid by the cycle the form happened to be on hid half the price list
   /// behind a control the user had not touched yet.
@@ -45,7 +45,7 @@ class PlanOption {
     required this.checkedAt,
   });
 
-  /// `/ mo`, `/ yr` — the unit that turns a bare figure into a price.
+  /// `/m`, `/y` — the unit that turns a bare figure into a price.
   String? get per => ItemPresenter.cyclePer(cycle);
 
   /// What a lit tile is remembered as.
@@ -99,14 +99,14 @@ class PlanGrid extends StatelessWidget {
   /// compare them.
   ///
   /// Every cycle the vendor publishes, not just the one the form is set to.
-  /// The `/ mo` and `/ yr` on the tiles are what keeps the two readable side by
+  /// The `/m` and `/y` on the tiles are what keeps the two readable side by
   /// side, and a yearly tier is the one number a monthly-billed user most wants
   /// to see before they commit.
   static List<PlanOption> optionsFor(CatalogEntry entry) {
     for (final region in const ['VN', 'GLOBAL']) {
       final plans = entry.plans.where((p) => p.region == region).toList()
         ..sort((a, b) {
-          // Short cycles first, so `/ mo` tiles group above `/ yr` ones rather
+          // Short cycles first, so `/m` tiles group above `/y` ones rather
           // than interleaving by price -- a yearly figure is ten times a
           // monthly one and would otherwise sink to the bottom of the grid
           // whatever tier it is.
@@ -233,7 +233,7 @@ class _PlanTile extends StatelessWidget {
                     children: [
                       // The unit, not a second figure: two tiles reading
                       // 260,000 and 2,600,000 are the same plan billed two
-                      // ways, and without `/ mo` beside one of them the grid
+                      // ways, and without `/m` beside one of them the grid
                       // looks like a tenfold price rise.
                       if (option.per case final per?)
                         TextSpan(

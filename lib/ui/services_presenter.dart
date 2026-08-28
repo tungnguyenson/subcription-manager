@@ -1,6 +1,7 @@
 import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
+import 'package:subdock/ui/item_presenter.dart';
 import 'package:subdock/ui/money_format.dart';
 import 'package:subdock/ui/screens/services_screen.dart';
 import 'package:subdock/ui/screens/sources_screen.dart';
@@ -89,7 +90,7 @@ abstract final class ServicesPresenter {
         S.t.servicesTrialEnds(MoneyFormat.shortDate(item.expiresOn))
       else
         S.t.servicesNext(MoneyFormat.shortDate(item.expiresOn)),
-      if (item.money case final money?) MoneyFormat.full(money),
+      if (item.money case final money?) ItemPresenter.cost(money, item.cycle),
     ];
     return parts.join(S.t.bullet);
   }

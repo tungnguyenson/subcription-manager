@@ -90,7 +90,10 @@ void main() {
     test('the subtitle says the next date and the amount', () {
       final groups = groupsOf([item('Netflix')]);
 
-      expect(groups.single.rows.single.subtitle, 'Next 22/08 · 260,000 ₫');
+      expect(
+        groups.single.rows.single.subtitle,
+        'Next 22/08 · 260,000\u00A0₫/m',
+      );
       expect(groups.single.rows.single.on, isTrue);
     });
 
@@ -109,7 +112,7 @@ void main() {
 
       expect(
         groups.single.rows.single.subtitle,
-        'Trial ends 22/08 · 260,000 ₫',
+        'Trial ends 22/08 · 260,000\u00A0₫/m',
       );
     });
 
