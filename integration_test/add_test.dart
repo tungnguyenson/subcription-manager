@@ -17,6 +17,7 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/cloud_backup.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
+import 'package:subdock/ui/screens/add_item_screen.dart';
 
 /// Saving a new item, driven through the real app.
 ///
@@ -135,5 +136,40 @@ void main() {
     expect(saved.note, 'Shared with Minh, he pays half.');
     expect(saved.inTrial, isTrue);
     expect(saved.paymentSourceId, 'vcb');
+  });
+
+  /// The form must be gone before the permission sheet is asked for.
+  ///
+  /// `_saveDraft` used to leave with `maybePop`, which asks the route first
+  /// and so pops one microtask later -- after the sheet had already been
+  /// pushed. `maybePop` then saw a different route on top and did nothing, so
+  /// the form stayed up behind the sheet with its Save button already spent
+  /// (trap 30). The item was on the list the whole time and the only way to
+  /// find that out was to back out of a form that looked like it had saved
+  /// nothing.
+  testWidgets('saving leaves the form before anything else is asked', (
+    tester,
+  ) async {
+    await seed();
+    await launch(tester);
+
+    await tester.tap(find.byTooltip('Add an item'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.text('Enter manually'));
+
+    await tester.enterText(find.byType(TextField).first, 'Gym Hoang Cau');
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.text('Today'));
+    await tapVisible(tester, find.text('Save item'));
+
+    // Whether the permission sheet ever comes depends on what this device
+    // already granted. The form leaving does not, and it must have left
+    // before anything is put on top of it.
+    expect(find.byType(AddItemScreen), findsNothing);
+    expect(find.text('Gym Hoang Cau'), findsWidgets);
+
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pumpAndSettle();
+    expect(find.byType(AddItemScreen), findsNothing);
   });
 }

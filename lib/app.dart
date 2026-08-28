@@ -1381,18 +1381,39 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
     if (!mounted) return;
 
-    Navigator.of(context).maybePop();
-
     _saves++;
-    if (_shouldAskForNotifications) {
-      await _askForNotifications(item);
+    final ask = _shouldAskForNotifications;
+
+    // `pop`, not `maybePop`, and the difference is the whole bug. `maybePop`
+    // asks the route whether it may go and so pops a microtask later; the
+    // permission sheet went up in this one, and `maybePop` then found a
+    // different route on top and quietly did nothing at all. The form stayed
+    // on screen behind the sheet with its own Save button already spent (trap
+    // 30), so the only way to learn that the item had in fact been saved was
+    // to back out of a form that looked like it had saved nothing.
+    Navigator.of(context).pop();
+
+    if (!ask) {
+      // An item dated a year out lands in a collapsed fold, so saving it looks
+      // exactly like saving nothing. Say where it went.
+      _confirm(_savedMessage(item));
       return;
     }
 
-    // An item dated a year out lands in a collapsed fold, so saving it looks
-    // exactly like saving nothing. Say where it went.
-    _confirm(_savedMessage(item));
+    // Ask only once the list is back. The sheet names the item and its dates,
+    // and it reads as a question about the row now sitting behind it rather
+    // than as one more step of a form that has not finished.
+    await Future<void>.delayed(_formExit);
+    if (!mounted) return;
+    await _askForNotifications(item);
   }
+
+  /// How long the form takes to leave, plus a beat.
+  ///
+  /// [MaterialPageRoute] runs its transition for 300ms. Waiting it out is what
+  /// puts the permission sheet on top of the list rather than on top of a form
+  /// sliding away underneath it.
+  static const _formExit = Duration(milliseconds: 340);
 
   /// First save, then not until two more have gone in after a decline.
   bool get _shouldAskForNotifications =>

@@ -94,7 +94,7 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Bốn mươi tám cái bẫy đã vấp, đừng vấp lại
+## Năm mươi cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -1000,6 +1000,73 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     `Pods/Pods.xcodeproj`, mà `flutter build` không đọc tệp đó nên nó chạy đúng mãi cho
     tới hôm có người mở Xcode lên. Đủ bốn bước ở `docs/running.md` mục 1, kèm chuyện
     `pod deintegrate` chết nếu locale không phải UTF-8.
+
+49. **Cảnh báo KGP lúc build Android là báo động giả, và đường sửa hiển nhiên thì gãy
+    build.** Mỗi lần build Android in ra:
+
+    ```
+    WARNING: Your app uses the following plugins that apply Kotlin Gradle Plugin (KGP):
+    flutter_timezone
+    Future versions of Flutter will fail to build if your app uses plugins that apply KGP.
+    ```
+
+    `flutter_timezone` 5.1.0 đã migrate rồi, và 5.1.0 là bản mới nhất trên pub.dev.
+    `android/build.gradle` của nó bọc lời gọi trong một điều kiện:
+
+    ```groovy
+    if (agpMajor < 9 || !builtInKotlinEnabled) {
+        apply plugin: 'kotlin-android'
+    }
+    ```
+
+    Repo này chạy AGP 9.1.0 nên nhánh đó không chạy. Nhưng phép dò của Flutter **đọc file
+    build của plugin bằng một mẫu tìm chuỗi, không hỏi Gradle xem plugin nào thật sự được
+    nạp lúc chạy.** Nó thấy chuỗi `apply plugin: 'kotlin-android'` nằm trong file là kêu,
+    không đọc được cái `if` bọc ngoài. Chỗ viết ra điều đó là comment ngay trên
+    `getSubprojectPluginState` trong `packages/flutter_tools/gradle/src/main/kotlin/FlutterPluginUtils.kt`
+    của SDK. Tác giả plugin trả lời đúng như vậy và đóng
+    [issue #63](https://github.com/tjarvstrand/flutter_timezone/issues/63).
+
+    **Đừng lật `android.builtInKotlin` trong `android/gradle.properties` thành `true`.**
+    Đó là đường sửa trông có lý nhất, và nó hỏng theo hai kiểu cùng lúc. Một, build gãy ở
+    `:android_file_picker:bundleDebugAar` với `aarMetadataCheck ... which doesn't exist`.
+    Hai, cảnh báo `flutter_timezone` **vẫn hiện y nguyên**, đúng như phải thế, vì nó đọc
+    văn bản file chứ không đọc cái cờ đó. Tức là đổi một build đang chạy lấy đúng con số
+    không.
+
+    Cũng đừng bỏ plugin đi. Nó được gọi đúng một chỗ, `FlutterTimezone.getLocalTimezone()`
+    trong `lib/platform/notification_scheduler.dart`, và Dart không có đường nào lấy tên
+    múi giờ kiểu IANA. Bỏ nó nghĩa là tự viết kênh gọi sang cả hai nền tảng, cho đúng cái
+    thứ mà bẫy 25 đã ghi lại là làm nhắc 08:30 tới lúc 15:30 khi sai.
+
+    Thứ đáng để mắt thì có thật, và nó không nằm trong repo này: nếu Flutter biến cảnh báo
+    thành lỗi mà vẫn giữ nguyên cách dò bằng chuỗi, repo sẽ gãy dù code của plugin hoàn
+    toàn đúng. Đường sửa lúc đó nằm ở phía Flutter hoặc phía plugin, không phải ở đây.
+
+    Kèm theo: mỗi lần build Android đẻ ra `android/.kotlin/`, thư mục nháp của Kotlin
+    Gradle Plugin. Nó đã vào `android/.gitignore`.
+
+50. **`maybePop` pop trễ một nhịp, nên đừng đẩy gì lên ngay sau nó.** `_saveDraft` từng
+    gọi `Navigator.of(context).maybePop()` rồi mở luôn sheet xin quyền thông báo trong
+    cùng một nhịp đồng bộ. `maybePop` hỏi route xem có được đi không, mà phép hỏi đó là
+    một `await`, nên nó pop ở microtask sau; lúc quay lại thì trên đỉnh stack là cái
+    sheet vừa đẩy lên chứ không phải cái form nó định pop, và nó **lặng lẽ không làm gì**.
+
+    Người dùng vì thế đáp ứng xong lời xin quyền là thấy mình vẫn đứng trong form, với
+    nút Lưu đã tắt vì cái chốt ở bẫy 30 đã tiêu. Không có gì trên màn hình nói mục đã
+    lưu hay chưa, và cách duy nhất để biết là bấm Cancel rồi thấy nó nằm sẵn ngoài danh
+    sách. Với một form vừa hỏi xin quyền thì đó đúng là câu tệ nhất có thể nói: cú bấm
+    tiếp theo của một người tưởng mình chưa lưu là lưu lại lần nữa.
+
+    Nay `_saveDraft` gọi `pop()` trơn, đồng bộ và không hỏi ai, rồi mới chờ hết
+    `_formExit` (340ms, đúng bằng chuyển cảnh của `MaterialPageRoute` cộng một nhịp) mới
+    mở sheet. Thứ tự đó là cả tính năng: sheet gọi tên cái mục vừa lưu, và nó phải nằm
+    trên danh sách đang có mục đó chứ không nằm trên một cái form chưa đóng.
+
+    Chốt chặn là bài `saving leaves the form before anything else is asked` trong
+    `integration_test/add_test.dart`, chạy trên máy ảo. Phải là integration test vì cả
+    lời gọi pop lẫn cái sheet đều nằm trong `app.dart`; widget test của form chỉ thấy
+    `DraftItem` đi ra, đúng như bẫy 45.
 
 ## Viết tài liệu
 
