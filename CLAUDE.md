@@ -107,7 +107,7 @@ for f in integration_test/*_test.dart; do flutter test "$f" -d <device-id>; done
 Mất khoảng bốn phút mỗi file trên máy ảo, nên đừng chạy sau từng lần sửa nhỏ. Nhưng
 phải chạy trước khi tin rằng một thay đổi về điều hướng hay bố cục đã xong.
 
-## Năm mươi tám cái bẫy đã vấp, đừng vấp lại
+## Năm mươi chín cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -1446,6 +1446,38 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
     nhất gọi là `test/unit/domain/manage_link_test.dart`, tức là một bài test xanh khoá
     một luật không chạy. Hai bản sao của một luật thì lệch nhau, và bản có test xanh lệch
     trong im lặng.
+
+59. **Màn hình đã push giữ nguyên một bản chụp của mục, và trên màn toàn công tắc thì đó
+    là mất dữ liệu chứ không phải chữ cũ.** Flutter dựng trang của một route đúng một lần
+    rồi giữ luôn, đúng như bẫy 34 đã ghi cho bảng màu. Hệ quả bên dữ liệu thì nặng hơn:
+    `_openItem` dựng sẵn `ItemDetailScreen(item: item, ...)` **trước** khi đưa vào
+    `MaterialPageRoute`, nên màn Detail và màn Reminders con của nó ôm một `TrackedItem`
+    chụp lúc push, cho tới khi đóng.
+
+    Trên màn Reminders, mỗi hàng là một công tắc ghi thẳng xuống SQLite. Bấm thì lệnh ghi
+    **có** chạy, nhưng công tắc bật lại về chỗ cũ ngay, vì màn hình đọc `item.leadDays` của
+    bản chụp. Đó mới là nửa nhẹ. Nửa nặng: `onToggleLead` cũng đóng gói cùng cái `item` cũ,
+    nên nấc thứ hai tính lại thang **từ danh sách ban đầu** và xoá mất nấc vừa bật. Bật `7`
+    rồi bật `1` trên một mục đang có `[3]` cho ra `[3, 1]`, con số `7` biến mất không báo gì.
+
+    `_openServices` đã bọc `StreamBuilder` từ trước vì đúng lý do này, kèm comment nói rõ.
+    Nay có `_liveItem(seed, build)` trong `app.dart` đặt tên cho phép đó, và cả màn Detail
+    lẫn màn Reminders đều đi qua nó. Hai điều kèm theo:
+
+    - **Tra lại theo `id`, không giữ tham chiếu.** Bản dựng lại phải lấy mục từ danh sách
+      stream vừa phát, không phải dùng lại đối tượng đã bắt được. Giữ tham chiếu thì màn
+      hình vẽ đúng mà callback vẫn tính trên bản cũ, tức là chỉ chữa được nửa nhẹ.
+    - **Không tìm thấy `id` thì rơi về `seed`, không ném lỗi.** Xoá một mục có pop route,
+      nhưng danh sách mất hàng đó **trước**, và một phép tra không có gì để tìm sẽ giết
+      khung hình trước khi cú pop kịp tới.
+
+    Chốt chặn là `integration_test/reminders_test.dart`, chạy trên máy ảo. Phải là
+    integration test vì cả `_push` lẫn callback đều nằm trong `app.dart`; widget test của
+    `RemindersScreen` tự cấp `onToggleLead` nên nó xanh trong cả ba trường hợp hỏng. Ba bài
+    trong đó đã kiểm là đỏ khi lùi riêng `app.dart` về bản trước.
+
+    Luật rút ra: **màn hình nào đã push mà hiển thị hoặc sửa dữ liệu sống thì phải đi qua
+    `_liveItem`**, không được nhận một `TrackedItem` dựng sẵn.
 
 ## Viết tài liệu
 

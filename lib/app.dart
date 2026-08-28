@@ -1058,7 +1058,38 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (item != null) _openItem(item);
   }
 
-  void _openItem(TrackedItem item) {
+  /// A pushed route that keeps up with the item it is about.
+  ///
+  /// A route's page is built once and kept, so a screen handed a
+  /// [TrackedItem] at push time holds that one snapshot for as long as it is
+  /// open. On a screen of switches that write to the database, that is not a
+  /// stale label but a broken control: the reminders screen showed every
+  /// switch flip straight back, and -- worse -- its callback recomputed the
+  /// ladder from the snapshot, so turning on a second rung silently dropped
+  /// the first. The write was going through the whole time; only the item the
+  /// screen was reasoning about was frozen.
+  ///
+  /// `_openServices` already carried this stream for exactly this reason. This
+  /// is the same fix with a name on it, so the next screen that needs it does
+  /// not have to rediscover why.
+  ///
+  /// Falls back to [seed] when the id is no longer in the list. Deleting pops
+  /// the route, but the list loses the row first, and a lookup with nothing to
+  /// find would take the frame down in between.
+  Widget _liveItem(TrackedItem seed, Widget Function(TrackedItem item) build) {
+    return StreamBuilder<List<TrackedItem>>(
+      initialData: _items,
+      stream: widget.repository.observeAll(),
+      builder: (context, snapshot) {
+        final items = snapshot.data ?? const <TrackedItem>[];
+        return build(items.where((i) => i.id == seed.id).firstOrNull ?? seed);
+      },
+    );
+  }
+
+  void _openItem(TrackedItem seed) => _push(_liveItem(seed, _detailScreen));
+
+  Widget _detailScreen(TrackedItem item) {
     final held = _plan.alerts.where((a) => a.itemId == item.id).length;
     final category = _categories[item.categoryId];
     // Built from the plan, so it shows what is actually pending rather than
@@ -1072,37 +1103,35 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       today: LocalDate.today(),
     );
 
-    _push(
-      ItemDetailScreen(
-        item: item,
-        category: category,
-        today: LocalDate.today(),
-        history: _history.where((e) => e.itemId == item.id).toList(),
-        scheduledCount: held,
-        timeline: timeline,
-        onEdit: () => _openEdit(item),
-        onMarkPaid: () => _markPaid(item),
-        onSnooze: () => _snooze(item, 3),
-        onDelete: () => _delete(item),
-        onStop: () => _stop(item),
-        // Matched by name at display time, not stored on the item. The
-        // catalogue grows between releases, so an item added before its
-        // service had a price picks one up on the next update.
-        catalogEntry: widget.catalog.matchByName(item.name),
-        source: _sourcesById[item.paymentSourceId],
-        onOpenManage: (action) => _openManage(item, action),
-        onEditReminders: () => _push(
-          RemindersScreen(
-            item: item,
-            today: LocalDate.today(),
-            heldSlots: held,
-            droppedElsewhere: _plan.dropped
-                .where((a) => a.itemId != item.id)
-                .length,
-            onToggleLead: (lead, on) => _toggleLead(item, lead, on),
-          ),
-        ),
-      ),
+    return ItemDetailScreen(
+      item: item,
+      category: category,
+      today: LocalDate.today(),
+      history: _history.where((e) => e.itemId == item.id).toList(),
+      scheduledCount: held,
+      timeline: timeline,
+      onEdit: () => _openEdit(item),
+      onMarkPaid: () => _markPaid(item),
+      onSnooze: () => _snooze(item, 3),
+      onDelete: () => _delete(item),
+      onStop: () => _stop(item),
+      // Matched by name at display time, not stored on the item. The
+      // catalogue grows between releases, so an item added before its
+      // service had a price picks one up on the next update.
+      catalogEntry: widget.catalog.matchByName(item.name),
+      source: _sourcesById[item.paymentSourceId],
+      onOpenManage: (action) => _openManage(item, action),
+      onEditReminders: () => _push(_liveItem(item, _remindersScreen)),
+    );
+  }
+
+  Widget _remindersScreen(TrackedItem item) {
+    return RemindersScreen(
+      item: item,
+      today: LocalDate.today(),
+      heldSlots: _plan.alerts.where((a) => a.itemId == item.id).length,
+      droppedElsewhere: _plan.dropped.where((a) => a.itemId != item.id).length,
+      onToggleLead: (lead, on) => _toggleLead(item, lead, on),
     );
   }
 
@@ -2003,7 +2032,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _confirm(S.t.remindingAgainOn(MoneyFormat.shortDate(until)));
   }
 
-  /// Ends the series after the payment that is currently due.
   /// Ends a subscription, once the user has said so on a sheet that named the
   /// consequences.
   ///
