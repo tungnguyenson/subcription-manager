@@ -152,6 +152,9 @@ class _ServicePickerState extends State<ServicePicker> {
                 controller: _query,
                 hint: S.t.searchServices,
                 onSubmitted: _useTyped,
+                // Doubles as the name box: `_useTyped` hands this text to the
+                // form for anything the catalogue does not carry.
+                capitalize: true,
               ),
             ],
           ),

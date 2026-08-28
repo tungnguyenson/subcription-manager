@@ -928,6 +928,10 @@ class _AddItemScreenState extends State<AddItemScreen> {
               // the cycle -- is what the user actually came to fill in, while
               // the name it opened over is already right.
               autofocus: _name.text.isEmpty,
+              // A name, so the keyboard opens shifted. `sentences` rather than
+              // `words`: a Vietnamese name is a sentence, and `Bao Hiem Xe May`
+              // is not how anyone writes one.
+              textCapitalization: TextCapitalization.sentences,
               style: SubdockText.fieldValue,
               cursorColor: SubdockColors.accent,
               onChanged: (_) => _nameSettled = false,

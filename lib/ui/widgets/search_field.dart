@@ -24,12 +24,22 @@ class SearchField extends StatelessWidget {
 
   final bool autofocus;
 
+  /// Opens the keyboard shifted for the first letter.
+  ///
+  /// Off for a box that only filters a list: matching folds case anyway, and a
+  /// capital the user did not ask for is noise in a query they will throw away.
+  /// On where the box is also the way a name gets typed -- the service picker
+  /// hands whatever is in it to the form when nothing in the catalogue matches,
+  /// so the shift key here is the only one that name ever sees.
+  final bool capitalize;
+
   const SearchField({
     super.key,
     required this.controller,
     required this.hint,
     this.onSubmitted,
     this.autofocus = false,
+    this.capitalize = false,
   });
 
   @override
@@ -44,6 +54,9 @@ class SearchField extends StatelessWidget {
             child: TextField(
               controller: controller,
               autofocus: autofocus,
+              textCapitalization: capitalize
+                  ? TextCapitalization.sentences
+                  : TextCapitalization.none,
               textInputAction: onSubmitted == null
                   ? TextInputAction.done
                   : TextInputAction.search,

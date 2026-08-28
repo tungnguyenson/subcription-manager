@@ -1256,6 +1256,25 @@ void main() {
       expect(tester.testTextInput.isVisible, isFalse);
     });
 
+    // A name is a name whichever box it was typed into, and the shift key is
+    // the only thing that decides how it comes out. `sentences` rather than
+    // `words`, since a Vietnamese name is a sentence and `Bao Hiem Xe May` is
+    // not how anyone writes one.
+    testWidgets('the name box opens the keyboard shifted', (tester) async {
+      await showForm(
+        tester,
+        AddItemScreen(
+          catalog: catalog,
+          categories: CategoryBook.shipped,
+          today: today,
+          onSave: (_) {},
+        ),
+      );
+
+      final name = tester.widget<TextField>(find.byType(TextField).first);
+      expect(name.textCapitalization, TextCapitalization.sentences);
+    });
+
     // A box holding spaces is a box somebody cleared. It has to come back as
     // null, because null is what the detail screen reads to decide whether the
     // row is drawn at all -- whitespace would draw an empty one.
