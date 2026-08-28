@@ -107,7 +107,7 @@ for f in integration_test/*_test.dart; do flutter test "$f" -d <device-id>; done
 Mất khoảng bốn phút mỗi file trên máy ảo, nên đừng chạy sau từng lần sửa nhỏ. Nhưng
 phải chạy trước khi tin rằng một thay đổi về điều hướng hay bố cục đã xong.
 
-## Năm mươi sáu cái bẫy đã vấp, đừng vấp lại
+## Năm mươi bảy cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -1395,6 +1395,21 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
       Thấy được widget cũng chưa đủ: sheet trượt lên, nên nút tồn tại trong cây khoảng
       200ms trước khi nó tới chỗ ngón tay chạm được, khung đầu tiên đặt nó ở dưới mép màn
       hình cả một màn rưỡi. Phải chờ nó xuất hiện **rồi** `pumpAndSettle` cho nó vào xong.
+
+57. **Toast là chỗ duy nhất `ink` trở thành màu nền, và nó cần token riêng.** Hai
+    `SnackBar` trong `app.dart` vẽ nền bằng `SubdockColors.ink` và chữ bằng
+    `SubdockColors.card`. Ở bản sáng thì đúng: nền mực đậm, chữ trắng. Ở bản tối cả hai
+    cùng lật, `ink` thành gần trắng còn `card` là trắng 7,5%, nên toast ra một dải trắng
+    trống trơn. Người vừa lưu một mục thấy một cái banner rỗng nhảy lên và không đọc được
+    câu xác nhận nào.
+
+    Nay có token `onInk`, đúng lý do `onAccent` tồn tại ở bẫy 34: trắng ở bản sáng,
+    `0xFF111624` ở bản tối. `textColor` của `SnackBarAction` cũng dùng nó. Bất cứ chỗ nào
+    lấy một token mực làm nền thì chữ trên đó phải là một token riêng, không được mượn
+    một token bề mặt.
+
+    Chuyện này không có test nào bắt được: `flutter test` và `flutter analyze` đều xanh,
+    vì mỗi màu riêng lẻ đều hợp lệ. Chỉ có mắt nhìn màn hình ở bản tối mới thấy.
 
 ## Viết tài liệu
 

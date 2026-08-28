@@ -1711,7 +1711,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       SnackBar(
         content: Text(
           S.t.sawRenewalDate,
-          style: SubdockText.rowValue.copyWith(color: SubdockColors.card),
+          style: SubdockText.rowValue.copyWith(color: SubdockColors.onInk),
         ),
         backgroundColor: SubdockColors.ink,
         behavior: SnackBarBehavior.floating,
@@ -1721,7 +1721,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         duration: const Duration(seconds: 8),
         action: SnackBarAction(
           label: S.t.enterDate,
-          textColor: SubdockColors.card,
+          textColor: SubdockColors.onInk,
           onPressed: () => unawaited(_confirmRenewalDate(item)),
         ),
       ),
@@ -1946,7 +1946,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       SnackBar(
         content: Text(
           message,
-          style: SubdockText.rowValue.copyWith(color: SubdockColors.card),
+          style: SubdockText.rowValue.copyWith(color: SubdockColors.onInk),
         ),
         backgroundColor: SubdockColors.ink,
         behavior: SnackBarBehavior.floating,

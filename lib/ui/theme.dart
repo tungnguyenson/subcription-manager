@@ -178,6 +178,7 @@ abstract final class SubdockColors {
   static Color get lockScreen => _active.lockScreen;
 
   static Color get ink => _active.ink;
+  static Color get onInk => _active.onInk;
   static Color get inkSecondary => _active.inkSecondary;
   static Color get inkMuted => _active.inkMuted;
   static Color get hairline => _active.hairline;

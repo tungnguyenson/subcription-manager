@@ -103,6 +103,13 @@ class SubdockPalette {
 
   final Color ink;
 
+  /// Text and marks drawn *on* a filled [ink] surface: the toast at the bottom
+  /// of the screen, the one place in the app where the ink colour becomes a
+  /// background. Same reason [onAccent] exists, and the same trap: in dark
+  /// [ink] is near-white, so anything that reaches for a light token here
+  /// paints white on white and the toast reads as a blank banner.
+  final Color onInk;
+
   /// A row's label, a subtitle, a paragraph. The stronger of the two greys.
   /// Secondary text *says something* about the thing beside it.
   final Color inkSecondary;
@@ -196,6 +203,7 @@ class SubdockPalette {
     required this.knob,
     required this.lockScreen,
     required this.ink,
+    required this.onInk,
     required this.inkSecondary,
     required this.inkMuted,
     required this.hairline,
@@ -251,6 +259,7 @@ class SubdockPalette {
     knob: Color(0xFFFFFFFF),
     lockScreen: Color(0xFFE4E7EE),
     ink: Color(0xFF1B2230),
+    onInk: Color(0xFFFFFFFF),
     inkSecondary: Color(0x9E1B2230), // rgba(27,34,48,.62)
     inkMuted: Color(0x801B2230), // rgba(27,34,48,.50)
     hairline: Color(0x1A1B2230), // rgba(27,34,48,.10)
@@ -312,6 +321,7 @@ class SubdockPalette {
     knob: Color(0xFFE9ECF3),
     lockScreen: Color(0xFF23262E),
     ink: Color(0xFFE9ECF3),
+    onInk: Color(0xFF111624),
     inkSecondary: Color(0x9EE9ECF3), // rgba(233,236,243,.62)
     inkMuted: Color(0x75E9ECF3), // rgba(233,236,243,.46)
     hairline: Color(0x21FFFFFF), // rgba(255,255,255,.13)
