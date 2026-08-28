@@ -5,6 +5,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:subdock/app.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/backup_store.dart';
+import 'package:subdock/data/cloud_store.dart';
 import 'package:subdock/data/currency_store.dart';
 import 'package:subdock/data/database.dart';
 import 'package:subdock/data/filter_store.dart';
@@ -56,7 +57,8 @@ void main() {
     catalog: ServiceCatalog(const []),
     backups: BackupStore(db, repo, SettingsStore(db)),
     files: BackupFiles(),
-    cloud: CloudBackup(TargetPlatform.android),
+    cloud: const NoCloud(),
+    clouds: CloudStore(db),
   );
 
   /// Frame by frame rather than `pumpAndSettle`, which is the whole point:

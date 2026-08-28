@@ -1125,9 +1125,45 @@ class ViStrings implements Strings {
       'Danh sách của bạn chỉ nằm trên máy này, và $confirmed ngày trong đó đã '
       'được hỏi lại nhà cung cấp. Gỡ app là mất chúng.';
   @override
+  String get backupStale => 'Có ngày mới chưa được sao lưu';
+  @override
+  String backupStaleBody(int confirmed) =>
+      '$confirmed ngày bạn đã hỏi lại nhà cung cấp không nằm trong bản sao '
+      'nào. Bản gần nhất được tạo trước khi bạn thêm chúng.';
+  @override
   String get backupStateSignedOut => 'Hãy đăng nhập iCloud';
   @override
+  String get backupStateReconnect => 'Hãy kết nối lại tài khoản';
+  @override
+  String get backupFirstCopy => 'Đang lưu bản đầu tiên';
+  @override
+  String get backupStateDisconnected => 'Chưa kết nối';
+  @override
   String get backupStateFailed => 'Không lưu được';
+  @override
+  String get backupDriveTitle => 'Google Drive';
+  @override
+  String get backupDriveIntro =>
+      'Subdock giữ một bản sao danh sách trong Google Drive của chính bạn, ở '
+      'một thư mục ẩn chỉ app này mở được. Bạn sửa gì thì nó ghi lại bản mới, '
+      'và bạn lấy về được trên máy khác.';
+  @override
+  String get backupDriveAccount => 'Tài khoản';
+  @override
+  String get backupDriveConnect => 'Kết nối tài khoản Google';
+  @override
+  String get backupDriveConnectNote =>
+      'Subdock không có tài khoản và không có máy chủ. Bản sao đi vào tài '
+      'khoản Google bạn chọn, ở một thư mục ẩn với Drive và với mọi app khác. '
+      'App không đọc gì khác trong Drive của bạn.';
+  @override
+  String get backupDriveDisconnect => 'Ngắt tài khoản này';
+  @override
+  String get backupRestoreFromDrive => 'Khôi phục từ Drive';
+  @override
+  String get backupDriveRestoreNote =>
+      'Khôi phục là thay hết những gì đang có trong app bằng nội dung bản sao. '
+      'Ngắt tài khoản thì bản sao vẫn nằm nguyên trong Drive.';
   @override
   String get backupNoteWholeDevice =>
       'Subdock không có tài khoản và không có máy chủ. Danh sách của bạn nằm '
@@ -1135,9 +1171,10 @@ class ViStrings implements Strings {
       'nó bằng cách khôi phục cả máy.';
   @override
   String get backupNotePerApp =>
-      'Subdock không có tài khoản và không có máy chủ. Danh sách của bạn nằm '
-      'trong bản sao lưu Google của máy này và tự đi theo sang máy mới, nhưng '
-      'Subdock không kiểm được bản sao lưu đó đã từng chạy hay chưa.';
+      'Subdock không có tài khoản và không có máy chủ. Nó chỉ giữ những bản sao '
+      'trong mục này. Bản sao lưu Google của chính máy này cũng có thể mang '
+      'danh sách sang máy mới, theo lịch riêng của nó, và Subdock không can '
+      'thiệp vào bản đó.';
   @override
   String get backupNoteUnknown =>
       'Subdock không có tài khoản và không có máy chủ. Những gì bạn thấy trong '
@@ -1265,6 +1302,15 @@ class ViStrings implements Strings {
   String get signInToICloud => 'Đăng nhập iCloud để lấy bản cất ở đó.';
   @override
   String couldNotReadICloud(String detail) => 'Không đọc được iCloud: $detail.';
+  @override
+  String get noCopyInDrive => 'Trên Drive chưa có bản sao nào.';
+  @override
+  String get connectDriveFirst => 'Hãy kết nối tài khoản Google trước.';
+  @override
+  String couldNotReadDrive(String detail) => 'Không đọc được Drive: $detail.';
+  @override
+  String couldNotConnectDrive(String detail) =>
+      'Không kết nối được tài khoản: $detail.';
   @override
   String get unknownError => 'lỗi không rõ';
   @override

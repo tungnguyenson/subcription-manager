@@ -1,7 +1,7 @@
-import 'package:flutter/foundation.dart' show TargetPlatform;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:subdock/platform/cloud_backup.dart';
+import 'package:subdock/platform/icloud_backup.dart';
 
 /// The real plugin, called for real, on a device.
 ///
@@ -21,7 +21,7 @@ import 'package:subdock/platform/cloud_backup.dart';
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  final cloud = CloudBackup(TargetPlatform.iOS);
+  final cloud = ICloudBackup();
 
   /// Signed in, and this machine happens to have a container. Then the call
   /// really worked, which is also a pass; the point is that neither answer is

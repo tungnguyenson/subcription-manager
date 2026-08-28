@@ -21,6 +21,7 @@ import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/notification_planner.dart';
 import 'package:subdock/domain/upcoming_filter.dart';
 import 'package:subdock/data/backup_store.dart';
+import 'package:subdock/data/cloud_store.dart';
 import 'package:subdock/domain/backup.dart';
 import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/cloud_backup.dart';
@@ -76,6 +77,7 @@ class SubdockApp extends StatefulWidget {
   final BackupStore backups;
   final BackupFiles files;
   final CloudBackup cloud;
+  final CloudStore clouds;
 
   const SubdockApp({
     super.key,
@@ -90,6 +92,7 @@ class SubdockApp extends StatefulWidget {
     required this.backups,
     required this.files,
     required this.cloud,
+    required this.clouds,
   });
 
   @override
@@ -231,6 +234,7 @@ class _SubdockAppState extends State<SubdockApp> with WidgetsBindingObserver {
           backups: widget.backups,
           files: widget.files,
           cloud: widget.cloud,
+          clouds: widget.clouds,
           repository: widget.repository,
           settings: widget.settings,
           filters: widget.filters,
@@ -257,6 +261,7 @@ class HomePage extends StatefulWidget {
   final BackupStore backups;
   final BackupFiles files;
   final CloudBackup cloud;
+  final CloudStore clouds;
 
   /// Which Glass variant is painted, and how to change it. Owned by
   /// [SubdockApp] rather than here, because the widget that publishes the
@@ -282,6 +287,7 @@ class HomePage extends StatefulWidget {
     required this.backups,
     required this.files,
     required this.cloud,
+    required this.clouds,
     this.themeChoice = ThemeChoice.system,
     this.onThemeChoice,
     this.locale = AppLocale.en,
@@ -374,9 +380,35 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// `Waiting for a change`, which put an iCloud row on the Android Settings
   /// screen reporting on a thing that does not exist there -- and now that the
   /// row leads somewhere, it would open a page about it.
-  late CloudResult _cloud = widget.cloud.isSupported
-      ? CloudResult.idle
-      : CloudResult.unsupported;
+  late CloudChannel _cloud = CloudChannel(
+    kind: widget.cloud.kind,
+    result: widget.cloud.isSupported
+        ? CloudResult.idle
+        : CloudResult.unsupported,
+    // True until the startup reconnect answers. Starting the other way round
+    // would show a `Last saved: Never` page for one frame to a user who has an
+    // account attached and a copy sitting in it.
+    needsAccount: widget.cloud.needsAccount,
+    account: widget.cloud.account,
+  );
+
+  /// True while an upload is in the air, so the screen can say so.
+  bool _cloudWriting = false;
+
+  /// Re-reads who the copy belongs to, after anything that could change it.
+  void _syncCloudAccount(CloudResult result) {
+    if (!mounted) return;
+    setState(() {
+      _cloud = CloudChannel(
+        kind: _cloud.kind,
+        result: result,
+        needsAccount: widget.cloud.needsAccount,
+        account: widget.cloud.account,
+        writing: _cloudWriting,
+      );
+    });
+    _backupRevision.value++;
+  }
 
   /// Holds the cloud write back until the edits stop.
   ///
@@ -384,6 +416,20 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// stream event. Uploading on each one would spend the user's battery and
   /// their data on thirty copies of a sentence being typed.
   Timer? _cloudDebounce;
+
+  /// Bumped whenever anything the two backup screens read has changed.
+  ///
+  /// They need it because they are pushed routes, and a pushed route builds
+  /// its page exactly once and keeps it. Trap 34 wrote this down for colours:
+  /// `setState` up here rebuilds the shell, and the widget sitting inside an
+  /// already-built route is handed back untouched. The only way in is a
+  /// subscription the pushed widget makes itself, which is what
+  /// [ValueListenableBuilder] is.
+  ///
+  /// Without it the Drive page still read `Connect a Google account` after the
+  /// user had connected one, and only told the truth once they went back and
+  /// opened it again.
+  final ValueNotifier<int> _backupRevision = ValueNotifier(0);
 
   /// When a backup last actually left the device, or null if never.
   LastBackups _lastBackupOn = LastBackups.none;
@@ -479,11 +525,31 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _lastBackupSubscription = widget.backups.observeLastSaved().listen((on) {
       if (!mounted) return;
       setState(() => _lastBackupOn = on);
+      _backupRevision.value++;
     });
 
     unawaited(_refreshPermission());
     unawaited(_restoreFilter());
     unawaited(_readVersion());
+    unawaited(_resumeCloud());
+  }
+
+  /// Picks up an account the user attached in an earlier run.
+  ///
+  /// Reads one row out of this app's own database and reaches nothing else.
+  /// It used to ask the plugin instead, which looked harmless and was not: the
+  /// Android implementation of its "lightweight" sign-in makes a second call,
+  /// whenever the first finds no already-authorized account, that opens the
+  /// one-tap sheet over any Google account on the phone. So opening Subdock
+  /// asked people who had never wanted cloud backup to sign in to Google, in
+  /// an app whose first promise is that it needs no account.
+  ///
+  /// Google is now reached from exactly two places: the button the user
+  /// pressed, and a silent token request when there is something to upload.
+  Future<void> _resumeCloud() async {
+    if (!widget.cloud.isSupported) return;
+    widget.cloud.resume(await widget.clouds.read());
+    _syncCloudAccount(CloudResult.idle);
   }
 
   Future<void> _readVersion() async {
@@ -550,6 +616,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _historySubscription?.cancel();
     _settingsSubscription?.cancel();
     _lastBackupSubscription?.cancel();
+    _backupRevision.dispose();
     _cloudDebounce?.cancel();
     super.dispose();
   }
@@ -606,7 +673,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// from the settings stream: [BackupStore.markSaved] writes a settings row,
   /// so listening there would have every upload schedule the next one.
   void _scheduleCloudBackup() {
-    if (!widget.cloud.isSupported) return;
+    // Nothing to write to until an account is attached. Queuing anyway would
+    // wake a timer every edit for a channel that answers `disconnected` to
+    // everything, and would flip the Settings row from an untouched offer to
+    // something that looks like a fault.
+    if (!widget.cloud.isSupported || widget.cloud.needsAccount) return;
     _cloudDebounce?.cancel();
     _cloudDebounce = Timer(_cloudDelay, () => unawaited(_runCloudBackup()));
   }
@@ -620,11 +691,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> _runCloudBackup() async {
     _cloudDebounce?.cancel();
     _cloudDebounce = null;
-    if (!widget.cloud.isSupported || !_loaded) return;
+    if (!widget.cloud.isSupported || widget.cloud.needsAccount || !_loaded) {
+      return;
+    }
+
+    _cloudWriting = true;
+    _syncCloudAccount(_cloud.result);
 
     final at = DateTime.now();
     final backup = await widget.backups.read(clock: at);
     final result = await widget.cloud.save(BackupCodec.encode(backup));
+    _cloudWriting = false;
 
     // Only a write that landed counts as a backup. Recording one for a failed
     // upload would put a date under `Last backup` and take the warning off the
@@ -638,7 +715,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (result.state == CloudState.saved) {
       await widget.backups.markSaved(at, BackupChannel.cloud);
     }
-    if (mounted) setState(() => _cloud = result);
+    // Through the setter rather than assigning the result on its own: a write
+    // that comes back `signedOut` is often an account that has been revoked,
+    // and the page has to stop naming it.
+    _syncCloudAccount(result);
   }
 
   /// The two answers onboarding asked for, changeable afterwards.
@@ -1164,6 +1244,60 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// The id is the microsecond clock, matching how items are keyed. Two sources
   /// created in the same microsecond would collide; a user tapping "Add source"
   /// twice in one microsecond is not a case worth a uuid dependency.
+  /// Attaches a cloud account, from a tap and only from a tap.
+  ///
+  /// The guard in the middle is the one part of this that must not be dropped.
+  /// Whoever opens this screen with an empty list has usually just reinstalled
+  /// or changed phone, and that is precisely the person with a copy waiting.
+  /// Connecting and writing straight away would overwrite it with the empty
+  /// list, in the tap they made to protect themselves, and there is nothing to
+  /// undo it with.
+  ///
+  /// So an empty list looks first. If a copy is up there the restore path
+  /// takes over, confirmation sheet and all; declining it writes nothing
+  /// either, because the answer to "do you want your old list back" being no
+  /// is not the same as "throw it away". The next edit writes normally.
+  Future<void> _connectCloud() async {
+    final result = await widget.cloud.connect();
+    if (!mounted) return;
+    _syncCloudAccount(result);
+
+    if (result.state == CloudState.failed) {
+      _confirm(S.t.couldNotConnectDrive(result.detail ?? S.t.unknownError));
+      return;
+    }
+    // Backing out of the sheet comes back `disconnected`, which is an answer
+    // rather than a fault. Nothing to say about it.
+    if (result.state != CloudState.saved) return;
+
+    // Remembered here so the next launch can answer "is this connected" out of
+    // the app's own database, without a single call to Google.
+    final attached = widget.cloud.account;
+    if (attached != null) await widget.clouds.save(attached);
+
+    if (_items.isEmpty) {
+      final fetch = await widget.cloud.latest();
+      if (!mounted) return;
+      if (fetch.state == CloudState.saved) {
+        await _importFromCloud();
+        return;
+      }
+    }
+
+    unawaited(_runCloudBackup());
+  }
+
+  /// Detaches it. The copy stays where it is, which is what the footnote under
+  /// the button says: deleting somebody's backup because they turned a switch
+  /// off is not a decision this app gets to make.
+  Future<void> _disconnectCloud() async {
+    await widget.clouds.clear();
+    await widget.cloud.disconnect();
+    if (!mounted) return;
+    _cloudDebounce?.cancel();
+    _syncCloudAccount(const CloudResult(CloudState.disconnected));
+  }
+
   /// The two backup channels, each on its own screen.
   ///
   /// Rebuilt from the live state on every frame of the route rather than
@@ -1171,8 +1305,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   /// a write lands, iCloud comes back -- and a snapshot would go on reporting
   /// what was true when the row was tapped.
   void _openCloudBackup() => _push(
-    Builder(
-      builder: (_) {
+    ValueListenableBuilder<int>(
+      valueListenable: _backupRevision,
+      builder: (_, _, _) {
         final page = BackupPresenter.cloudPage(
           saved: _lastBackupOn,
           cloud: _cloud,
@@ -1181,14 +1316,17 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         return BackupScreen(
           page: page,
           onRestore: () => unawaited(_importFromCloud()),
+          onConnect: () => unawaited(_connectCloud()),
+          onDisconnect: () => unawaited(_disconnectCloud()),
         );
       },
     ),
   );
 
   void _openFileBackup() => _push(
-    Builder(
-      builder: (_) => BackupScreen(
+    ValueListenableBuilder<int>(
+      valueListenable: _backupRevision,
+      builder: (_, _, _) => BackupScreen(
         page: BackupPresenter.filePage(saved: _lastBackupOn),
         onBackUp: () => unawaited(_exportBackup()),
         onExportCsv: () => unawaited(_exportCsv()),
@@ -1664,17 +1802,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final fetch = await widget.cloud.latest();
     if (!mounted) return;
 
+    // Which cloud is in front of the user decides every sentence below.
+    // `Sign in to iCloud` on an Android phone sends them to a settings page
+    // that does not exist there.
+    final drive = _cloud.kind == CloudKind.drive;
+
     switch (fetch.state) {
       case CloudState.saved:
         break;
       case CloudState.missing:
-        _confirm(S.t.noCopyInICloud);
+        _confirm(drive ? S.t.noCopyInDrive : S.t.noCopyInICloud);
         return;
       case CloudState.signedOut:
-        _confirm(S.t.signInToICloud);
+      case CloudState.disconnected:
+        _confirm(drive ? S.t.connectDriveFirst : S.t.signInToICloud);
         return;
       default:
-        _confirm(S.t.couldNotReadICloud(fetch.detail ?? S.t.unknownError));
+        final why = fetch.detail ?? S.t.unknownError;
+        _confirm(
+          drive ? S.t.couldNotReadDrive(why) : S.t.couldNotReadICloud(why),
+        );
         return;
     }
 

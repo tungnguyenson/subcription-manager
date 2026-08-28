@@ -1162,9 +1162,46 @@ class EnStrings implements Strings {
       '${confirmed == 1 ? 'one of its dates was' : '$confirmed of its dates '
                 'were'} confirmed with a provider. Removing the app removes them.';
   @override
+  String get backupStale => 'Newer dates are not backed up';
+  @override
+  String backupStaleBody(int confirmed) =>
+      '${confirmed == 1 ? 'One date you confirmed with a provider is' : '$confirmed dates you confirmed with a provider are'} '
+      'in no copy. The newest copy was taken before you added '
+      '${confirmed == 1 ? 'it' : 'them'}.';
+  @override
   String get backupStateSignedOut => 'Sign in to iCloud';
   @override
+  String get backupStateReconnect => 'Reconnect your account';
+  @override
+  String get backupFirstCopy => 'Saving the first copy';
+  @override
+  String get backupStateDisconnected => 'Not connected';
+  @override
   String get backupStateFailed => 'Could not save';
+  @override
+  String get backupDriveTitle => 'Google Drive';
+  @override
+  String get backupDriveIntro =>
+      'Subdock keeps one copy of your list in your own Google Drive, in a '
+      'hidden folder only this app can open. It rewrites the copy whenever '
+      'you change something, and you can pull it back on a new phone.';
+  @override
+  String get backupDriveAccount => 'Account';
+  @override
+  String get backupDriveConnect => 'Connect a Google account';
+  @override
+  String get backupDriveConnectNote =>
+      'Subdock has no account and no server. The copy goes to the Google '
+      'account you pick, in a folder hidden from Drive and from every other '
+      'app. Nothing else in your Drive is read.';
+  @override
+  String get backupDriveDisconnect => 'Disconnect this account';
+  @override
+  String get backupRestoreFromDrive => 'Restore from Drive';
+  @override
+  String get backupDriveRestoreNote =>
+      'Restoring replaces everything in the app with what is in the copy. '
+      'Disconnecting leaves the copy in your Drive.';
   @override
   String get backupNoteWholeDevice =>
       'Subdock has no account and no server. Your list is in this '
@@ -1172,9 +1209,10 @@ class EnStrings implements Strings {
       'whole phone.';
   @override
   String get backupNotePerApp =>
-      'Subdock has no account and no server. Your list is in this '
-      "phone's Google backup and moves to a new phone by itself, but "
-      'Subdock cannot check whether that backup has ever run.';
+      'Subdock has no account and no server. The copies it keeps are the ones '
+      "in this section. This phone's own Google backup may also carry the list "
+      'to a new phone, on its own schedule, and Subdock has no say in that '
+      'one.';
   @override
   String get backupNoteUnknown =>
       'Subdock has no account and no server. What you see in the app is the '
@@ -1300,6 +1338,15 @@ class EnStrings implements Strings {
       'Sign in to iCloud to reach the copy kept there.';
   @override
   String couldNotReadICloud(String detail) => 'Could not read iCloud: $detail.';
+  @override
+  String get noCopyInDrive => 'No copy in Drive yet.';
+  @override
+  String get connectDriveFirst => 'Connect a Google account first.';
+  @override
+  String couldNotReadDrive(String detail) => 'Could not read Drive: $detail.';
+  @override
+  String couldNotConnectDrive(String detail) =>
+      'Could not connect the account: $detail.';
   @override
   String get unknownError => 'unknown error';
   @override

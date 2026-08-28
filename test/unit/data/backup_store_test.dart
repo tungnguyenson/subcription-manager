@@ -339,6 +339,114 @@ void main() {
     });
   });
 
+  // What a copy holds, beside when it was taken. Without this the app can only
+  // ask whether *a* backup exists, which goes quiet for someone who backed up
+  // in May and has confirmed four dates since.
+  group('what the last copy covered', () {
+    TrackedItem costly(String id) => TrackedItem(
+      id: id,
+      name: id,
+      categoryId: 'STREAMING',
+      expiresOn: d('2026-09-01'),
+      anchorDate: d('2026-09-01'),
+      dateSource: DateSource.userConfirmed,
+    );
+
+    test('starts unknown rather than empty on a fresh install', () async {
+      final saved = await backups.lastSaved();
+      expect(saved.fileCovered, isNull);
+      expect(saved.cloudCovered, isNull);
+      expect(saved.coverageKnown, isTrue, reason: 'no copy, nothing unknown');
+    });
+
+    // The whole reason the set is read inside `markSaved` rather than passed
+    // in. An optional argument is the shape that has already gone wrong twice
+    // here, and its failure is silent: the copy lands, the record says it
+    // holds nothing.
+    test('a write records the costly dates in the database', () async {
+      await repo.upsert(costly('a'), 1);
+      await repo.upsert(costly('b'), 2);
+      await backups.markSaved(t('2026-08-25 09:30'));
+
+      expect((await backups.lastSaved()).fileCovered, {'a', 'b'});
+    });
+
+    // The set answers "is anything expensive missing"; a date typed from
+    // memory can be typed again, and carrying it would grow the row without
+    // changing an answer.
+    test('a date typed from memory is not recorded', () async {
+      await repo.upsert(costly('a'), 1);
+      await repo.upsert(
+        TrackedItem(
+          id: 'guess',
+          name: 'guess',
+          categoryId: 'STREAMING',
+          expiresOn: d('2026-09-01'),
+          anchorDate: d('2026-09-01'),
+        ),
+        2,
+      );
+      await backups.markSaved(t('2026-08-25 09:30'));
+
+      expect((await backups.lastSaved()).fileCovered, {'a'});
+    });
+
+    test('the two channels record their own copies apart', () async {
+      await repo.upsert(costly('a'), 1);
+      await backups.markSaved(t('2026-08-25 09:30'));
+
+      await repo.upsert(costly('b'), 2);
+      await backups.markSaved(t('2026-08-26 09:30'), BackupChannel.cloud);
+
+      final saved = await backups.lastSaved();
+      expect(saved.fileCovered, {'a'});
+      expect(saved.cloudCovered, {'a', 'b'});
+    });
+
+    // An install written by a build that kept only the date. Reading that as
+    // "covers nothing" would fire the warning at every existing user the
+    // moment they upgrade, over copies that are perfectly good.
+    test('a date from an older build reads as unknown, not as empty', () async {
+      await db
+          .into(db.settingRow)
+          .insert(
+            SettingRowCompanion(
+              settingKey: const Value('last_backup_on'),
+              value: const Value('2026-08-25'),
+            ),
+          );
+
+      final saved = await backups.lastSaved();
+      expect(saved.file, d('2026-08-25'));
+      expect(saved.fileCovered, isNull);
+      expect(saved.coverageKnown, isFalse);
+    });
+
+    // Both halves go together. A date left without its set would read as a
+    // copy holding nothing; a set without its date, as a copy that never was.
+    test('a restore with no date in it clears the set too', () async {
+      await repo.upsert(costly('a'), 1);
+      await backups.markSaved(t('2026-08-25 09:30'));
+
+      final taken = await backups.read();
+      await backups.restore(
+        Backup(
+          categories: taken.categories,
+          sources: taken.sources,
+          items: taken.items,
+          history: taken.history,
+          defaultLeadDays: taken.defaultLeadDays,
+          remindAt: taken.remindAt,
+          exportedAt: 'not a date',
+        ),
+      );
+
+      final saved = await backups.lastSaved();
+      expect(saved.file, isNull);
+      expect(saved.fileCovered, isNull);
+    });
+  });
+
   group('the file name', () {
     // Local, not UTC. Someone in Vietnam taking a backup at 1am picks it out of
     // a folder by the day they remember, and UTC files it under the day before.

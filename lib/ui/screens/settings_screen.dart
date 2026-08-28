@@ -189,11 +189,14 @@ class SettingsScreen extends StatelessWidget {
             // last write that landed. One date beside both rows would report
             // the newer of the two next to whichever the reader looked at.
             //
-            // iCloud first, and absent entirely off iOS, where the system
-            // already carries the database to the next phone.
+            // The cloud row first, and absent entirely where the app writes
+            // to no cloud at all. Its name comes from the view rather than
+            // being written here, because which cloud this is depends on the
+            // platform and `iCloud` on an Android phone names a service that
+            // is not on the device.
             if (backup?.hasCloud ?? false)
               DetailRow.nav(
-                label: S.t.rowICloud,
+                label: backup?.cloudLabel ?? '',
                 value: backup?.cloudLine,
                 onTap: onOpenCloudBackup,
               ),

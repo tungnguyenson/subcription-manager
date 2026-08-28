@@ -269,6 +269,26 @@ Khi nào có tài khoản trả phí, bật nó lên như sau:
 
 Bước 4 không bỏ được. Đây đúng là loại lỗi không tự báo, nên chỉ có cách thử tay mới biết.
 
+## 5bis. Sao lưu lên Google Drive, chỉ Android
+
+Hàng **Google Drive** trong Settings chỉ hiện khi bản build có client id của Google.
+Không có nó thì `DriveBackup.isSupported` trả `false`, hàng đó biến mất, và app chạy y
+như trước. Đó là chủ ý, để một checkout không có dự án Google đứng sau vẫn build được.
+
+```bash
+flutter run -d <android-device> \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=<web-client-id>
+```
+
+`<web-client-id>` là client id của **OAuth client kiểu Web**, không phải kiểu Android.
+Bốn bước dựng nó nằm ở `docs/backup-and-sync.md` mục 6.2bis, kèm cái bẫy SHA-1 của Play
+App Signing: khai thiếu dấu vân tay đó thì đăng nhập chạy ngon lúc tự thử và hỏng với
+mọi người tải từ Store.
+
+Lỗi cấu hình hiện ra dưới dạng một thông báo bắt đầu bằng `Không kết nối được tài
+khoản`, kèm nguyên văn phần mô tả Google trả về. Đừng nuốt phần mô tả đó đi, nó là manh
+mối duy nhất cho một lỗi không tái hiện được ở bàn làm việc.
+
 ## 6. Hạn chế của tài khoản Apple thường
 
 Ký bằng Apple ID thường thì dùng được ngay, không mất tiền, nhưng kèm ba giới hạn thật:

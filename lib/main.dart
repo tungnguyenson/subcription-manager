@@ -15,8 +15,11 @@ import 'package:subdock/data/locale_store.dart';
 import 'package:subdock/data/theme_store.dart';
 import 'package:subdock/domain/item_actions.dart';
 import 'package:subdock/domain/local_date.dart';
+import 'package:subdock/data/cloud_store.dart';
 import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/cloud_backup.dart';
+import 'package:subdock/platform/drive_backup.dart';
+import 'package:subdock/platform/icloud_backup.dart';
 import 'package:subdock/platform/notification_scheduler.dart';
 
 Future<void> main() async {
@@ -81,10 +84,29 @@ Future<void> main() async {
       catalog: catalog,
       backups: backups,
       files: BackupFiles(),
-      cloud: CloudBackup(defaultTargetPlatform),
+      cloud: _cloudFor(defaultTargetPlatform),
+      clouds: CloudStore(database),
     ),
   );
 }
+
+/// Which cloud this platform keeps a copy in.
+///
+/// Decided once, here, rather than asked again inside the classes themselves.
+/// The two are genuinely different mechanisms with different sign-in stories,
+/// and a single class carrying both would be one long branch from top to
+/// bottom.
+///
+/// Android gets Drive because its own system backup, while real, is invisible
+/// to the app: it cannot say whether it ever ran, cannot ask it to run, and
+/// only hands anything back when the app is reinstalled. iOS gets iCloud
+/// because the container is already there and needs nobody to sign in to
+/// anything. Everywhere else keeps the file channel and says so.
+CloudBackup _cloudFor(TargetPlatform platform) => switch (platform) {
+  TargetPlatform.iOS => ICloudBackup(),
+  TargetPlatform.android => DriveBackup(),
+  _ => const NoCloud(),
+};
 
 Future<void> _handleNotificationAction(
   ItemRepository repository,

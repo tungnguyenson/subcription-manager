@@ -1,7 +1,4 @@
-import 'dart:async';
-
-import 'package:flutter/foundation.dart' show TargetPlatform, immutable;
-import 'package:icloud_storage_plus/icloud_storage.dart';
+import 'package:flutter/foundation.dart' show immutable;
 
 /// How the last write to the user's own cloud went.
 enum CloudState {
@@ -25,6 +22,14 @@ enum CloudState {
 
   /// Nothing has been attempted yet this run.
   idle,
+
+  /// The channel works on this platform, but no account is attached to it yet.
+  ///
+  /// Its own value rather than folding into [signedOut], because the two ask
+  /// the user for different things. `signedOut` is something that broke and
+  /// wants fixing; this is an offer nobody has taken up, and reporting it as
+  /// a fault would accuse the user of breaking a thing they never turned on.
+  disconnected,
 
   /// This platform has no cloud the app writes to. Android is here, and it is
   /// not a gap: the system already backs the database up and hands it to the
@@ -76,153 +81,108 @@ class CloudFetch {
   const CloudFetch(this.state, {this.copy, this.detail});
 }
 
-/// Keeps a copy of the backup in the user's own iCloud.
+/// Which cloud the app writes to on this platform.
 ///
-/// **Backup, one direction, not sync.** The app writes and never reads except
-/// when the user asks to restore. Two-way sync would need conflict resolution
-/// between devices, which is a different feature with a different cost; see
-/// `docs/backup-and-sync.md` section 6.3 for where that line is drawn and why.
+/// The two are not interchangeable on screen. iCloud is already signed in and
+/// needs no account row; Drive has one, and a user with two Google accounts
+/// has two different backups. Naming the cloud is also the difference between
+/// `Sign in to iCloud` and `Reconnect your account`, and sending someone to
+/// the wrong one of those is sending them to a settings page that will not
+/// help them.
+enum CloudKind { none, icloud, drive }
+
+/// One place the app keeps a copy of the list, outside the device.
 ///
-/// The user's own iCloud rather than a server of ours: no account to create,
-/// no backend to run, nothing worth stealing in one place, and it works the
-/// moment they are signed into the phone they already own.
+/// Two of these exist and they are not the same shape. iCloud is already
+/// signed in on the phone, so the app writes without asking anyone anything.
+/// Google Drive needs an account attached first, once, by the user. The extra
+/// members below are what that difference costs, and they default to doing
+/// nothing so the channel that has no account never has to mention one.
 ///
-/// This exists because of a specific hole. The database is inside the iPhone's
-/// own backup already, but iOS will only give that back by restoring the whole
-/// phone, so the copy is useless to anyone who just wants their list. A file of
-/// its own in the app's iCloud container comes back on its own.
+/// One direction, not sync. Every implementation writes, and reads only when
+/// the user asks to restore. Reading on a timer would be the first half of
+/// two-way sync, which is a different feature with a different cost; see
+/// `docs/backup-and-sync.md` section 6.3.
 ///
 /// A class rather than top-level functions so a test can put a fake in its
-/// place, the same as [BackupFiles] and [NotificationScheduler].
-class CloudBackup {
-  /// Must match `com.apple.developer.icloud-container-identifiers` in
-  /// `ios/Runner/Runner.entitlements`. A mismatch is not a build error: the
-  /// container simply does not resolve and every call comes back
-  /// [CloudState.signedOut], which reads on screen as the user's fault.
-  static const String containerId = 'iCloud.space.subdock.subdock';
+/// place, the same as `BackupFiles` and `NotificationScheduler`.
+abstract class CloudBackup {
+  const CloudBackup();
 
-  /// One file, overwritten. Not a dated series: the container is visible in
-  /// the Files app, and a folder that grows a file every time the user edits
-  /// an item is a folder they will eventually delete in irritation. The dated
-  /// copies are the ones they save by hand through the share sheet.
-  static const String fileName = 'subdock-latest.json';
+  /// Whether this build writes to a cloud at all. False hides the row rather
+  /// than showing one that reads `Not available`, which would report a gap
+  /// where there is none.
+  bool get isSupported;
 
-  final TargetPlatform _platform;
+  /// Which cloud this is, for the wording on the one screen that names it.
+  ///
+  /// Asked of the channel rather than worked out from `defaultTargetPlatform`
+  /// at the call site: a test that puts a fake in place on an Android emulator
+  /// would otherwise be told it is looking at Drive while the fake stands in
+  /// for iCloud, and every sentence on the page would be the wrong one.
+  CloudKind get kind => CloudKind.none;
 
-  CloudBackup(this._platform);
+  /// Whether the user has to attach an account before anything is written.
+  ///
+  /// False on iCloud, where the phone is already signed in and there is
+  /// nothing to ask. True on Drive until they have connected one, which is
+  /// why the screen needs to tell the two apart rather than printing `Never`
+  /// at somebody who was never offered the chance to say yes.
+  bool get needsAccount => false;
 
-  /// Android is deliberately not covered. Its system backup already carries
-  /// the database to a new phone by itself, which is the thing iOS will not
-  /// do; adding a second mechanism there would duplicate the platform without
-  /// making anything safer. What the app cannot do is tell the user whether
-  /// that system backup ever ran, and the Settings note says so.
-  bool get isSupported => _platform == TargetPlatform.iOS;
+  /// The account copies go to, for the one screen that names it.
+  ///
+  /// Null where there is no account to name. It matters on Drive because a
+  /// user with two Google accounts has two different backups, and which one
+  /// they are looking at is not something they can work out from a date.
+  String? get account => null;
 
-  /// Writes [contents] over the single file in the container.
+  /// Attaches an account, showing whatever the platform shows.
+  ///
+  /// Only ever from a tap. Anything that puts a sign-in sheet in front of
+  /// someone who did not ask for it is a bug, not a feature.
+  Future<CloudResult> connect() async => CloudResult.unsupported;
+
+  /// Takes back up an account attached in an earlier run.
+  ///
+  /// Deliberately not a `Future` and deliberately not a call to the platform:
+  /// this runs at launch, and the one thing it must never do is put a sign-in
+  /// sheet in front of somebody who has not asked for cloud backup. The caller
+  /// hands over what it read from its own database; nothing here goes out.
+  ///
+  /// Does nothing on a channel with no account to attach.
+  void resume(String? account) {}
+
+  /// Detaches the account. The copy already in the cloud stays where it is:
+  /// deleting somebody's backup on their behalf, because they turned a switch
+  /// off, is not a decision this app gets to make.
+  Future<void> disconnect() async {}
+
+  /// Writes [contents] over the single copy.
   ///
   /// Never throws. Every failure comes back as a [CloudResult] the screen can
   /// print, because this runs on a timer with nobody watching: an exception
   /// here would be swallowed by the caller's `unawaited` and the user would go
   /// on believing they are backed up.
-  ///
-  /// Written in place rather than staged to a temporary file and copied in.
-  /// The backup is tens of kilobytes, which is the size the in-place API is
-  /// for, and it removes a file this app used to leave in the temporary
-  /// directory after every edit.
-  Future<CloudResult> save(String contents) async {
-    if (!isSupported) return CloudResult.unsupported;
+  Future<CloudResult> save(String contents);
 
-    try {
-      await ICloudStorage.writeInPlace(
-        containerId: containerId,
-        relativePath: fileName,
-        contents: contents,
-      );
-      return const CloudResult(CloudState.saved);
-    } on ICloudContainerAccessException {
-      // The one failure the user can act on, and the one the app must not
-      // dress up as a bug: signed out of iCloud, iCloud Drive off, or
-      // permission refused for this app.
-      return const CloudResult(CloudState.signedOut);
-    } on ICloudOperationException catch (error) {
-      return CloudResult(CloudState.failed, detail: error.message);
-    } on Exception catch (error) {
-      return CloudResult(CloudState.failed, detail: '$error');
-    }
-  }
+  /// Reads the copy back, if there is one.
+  Future<CloudFetch> latest();
+}
 
-  /// How long a read is given before the app stops waiting on it.
-  ///
-  /// A file this size is a few tens of kilobytes, so anything past this is a
-  /// network that is not going to finish. The user is holding the phone
-  /// waiting for an answer, and no answer at all is the worst one.
-  ///
-  /// Needed even though the read is a single await: a coordinated open on a
-  /// file the phone has not downloaded yet blocks until iCloud hands the bytes
-  /// over, and iCloud is under no obligation to hurry.
-  static const Duration _fetchTimeout = Duration(seconds: 20);
+/// The answer on a platform the app writes no cloud copy for.
+///
+/// Everything reports [CloudState.unsupported], which is what takes the row
+/// off the Settings screen entirely.
+class NoCloud extends CloudBackup {
+  const NoCloud();
 
-  /// Reads back the single file in the container, if it is there.
-  ///
-  /// The one read this class does, and only ever because the user asked to
-  /// restore. Nothing here runs on a timer: that would be the first half of
-  /// two-way sync, which is a different feature with a different cost. See
-  /// `docs/backup-and-sync.md` section 6.3.
-  Future<CloudFetch> latest() async {
-    if (!isSupported) return const CloudFetch(CloudState.unsupported);
+  @override
+  bool get isSupported => false;
 
-    try {
-      // `gather` runs a metadata query; `listContents` and `getItemMetadata`
-      // read the local filesystem. The difference decides this call. Whoever
-      // opens this screen has usually just reinstalled or changed phone, and
-      // on a device that has never seen the container the file exists only as
-      // a promise the metadata query knows about and the filesystem does not
-      // yet. Asking the filesystem would answer `missing` to exactly the
-      // person this feature is for.
-      final gathered = await ICloudStorage.gather(containerId: containerId);
-      final match = gathered.files
-          .where((file) => file.relativePath == fileName)
-          .firstOrNull;
-      if (match == null) return const CloudFetch(CloudState.missing);
+  @override
+  Future<CloudResult> save(String contents) async => CloudResult.unsupported;
 
-      final contents = await ICloudStorage.readInPlace(
-        containerId: containerId,
-        relativePath: fileName,
-      ).timeout(_fetchTimeout);
-
-      // An empty read would reach the format check as "not a Subdock backup",
-      // which blames the user's file for a download that came back with
-      // nothing.
-      if (contents.isEmpty) {
-        return const CloudFetch(
-          CloudState.failed,
-          detail: 'the copy came back empty',
-        );
-      }
-
-      return CloudFetch(
-        CloudState.saved,
-        copy: CloudCopy(
-          contents: contents,
-          changedAt: match.contentChangeDate,
-        ),
-      );
-    } on TimeoutException {
-      return const CloudFetch(
-        CloudState.failed,
-        detail: 'the copy did not finish downloading',
-      );
-    } on ICloudItemNotFoundException {
-      // The metadata query saw it and the read did not. A file deleted from
-      // another device between the two calls lands here, and `missing` is the
-      // honest answer: there is nothing to restore.
-      return const CloudFetch(CloudState.missing);
-    } on ICloudContainerAccessException {
-      return const CloudFetch(CloudState.signedOut);
-    } on ICloudOperationException catch (error) {
-      return CloudFetch(CloudState.failed, detail: error.message);
-    } on Exception catch (error) {
-      return CloudFetch(CloudState.failed, detail: '$error');
-    }
-  }
+  @override
+  Future<CloudFetch> latest() async => const CloudFetch(CloudState.unsupported);
 }

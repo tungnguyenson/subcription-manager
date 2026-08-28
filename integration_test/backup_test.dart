@@ -1,5 +1,3 @@
-import 'package:flutter/foundation.dart' show TargetPlatform;
-
 import 'dart:ui' show Rect;
 
 import 'package:drift/native.dart';
@@ -8,6 +6,7 @@ import 'package:integration_test/integration_test.dart';
 import 'package:subdock/app.dart';
 import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/backup_store.dart';
+import 'package:subdock/data/cloud_store.dart';
 import 'package:subdock/data/database.dart';
 import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/data/item_repository.dart';
@@ -97,13 +96,20 @@ void main() {
         backups: BackupStore(db, repo, SettingsStore(db)),
         files: files,
         cloud: cloud,
+        clouds: CloudStore(db),
       ),
     );
     await tester.pumpAndSettle();
   }
 
+  /// Unwinds to the Settings tab from wherever the test is standing.
+  ///
+  /// `.last` because the word appears twice once the screen is up: the tab
+  /// label and the screen's own title. The tab bar is built after the content,
+  /// so the last of the two is the one that navigates. Without it, calling
+  /// this while already on Settings throws on an ambiguous finder.
   Future<void> openSettings(WidgetTester tester) async {
-    await tester.tap(find.text('Settings'));
+    await tester.tap(find.text('Settings').last);
     await tester.pumpAndSettle();
   }
 
@@ -122,6 +128,72 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Opens the File page from Settings, then taps one of its rows.
+  ///
+  /// Two taps rather than one, because that is the app. Settings used to carry
+  /// every backup action directly; it now carries one row per channel and the
+  /// actions live on the page behind it. These tests went on tapping the old
+  /// layout and had been red ever since, which is worse than having no test:
+  /// the suite was reporting on a path nobody was walking.
+  Future<void> tapFileRow(WidgetTester tester, String label) async {
+    if (find.text('Restore from a file').evaluate().isEmpty) {
+      // Not already on the page. Back to Settings first, from wherever we
+      // are: sub-screens keep the tab bar, and tapping Settings on it unwinds
+      // to the root rather than stacking another screen on top.
+      await openSettings(tester);
+      await tapRow(tester, 'Import/Export');
+    }
+    await tapRow(tester, label);
+  }
+
+  /// The same, for the cloud channel.
+  Future<void> tapCloudRow(WidgetTester tester, String label) async {
+    if (find.text('Restore from iCloud').evaluate().isEmpty) {
+      await openSettings(tester);
+      await tapRow(tester, 'iCloud');
+    }
+    await tapRow(tester, label);
+  }
+
+  /// Pumps a fixed number of frames instead of waiting for the tree to go
+  /// quiet.
+  ///
+  /// Onboarding is the one screen `pumpAndSettle` must never be pointed at.
+  /// Two of its three cards animate on a loop -- the strip of items sliding
+  /// across, the notifications dropping in -- so the tree never goes quiet and
+  /// the wait never returns. Trap 42 wrote this down; this helper is what
+  /// following it looks like from a test that has to walk through the screen
+  /// rather than photograph it.
+  Future<void> settle(WidgetTester tester) async {
+    for (var frame = 0; frame < 10; frame++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+
+  /// Walks out of onboarding, which is what stands between a wiped database
+  /// and every other screen.
+  ///
+  /// Two pages: three cards and a Continue, then language and currency and a
+  /// Get started. Nothing here offers to restore a backup, and that is the
+  /// design rather than an oversight -- see trap 42. It is also the reason
+  /// these tests changed shape: they used to tap `I already have a backup` on
+  /// the first onboarding screen, and that button no longer exists.
+  Future<void> passOnboarding(WidgetTester tester) async {
+    // Onboarding replaces the root screen, so a test standing on a pushed
+    // page never sees it however empty the database gets. Unwind first.
+    await tester.tap(find.text('Upcoming').last);
+    await settle(tester);
+
+    // Proves the wipe actually took, and that a database with nothing in it
+    // lands on the explanation rather than on an empty Upcoming.
+    expect(find.text('Never miss a due date again.'), findsOneWidget);
+
+    await tester.tap(find.text('Continue'));
+    await settle(tester);
+    await tester.tap(find.text('Get started'));
+    await settle(tester);
+  }
+
   /// Waits out the confirmation snackbar.
   ///
   /// It floats over the bottom of the screen, which is where the rows this
@@ -137,7 +209,7 @@ void main() {
     await launch(tester);
     await openSettings(tester);
 
-    await tapRow(tester, 'Export a backup');
+    await tapFileRow(tester, 'Export a backup');
 
     expect(files.saved, isNotNull, reason: 'the share sheet got a file');
     expect(files.savedAs, endsWith('.json'));
@@ -164,7 +236,7 @@ void main() {
 
     await settleSnackBar(tester);
     files.toPick = files.saved;
-    await tapRow(tester, 'Restore from a file');
+    await tapFileRow(tester, 'Restore from a file');
 
     // The sheet has to name what is about to go, and the filled button is the
     // one that keeps it.
@@ -206,7 +278,9 @@ void main() {
     await openSettings(tester);
 
     expect(find.text('Nothing has been backed up'), findsOneWidget);
-    expect(find.text('Never'), findsOneWidget);
+    // One per channel: the card carries a row for the cloud and a row for the
+    // file, and neither has anything in it yet.
+    expect(find.text('Never'), findsNWidgets(2));
 
     // The banner's own action, not the row below it. Someone who reads the
     // warning must be able to answer it without hunting for the card.
@@ -214,7 +288,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Nothing has been backed up'), findsNothing);
-    expect(find.text('Never'), findsNothing);
+    // The file row has a date now. The cloud row has not, because nothing was
+    // written up there, and it says so rather than borrowing the file's date.
+    expect(find.text('Never'), findsOneWidget);
   });
 
   // Dates typed from memory are annoying to retype. Dates read off a
@@ -225,18 +301,23 @@ void main() {
     await openSettings(tester);
 
     expect(find.text('Nothing has been backed up'), findsNothing);
-    expect(find.text('Never'), findsOneWidget);
+    expect(find.text('Never'), findsNWidgets(2), reason: 'one per channel');
   });
 
-  // The moment a backup is worth having is the moment someone reinstalls, and
-  // that person is looking at the onboarding screen, not at Settings.
+  // The moment a backup is worth having is the moment someone reinstalls.
+  //
+  // That person now has further to walk than they used to: onboarding no
+  // longer offers to restore one, so the only way back is through it and into
+  // Settings. Trap 42 records that as a deliberate loss rather than a gap, and
+  // this test walks the whole of it -- if the route were ever broken, the
+  // person who found out would be the person with nothing left.
   testWidgets('a fresh install can restore before it has anything', (
     tester,
   ) async {
     await seed();
     await launch(tester);
     await openSettings(tester);
-    await tapRow(tester, 'Export a backup');
+    await tapFileRow(tester, 'Export a backup');
 
     await settleSnackBar(tester);
 
@@ -244,11 +325,12 @@ void main() {
     await db.delete(db.handledEventRow).go();
     await db.delete(db.itemRow).go();
     await tester.pumpAndSettle();
-    expect(find.text('Never miss a due date again.'), findsOneWidget);
 
+    await passOnboarding(tester);
     files.toPick = files.saved;
-    await tester.tap(find.text('I already have a backup'));
-    await tester.pumpAndSettle();
+    await tapFileRow(tester, 'Restore from a file');
+    // `Restore`, not `Replace everything`. There is nothing on this phone to
+    // replace, and the sheet does not talk about losing what does not exist.
     await tester.tap(find.text('Restore'));
     await tester.pumpAndSettle();
 
@@ -264,14 +346,14 @@ void main() {
     // Whatever the app last wrote up there is what comes back down.
     cloud.holds = null;
     await openSettings(tester);
-    await tapRow(tester, 'Export a backup');
+    await tapFileRow(tester, 'Export a backup');
     cloud.holds = files.saved;
     await settleSnackBar(tester);
 
     await repo.delete('passport');
     await tester.pumpAndSettle();
 
-    await tapRow(tester, 'Restore from iCloud');
+    await tapCloudRow(tester, 'Restore from iCloud');
 
     // The same sheet a file restore raises. Both destroy the same rows, so
     // both have to ask the same question.
@@ -315,6 +397,47 @@ void main() {
     expect(saved.fileAt, isNull, reason: 'nothing was ever written to a file');
   });
 
+  // The bug this exists for: connecting an account changed nothing on screen.
+  // The page went on offering `Connect` and only told the truth after the user
+  // went back and opened it again.
+  //
+  // The cause is the one trap 34 already wrote down for colours. A pushed
+  // route builds its page exactly once and keeps it, so `setState` in the
+  // shell rebuilds everything except the screen the user is looking at. The
+  // only way in is a subscription the pushed widget makes for itself.
+  testWidgets('connecting an account shows on the page you are on', (
+    tester,
+  ) async {
+    cloud.wantsAccount = true;
+    await seed();
+    await launch(tester);
+    await openSettings(tester);
+    await tapRow(tester, 'iCloud');
+
+    expect(find.text('Connect a Google account'), findsOneWidget);
+
+    await tester.tap(find.text('Connect a Google account'));
+    await tester.pumpAndSettle();
+
+    // Still on the same route. Nothing was popped and nothing re-pushed.
+    expect(
+      find.text('Connect a Google account'),
+      findsNothing,
+      reason: 'the offer is gone once it has been taken up',
+    );
+    expect(find.text('someone@gmail.com'), findsOneWidget);
+
+    // And the copy the connection triggered lands on the same screen.
+    await tester.pump(const Duration(seconds: 13));
+    await tester.pumpAndSettle();
+    expect(cloud.written, isNotNull, reason: 'connecting writes a copy');
+    expect(
+      find.text('Never'),
+      findsNothing,
+      reason: 'a copy exists, so the row must not report that none does',
+    );
+  });
+
   // Silence here would read as a tap that did nothing.
   testWidgets('an empty container says so rather than nothing', (tester) async {
     await seed();
@@ -322,34 +445,34 @@ void main() {
     await openSettings(tester);
 
     cloud.holds = null;
-    await tapRow(tester, 'Restore from iCloud');
+    await tapCloudRow(tester, 'Restore from iCloud');
 
     expect(find.textContaining('no copy in iCloud yet'), findsOneWidget);
     expect(find.text('Replace everything'), findsNothing);
   });
 
-  // Someone on this screen has just reinstalled or changed phone. They came to
-  // get their list back, not to be told about iCloud.
-  testWidgets('a fresh install reaches for the cloud copy first', (
+  // The same walk on the other channel, and the one that matters most: whoever
+  // changed phone has no file to pick, only whatever the app wrote up there by
+  // itself while they still had the old one.
+  testWidgets('a wiped install can pull its list back out of the cloud', (
     tester,
   ) async {
     await seed();
     await launch(tester);
     await openSettings(tester);
-    await tapRow(tester, 'Export a backup');
+    await tapFileRow(tester, 'Export a backup');
     cloud.holds = files.saved;
     await settleSnackBar(tester);
 
     await db.delete(db.handledEventRow).go();
     await db.delete(db.itemRow).go();
     await tester.pumpAndSettle();
-    expect(find.text('Never miss a due date again.'), findsOneWidget);
 
-    // No file is offered to the picker, so anything restored came from the
-    // cloud.
+    // Nothing is offered to the file picker, so anything that comes back came
+    // out of the cloud.
     files.toPick = null;
-    await tester.tap(find.text('I already have a backup'));
-    await tester.pumpAndSettle();
+    await passOnboarding(tester);
+    await tapCloudRow(tester, 'Restore from iCloud');
     await tester.tap(find.text('Restore'));
     await tester.pumpAndSettle();
 
@@ -362,14 +485,14 @@ void main() {
     await launch(tester);
     await openSettings(tester);
 
-    await tapRow(tester, 'Export a backup');
+    await tapFileRow(tester, 'Export a backup');
 
     await repo.delete('passport');
     await tester.pumpAndSettle();
 
     await settleSnackBar(tester);
     files.toPick = files.saved;
-    await tapRow(tester, 'Restore from a file');
+    await tapFileRow(tester, 'Restore from a file');
     await tester.tap(find.text('Keep what I have'));
     await tester.pumpAndSettle();
 
@@ -383,7 +506,7 @@ void main() {
     await openSettings(tester);
 
     files.toPick = '{"hello": "world"}';
-    await tapRow(tester, 'Restore from a file');
+    await tapFileRow(tester, 'Restore from a file');
 
     expect(find.textContaining('not a Subdock backup'), findsOneWidget);
     expect(find.text('Replace everything'), findsNothing);
@@ -396,7 +519,7 @@ void main() {
     await launch(tester);
     await openSettings(tester);
 
-    await tapRow(tester, 'Restore from a file');
+    await tapFileRow(tester, 'Restore from a file');
 
     expect(find.textContaining('Replace everything'), findsNothing);
     expect(find.textContaining('Could not'), findsNothing);
@@ -409,7 +532,27 @@ void main() {
 /// `signedOut` to everything. What is worth testing is the wiring above it:
 /// which row reads which source, and that both ask the same question first.
 class _FakeCloud extends CloudBackup {
-  _FakeCloud() : super(TargetPlatform.iOS);
+  /// Whether this stands in for a channel the user has to attach an account
+  /// to, the way Drive does, rather than one the phone is already signed in
+  /// to.
+  bool wantsAccount = false;
+
+  String? _account;
+
+  @override
+  bool get needsAccount => wantsAccount && _account == null;
+
+  @override
+  String? get account => _account;
+
+  @override
+  void resume(String? account) => _account = account;
+
+  @override
+  Future<CloudResult> connect() async {
+    _account = 'someone@gmail.com';
+    return const CloudResult(CloudState.saved);
+  }
 
   /// What [latest] finds. Null is an empty container.
   String? holds;

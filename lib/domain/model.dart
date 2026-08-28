@@ -644,6 +644,22 @@ class TrackedItem {
   /// can never disagree about what the user turned off.
   bool get isLive => !paused && state != ItemState.archived;
 
+  /// Whether losing this item would cost the user more than retyping it.
+  ///
+  /// A date read off a provider's own record cost a phone call to obtain; a
+  /// date typed from memory cost nothing and can be typed again. The backup
+  /// warning measures the first kind and ignores the second, so the number it
+  /// quotes is the cost of losing the list rather than its length.
+  ///
+  /// Archived items are out, because they are out of the user's way already
+  /// and counting them would keep a warning alive over a list nobody is using.
+  ///
+  /// Lives here rather than on the presenter because [BackupStore] records the
+  /// same set when a copy lands. Two copies of this rule would drift, and the
+  /// drift would show up as a warning that never clears or never fires.
+  bool get isCostlyToRebuild =>
+      dateSource == DateSource.userConfirmed && state != ItemState.archived;
+
   TrackedItem copyWith({
     String? id,
     String? name,

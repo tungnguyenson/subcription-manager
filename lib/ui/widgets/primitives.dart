@@ -372,7 +372,15 @@ class DetailRow extends StatelessWidget {
                   children: [
                     ConstrainedBox(
                       constraints: BoxConstraints(
-                        maxWidth: room.maxWidth * _labelShare,
+                        // Only where there is a value to protect. The cap
+                        // exists to stop a long label squeezing the answer
+                        // out; on a row that has no answer it was cutting the
+                        // label to leave room for nothing, which is how
+                        // `Connect a Google account` reached the screen as
+                        // `Connect a Google a...`.
+                        maxWidth: value == null
+                            ? room.maxWidth
+                            : room.maxWidth * _labelShare,
                       ),
                       child: Text(
                         label,

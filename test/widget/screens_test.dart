@@ -644,7 +644,7 @@ void main() {
               fileAt: LocalDateTime(d('2026-08-11'), const LocalTime(9, 30)),
             ),
             device: DeviceBackup.wholeDeviceOnly,
-            cloud: const CloudResult(CloudState.saved),
+            cloud: const CloudChannel(result: CloudResult(CloudState.saved)),
           ),
           onOpenCloudBackup: () => cloud++,
           onOpenFileBackup: () => file++,
@@ -676,7 +676,9 @@ void main() {
               cloudAt: LocalDateTime(d('2026-06-25'), const LocalTime(9, 30)),
             ),
             device: DeviceBackup.wholeDeviceOnly,
-            cloud: const CloudResult(CloudState.signedOut),
+            cloud: const CloudChannel(
+              result: CloudResult(CloudState.signedOut),
+            ),
           ),
           onOpenCloudBackup: () {},
           onOpenFileBackup: () {},
@@ -861,7 +863,7 @@ void main() {
         saved: LastBackups(
           cloudAt: LocalDateTime(d('2026-08-11'), const LocalTime(9, 30)),
         ),
-        cloud: const CloudResult(CloudState.saved),
+        cloud: const CloudChannel(result: CloudResult(CloudState.saved)),
       );
 
       await show(
@@ -881,6 +883,54 @@ void main() {
       await tester.tap(find.text('Restore from iCloud'));
       await tester.pumpAndSettle();
       expect(restored, 1);
+    });
+
+    // The label was capped at 55% of the row to leave the value somewhere to
+    // sit, and the cap applied even on a row with no value at all. This one
+    // has none, so it was cutting the label to make room for nothing and the
+    // button reached the screen as `Connect a Google a...`.
+    testWidgets('a Drive account is connected from one full-width row', (
+      tester,
+    ) async {
+      // At the width the design is drawn for. The default test surface is
+      // wider than any phone, and at that width the capped label still fits,
+      // so the bug this test exists for is invisible there.
+      tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+      tester.view.devicePixelRatio = 3;
+      addTearDown(tester.view.reset);
+
+      var connected = 0;
+      final page = BackupPresenter.cloudPage(
+        saved: LastBackups.none,
+        cloud: const CloudChannel(
+          kind: CloudKind.drive,
+          result: CloudResult(CloudState.disconnected),
+          needsAccount: true,
+        ),
+      );
+
+      await show(
+        tester,
+        BackupScreen(page: page!, onConnect: () => connected++),
+      );
+
+      // Measured as a share of the row rather than against the text's own
+      // width: the font the test framework substitutes is far wider than the
+      // real one, so what fits here says nothing about what fits on a phone.
+      // What this pins down is the rule that changed, which is how much of the
+      // row the label may occupy when nothing is sharing it.
+      final row = tester.getSize(find.byType(DetailRow).first).width;
+      final label = tester.getSize(find.text('Connect a Google account')).width;
+
+      expect(
+        label / row,
+        greaterThan(0.6),
+        reason: 'a row with no value must not cap its label at 55%',
+      );
+
+      await tester.tap(find.text('Connect a Google account'));
+      await tester.pumpAndSettle();
+      expect(connected, 1);
     });
 
     testWidgets('a file is written and read back by hand', (tester) async {
@@ -947,7 +997,7 @@ void main() {
     testWidgets('iCloud offers no spreadsheet', (tester) async {
       final page = BackupPresenter.cloudPage(
         saved: LastBackups.none,
-        cloud: const CloudResult(CloudState.saved),
+        cloud: const CloudChannel(result: CloudResult(CloudState.saved)),
       );
 
       await show(tester, BackupScreen(page: page!));
@@ -963,7 +1013,7 @@ void main() {
       for (final page in [
         BackupPresenter.cloudPage(
           saved: LastBackups.none,
-          cloud: const CloudResult(CloudState.saved),
+          cloud: const CloudChannel(result: CloudResult(CloudState.saved)),
         )!,
         BackupPresenter.filePage(saved: LastBackups.none),
       ]) {
@@ -981,7 +1031,7 @@ void main() {
       expect(
         BackupPresenter.cloudPage(
           saved: LastBackups.none,
-          cloud: CloudResult.unsupported,
+          cloud: CloudChannel.none,
         ),
         isNull,
       );

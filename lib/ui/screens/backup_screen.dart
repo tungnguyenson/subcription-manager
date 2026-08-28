@@ -32,6 +32,12 @@ class BackupScreen extends StatelessWidget {
   /// this up, not to a button on a settings screen.
   final VoidCallback? onRestore;
 
+  /// Attaches an account to a channel that needs one.
+  final VoidCallback? onConnect;
+
+  /// Detaches it again, leaving the copy where it is.
+  final VoidCallback? onDisconnect;
+
   final VoidCallback? onBack;
 
   const BackupScreen({
@@ -40,6 +46,8 @@ class BackupScreen extends StatelessWidget {
     this.onBackUp,
     this.onExportCsv,
     this.onRestore,
+    this.onConnect,
+    this.onDisconnect,
     this.onBack,
   });
 
@@ -65,6 +73,10 @@ class BackupScreen extends StatelessWidget {
         SectionLabel(S.t.backupActions),
         GroupedCard(
           children: [
+            // First, because on a channel with no account yet it is the only
+            // row here and the only thing the page is for.
+            if (page.connectLabel case final label?)
+              DetailRow.nav(label: label, onTap: onConnect),
             if (page.backUpLabel case final label?)
               DetailRow.nav(label: label, onTap: onBackUp),
             // Under the backup rather than above it. The backup is the row
@@ -79,6 +91,10 @@ class BackupScreen extends StatelessWidget {
             // dangerous.
             if (page.restoreLabel case final label?)
               DetailRow.nav(label: label, onTap: onRestore),
+            // Below the restore, and plain. It destroys nothing: the copy
+            // stays in the user's Drive, which is what the footnote says.
+            if (page.disconnectLabel case final label?)
+              DetailRow.nav(label: label, onTap: onDisconnect),
           ],
         ),
         if (page.note case final note?) Footnote(note),

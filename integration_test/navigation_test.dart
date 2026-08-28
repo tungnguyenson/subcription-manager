@@ -7,6 +7,7 @@ import 'package:subdock/catalog/service_catalog.dart';
 import 'package:subdock/data/database.dart';
 import 'package:subdock/data/item_repository.dart';
 import 'package:subdock/data/backup_store.dart';
+import 'package:subdock/data/cloud_store.dart';
 import 'package:subdock/data/filter_store.dart';
 import 'package:subdock/platform/backup_files.dart';
 import 'package:subdock/platform/cloud_backup.dart';
@@ -81,6 +82,15 @@ void main() {
   tearDown(() => db.close());
 
   Future<void> launch(WidgetTester tester) async {
+    // Onboarding is the first screen an empty database lands on, and two of
+    // its cards animate on a loop. `pumpAndSettle` waits for the tree to go
+    // quiet, so pointed at that screen it waits forever. Turning animations
+    // off at the system level is the same road a phone with Reduce Motion
+    // takes, which is the road trap 42 says these tests must go down.
+    tester.platformDispatcher.accessibilityFeaturesTestValue =
+        const FakeAccessibilityFeatures(disableAnimations: true);
+    addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
+
     await tester.pumpWidget(
       SubdockApp(
         repository: repo,
@@ -95,10 +105,49 @@ void main() {
         files: BackupFiles(),
         // Off in tests: the host has no iCloud container, and a timer
         // uploading in the background is not what any of these are about.
-        cloud: CloudBackup(TargetPlatform.android),
+        cloud: const NoCloud(),
+        clouds: CloudStore(db),
       ),
     );
     await tester.pumpAndSettle();
+  }
+
+  /// Scrolls something into view before tapping it.
+  ///
+  /// The add form is taller than a phone, so most of what these tests reach
+  /// for starts off the bottom of it.
+  Future<void> tapVisible(WidgetTester tester, Finder target) async {
+    await tester.scrollUntilVisible(
+      target,
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(target);
+    await tester.pumpAndSettle();
+  }
+
+  /// Dismisses the notification sheet the first save raises.
+  ///
+  /// It did not exist when these tests were written, so they went on asserting
+  /// against a list that was sitting behind it. Declining is the right answer
+  /// here: what is under test is the route into the form and out again, not
+  /// whether reminders get switched on.
+  Future<void> declineReminders(WidgetTester tester) async {
+    if (find.text('Not now').evaluate().isEmpty) return;
+    await tester.tap(find.text('Not now'));
+    await tester.pumpAndSettle();
+  }
+
+  /// Opens the add form and gets past the catalogue browser.
+  ///
+  /// Step one of adding anything is now picking from the catalogue, and the
+  /// way past it for something the catalogue does not know is the row that
+  /// keeps whatever was typed. These tests predate that step and used to tap
+  /// straight into the name field.
+  Future<void> openBlankForm(WidgetTester tester) async {
+    await tester.tap(find.byTooltip('Add an item'));
+    await tester.pumpAndSettle();
+    await tapVisible(tester, find.text('Enter manually'));
   }
 
   testWidgets(
@@ -148,20 +197,29 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Reminders'), findsOneWidget);
-    expect(find.textContaining('reminder slots iOS allows'), findsOneWidget);
+    // Not `iOS allows`. The budget is an iOS figure applied to both platforms
+    // because no published Android number exists that the app dares quote, so
+    // the wording names no platform at all -- see trap 11.
+    expect(
+      find.textContaining('reminder slots this app schedules'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('every tab opens', (tester) async {
     await seed();
     await launch(tester);
 
-    await tester.tap(find.text('Money'));
+    // `Spending`, not `Money`. The tab was renamed and this test went on
+    // tapping a label that is not on the screen.
+    await tester.tap(find.text('Spending'));
     await tester.pumpAndSettle();
     expect(find.text('THIS MONTH'), findsOneWidget);
 
-    await tester.tap(find.text('Settings'));
+    await tester.tap(find.text('Settings').last);
     await tester.pumpAndSettle();
-    expect(find.text('Export data'), findsOneWidget);
+    // One row per channel now, and the file one is called `Import/Export`.
+    expect(find.text('Import/Export'), findsOneWidget);
 
     await tester.tap(find.text('Upcoming').last);
     await tester.pumpAndSettle();
@@ -186,15 +244,14 @@ void main() {
     await seed();
     await launch(tester);
 
-    await tester.tap(find.byTooltip('Add an item'));
-    await tester.pumpAndSettle();
+    await openBlankForm(tester);
 
     await tester.enterText(find.byType(TextField).first, 'Vehicle inspection');
     await tester.pumpAndSettle();
-    await tester.tap(find.text('In 7 days'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
+    // `+7`, not `In 7 days`: the date shortcuts are written as offsets now.
+    await tapVisible(tester, find.text('+7'));
+    await tapVisible(tester, find.text('Save item'));
+    await declineReminders(tester);
 
     expect(find.text('Vehicle inspection'), findsOneWidget);
     expect(await repo.observeAll().first, hasLength(4));
@@ -209,14 +266,14 @@ void main() {
     await seed();
     await launch(tester);
 
-    await tester.tap(find.byTooltip('Add an item'));
-    await tester.pumpAndSettle();
+    await openBlankForm(tester);
     await tester.enterText(find.byType(TextField).first, 'Vehicle inspection');
     await tester.pumpAndSettle();
-    await tester.tap(find.text('In 1 month'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Save'));
-    await tester.pumpAndSettle();
+    // The furthest shortcut the form offers, which is the one that lands
+    // outside the folds the list opens with.
+    await tapVisible(tester, find.text('+30'));
+    await tapVisible(tester, find.text('Save item'));
+    await declineReminders(tester);
 
     expect(find.textContaining('Next 30 days'), findsWidgets);
     expect(await repo.observeAll().first, hasLength(4));

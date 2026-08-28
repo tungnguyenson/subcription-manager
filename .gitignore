@@ -45,3 +45,11 @@ __pycache__/
 # Screenshots from tool/shots/capture.dart. Regenerated on demand and dated
 # from the clock, so they are never a fixed artefact to compare against.
 tool/shots/out/
+
+# Khoa OAuth tai ve tu Google Cloud Console.
+#
+# App nay khong dung toi client secret: google_sign_in tren dien thoai chi can
+# client id, va client id thi khong phai bi mat, no nam san trong moi ban app da
+# phat hanh. File secret tai ve chi de o may, khong duoc vao repo.
+credentials/
+client_secret_*.json

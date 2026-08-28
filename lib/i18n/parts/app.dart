@@ -59,6 +59,10 @@ abstract class AppStrings {
   String get noCopyInICloud;
   String get signInToICloud;
   String couldNotReadICloud(String detail);
+  String get noCopyInDrive;
+  String get connectDriveFirst;
+  String couldNotReadDrive(String detail);
+  String couldNotConnectDrive(String detail);
   String get unknownError;
   String takenOn(String date);
 

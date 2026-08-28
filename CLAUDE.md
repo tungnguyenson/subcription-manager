@@ -94,7 +94,20 @@ phải treo.
 **`flutter test` trả về exit code 0 ngay cả khi có test hỏng.** Đọc dòng tổng kết cuối
 cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
 
-## Năm mươi cái bẫy đã vấp, đừng vấp lại
+**`flutter test` không chạy `integration_test/`.** Phải gọi tên từng file kèm một thiết
+bị. Hệ quả đã xảy ra thật: ngày 28/08/2026 phát hiện `backup_test.dart` có 10 trên 11
+bài đỏ, và chúng đỏ từ lúc màn Settings được sắp lại nhiều tháng trước mà không ai biết.
+Đó lại đúng là những bài mà bẫy 26, 28, 43 và 45 viện làm chốt chặn, tức là bốn cái lưới
+đã rơi cùng lúc. Chạy lại cả thư mục sau khi sửa bất kỳ màn hình nào:
+
+```bash
+for f in integration_test/*_test.dart; do flutter test "$f" -d <device-id>; done
+```
+
+Mất khoảng bốn phút mỗi file trên máy ảo, nên đừng chạy sau từng lần sửa nhỏ. Nhưng
+phải chạy trước khi tin rằng một thay đổi về điều hướng hay bố cục đã xong.
+
+## Năm mươi hai cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -1068,6 +1081,119 @@ cùng, hoặc chạy với `--reporter github` để thấy số rõ ràng.
     lời gọi pop lẫn cái sheet đều nằm trong `app.dart`; widget test của form chỉ thấy
     `DraftItem` đi ra, đúng như bẫy 45.
 
+51. **Cảnh báo sao lưu đo theo *nội dung* bản sao, không đo theo ngày.** Trước đây nó
+    chỉ bật khi **chưa từng** sao lưu ở đâu, nên người lưu một lần hồi tháng Năm rồi
+    thêm sáu mục phải gọi tổng đài mới có ngày thì app im hoàn toàn. Nay mỗi lần ghi
+    thành công, `markSaved` lưu kèm **danh sách id** của những mục `isCostlyToRebuild`
+    đang có, và cảnh báo bật khi có mục nào không nằm trong danh sách của bất kỳ kênh
+    nào.
+
+    **Là tập id chứ không phải một con số đếm, và đó là cả điểm của nó.** Người sao lưu
+    năm ngày, xoá một mục rồi thêm một mục khác vẫn đang có năm, trong khi một ngày
+    trong đó không nằm trong bản sao nào. Một con số không nhìn thấy chuyện đó.
+
+    **`null` và tập rỗng là hai chuyện khác nhau, và phân biệt được hai cái đó là điều
+    kiện để tính năng này không thành báo động giả.** `null` là bản sao do bản build cũ
+    ghi, tức là không biết nó chứa gì; rỗng là bản sao biết chắc không chứa gì đáng giá.
+    Gộp hai thứ lại thì mọi bản cài đang chạy sẽ nổ cảnh báo ngay lúc nâng cấp, cho
+    những bản sao hoàn toàn tốt. `LastBackups.coverageKnown` là chỗ trả lời, và
+    `BackupPresenter.unsavedDates` trả về 0 khi chưa biết.
+
+    **Danh sách id đọc *bên trong* `markSaved`, không truyền vào qua tham số.** Tham số
+    không bắt buộc đúng là hình dạng đã hỏng hai lần trong repo này, xem bẫy 43 và 45:
+    lời gọi vẫn biên dịch, bản sao vẫn lên, và cái record lặng lẽ khai rằng bản sao đó
+    chứa số không.
+
+    Luật `isCostlyToRebuild` nằm ở `TrackedItem` chứ không nằm ở presenter, vì cả tầng
+    dữ liệu lẫn màn hình đều hỏi nó. Hai bản sao của luật này lệch nhau sẽ ra một cảnh
+    báo không bao giờ tắt hoặc không bao giờ bật.
+
+52. **Android sao lưu lên Drive App Data, và đó không phải ngoại lệ của nguyên tắc
+    "không tài khoản".** Nguyên tắc là *Subdock* không có tài khoản và không có máy chủ.
+    Bản iOS vẫn ghi vào iCloud của chính người dùng, tức là tài khoản Apple của họ;
+    Drive App Data là đúng chuyện đó phía Android. Khác duy nhất là Apple giao container
+    mà không hỏi, còn Google hỏi một lần.
+
+    Hai phương án đã cân và loại, đừng đề xuất lại mà không đọc `docs/backup-and-sync.md`
+    mục 6.2:
+
+    - **Backend riêng.** Phần rối nhất của Drive là thiết lập đăng nhập Google, mà một
+      backend cũng phải làm y hệt phần đó, rồi cộng thêm máy chủ, cơ sở dữ liệu, tiền
+      hằng tháng, và trách nhiệm giữ ngày hết hạn SIM cùng số hộ chiếu của người lạ.
+    - **Thư mục SAF người dùng tự chọn.** Không chống được mất máy, vì thư mục nằm trên
+      chính cái máy đã mất. Nó chỉ sống sót nếu người dùng tình cờ trỏ vào một thư mục
+      do dịch vụ đám mây cung cấp, mà app không ép và không kiểm được.
+
+    **Bật Drive trên một danh sách rỗng phải nhìn lên Drive trước khi ghi.** Người mở màn
+    này với danh sách rỗng gần như luôn là người vừa cài lại máy, tức là đúng người đang
+    có bản sao nằm trên đó. Kết nối rồi ghi ngay là ghi đè bản sao đó bằng danh sách
+    rỗng, bằng chính cú bấm họ làm để tự bảo vệ mình, và không có gì để lùi lại. Luật ở
+    `_connectCloud` trong `app.dart`, và **từ chối khôi phục cũng không ghi gì**: "không
+    muốn lấy lại danh sách cũ" không phải là "vứt nó đi".
+
+    **`CloudState.disconnected` không phải `signedOut`.** `signedOut` là thứ đã hỏng và
+    cần sửa; `disconnected` là một lời mời chưa ai nhận. Báo cái thứ hai bằng giọng của
+    cái thứ nhất là đổ cho người dùng làm hỏng thứ họ chưa từng bật. Bấm huỷ giữa màn
+    đăng nhập cũng rơi về `disconnected`, không phải `failed`: từ chối một lời mời là
+    một câu trả lời.
+
+    **Đừng gọi `attemptLightweightAuthentication` lúc mở app.** Tên nó và tài liệu
+    của nó đều nói là im lặng, và trên Android thì không. Bản Android gọi hai lần: lần
+    đầu chỉ nhìn những tài khoản đã cấp quyền cho app này, và **lần thứ hai, chạy mỗi
+    khi lần đầu không thấy gì, mở sheet one-tap trên mọi tài khoản Google có trên máy.**
+    Xem chính code của plugin, `google_sign_in_android/lib/google_sign_in_android.dart`,
+    hàm `attemptLightweightAuthentication`, khối `if (_hostedDomain == null)`.
+
+    Hậu quả là mở Subdock lên thì bị hỏi đăng nhập Google, với người chưa từng muốn sao
+    lưu đám mây, trong một app mà lời hứa đầu tiên là không cần tài khoản nào. Đó là phá
+    nguyên tắc chứ không phải phiền nhẹ.
+
+    Vì vậy **app tự nhớ lấy tài khoản**, trong `CloudStore`, một dòng trong `settingRow`.
+    Lúc mở app nó đọc đúng dòng đó và không đi đâu cả; `CloudBackup.resume` là `void`
+    chứ không phải `Future`, cố ý, để không ai lỡ tay đặt một lời gọi mạng vào đó. Google
+    chỉ được chạm tới ở đúng hai chỗ: cái nút người dùng bấm, và một lần xin token im
+    lặng khi thật sự có thứ để tải lên.
+
+    Token đó xin qua `GoogleSignIn.instance.authorizationClient`, tức là client dùng
+    chung, **không phải qua một `GoogleSignInAccount`**. Muốn có đối tượng account thì
+    phải đăng nhập, mà đăng nhập là đúng cái lời gọi phục kích người dùng lúc mở app.
+    Client dùng chung chỉ trả token cho scope đã được cấp và trả null nếu chưa, không mở
+    gì hết.
+
+    Hệ quả cho chữ trên màn hình: **chưa có tài khoản là `disconnected`, có tài khoản mà
+    không xin được token là `signedOut`.** Cái thứ nhất là một lời mời chưa ai nhận, cái
+    thứ hai là quyền đã bị thu hồi và sửa bằng một cú bấm. Báo cái thứ hai bằng giọng
+    của cái thứ nhất là gỡ tên tài khoản khỏi một màn hình vẫn đang hiện nó.
+
+    Chốt chặn là nhóm `before anyone has connected` trong
+    `test/unit/platform/drive_backup_test.dart`, và nó kiểm bằng cách khẳng định **không
+    một request nào rời khỏi app**.
+
+    **`DriveBackup.isSupported` đọc `--dart-define=GOOGLE_SERVER_CLIENT_ID`.** Không có
+    thì hàng Google Drive không hiện và app chạy y như cũ. Đó là chủ ý: một checkout
+    không có dự án Google đứng sau vẫn build và vẫn chạy được, thay vì mọc ra một hàng
+    mở màn đăng nhập rồi chết bằng một lỗi cấu hình người dùng không sửa được.
+
+    **Scope phải giữ nguyên là `drive.appdata`.** Nó thuộc nhóm non-sensitive, nên không
+    phải nộp duyệt, không có đánh giá an ninh hằng năm, và không có màn hình "Google
+    chưa xác minh ứng dụng này". Nới sang `drive.file` hay `drive` là vứt cả ba đi.
+
+    **Cái bẫy tốn nhiều thời gian nhất không nằm trong code.** Play ký lại app bằng khoá
+    riêng của nó, nên dấu vân tay SHA-1 của bản người dùng tải về khác với bản trên máy
+    dev. Khai thiếu nó thì đăng nhập chạy hoàn hảo suốt lúc tự thử rồi hỏng với **toàn
+    bộ** người tải từ Store, và không tái hiện được ở nhà. Đủ bốn bước ở
+    `docs/backup-and-sync.md` mục 6.2bis. Vì lý do đó `DriveBackup._fromSignIn` **giữ
+    nguyên phần mô tả** của `clientConfigurationError` thay vì nuốt đi.
+
+    Ghi thì `PATCH` lên id đã có, không `POST` lần nữa: `POST` lần hai để lại hai tệp
+    cùng tên trong thư mục và lần đọc sau lấy tệp nào Drive liệt kê trước. Câu truy vấn
+    bắt buộc có `spaces=appDataFolder`; thiếu nó là Drive đi tìm trong My Drive, chỗ app
+    này không có quyền và cũng không có việc gì phải tìm. Chốt chặn là
+    `test/unit/platform/drive_backup_test.dart`, chạy được không cần tài khoản nào.
+
+    Thêm `google_sign_in` **không** kéo CocoaPods quay lại: `google_sign_in_ios` có
+    `Package.swift`. Bẫy 48 vẫn nguyên vẹn, đã kiểm bằng `flutter build ios`.
+
 ## Viết tài liệu
 
 Tài liệu trong repo viết bằng **tiếng Việt**. Chữ trên giao diện app có **hai bản**,
@@ -1096,6 +1222,6 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | Cái gì sắp xảy ra với một mục | `lib/ui/reminder_timeline.dart` cho phép dựng, `lib/ui/widgets/reminder_timeline_card.dart` cho khối trên màn Detail |
 | Bộ lọc màn Upcoming | `lib/domain/upcoming_filter.dart` cho luật khớp, `lib/ui/filter_presenter.dart` cho danh sách chip và dòng tóm tắt, `lib/ui/widgets/filter_sheet.dart` cho sheet |
 | Lịch tháng trên Upcoming | `lib/ui/calendar_presenter.dart` cho phép dựng lưới và luật chọn ngày, `lib/ui/widgets/month_grid.dart` cho cái card |
-| Sao lưu, khôi phục, và câu hỏi đồng bộ | `docs/backup-and-sync.md`. Bẫy 43 và 44 cho hai kênh hiện tại, bẫy 48 cho plugin iCloud, `lib/ui/csv_export.dart` cho tệp bảng tính |
+| Sao lưu, khôi phục, và câu hỏi đồng bộ | `docs/backup-and-sync.md`. Bẫy 43 và 44 cho hai kênh tệp, bẫy 48 cho plugin iCloud, bẫy 51 cho cảnh báo theo nội dung, bẫy 52 cho Drive bên Android, `lib/ui/csv_export.dart` cho tệp bảng tính |
 | Việc còn dang dở | `data/services/_verify.md` |
 | Khối so sánh gói năm và nút trang thuê bao | `docs/design-spec-annual-saving.md`, đã dựng, logic ở `lib/ui/annual_saving_presenter.dart` và `lib/ui/manage_presenter.dart` |

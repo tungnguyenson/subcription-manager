@@ -265,21 +265,86 @@ chờ iCloud giao dữ liệu. Đầy đủ ở bẫy 48 trong CLAUDE.md.
 hết và mọi plugin iOS của dự án nay đều là Swift Package. Dự án vẫn còn tích hợp
 CocoaPods; xem `docs/running.md` mục 1.
 
-### 6.2 Android
+### 6.2 Android: đã chốt Drive App Data, dựng ngày 28/08/2026
 
 CLAUDE.md bắt buộc hỏi: **nền tảng kia làm việc này thế nào, và nếu nó không làm được
 thì giao diện có nói ra không.**
 
-Android có hai đường, chưa chốt đường nào:
+Android có hai đường, và đã chọn đường thứ hai:
 
 | Đường | Được | Mất |
 |---|---|---|
-| Auto Backup for Apps | Gần như miễn phí, chỉ một cờ trong manifest | Mờ đục. Chạy khi máy đang sạc, đang rảnh, có wifi. Người dùng không kiểm tra được nó đã chạy chưa. Giới hạn dung lượng |
-| Drive App Data folder | Chắc chắn, kiểm tra được, tự chọn lúc ghi | Cần đăng nhập Google, tức là quay lại chuyện tài khoản |
+| Auto Backup for Apps | Gần như miễn phí, chỉ một cờ trong manifest | Mờ đục. Chạy khi máy đang sạc, đang rảnh, có wifi. App không kiểm được nó đã chạy chưa, không gọi nó chạy được, và chỉ trả dữ liệu lúc cài lại app. Giới hạn dung lượng |
+| Drive App Data folder | Chắc chắn, kiểm được, ghi ngay sau mỗi thay đổi, khôi phục lúc nào cũng được | Cần đăng nhập Google một lần |
 
-Nếu hai nền tảng cho ra hai mức bảo đảm khác nhau thì **dòng `Last backup` ở Bước 0
-chính là chỗ nói ra điều đó**. Đó là lý do Bước 0 phải xong trước Bước 1, chứ không chỉ
-vì nó nhỏ hơn.
+Auto Backup vẫn bật, nó không bị bỏ đi. Nhưng nó không còn là câu trả lời của app cho
+câu hỏi "danh sách của tôi có an toàn không", vì app không nhìn thấy nó. Chú thích dưới
+card sao lưu vì thế đã đổi giọng: nó nói bản sao lưu của máy có tồn tại và app không
+can thiệp vào, thay vì than rằng app không kiểm được. Hai câu chuyện sao lưu cạnh nhau
+mà một câu lấp lửng thì người đọc tin câu tệ hơn.
+
+**Chuyện tài khoản không phải ngoại lệ so với nguyên tắc.** Nguyên tắc là *Subdock*
+không có tài khoản và không có máy chủ. Bản iOS đã ghi vào iCloud của chính người dùng,
+tức là tài khoản Apple của họ; Drive App Data là đúng chuyện đó phía Android, chỉ khác
+ở chỗ Apple giao container mà không hỏi còn Google thì hỏi một lần.
+
+#### Ba điều kiện đã kiểm trước khi làm
+
+1. **Scope `drive.appdata` thuộc nhóm non-sensitive.** Trang scope của Drive API xếp nó
+   vào mục khuyến nghị, và nó không có tên trong danh sách restricted. Nghĩa là không
+   phải nộp app cho Google duyệt, không có khoản đánh giá an ninh hằng năm, và **không
+   có màn hình "Google chưa xác minh ứng dụng này"** trước mặt người dùng. Mở rộng scope
+   sang `drive.file` hay `drive` là vứt cả ba thứ đó đi.
+2. **`google_sign_in_ios` có `Package.swift`**, nên thêm thư viện này không kéo
+   CocoaPods quay lại, tức là không phá công cuộc ở bẫy 48. Đã kiểm trong
+   `flutter/packages`, và issue flutter/flutter#146904 đã đóng từ 2/2025.
+3. **Cấu hình phía Google Cloud Console** là phần phiền nhất, xem mục 6.2bis.
+
+### 6.2bis Cấu hình phải làm bên Google Cloud Console
+
+Không làm phần này thì `DriveBackup.isSupported` trả `false`, hàng Google Drive không
+hiện ra, và app chạy y như trước. Đó là chủ ý: một checkout không có dự án Google đứng
+sau vẫn build được và vẫn chạy được.
+
+1. Tạo một dự án trên Google Cloud Console, bật **Google Drive API**.
+2. Dựng màn hình đồng ý (OAuth consent screen), thêm scope
+   `https://www.googleapis.com/auth/drive.appdata`, rồi **chuyển trạng thái sang
+   Production**. Để ở Testing thì trần cứng 100 tài khoản, bất kể scope loại gì.
+3. Tạo một **OAuth client kiểu Web**. Chuỗi client id của nó là giá trị truyền vào
+   `--dart-define=GOOGLE_SERVER_CLIENT_ID=...`. Của dự án này là:
+
+   ```
+   1014667804289-k3atk3dlklg5fbioc1p1h9urp6koavsm.apps.googleusercontent.com
+   ```
+
+   Chuỗi này **không phải bí mật**, nên để trong repo là được. Nó nằm sẵn trong mọi bản
+   app đã phát hành và ai cũng đọc ra được. Thứ phải giữ kín là **client secret** đứng
+   cạnh nó trong Console, chuỗi bắt đầu bằng `GOCSPX`. App này không dùng tới nó và nó
+   không được phép xuất hiện ở đâu trong repo.
+4. Tạo một **OAuth client kiểu Android** cho mỗi dấu vân tay SHA-1, và phải đủ ba:
+   - keystore debug của từng máy dev,
+   - khoá dùng để đóng gói bản phát hành,
+   - **khoá do Google Play tạo ra** (Play App Signing).
+
+   Cái thứ ba là cái bẫy. Play ký lại app bằng khoá riêng của nó trước khi giao tới máy
+   người dùng, nên dấu vân tay của bản người dùng cài về khác với dấu vân tay trên máy
+   bạn. Thiếu nó thì đăng nhập chạy hoàn hảo suốt lúc tự thử và **hỏng với toàn bộ
+   người tải từ Store**, mà không tái hiện được ở nhà. Lấy chuỗi đó trong Play Console,
+   mục Setup rồi App integrity.
+
+Chạy thử:
+
+```bash
+flutter run -d <android-device> \
+  --dart-define=GOOGLE_SERVER_CLIENT_ID=1014667804289-k3atk3dlklg5fbioc1p1h9urp6koavsm.apps.googleusercontent.com
+```
+
+Lỗi cấu hình quay về dưới dạng `GoogleSignInException` mã `clientConfigurationError`, và
+`DriveBackup._fromSignIn` **giữ nguyên phần mô tả** thay vì nuốt đi, đúng vì lý do ở
+trên: đó là manh mối duy nhất cho một lỗi không tái hiện được ở bàn làm việc.
+
+Thêm một việc hành chính: biểu mẫu Data Safety trên Play Console nay phải khai app có
+đăng nhập bằng tài khoản Google.
 
 ### 6.3 Đã quyết trong lúc dựng
 
@@ -293,6 +358,13 @@ vì nó nhỏ hơn.
 - **Chỉ ghi khi ghi được:** `last_backup_on` chỉ được cập nhật khi lần ghi thật sự
   thành công. Ghi nhận cho một lần tải lên hỏng là đặt một cái ngày dưới `Last backup`
   và gỡ cảnh báo khỏi màn hình, cho một tệp không tồn tại.
+- **Bật Drive trên một danh sách rỗng phải nhìn trước khi ghi.** Người mở màn này với
+  danh sách rỗng gần như luôn là người vừa cài lại máy, tức là đúng người đang có một
+  bản sao nằm trên đó. Kết nối rồi ghi ngay là ghi đè bản sao đó bằng danh sách rỗng,
+  bằng chính cú bấm họ làm để tự bảo vệ mình, và không có gì để lùi lại. Luật nằm ở
+  `_connectCloud` trong `app.dart`: rỗng thì đọc trước, có bản sao thì chuyển sang
+  đường khôi phục kèm sheet xác nhận, và **từ chối khôi phục cũng không ghi gì**, vì
+  "không muốn lấy lại danh sách cũ" không phải là "vứt nó đi".
 
 Còn để ngỏ:
 
