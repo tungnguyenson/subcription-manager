@@ -43,6 +43,15 @@ abstract class DateStrings {
   /// `6d`. Today, tomorrow and overdue are spelled out by the caller.
   String daysShort(int days);
 
+  /// The same column once the date is far enough away that the exact day count
+  /// stops being read as a number and starts being read as noise: `2 months`.
+  /// Never called with fewer than two, so the singular never appears.
+  String monthsShort(int months);
+
+  /// And once even the month count is long: `2 years`. A passport is renewed
+  /// on a ten-year cycle, and `120 months` is not a thing anyone reads.
+  String yearsShort(int years);
+
   /// The overdue pill: `Late`.
   String get late;
 

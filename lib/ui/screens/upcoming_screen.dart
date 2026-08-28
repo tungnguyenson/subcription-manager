@@ -715,11 +715,21 @@ abstract final class UpcomingCopy {
   /// number and a `d`, with today and tomorrow spelled out because they are the
   /// two the reader acts on rather than compares.
   ///
-  /// Abbreviated, never rounded. "About a month" on something due in 29 days is
-  /// the single most common one-star complaint in this category, and it is
-  /// always the app that was trying to be reassuring. `29d` is the same exact
-  /// number in fewer glyphs, which is what keeps this column narrow enough to
-  /// scan straight down.
+  /// Exact days for everything a reader still counts in days, which is why the
+  /// switch to months waits until [_monthsFrom] whole months rather than one.
+  /// "About a month" on something due in 29 days is the single most common
+  /// one-star complaint in this category, and it is always the app that was
+  /// trying to be reassuring; `29d` is the same exact number in fewer glyphs.
+  /// `45d` is still a number someone plans around. `312d` is not: past two
+  /// months nobody subtracts that from today, they read it as "far away", and
+  /// a column of three-digit day counts costs the name beside it its width to
+  /// say so.
+  ///
+  /// Rounded down, never up, and always by whole calendar months. `2 months`
+  /// means [LocalDate.plusMonths] twice lands on or before the date, so the
+  /// column never grants time the reader does not have. The exact date sits
+  /// directly under it either way, which is what makes dropping the remainder
+  /// safe here and nowhere else.
   /// [trial] replaces the countdown with `Trial ends`, which is what the
   /// hand-off draws in that column. The swap is worth the width: `2d` on a
   /// trial row says "two days until something happens" and leaves the reader
@@ -737,8 +747,19 @@ abstract final class UpcomingCopy {
     if (days < 0) return S.t.late;
     if (days == 0) return S.t.today;
     if (days == 1) return S.t.tomorrow;
-    return S.t.daysShort(days);
+
+    final months = today.monthsUntil(actBy);
+    if (months < _monthsFrom) return S.t.daysShort(days);
+    if (months < _monthsPerYear) return S.t.monthsShort(months);
+    return S.t.yearsShort(months ~/ _monthsPerYear);
   }
+
+  /// Two, not one: a month and a half is still counted in days by the person
+  /// holding the phone, and `1 month` on something 45 days out is the rounding
+  /// that gets an app one star.
+  static const int _monthsFrom = 2;
+
+  static const int _monthsPerYear = 12;
 
   static String overdueDetail(LocalDate actBy, LocalDate today) =>
       S.t.overdueAgo(actBy.daysUntil(today));

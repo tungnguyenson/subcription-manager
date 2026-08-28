@@ -1194,6 +1194,30 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
     Thêm `google_sign_in` **không** kéo CocoaPods quay lại: `google_sign_in_ios` có
     `Package.swift`. Bẫy 48 vẫn nguyên vẹn, đã kiểm bằng `flutter build ios`.
 
+53. **Cột đếm ngược đổi sang tháng ở mốc hai tháng tròn, và đếm bằng tháng lịch chứ
+    không phải chia cho 30.** Trước đây cột này luôn đếm ngày, nên một hộ chiếu còn hạn
+    tới năm sau hiện `312d`, một con số không ai trừ ra từ hôm nay và lại chiếm mất
+    chiều ngang của cái tên bên cạnh.
+
+    Ba con số trong `UpcomingCopy.when` đều có lý do, đừng đổi mà không đọc:
+
+    - **Mốc là hai tháng, không phải một.** Bốn mươi lăm ngày vẫn là con số người ta
+      tính được, còn ghi `1 tháng` cho nó là làm đúng cái việc mà dòng comment cũ trong
+      file cảnh báo: một app tỏ ra dễ chịu bằng cách làm tròn một hạn đang tới gần.
+      Dưới hai tháng vẫn đếm ngày chính xác từng ngày như cũ.
+    - **`LocalDate.monthsUntil` đếm tháng lịch và bỏ phần lẻ, không làm tròn.**
+      `2 tháng` nghĩa là cộng hai tháng vào hôm nay thì rơi đúng ngày đó hoặc sớm hơn,
+      nên cột không bao giờ cho người dùng nhiều thời gian hơn thứ họ thật sự có. Chia
+      ngày cho 30 thì 59 ngày ra `2 tháng`, tức là hứa thừa một tuần.
+    - **Từ 12 tháng trở lên đổi sang năm.** Hộ chiếu gia hạn theo chu kỳ mười năm, và
+      `120 tháng` thì không phải một câu trả lời.
+
+    Phần lẻ mất đi ở đây chấp nhận được vì ngày đầy đủ nằm ngay dưới cùng một cột, và
+    chỉ ở đây. Chốt chặn là nhóm `wording` trong
+    `test/unit/ui/upcoming_presenter_test.dart` và nhóm `monthsUntil` trong
+    `test/unit/domain/local_date_test.dart`. Lịch tháng dùng chung `UpcomingCopy.when`
+    nên nó đi theo, đúng luật ở bẫy 31.
+
 ## Viết tài liệu
 
 Tài liệu trong repo viết bằng **tiếng Việt**. Chữ trên giao diện app có **hai bản**,

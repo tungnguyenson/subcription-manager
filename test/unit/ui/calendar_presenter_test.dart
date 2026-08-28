@@ -306,7 +306,8 @@ void main() {
 
     // The row counts down to the occurrence the reader tapped, not to whatever
     // the item says is next. A November mark whose row reads `2d` is the grid
-    // and the list telling two different stories about one tap.
+    // and the list telling two different stories about one tap. Far enough out
+    // that the column counts in months, exactly as the list does.
     test('counts down to the day tapped, not to the item\'s next one', () {
       final view = CalendarPresenter.build(
         [item('netflix', expiresOn: '2026-08-28', cycle: Cycle.monthly)],
@@ -316,7 +317,7 @@ void main() {
       );
 
       expect(view.entries.single.date, '28/11');
-      expect(view.entries.single.when, '94d');
+      expect(view.entries.single.when, '3 months');
     });
 
     test('is empty on a day with nothing on it', () {

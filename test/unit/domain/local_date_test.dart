@@ -68,6 +68,27 @@ void main() {
     test('daysUntil is negative going backwards', () {
       expect(d('2026-08-15').daysUntil(d('2026-08-10')), -5);
     });
+
+    // Calendar months, not days over thirty: the countdown column says
+    // `2 months` only where adding two months lands on or before the date.
+    test('monthsUntil drops the partial month rather than rounding it', () {
+      expect(d('2026-08-15').monthsUntil(d('2026-10-14')), 1);
+      expect(d('2026-08-15').monthsUntil(d('2026-10-15')), 2);
+      expect(d('2026-08-15').monthsUntil(d('2026-11-14')), 2);
+      expect(d('2026-08-15').monthsUntil(d('2026-08-15')), 0);
+    });
+
+    // A clamped month still counts: 31 Jan plus one month is 28 Feb, so 28 Feb
+    // is a whole month away from 31 Jan and not a day short of one.
+    test('monthsUntil follows the clamping plusMonths does', () {
+      expect(d('2026-01-31').monthsUntil(d('2026-02-28')), 1);
+      expect(d('2026-01-31').monthsUntil(d('2026-02-27')), 0);
+    });
+
+    test('monthsUntil is negative going backwards', () {
+      expect(d('2026-08-15').monthsUntil(d('2026-06-15')), -2);
+      expect(d('2026-08-15').monthsUntil(d('2026-06-16')), -1);
+    });
   });
 
   group('comparison', () {

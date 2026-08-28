@@ -126,15 +126,64 @@ void main() {
       expect(entry.overdue, isTrue);
     });
 
-    // Abbreviated, never rounded. "About a month" on something due in 29 days
-    // is the single most common one-star complaint in this category, and it is
-    // always the app trying to be reassuring; `29d` is the same exact number.
+    // Abbreviated, never rounded, for as long as the reader is still counting
+    // in days. "About a month" on something due in 29 days is the single most
+    // common one-star complaint in this category, and it is always the app
+    // trying to be reassuring; `29d` is the same exact number.
     test('a distant date is still counted in exact days', () {
       final view = UpcomingPresenter.build([
         item('x', expiresOn: '2026-09-13'),
       ], today);
 
       expect(everything(view).single.when, '29d');
+    });
+
+    // A month and a half is still a number someone plans around, and `1 month`
+    // on something 45 days away is exactly the rounding the rule above exists
+    // to prevent. The switch waits for the second whole month.
+    test('a month and a half is still counted in days', () {
+      final view = UpcomingPresenter.build([
+        item('x', expiresOn: '2026-09-29'),
+      ], today);
+
+      expect(everything(view).single.when, '45d');
+    });
+
+    test('past two months the column counts in months', () {
+      final view = UpcomingPresenter.build([
+        item('a', expiresOn: '2026-10-15'),
+        item('b', expiresOn: '2027-07-15'),
+      ], today);
+
+      expect(everything(view).map((e) => e.when), ['2 months', '11 months']);
+    });
+
+    // Whole calendar months, not days over thirty: `2 months` has to mean two
+    // months have to pass, so the column never grants time the reader has not
+    // got. One day short of the second month is still a day count.
+    test('the month count rounds down, never up', () {
+      final view = UpcomingPresenter.build([
+        item('short', expiresOn: '2026-10-14'),
+        item('exact', expiresOn: '2026-10-15'),
+        item('over', expiresOn: '2026-11-14'),
+      ], today);
+
+      expect(everything(view).map((e) => e.when), [
+        '60d',
+        '2 months',
+        '2 months',
+      ]);
+    });
+
+    // A passport renews on a ten-year cycle and `120 months` is not a number
+    // anyone reads.
+    test('past a year the column counts in years', () {
+      final view = UpcomingPresenter.build([
+        item('a', expiresOn: '2027-08-15'),
+        item('b', expiresOn: '2036-08-15'),
+      ], today);
+
+      expect(everything(view).map((e) => e.when), ['1 year', '10 years']);
     });
 
     // Day-first. Using the device locale would render 17/08 as 08/17 for a

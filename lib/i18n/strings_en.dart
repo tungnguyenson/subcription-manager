@@ -100,6 +100,11 @@ class EnStrings implements Strings {
   @override
   String daysShort(int days) => '${days}d';
   @override
+  String monthsShort(int months) =>
+      '$months ${months == 1 ? 'month' : 'months'}';
+  @override
+  String yearsShort(int years) => '$years ${years == 1 ? 'year' : 'years'}';
+  @override
   String get late => 'Late';
   @override
   String daysEarlier(int days) => '$days ${days == 1 ? 'day' : 'days'} earlier';

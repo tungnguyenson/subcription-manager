@@ -102,6 +102,21 @@ class LocalDate implements Comparable<LocalDate> {
   /// Whole days from this date until [other]. Negative when [other] is earlier.
   int daysUntil(LocalDate other) => other.epochDay - epochDay;
 
+  /// Whole calendar months from this date until [other], rounded towards zero.
+  /// Negative when [other] is earlier.
+  ///
+  /// Calendar months, not days divided by 30: a countdown that says `2 months`
+  /// has to mean [plusMonths] twice would land on or before that date, so it
+  /// can never read `2 months` for something 59 days away. The partial month
+  /// is dropped rather than rounded, so the number never claims more time
+  /// than the reader has.
+  int monthsUntil(LocalDate other) {
+    final gap = (other.year * 12 + other.month) - (year * 12 + month);
+    if (gap > 0 && plusMonths(gap) > other) return gap - 1;
+    if (gap < 0 && plusMonths(gap) < other) return gap + 1;
+    return gap;
+  }
+
   bool operator <(LocalDate other) => compareTo(other) < 0;
   bool operator <=(LocalDate other) => compareTo(other) <= 0;
   bool operator >(LocalDate other) => compareTo(other) > 0;

@@ -89,6 +89,10 @@ class ViStrings implements Strings {
   @override
   String daysShort(int days) => '$days ngày';
   @override
+  String monthsShort(int months) => '$months tháng';
+  @override
+  String yearsShort(int years) => '$years năm';
+  @override
   String get late => 'Trễ';
   @override
   String daysEarlier(int days) => 'sớm hơn $days ngày';
