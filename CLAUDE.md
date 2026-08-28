@@ -107,7 +107,7 @@ for f in integration_test/*_test.dart; do flutter test "$f" -d <device-id>; done
 Mất khoảng bốn phút mỗi file trên máy ảo, nên đừng chạy sau từng lần sửa nhỏ. Nhưng
 phải chạy trước khi tin rằng một thay đổi về điều hướng hay bố cục đã xong.
 
-## Năm mươi bảy cái bẫy đã vấp, đừng vấp lại
+## Năm mươi tám cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -1410,6 +1410,42 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
 
     Chuyện này không có test nào bắt được: `flutter test` và `flutter analyze` đều xanh,
     vì mỗi màu riêng lẻ đều hợp lệ. Chỉ có mắt nhìn màn hình ở bản tối mới thấy.
+
+58. **Không có trang của hãng thì không có nút Manage, và nhóm dịch vụ không phải là
+    cơ sở để đoán.** `ManagePresenter` từng có nhánh cuối `PurchaseChannel.unknown =>
+    renews ? ManageOffer(primary: store) : null`, với `renews = !category.isObligation`.
+    Nói cho gọn: nhóm này không nhắc lại sau hạn, nên nó gia hạn được, nên nó có thể nằm
+    trong danh sách đăng ký của App Store. Chuỗi suy luận đó không chạm vào một mẩu thông
+    tin nào của chính cái mục đang xem.
+
+    Hậu quả thật: một dịch vụ Việt Nam nhập tay, trả tiền trên trang của hãng, hiện nút
+    `Quản lý trong App Store` trỏ vào một danh sách chắc chắn không có nó. App không có ô
+    nào hỏi nơi mua, nên mọi mục nhập tay đều mang `unknown` mặc định của cột, tức là
+    **mọi** mục nhập tay thuộc nhóm không phải nghĩa vụ đều dính.
+
+    Ba lý do bỏ, đừng dựng lại:
+
+    - **Bất đối xứng về giọng.** Cùng một mức hiểu biết bằng không, nhánh có `manageUrl`
+      nói bằng câu hỏi (`Bạn mua qua App Store?`, nằm dưới nút chính) còn nhánh không có
+      thì nói bằng khẳng định và chiếm luôn nút chính. Nhánh biết ít hơn lại nói chắc hơn.
+    - **Cú bấm ghi xuống.** `_openManage` lưu `purchaseChannel` bằng đúng cái kênh nút
+      khai, nên một cú bấm tò mò khai vĩnh viễn rằng mục này mua từ Apple, và
+      `SavingsPresenter.cancelTarget` từ đó xếp App Store trên trang huỷ của hãng, ngược
+      thứ tự tin cậy ở bẫy 21.
+    - **Mù nền tảng.** Trên Android nó vẫn là link `apps.apple.com`. Nhánh
+      `PurchaseChannel.playStore` chỉ chạy khi kênh đã là `playStore`, mà thứ duy nhất
+      đặt được giá trị đó là `records` của chính nút Play, và nút Play chỉ hiện khi kênh
+      đã là `playStore`. Vòng khép kín, không có đường vào.
+
+    Nay `unknown` không có `manageUrl` thì trả `null`, và `renews` chuyển sang lo một việc
+    hẹp hơn: có hỏi thêm câu App Store dưới trang của hãng hay không.
+
+    **Kèm theo, `manage_link.dart` rút còn hai hằng số.** Nó từng mang `ManageLinks.primary`
+    và `alternates`, một bản sao thứ hai của đúng cái quyết định `ManagePresenter` đang
+    làm, gồm cả phép đoán vừa bỏ. Không một chỗ nào trong `lib/` gọi hai hàm đó; thứ duy
+    nhất gọi là `test/unit/domain/manage_link_test.dart`, tức là một bài test xanh khoá
+    một luật không chạy. Hai bản sao của một luật thì lệch nhau, và bản có test xanh lệch
+    trong im lặng.
 
 ## Viết tài liệu
 

@@ -59,24 +59,44 @@ void main() {
       expect(offer.alternate!.records, PurchaseChannel.appStore);
     });
 
-    test('a subscription with no vendor page still gets the store', () {
+    // The app has nothing to go on here. There is no field for the channel on
+    // the form, so a hand-typed item carries the `unknown` the column defaults
+    // to, and the catalogue has no page to fall back on. A store button would
+    // be a guess wearing the clothes of an answer -- and the tap writes, so one
+    // curious press would record Apple as the seller for good.
+    test('a subscription with no vendor page gets no button', () {
       final offer = ManagePresenter.of(
         item: item(),
         category: shelfOf(item()),
         entry: entry(manageUrl: null),
       );
 
-      expect(offer!.primary.label, 'Manage in the App Store');
-      expect(offer.alternate, isNull);
+      expect(offer, isNull);
     });
 
-    test('an item with no catalog match at all still gets the store', () {
+    test('a hand-typed item with no catalog match gets no button', () {
       final offer = ManagePresenter.of(
-        item: item(),
+        item: item(name: 'Fshare VIP'),
         category: shelfOf(item()),
         entry: null,
       );
-      expect(offer!.primary.url, ManageLinks.appStore);
+      expect(offer, isNull);
+    });
+
+    // The store question rides under the vendor page, and only where a store
+    // could plausibly hold the thing. An insurance policy renewed on the
+    // insurer's portal is worth linking; asking whether it came from the App
+    // Store is not.
+    test('an obligation with a page is not asked about the store', () {
+      final insured = item(categoryId: 'INSURANCE', name: 'Bảo hiểm');
+      final offer = ManagePresenter.of(
+        item: insured,
+        category: shelfOf(insured),
+        entry: entry(manageUrl: 'https://insurer.example/policy'),
+      );
+
+      expect(offer!.primary.url, 'https://insurer.example/policy');
+      expect(offer.alternate, isNull);
     });
   });
 
@@ -133,12 +153,17 @@ void main() {
     // page. A button here would be a button to a page guaranteed not to hold
     // the answer.
     test('a document and a bill get no button', () {
-      // Read off the shelf's nag setting: one that keeps asking after the date
-      // is one where something is owed, and nothing owed is cancelled from a
-      // store. `OTHER` is deliberately not on this list any more -- it says
-      // "not known", not "not a subscription", and refusing the store there
-      // would strand every hand-typed subscription.
-      for (final category in ['DOCUMENTS', 'UTILITIES', 'INSURANCE']) {
+      // Nothing here has a catalogue page, and without one there is no button
+      // on any shelf -- `OTHER` included. The shelf's nag setting no longer
+      // decides whether a store button appears, only whether the store is
+      // worth asking about underneath a page that does exist.
+      for (final category in [
+        'DOCUMENTS',
+        'UTILITIES',
+        'INSURANCE',
+        'OTHER',
+        'STREAMING',
+      ]) {
         final offer = ManagePresenter.of(
           item: item(categoryId: category, name: 'Hộ chiếu'),
           category: CategoryBook.shipped[category],

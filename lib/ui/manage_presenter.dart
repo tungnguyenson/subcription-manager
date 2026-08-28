@@ -94,21 +94,42 @@ abstract final class ManagePresenter {
       PurchaseChannel.web =>
         vendor == null ? null : ManageOffer(primary: vendor),
 
-      // Not answered yet. The vendor's page is the better guess when there is
-      // one, with the store offered underneath; the tap that lands is the
-      // answer, so the question is never put to the user directly.
-      PurchaseChannel.unknown when vendor != null => ManageOffer(
-        primary: vendor,
-        alternate: ManageAction(
-          label: S.t.boughtThroughAppStore,
-          url: ManageLinks.appStore,
-          records: PurchaseChannel.appStore,
-        ),
-      ),
-
-      // No vendor page. The store is still a real answer for something that
-      // renews, and no answer at all for anything else.
-      PurchaseChannel.unknown => renews ? ManageOffer(primary: store) : null,
+      // Not answered yet, and the only thing the app has to go on is the
+      // catalogue's page. It leads, with the store offered underneath as a
+      // question; the tap that lands is the answer, so the question is never
+      // put to the user directly.
+      //
+      // No page means no button. The app knows nothing about where this item
+      // was bought -- there is no field for it on the form, and a hand-typed
+      // item carries the `unknown` the column defaults to -- so a store button
+      // here would be a guess wearing the clothes of an answer, on a screen
+      // whose whole job is saying how much the app actually knows. It used to
+      // show one anyway, reasoning that a shelf which stops nagging renews and
+      // a thing that renews might be in a store. That reasoning holds nothing
+      // about the item in front of it: a hand-typed Vietnamese service billed
+      // on the vendor's own site got `Manage in the App Store`, pointing at a
+      // list it is guaranteed not to be in.
+      //
+      // Worse than a dead end, because the tap writes. `_openManage` records
+      // the channel the button claims, so one curious tap tells the app the
+      // item was bought from Apple for good, and `SavingsPresenter.cancelTarget`
+      // then puts that ahead of the vendor's own cancellation page.
+      PurchaseChannel.unknown =>
+        vendor == null
+            ? null
+            : ManageOffer(
+                primary: vendor,
+                // Only where a store could plausibly hold it. An insurance
+                // policy with a renewal portal is worth linking; asking whether
+                // it came from the App Store is not.
+                alternate: renews
+                    ? ManageAction(
+                        label: S.t.boughtThroughAppStore,
+                        url: ManageLinks.appStore,
+                        records: PurchaseChannel.appStore,
+                      )
+                    : null,
+              ),
     };
   }
 }

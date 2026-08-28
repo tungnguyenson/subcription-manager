@@ -2742,9 +2742,10 @@ void main() {
 
       expect(find.text('YEARLY PLAN'), findsNothing);
       expect(find.text('Open Claude account'), findsNothing);
-      // Still offered the store: something that renews every month is worth a
-      // link to Apple's list even when the app has never heard of it.
-      expect(find.text('Manage in the App Store'), findsOneWidget);
+      // And no store button either. The app has never heard of this item and
+      // has no field that would let the user say where it was bought, so an
+      // Apple link here would be a guess -- one a tap would then write down.
+      expect(find.text('Manage in the App Store'), findsNothing);
     });
 
     testWidgets('the vendor page, with the store offered underneath', (
