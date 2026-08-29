@@ -99,6 +99,45 @@ xcrun simctl list devices available | grep iPhone      # lấy id máy ảo
 flutter test integration_test -d <simulator-id>
 ```
 
+#### Ba chuyện của integration test, đều đã làm mất thời gian một lần
+
+**`flutter test` không chạy được trên iPhone thật.** Nó ghi cứng
+`disablePortPublication: true` (`flutter_tools/lib/src/commands/test.dart`), mà một máy
+iOS thật cần cổng đó được công bố. App bật lên, hiện một màn trắng, rồi tắt, và trình chạy
+báo `WebSocketChannelException: Connection refused ... 127.0.0.1`. Nếu máy nối không dây
+thì lỗi còn khó hiểu hơn: `Cannot start app on wirelessly tethered iOS device. Try running
+again with the --publish-port flag`, mà `flutter test` **không có** cờ đó. Câu ấy là câu
+chung của lớp iOS device, nó không biết mình đang được gọi từ đâu.
+
+Đường đi là `flutter drive`, vì `flutter drive` có cờ đó và tự bật khi thấy máy nối không
+dây (`flutter_tools/lib/src/commands/drive.dart`):
+
+```bash
+flutter drive \
+  --driver=test_driver/integration_test.dart \
+  --target=integration_test/<file>.dart \
+  -d <device-id>
+```
+
+Chú ý: qua `flutter drive`, mọi dòng `print` của test ra log với tiền tố `flutter: `. Lọc
+bằng `grep '^CEILING'` sẽ không thấy gì.
+
+**`flutter test` gỡ app khỏi máy sau khi chạy xong.** Nên không cấp quyền giữa hai lần
+chạy được. Muốn có một lượt chạy đã sẵn quyền trên Android thì cài thẳng bằng APK mà lượt
+trước đã dựng, cấp quyền, rồi chạy; lần cài đè của test giữ nguyên quyền đã cấp:
+
+```bash
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
+adb shell pm grant space.subdock.subdock android.permission.POST_NOTIFICATIONS
+adb shell appops set space.subdock.subdock SCHEDULE_EXACT_ALARM allow
+flutter test integration_test/<file>.dart -d <android-device-id>
+```
+
+**Đừng gọi `requestExactAlarmsPermission()` trong test.** Nó không hỏi gì cả, nó **mở màn
+Cài đặt hệ thống** rồi đứng đó chờ ai đó bấm Back, đúng như bẫy 9 đã ghi. Một lượt chạy đã
+treo hơn năm phút ở `setUpAll` vì chuyện này, với cái điện thoại nằm úp trên bàn. Test nên
+**kiểm** quyền chứ đừng **xin**, và thiếu quyền thì hỏng ngay kèm câu lệnh adb ở trên.
+
 ### Kiểm tra migration
 
 `flutter test` chạy toàn bộ trên `NativeDatabase.memory()`. Cơ sở dữ liệu trong bộ nhớ luôn được tạo mới ở lược đồ hiện tại, nên **nó không bao giờ chạy qua migration**. Đó là lý do một migration hỏng ở mọi máy đã cài app vẫn để cả bộ test xanh.
