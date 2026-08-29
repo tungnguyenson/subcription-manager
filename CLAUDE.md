@@ -158,10 +158,38 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
     đi tìm `android-37`. Khối override phải nằm **trên** khối `evaluationDependsOn(":app")`
     và phải là `afterEvaluate`; đặt sai một trong hai chỗ là build gãy theo hai kiểu khác
     nhau. Điều kiện gỡ bỏ ghi trong comment ngay tại đó.
-11. **Ngân sách 50 nhắc hạn là giới hạn của iOS, đang áp cho cả hai nền tảng.** Không có
-    con số công bố cho Android mà app dám trích, nên nó dùng chung con số đã biết thay vì
-    đoán một con số to hơn. Chữ trên giao diện vì thế **không được nêu tên nền tảng nào**,
-    có test khoá điều này.
+11. **Ngân sách 50 nhắc hạn là giới hạn của iOS, đang áp cho cả hai nền tảng.** Chữ trên
+    giao diện vì thế **không được nêu tên nền tảng nào**, có test khoá điều này.
+
+    Câu "không có con số công bố cho Android mà app dám trích" từng đứng ở đây, và nay nó
+    sai. `integration_test/notification_ceiling_test.dart` đo được cả hai, nên cả hai con
+    số giờ là số đo chứ không phải số trích:
+
+    | | Trần | Vượt thì sao |
+    |---|---|---|
+    | iOS 26.5, iPhone thật | **64** | Giữ **64 cái đưa vào sau cùng**, vứt phần đưa vào trước |
+    | Android 13, Pixel 4 XL | **500 alarm mỗi UID** | **Ném lỗi**, `IllegalStateException: Maximum limit of concurrent alarms 500 reached` |
+
+    Android ném lỗi mới là chỗ nguy hiểm: theo bẫy 9, một cú ném làm hỏng cả vòng `apply`
+    nên người dùng mất sạch nhắc hạn chứ không mất bớt vài cái. Và 500 là giới hạn của
+    AOSP chứ không phải chuyện riêng của Samsung như README của plugin mô tả.
+
+    Hai điều đi kèm, cả hai đều đã đo:
+
+    - **iOS không giữ gì khi chưa được cấp quyền thông báo.** Xin 40, giữ 0. Quyền chặn
+      ngay khâu nhận chứ không chỉ chặn khâu hiện lên màn hình, nên cái chốt
+      `hasPermission()` trong `_applyPlan` là bắt buộc.
+    - **Đếm pending trên Android không đo được gì.** `pendingNotificationRequests` ở đó
+      đọc một khối `SharedPreferences` do chính plugin ghi
+      (`FlutterLocalNotificationsPlugin.java:536`), không hỏi `AlarmManager`. Nó luôn trả
+      lời đúng bằng số đã đưa, nên `xin 128 giữ 128` trên Android **không nói lên điều
+      gì**. Trên iOS thì lời gọi đó tới thẳng `UNUserNotificationCenter`, nên đo được thật.
+
+    Vì iOS giữ cái đưa vào sau cùng, `NotificationScheduler.apply` đưa `plan.alerts` vào
+    theo **thứ tự ngược**. `_ordered` xếp vòng 0 lên đầu, tức là cái hẹn gần nhất của từng
+    mục nằm ở đầu danh sách; đưa vào xuôi thì tràn trần sẽ vứt đúng những cái đó và giữ
+    lại các mốc xa nhất. Ngân sách 50 chưa chạm 64 nên chưa ai gặp, đây là lan can cho lần
+    ai đó nâng ngân sách.
 
 12. **Theme Glass không có bóng đổ, và đó là chủ ý.** Cả `cardLg` lẫn `cardSm` trong bản
     thiết kế đều là một đường viền trắng 1px nằm trong (`inset 0 0 0 1px

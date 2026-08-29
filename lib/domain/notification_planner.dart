@@ -93,23 +93,53 @@ class NotificationPlan {
 /// Turns the item list into the set of notifications to have pending.
 ///
 /// This is an allocator against a hard resource budget, not a per-item
-/// "schedule a reminder" call. iOS keeps at most 64 pending local notifications
-/// per app and silently evicts the furthest-out ones past that, without telling
-/// the app which ones. Deciding here, and reporting what did not fit, is the
-/// only way the app can say anything true about what it will remind you of.
-/// See product-spec.md section 7.3.
+/// "schedule a reminder" call. Both platforms cap what one app may hold, and
+/// deciding here, and reporting what did not fit, is the only way the app can
+/// say anything true about what it will remind you of. See product-spec.md
+/// section 7.3.
 ///
-/// Android is not known to cap pending alarms the same way, and no figure for
-/// it is published that this app could cite. So the iOS budget runs on both
-/// rather than a guessed larger one: the cost is that a heavy Android list
-/// truncates earlier than it strictly must, and the alternative is a number
-/// the app cannot stand behind -- printed to the user, on a screen whose whole
-/// job is telling them what will and will not be delivered.
+/// Both figures are measured rather than quoted, by
+/// `integration_test/notification_ceiling_test.dart`.
+///
+/// **iOS keeps exactly 64**, on an iPhone running iOS 26.5: ask for 65 and it
+/// holds 64, ask for 128 and it still holds 64. The number matches the one
+/// everyone repeats, which was worth confirming, since no page of Apple's
+/// states it any more.
+///
+/// **Which 64 is the part that was written down wrong here for a long time.**
+/// Handed a hundred requests in date order, iOS keeps the *last sixty-four
+/// added*, not the sixty-four firing soonest. Overflowing does not shed the
+/// far future; it sheds whatever went in first. `NotificationScheduler.apply`
+/// answers that by adding this list in reverse, so the head of it -- round
+/// zero, every item's nearest alert -- is handed over last.
+///
+/// **Android throws instead of truncating.** The 501st alarm comes back as
+/// `IllegalStateException: Maximum limit of concurrent alarms 500 reached for
+/// uid`, measured on a Pixel 4 XL on Android 13, so this is AOSP and not the
+/// Samsung quirk the plugin's README describes. A throw is worse than a
+/// truncation here: one aborts the whole `apply` loop and leaves the user with
+/// no reminders at all rather than fewer.
+///
+/// So the tighter iOS budget runs on both. The cost is that a heavy Android
+/// list truncates at a tenth of what the platform would take; the benefit is
+/// one number, measured, that the app can print to the user and stand behind.
 ///
 /// Pure function, so the ranking and truncation rules are testable without a
 /// device.
 abstract final class NotificationPlanner {
-  /// iOS keeps 64; leave headroom so nothing we schedule evicts anything else.
+  /// Fifty against a measured ceiling of 64, and the fourteen left over are
+  /// not spare room for stray notifications the way this comment used to say.
+  /// The app posts exactly one notification outside the plan, the test
+  /// reminder, and it holds a slot for ten seconds.
+  ///
+  /// They are there because overflow is not a graceful degradation. iOS keeps
+  /// the last 64 handed to it, so going over the line drops whatever went in
+  /// first, and Android does not drop anything -- it throws, and one throw
+  /// costs the user every reminder rather than the marginal one. Fourteen
+  /// slots is the margin for a ceiling measured on one device and one OS
+  /// version. Raise it against a wider set of measurements, not against this
+  /// comment.
+  ///
   /// Applied on Android too -- see the note on this class.
   static const int budget = 50;
 

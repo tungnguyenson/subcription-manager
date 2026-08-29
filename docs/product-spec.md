@@ -481,11 +481,17 @@ Giờ nhắc mặc định **08:30 sáng**.
 
 ### 7.3 Giới hạn 64 thông báo của iOS
 
-iOS chỉ giữ tối đa **64 local notification đang chờ** cho mỗi app. Đặt cái thứ 65 thì cái cũ nhất bị đẩy ra, âm thầm.
+iOS chỉ giữ tối đa **64 local notification đang chờ** cho mỗi app. Con số này đã đo, không phải trích: `integration_test/notification_ceiling_test.dart` chạy trên iPhone iOS 26.5 cho `xin 64 giữ 64`, `xin 65 giữ 64`, `xin 128 giữ 64`. Đo lại vì Apple hiện không nêu con số đó ở bất cứ trang tài liệu nào còn sống.
 
 Với 5 SIM (mỗi SIM 2 tới 3 mục, mỗi mục 3 tới 5 mốc) cộng 10 dịch vụ, con số vượt trần dễ dàng.
 
-Cái bẫy nằm ở chỗ **mốc xa nhất bị vứt trước**. Với thang nhắc của giấy tờ (180, 90, 60, 30 ngày), chính những cảnh báo sớm nhất trên mục quan trọng nhất là thứ biến mất.
+**Cái bẫy nằm ở chỗ iOS giữ 64 cái được đưa vào SAU CÙNG, không phải 64 cái bắn sớm nhất.** Đưa vào 100 cái đánh số 0 tới 99 theo thứ tự ngày tăng dần thì nó giữ lại 36 tới 99. Luật "bắn sớm nhất thì được giữ" là hành vi của iOS 9 trở về trước, và tài liệu này từng ghi theo luật cũ đó.
+
+Sai lệch ấy đảo ngược hậu quả. `NotificationScheduler.apply` đưa `plan.alerts` vào theo thứ tự `_ordered` sinh ra, mà vòng 0 nằm đầu, tức là **cái hẹn gần nhất của từng mục được đưa vào trước tiên**. Tràn trần thì đúng những cái đó bị vứt, còn thứ được giữ lại là các mốc xa nhất. Vì vậy `apply` nay đưa vào theo **thứ tự ngược**, để cái đáng giữ nhất là cái được trao sau cùng.
+
+**Android không cắt bớt, nó ném lỗi.** Cái thứ 501 trả về `IllegalStateException: Maximum limit of concurrent alarms 500 reached for uid`, đo trên Pixel 4 XL chạy Android 13. Đây là giới hạn của AOSP chứ không phải chuyện riêng của Samsung như README của plugin mô tả. Ném lỗi tệ hơn cắt bớt: theo bẫy 9, một cú ném làm hỏng cả vòng `apply` nên người dùng mất sạch nhắc hạn chứ không mất bớt vài cái.
+
+**iOS không giữ gì khi app chưa được cấp quyền thông báo.** Xin 40, giữ 0. Quyền chặn ngay ở khâu nhận chứ không chỉ chặn khâu hiện lên màn hình, nên cái chốt `hasPermission()` trong `_applyPlan` là bắt buộc chứ không phải cẩn thận thừa.
 
 Nên phần đặt lịch không phải là "gọi hàm đặt thông báo cho từng mục", mà là **một bộ phân bổ có giới hạn, chạy lại từ đầu mỗi lần**:
 
@@ -578,7 +584,7 @@ của `flutter_local_notifications` 22.3.0 nhận `matchDateTimeComponents`, và
 
 | Chu kỳ trong app | Lặp được bằng |
 |---|---|
-| `(month, 1)` hàng tháng | `dayOfMonthAndTime` |
+| `(month, 1)` hàng tháng | `dayOfMonthAndTime`, **có điều kiện, xem dưới** |
 | `(month, 12)` hàng năm | `dateAndTime` |
 | `(day, 7)` hàng tuần | `dayOfWeekAndTime` |
 | `(day, 1)` hàng ngày | `time` |
@@ -587,15 +593,62 @@ của `flutter_local_notifications` 22.3.0 nhận `matchDateTimeComponents`, và
 
 Sau khi làm, trần 64 chuyển từ *64 lần nhắc* thành *64 luật nhắc*.
 
-Ba cái giá, và cái thứ ba là chỗ dễ hỏng im lặng nhất:
+#### Điều kiện của gói hàng tháng, và nó hẹp hơn bảng trên trông có vẻ
 
-- Chữ không đổi được theo từng lần bắn. Không sao với một nấc lead, không dùng được cho
-  nhắc lại sau hạn.
-- Không huỷ được một lần riêng lẻ. Người dùng ghi nhận đã trả sớm thì lần bắn kế vẫn tới,
-  cho tới lần mở app kế tiếp.
-- **Ngày neo lớn hơn 28 không lặp theo tháng được.** `dayOfMonthAndTime` với ngày 31 nhảy
-  qua tháng Hai, Tư, Sáu, Chín và Mười một. Những mục đó phải giữ kiểu một lần. Đây đúng
-  là cái bẫy mà `Recurrence` đã ghi ở đầu `recurrence.dart`, chỉ đổi chỗ xảy ra.
+`FlutterLocalNotificationsPlugin.m:906` cho thấy `dayOfMonthAndTime` lấy **ngày trong
+tháng** từ mốc được đưa vào rồi dựng một `UNCalendarNotificationTrigger` lặp trên đúng
+ngày đó. Nó cần một ngày trong tháng cố định.
+
+Nhưng app không đặt lịch vào ngày đến hạn, nó đặt vào **ngày đến hạn trừ số ngày báo
+trước**, và hai thứ đó không đứng yên như nhau. Netflix đến hạn mùng 5, báo trước 7 ngày:
+
+| Đến hạn | Ngày nhắc |
+|---|---|
+| 05/01 | 29/12 |
+| 05/02 | 29/01 |
+| 05/03 | **26/02** |
+| 05/04 | 29/03 |
+
+Ngày đến hạn đứng yên ở mùng 5, ngày nhắc nhảy giữa 26 và 29 vì tháng Hai ngắn. Không có
+ngày cố định nào để lặp.
+
+Điều kiện gọn lại: **ngày nhắc phải nằm trong cùng tháng với ngày đến hạn, và phải từ 1
+tới 28.** Tức là `ngày đến hạn > số ngày báo trước` và `ngày đến hạn ≤ 28`.
+
+| Thang nhắc | Ngày đến hạn hợp lệ | Tỉ lệ |
+|---|---|---|
+| Báo trước 3 ngày, mặc định của app | 4 tới 28 | 81% |
+| Báo trước 7 ngày | 8 tới 28 | 68% |
+| Báo trước 30 ngày trên gói hàng tháng | không có ngày nào | 0% |
+
+Gói hàng năm gần như lặp được hết, vì `dateAndTime` cố định tháng cộng ngày và một ngày
+dương lịch thì đứng yên qua các năm.
+
+#### Vẫn hẹn một lần, tức là vẫn tịt sau một chu kỳ
+
+- Hàng quý, nửa năm, chu kỳ tự gõ. Không có mẫu khớp.
+- Gói hàng tháng rơi vào phần 19% ở trên.
+- Nhắc đối chiếu, `verifyEveryDays` mặc định 60 ngày. Không khớp mẫu nào.
+- Nhắc lại sau hạn. Bắt buộc một lần, vì trigger lặp không đổi được chữ.
+- Hoãn. Bản chất là một lần.
+- Mục trả góp có số kỳ hữu hạn. Lặp mãi thì nó đòi tiền sau kỳ cuối.
+- Mục đã huỷ mà hết kỳ đã trả tiền. Phép quét đóng nó lại cần app được mở.
+
+#### Và nó đẻ ra một rủi ro mới, ngược chiều
+
+Hôm nay mọi thứ đều một lần nên app **không bao giờ nhắc thừa**. Chuyển sang lặp thì nó
+nhắc thừa được: người dùng ghi nhận đã trả sớm, đổi ngày, huỷ gói, hay trả xong kỳ cuối mà
+không mở app, thì cái nhắc vẫn tới với ngày cũ. Đó là đổi im lặng lấy sai lệch, và với app
+này thì đáng, vì im lặng là mất thứ không lấy lại được còn nhắc thừa là một cú vuốt. Nhưng
+nó là một cuộc đổi chác, không phải thắng không.
+
+#### Kết luận về mức che phủ
+
+Với một danh sách điển hình toàn gói tháng và gói năm, khoảng **bốn phần năm** số nhắc hạn
+sẽ tự chạy mãi mà không cần mở app. Phần còn lại vẫn tịt sau một chu kỳ y như bây giờ, và
+**người dùng không có cách nào biết mục nào thuộc phần nào**. Đó là lý do lịch hệ thống
+vẫn cần: lịch không có mẫu lặp nào để khớp, không có trần, và nhận mọi ngày cụ thể mà
+chính `Recurrence` của app tính ra.
 
 #### Lịch hệ thống: tấm lưới cuối, và đã chọn
 
