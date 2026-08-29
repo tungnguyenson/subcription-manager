@@ -493,9 +493,11 @@ Nên phần đặt lịch không phải là "gọi hàm đặt thông báo cho t
 2. **Xóa sạch rồi tính lại**, không cộng dồn vào lịch cũ.
 3. **Xếp hạng theo mức rủi ro giảm dần, rồi tới ngày tăng dần.** Mục Mức 1 được cấp trọn thang nhắc trước khi mục Mức 2 được cấp mốc thứ hai.
 4. **Chỉ đặt 50 cái, chừa 14 chỗ trống.** Không dùng hết 64 để còn chỗ cho thông báo phát sinh.
-5. **Chỉ xét các mốc trong 60 ngày tới.**
-6. **Không bao giờ dùng trigger lặp lại** của iOS, vì nó không cho phép nội dung khác nhau theo từng lần.
+5. ~~**Chỉ xét các mốc trong 60 ngày tới.**~~ Đã bỏ, xem mục 7.6. Chân trời 60 ngày giờ chỉ chặn nhắc lại sau hạn.
+6. ~~**Không bao giờ dùng trigger lặp lại** của iOS, vì nó không cho phép nội dung khác nhau theo từng lần.~~ Nêu quá rộng, xem mục 7.6. Đúng với nhắc lại sau hạn, không đúng với một nấc lead của gói lặp.
 7. **Nếu phải cắt, ghi lại và hiện cảnh báo trong Cài đặt.** Cắt âm thầm là đúng kiểu lỗi mà mục 7.1 nói tới.
+
+Điểm 3 cũng đã lỗi thời: không còn thang mức rủi ro để xếp theo, nên `_ordered` chia suất theo vòng, mỗi mục một suất trước khi mục nào có suất thứ hai, và trong một vòng thì mọi thứ bắn trước hạn đứng trước nhắc lại sau hạn. Xem bẫy 60 trong CLAUDE.md.
 
 Thêm `BGAppRefreshTask` để iOS tự chạy nạp lại trong nền. Nói thật là iOS tự quyết khi nào chạy và không đảm bảo đúng giờ, nên đây là lớp phòng hờ, lớp chính vẫn là nạp lại lúc mở app.
 
@@ -537,6 +539,127 @@ Nên mục Mức 1 có thêm `verifyEveryDays`, mặc định 60. Cứ đủ 60 
 
 Một giới hạn kỹ thuật cần biết nếu `actionUrl` là mã điện thoại: iOS không cho app tự động quay mã USSD, đây là chặn có chủ đích từ 2012 sau một lỗ hổng cho phép trang web xóa máy bằng mã USSD. App điền sẵn được mã, nút gọi vẫn phải người dùng bấm.
 
+
+### 7.6 Kênh gửi: bốn mắt xích, và cái nào app tự giữ được
+
+Mục 7.3 nói về việc chia 64 suất. Nhưng một lời nhắc tới được tay người dùng phải đi qua
+bốn mắt xích, và chia suất chỉ là mắt thứ hai:
+
+1. App tính đúng alert.
+2. Alert được đặt xuống hệ điều hành.
+3. Hệ điều hành giữ nó tới ngày.
+4. Hệ điều hành gửi, và người dùng thấy.
+
+Mắt 1 nằm trong `NotificationPlanner` và có test. Ba mắt còn lại là chỗ app đang yếu, và
+mục này ghi lại các phương án đã cân, kèm cái đã chọn.
+
+#### Hai điều ở mục 7.3 nay đã sai
+
+**Điểm 5, "chỉ xét các mốc trong 60 ngày tới", đã bỏ.** Chân trời 60 ngày giờ chỉ chặn
+nhắc lại sau hạn, thứ vốn không có điểm dừng tự nhiên. Nấc thang, hoãn và đối chiếu đều
+đếm được nên không cần chặn, và chặn chúng làm một cái hộ chiếu còn mười tám tháng hiện ra
+màn hình không có nhắc hạn nào. Xem bẫy 60 trong CLAUDE.md.
+
+**Điểm 6, "không bao giờ dùng trigger lặp lại", đúng nhưng nêu quá rộng.** Lý do thật là
+trigger lặp không đổi được nội dung theo từng lần bắn, và không huỷ được một lần riêng lẻ.
+Điều đó chặn nhắc lại sau hạn, và chặn mọi câu chữ phụ thuộc vào lần bắn cụ thể. Nó
+**không** chặn một nấc lead của gói lặp: câu "Netflix gia hạn sau 3 ngày" đúng ở mọi tháng.
+
+#### Nhắc hạn lặp: cách duy nhất bỏ được sự phụ thuộc vào việc mở app
+
+Hiện mỗi alert là một request dùng một lần. Bắn xong là suất trống, và chỉ có mở app mới
+bù vào. Đó là toàn bộ nguyên nhân của "không mở app ba tháng thì hết nhắc": `_replan` chỉ
+chạy ở stream dữ liệu và lúc app trở lại tiền cảnh, không có tác vụ nền nào.
+
+Trần 64 của iOS là trần trên **số request đang chờ**, không phải số lần bắn. Một request
+lặp chiếm đúng một suất và bắn mãi mãi mà app không cần chạy lại lần nào. `zonedSchedule`
+của `flutter_local_notifications` 22.3.0 nhận `matchDateTimeComponents`, và bốn giá trị của
+`DateTimeComponents` phủ được phần lớn danh sách:
+
+| Chu kỳ trong app | Lặp được bằng |
+|---|---|
+| `(month, 1)` hàng tháng | `dayOfMonthAndTime` |
+| `(month, 12)` hàng năm | `dateAndTime` |
+| `(day, 7)` hàng tuần | `dayOfWeekAndTime` |
+| `(day, 1)` hàng ngày | `time` |
+| `(month, 3)`, `(month, 6)`, chu kỳ tự gõ | không có mẫu khớp, giữ kiểu một lần |
+| Mục một lần, ví dụ hộ chiếu | không cần lặp |
+
+Sau khi làm, trần 64 chuyển từ *64 lần nhắc* thành *64 luật nhắc*.
+
+Ba cái giá, và cái thứ ba là chỗ dễ hỏng im lặng nhất:
+
+- Chữ không đổi được theo từng lần bắn. Không sao với một nấc lead, không dùng được cho
+  nhắc lại sau hạn.
+- Không huỷ được một lần riêng lẻ. Người dùng ghi nhận đã trả sớm thì lần bắn kế vẫn tới,
+  cho tới lần mở app kế tiếp.
+- **Ngày neo lớn hơn 28 không lặp theo tháng được.** `dayOfMonthAndTime` với ngày 31 nhảy
+  qua tháng Hai, Tư, Sáu, Chín và Mười một. Những mục đó phải giữ kiểu một lần. Đây đúng
+  là cái bẫy mà `Recurrence` đã ghi ở đầu `recurrence.dart`, chỉ đổi chỗ xảy ra.
+
+#### Lịch hệ thống: tấm lưới cuối, và đã chọn
+
+Ghi sự kiện kèm báo thức vào lịch của chính người dùng. Đây là kênh duy nhất sống sót khi
+bản thân Subdock chết: bị gỡ, bị force-stop, hoặc người dùng đổi sang điện thoại khác.
+
+- Không có trần 64.
+- Lịch đồng bộ theo tài khoản của người dùng, nên máy mới có sẵn.
+- App Lịch là thứ hệ điều hành không bao giờ giết vì tiết kiệm pin.
+- Dữ liệu đi vào tài khoản của chính họ, không đi vào máy chủ của ai khác, đúng nguyên tắc
+  ở mục 11.
+
+Cái giá là xin quyền lịch, và app phải giữ đồng bộ khi mục thay đổi hoặc bị xoá.
+
+Một điểm hay bị bỏ sót: **lịch trên máy đã đồng bộ lên Google Calendar hoặc iCloud rồi**,
+nếu tài khoản lịch của người dùng là tài khoản đó. Nghĩa là không cần OAuth scope nào để
+có được điều đó.
+
+#### Máy chủ đẩy thông báo: chưa bỏ, nhưng chưa làm
+
+Phương án: một backend giữ lịch nhắc và chủ động đẩy thông báo xuống máy.
+
+**Ưu điểm.** Không có trần suất. Trên iOS, APNs vẫn hiện thông báo dù người dùng đã vuốt
+tắt app. Không phụ thuộc vào việc mở app. Và điểm mạnh nhất, chỉ kênh này có: **một
+backend cần định danh người dùng, thường là email, nên nó gửi được nhắc hạn qua email, thứ
+tới nơi kể cả khi app đã bị gỡ và kể cả khi cái điện thoại không còn.** Không kênh nào
+khác làm được việc đó.
+
+**Nhược điểm, theo thứ tự nặng dần.**
+
+- **Không cứu được force-stop trên Android.** Android đặt app bị force-stop vào trạng thái
+  dừng, và app ở trạng thái đó không nhận FCM cho tới khi người dùng tự mở lại. Mà
+  force-stop chính là thứ trình quản lý pin của Xiaomi, Oppo, Vivo, Huawei làm với app ít
+  dùng. Nghĩa là push không thay được kênh cục bộ, nó chỉ thêm vào.
+- **Máy chủ phải biết ngày và tên mục.** Đó đúng là thứ mục 11 nói app không được giữ hộ
+  ai. Có đường vòng: máy chủ chỉ giữ mốc thời gian cộng một khối đã mã hoá, thiết bị giải
+  mã bằng Notification Service Extension trên iOS và data message trên Android. Làm được,
+  nhưng đó là một hệ mã hoá đầu cuối và quản lý khoá cho một app một người dùng.
+- **Máy chủ chết thì nhắc hạn chết theo, im lặng và đồng loạt.** App này theo dõi hộ chiếu,
+  chu kỳ mười năm. Ngày quên trả tiền máy chủ, hoặc ngày tác giả chuyển sang việc khác,
+  mọi nhắc hạn của mọi người tắt cùng lúc và không ai biết. Nhắc hạn cục bộ không có kiểu
+  hỏng đó: máy vẫn bắn dù tác giả đã biến mất từ lâu. Đây là lý do quyết định để nó không
+  được làm kênh chính.
+
+**Về nhánh "đăng nhập Google rồi ghi thẳng vào Google Calendar".** Nó gần như không mua
+thêm gì so với ghi vào lịch trên máy, vì lịch trên máy đã đồng bộ lên đó rồi. Mà nó tốn
+một scope lịch, thuộc nhóm nhạy cảm, tức là mất cả ba thứ mà bẫy 52 nói `drive.appdata`
+đang giữ được: không phải nộp duyệt, không có đánh giá an ninh hằng năm, không có màn hình
+"Google chưa xác minh ứng dụng này".
+
+**Kết luận tạm.** Email là năng lực thật sự riêng của phương án này và chưa có gì thay thế.
+Vì vậy nó được ghi lại chứ không loại bỏ. Nhưng nó là lớp thứ ba, sau nhắc hạn lặp và lịch
+hệ thống, và nếu làm thì kênh cục bộ vẫn phải là kênh chính.
+
+#### Thứ tự đã chốt
+
+1. **Nhắc hạn lặp.** Rẻ nhất, nằm trong kiến trúc sẵn có, xoá phần lớn sự phụ thuộc vào
+   việc mở app.
+2. **Một chỗ báo tình trạng ở cấp toàn app.** Hiện việc "mục này không được đặt lịch" chỉ
+   nằm trong chú thích màn Chi tiết của đúng mục đó, nên người có sáu mươi mục không có
+   cách nào biết mười mục đang im. Đây là phần trung thực: khi không bảo đảm được thì phải
+   nói ra, đúng điểm 7 của mục 7.3.
+3. **Lịch hệ thống.**
+4. **Máy chủ đẩy thông báo và email.** Để ngỏ.
 
 ---
 
