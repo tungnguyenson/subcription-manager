@@ -1,13 +1,16 @@
-# Nhắc hạn của Subdock: cái gì chắc chắn tới, cái gì không
+# Nhắc hạn của Subdock: cơ chế, giải pháp, và những chỗ còn hở
 
-Tài liệu này giải thích Subdock nhắc bạn bằng cách nào, và quan trọng hơn, **những
-trường hợp nó không nhắc được**. Viết để bạn đọc và tự quyết xem còn chỗ nào chưa yên tâm.
+Tài liệu này giải thích Subdock nhắc bạn bằng cách nào, giải pháp vừa làm để bịt lỗ hổng
+lớn nhất, và **những trường hợp nó vẫn không nhắc được**. Viết để bạn đọc và tự quyết xem
+còn chỗ nào chưa yên tâm.
 
-Đây không phải tài liệu kỹ thuật cho người sửa code. Mọi thứ ở đây viết cho người dùng
-app. Chỗ nào có con số thì con số đó đã được đo trên điện thoại thật, không phải chép lại
-từ tài liệu của ai.
+Đây không phải tài liệu kỹ thuật cho người sửa code. Chỗ nào có con số thì con số đó đã
+được đo trên điện thoại thật, không phải chép lại từ tài liệu của ai.
 
-## Thuật ngữ
+Thứ tự đọc: thuật ngữ, cơ chế hiện tại, giải pháp, giới hạn của giải pháp, rủi ro còn để
+ngỏ, rồi bảng tổng kết đã làm gì và chưa làm gì.
+
+## 1. Thuật ngữ
 
 Năm từ dùng suốt tài liệu, định nghĩa một lần ở đây:
 
@@ -19,7 +22,9 @@ Năm từ dùng suốt tài liệu, định nghĩa một lần ở đây:
 | **nấc nhắc** | Một lần nhắc trước hạn, ví dụ "báo trước 3 ngày". Một mục có thể có nhiều nấc. |
 | **nhắc lại sau hạn** | Những lần nhắc **sau** khi ngày hết hạn đã trôi qua, kiểu "vẫn chưa xong". |
 
-## 1. Subdock không tự canh giờ
+## 2. Cơ chế hiện tại
+
+### 2.1. Subdock không tự canh giờ
 
 Đây là điều nền tảng, và mọi thứ còn lại là hệ quả của nó.
 
@@ -31,7 +36,63 @@ lấy cái hẹn ra và hiện thông báo, kể cả khi app không được m�
 **mọi giới hạn của app đều là giới hạn của cái hàng chờ đó.** Điện thoại nhận bao nhiêu cái
 hẹn, giữ chúng trong bao lâu, và bỏ cái nào khi quá tải, đều do điện thoại quyết.
 
-## 2. Bốn chỗ có thể đứt
+### 2.2. App tính ra những cái hẹn nào
+
+Với mỗi mục còn đang theo dõi và chưa bị tắt nhắc, app sinh ra bốn loại cái hẹn:
+
+| Loại | Sinh ra khi nào | Bao nhiêu cái |
+|---|---|---|
+| **Nấc trước hạn** | Theo thang bạn đặt, ví dụ báo trước 7 ngày và 1 ngày | Đúng bằng số nấc |
+| **Nhắc lại sau hạn** | Ngày hết hạn đã qua mà bạn chưa ghi nhận đã xong | Nhiều nhất 14 lần cho mỗi mục |
+| **Nhắc kiểm lại ngày** | Nhóm nào bật, ví dụ mỗi 60 ngày kiểm lại hạn SIM | Một cái |
+| **Hoãn** | Bạn tự bấm "nhắc lại sau 3 ngày" | Một cái |
+
+Ba luật đi kèm, đều đáng biết:
+
+**Cái hẹn đã qua giờ trong hôm nay thì bỏ.** Lúc 18:40, một mục hẹn 08:30 đã hết chuyện để
+nói trong ngày, còn mục hẹn 21:00 thì chưa. So theo từng mục, vì giờ gửi là của từng mục.
+
+**Nấc trước hạn qua rồi thì mất hẳn, không dời sang mai.** Một nấc gọi tên một ngày cụ thể
+so với hạn; dời nó sang mai là nói "còn 3 ngày" vào ngày còn hai ngày.
+
+**Nhắc lại sau hạn thì ngược lại, qua rồi thì trượt sang mai.** Câu "vẫn chưa xong" thì mai
+vẫn đúng.
+
+Hai cái trần cho nhắc lại sau hạn: chỉ sinh trong vòng **60 ngày tới**, và nhiều nhất **14
+lần cho mỗi mục**. Nếu không có hai cái trần này thì một mục quá hạn nhắc hàng ngày sẽ sinh
+ra sáu mươi mốt cái hẹn và ăn sạch suất của cả danh sách. Đây là số đo thật: một danh sách
+11 mục, trong đó có **một** mục quá hạn nhắc hàng ngày, trước đây tiêu hết 50 suất và rớt
+21 cái hẹn của các mục khác. Nay nó tiêu 24 suất và không rớt cái nào.
+
+Trần 14 lần không phải là app bỏ cuộc sau hai tuần: mỗi lần bạn mở app, nó tính lại và trả
+về hai tuần tiếp theo.
+
+### 2.3. Ngân sách 50 suất, và cách chia
+
+Điện thoại chỉ nhận có hạn, nên app đặt cho mình một ngân sách **50 cái hẹn cho toàn bộ
+danh sách**. Con số 50 ở đâu ra thì mục 5.1 nói.
+
+Cách chia là **theo vòng**: vòng đầu lấy cái hẹn gần nhất của **từng** mục, vòng hai lấy
+cái thứ hai của từng mục, cứ thế. Mọi mục được nói một lần trước khi mục nào được nói lần
+thứ hai.
+
+Trước đây app xếp tất cả theo ngày rồi cắt. Nghe hợp lý, nhưng nó cho ra kết quả tệ: một
+mục quá hạn nhắc hàng ngày sinh ra sáu mươi cái ngày gần nhất, chiếm sạch suất, và **mọi
+mục khác im hoàn toàn** mà không màn nào nói ra.
+
+Trong cùng một vòng, **mọi cái hẹn trước hạn được xếp trên nhắc lại sau hạn**. Lý do là lý
+do app tồn tại: một nấc trước hạn tới lúc còn ngăn được, còn nhắc lại sau hạn tới khi việc
+đã xảy ra, vào đúng ngày nhà cung cấp đang tự gửi thông báo. Xếp thuần theo ngày thì nhắc
+lại sau hạn **luôn** thắng, vì nó bắt đầu từ ngày mai của một cái hạn đã trôi qua.
+
+### 2.4. App tính lại khi nào
+
+Ba thời điểm: khi có dòng nào trong dữ liệu đổi, khi bạn mở lại app, và khi app khởi động.
+
+Không có thời điểm thứ tư. **Không có hẹn giờ qua nửa đêm**: mở app để im từ hôm trước sang
+hôm sau thì bản tính vẫn cũ cho tới lần mở kế tiếp.
+
+## 3. Bốn chỗ có thể đứt
 
 Một lời nhắc tới được tay bạn phải đi qua bốn bước. Đứt ở bước nào cũng là im lặng.
 
@@ -45,7 +106,39 @@ Một lời nhắc tới được tay bạn phải đi qua bốn bước. Đứt
 App chỉ nắm chắc bước 1. Ba bước còn lại thuộc về điện thoại, và việc của app là **biết
 mình đang bị chặn ở đâu và nói ra**.
 
-## 3. Giới hạn thật, đã đo trên máy
+## 4. Giải pháp: hẹn lặp
+
+### 4.1. Chuyện đã hỏng
+
+Đây là phần đáng đọc kỹ nhất, vì nó ảnh hưởng tới **mọi người dùng**, không riêng ai.
+
+Trước đây mỗi cái hẹn chỉ dùng **một lần**: bắn xong là biến mất khỏi hàng chờ. Và app chỉ
+tính cho **kỳ đến hạn gần nhất**, không tính cho các kỳ sau.
+
+Ghép hai điều đó lại: ai không mở app trong khoảng một chu kỳ sẽ mất hết nhắc hạn. Với gói
+hàng tháng thì khoảng một tháng.
+
+Điều dễ hiểu nhầm nhất: **chuyện này không liên quan tới ngân sách 50 hay trần 64.** Người
+có ba dịch vụ cũng tịt sau một tháng y hệt người có ba mươi ba. Cái trần là một vấn đề
+khác, nhỏ hơn.
+
+### 4.2. Cách sửa
+
+Điện thoại nhận một kiểu hẹn khác: **hẹn lặp**. Thay vì "ngày 17/09 lúc 08:30", app dặn
+"ngày 17 hàng tháng lúc 08:30". Cái hẹn đó tốn đúng **một suất** và bắn mãi mãi, không cần
+app chạy lại lần nào.
+
+Điều này quan trọng và dễ bỏ qua: **trần của điện thoại đếm số cái hẹn, không đếm số lần
+bắn.** Một cái hẹn lặp chiếm một suất rồi bắn hàng trăm lần. Chính kỹ sư của Apple xác nhận
+điều đó trên diễn đàn của họ.
+
+Chỉ **nấc trước hạn** được lặp. Ba loại kia thì không, và đều có lý do riêng: nhắc lại sau
+hạn phải nói khác nhau mỗi lần và phải dừng ngay khi việc xong; hoãn bản chất là một lần;
+nhắc kiểm lại ngày chạy theo chu kỳ riêng không khớp kiểu lặp nào của điện thoại.
+
+## 5. Giới hạn của giải pháp
+
+### 5.1. Trần của điện thoại, đã đo trên máy
 
 Những con số này thường được chép qua chép lại trên internet mà không ai kiểm. Nên đã đo
 lại bằng một bài test chạy trên thiết bị thật, ở `integration_test/notification_ceiling_test.dart`.
@@ -55,52 +148,28 @@ lại bằng một bài test chạy trên thiết bị thật, ở `integration_
 | iPhone, iOS 26.5 | **64 cái hẹn** | Giữ 64 cái **được đưa vào sau cùng**, vứt phần đưa vào trước |
 | Pixel 4 XL, Android 13 | **500 cái hẹn** | **Báo lỗi** thay vì bỏ bớt |
 
-Ba điều rút ra, cả ba đều đã đo chứ không suy đoán:
+Bốn điều rút ra, cả bốn đều đã đo chứ không suy đoán:
 
-**iPhone giữ đúng 64.** Đưa 65 thì nó giữ 64. Đưa 128 cũng chỉ giữ 64. Subdock chỉ đưa
-vào 50, chừa lại 14 suất, nên không bao giờ chạm trần.
+**iPhone giữ đúng 64.** Đưa 65 thì nó giữ 64. Đưa 128 cũng chỉ giữ 64. Subdock chỉ đưa vào
+50, chừa lại 14 suất, nên không bao giờ chạm trần. Mười bốn suất đó là biên an toàn cho một
+con số mới đo trên một máy và một phiên bản hệ điều hành.
 
 **iPhone vứt cái đưa vào trước, không vứt cái xa nhất.** Đây là chỗ trước đây tài liệu của
-chính dự án ghi ngược. Hậu quả của việc ghi ngược: app đưa cái quan trọng nhất vào đầu
-tiên, nên nếu có ngày nào vượt trần thì đúng những cái đó bị vứt. Đã sửa bằng cách đưa vào
-theo thứ tự ngược lại, để cái đáng giữ nhất là cái được trao sau cùng.
+chính dự án ghi ngược. Hậu quả: app đưa cái quan trọng nhất vào đầu tiên, nên nếu có ngày
+nào vượt trần thì đúng những cái đó bị vứt. Đã sửa bằng cách đưa vào theo thứ tự ngược lại.
 
 **Android báo lỗi chứ không bỏ bớt.** Cái thứ 501 làm hệ thống ném ra một lỗi, và một lỗi
 như vậy làm hỏng cả lượt đặt lịch. Nghĩa là vượt trần trên Android thì người dùng mất
 **sạch** nhắc hạn chứ không mất bớt vài cái. Đây cũng là máy Google chứ không phải Samsung,
-nên đó là giới hạn chung của Android chứ không phải đặc thù một hãng.
+nên đó là giới hạn chung của Android chứ không phải đặc thù một hãng. Vì Android nguy hiểm
+hơn nên app áp chung ngân sách 50 chặt hơn cho cả hai nền tảng.
 
 **Chưa cấp quyền thông báo thì iPhone không giữ cái nào.** Đưa 40 cái, hỏi lại thì nó nói
 đang giữ 0. Quyền không chỉ chặn ở khâu hiện thông báo lên màn hình, nó chặn ngay từ khâu
 nhận. Vì vậy Subdock kiểm quyền trước rồi mới đặt lịch, và chưa có quyền thì nó không đặt
 gì cả, cũng không tự nhận là đã đặt xong.
 
-## 4. Lỗ hổng lớn nhất, và cách vừa bịt
-
-Đây là phần đáng đọc kỹ nhất, vì nó ảnh hưởng tới **mọi người dùng**, không riêng ai.
-
-### Chuyện đã hỏng
-
-Trước đây mỗi cái hẹn chỉ dùng **một lần**: bắn xong là biến mất khỏi hàng chờ. Và app chỉ
-tính cho **kỳ đến hạn gần nhất**, không tính cho các kỳ sau.
-
-Ghép hai điều đó lại: ai không mở app trong khoảng một chu kỳ sẽ mất hết nhắc hạn. Với gói
-hàng tháng thì khoảng một tháng.
-
-Điều dễ hiểu nhầm nhất: **chuyện này không liên quan tới trần 64.** Người có ba dịch vụ
-cũng tịt sau một tháng y hệt người có ba mươi ba. Cái trần là một vấn đề khác, nhỏ hơn.
-
-### Cách sửa
-
-Điện thoại nhận một kiểu hẹn khác: **hẹn lặp**. Thay vì "ngày 17/09 lúc 08:30", app dặn
-"ngày 17 hàng tháng lúc 08:30". Cái hẹn đó tốn đúng **một suất** và bắn mãi mãi, không cần
-app chạy lại lần nào.
-
-Điều này quan trọng và dễ bỏ qua: **trần 64 đếm số cái hẹn, không đếm số lần bắn.** Một cái
-hẹn lặp chiếm một suất rồi bắn hàng trăm lần. Chính kỹ sư của Apple xác nhận điều đó trên
-diễn đàn của họ.
-
-### Nhưng không phải mục nào cũng lặp được
+### 5.2. Không phải mục nào cũng lặp được
 
 Đây là chỗ tôi suýt viết sai, và nó đáng để bạn kiểm lại.
 
@@ -126,7 +195,7 @@ App không tự suy ra bằng công thức. Nó **tính thử 14 kỳ tới** r�
 nhau không. Trùng thì lặp, không trùng thì thôi. Mười bốn kỳ đủ đi qua một tháng Hai và một
 năm nhuận, nên nếu có chỗ lệch thì nó lộ ra.
 
-## 5. Cái gì còn tịt sau một chu kỳ
+### 5.3. Cái gì còn tịt sau một chu kỳ
 
 Danh sách những mục **vẫn** mất nhắc hạn nếu bạn không mở app:
 
@@ -145,11 +214,27 @@ Danh sách những mục **vẫn** mất nhắc hạn nếu bạn không mở ap
 được. Báo trước 7 ngày thì còn **68%**. Báo trước 30 ngày trên gói hàng tháng thì **không
 ngày nào**.
 
-**Điều đáng lo nhất không phải con số đó, mà là bạn không nhìn ra được.** Hai mục nằm cạnh
-nhau trong danh sách, một cái nhắc mãi mãi, một cái tịt sau một tháng, và trên màn hình
-chúng giống hệt nhau.
+### 5.4. Vậy mục nào của bạn chắc chắn được nhắc
 
-## 6. Rủi ro mới vừa nhận vào
+Bảng này là phần đáng dùng nhất khi bạn tự soát danh sách của mình.
+
+| Loại mục | Không mở app một tháng | Không mở app một năm |
+|---|---|---|
+| Hộ chiếu, bằng lái, giấy tờ hạn nhiều năm | **Vẫn nhắc** | **Vẫn nhắc** |
+| Gói hàng năm | **Vẫn nhắc** | **Vẫn nhắc** nếu ngày nhắc cố định |
+| Gói hàng tháng, ngày nhắc cố định | **Vẫn nhắc** | **Vẫn nhắc** |
+| Gói hàng tháng, ngày nhắc trôi | **Tịt** | Tịt |
+| Gói hàng quý, nửa năm | Vẫn nhắc kỳ gần nhất | **Tịt** |
+| SIM trả trước, nhắc lại hàng ngày sau hạn | Nhắc trước hạn vẫn tới; nhắc lại sau hạn chỉ có 14 lần | Như bên trái |
+
+Mục hạn dài lại là mục an toàn nhất, và đó là điều ngược với trực giác. Lý do: hộ chiếu còn
+500 ngày có một cái hẹn đặt sẵn cho ngày thứ 497, nằm im trong hàng chờ suốt thời gian đó,
+không cần app mở lần nào. Còn Netflix hàng tháng thì phụ thuộc vào việc nó có lặp được
+không.
+
+## 6. Rủi ro còn để ngỏ
+
+### 6.1. Rủi ro mới vừa nhận vào: nhắc thừa
 
 Hẹn lặp không miễn phí. Trước đây không cái hẹn nào bắn hai lần, nên app **không bao giờ
 nhắc thừa**. Giờ thì nhắc thừa được.
@@ -161,7 +246,16 @@ theo ngày cũ. Nó chỉ được sửa ở lần mở app kế tiếp.
 không lấy lại được, còn nhắc thừa chỉ tốn một cú vuốt. Nhưng đây là một cuộc đổi chác, và
 bạn nên biết mình đang đổi cái gì.
 
-## 7. Những chỗ ngoài tầm với của app
+### 6.2. Bạn không nhìn ra được mục nào đang im
+
+Đây là chỗ tôi cho là đáng lo nhất trong toàn bộ tài liệu.
+
+Hai mục nằm cạnh nhau trong danh sách, một cái nhắc mãi mãi, một cái tịt sau một tháng, và
+**trên màn hình chúng giống hệt nhau**. Hiện app chỉ nói "mục này không được đặt lịch" ở
+trong màn chi tiết của đúng mục đó. Người có sáu mươi mục không có cách nào biết mười mục
+đang im.
+
+### 6.3. Những chỗ ngoài tầm với của app
 
 Ba trường hợp app không làm gì được, kể cả khi mọi thứ bên trên đều đúng.
 
@@ -180,48 +274,59 @@ Developer từ 2018 và tới nay chưa ai của Apple trả lời.
 **Người dùng tắt quyền thông báo về sau.** App phát hiện được và nói ra, nhưng không sửa hộ
 được.
 
-## 8. Vậy mục nào của bạn chắc chắn được nhắc
+### 6.4. Câu hỏi chưa có lời đáp
 
-Bảng này là phần đáng dùng nhất khi bạn tự soát danh sách của mình.
+**Ghi sang lịch thì lịch nào?** Lịch tạo trên máy chết theo máy, tức là không chống được
+mất điện thoại, mà đó là một nửa lý do làm tính năng này. Lịch gắn với tài khoản iCloud hay
+Google thì sống sót, nhưng app phải hỏi thêm một câu và người dùng phải có tài khoản.
 
-| Loại mục | Không mở app một tháng | Không mở app một năm |
+**Tiêu đề sự kiện có cần chế độ kín đáo không?** Sự kiện lịch hiện trên màn khoá và có thể
+chia sẻ cho người khác. Dòng "Hộ chiếu hết hạn 12/03" nói ra một thứ không phải ai cũng
+muốn nói.
+
+**Có nâng ngân sách từ 50 lên gần 64 không?** Trần 64 giờ là số đo chứ không phải số trích,
+nên nâng được. Nhưng 64 mới đo trên một máy và một phiên bản, và Android thì vượt trần là
+mất sạch. Chưa nâng.
+
+**Máy chủ đẩy thông báo và gửi email** vẫn để ngỏ, không loại bỏ. Ưu điểm riêng của nó:
+muốn dùng máy chủ thì phải có danh tính người dùng, thường là email, nên nó gửi được cả khi
+app đã bị gỡ khỏi máy. Cái giá là Subdock phải có tài khoản và máy chủ, tức là bỏ đúng lời
+hứa đầu tiên của app. Lý do đầy đủ ghi ở `docs/product-spec.md` mục 7.6.
+
+## 7. Bảng tổng kết: đã xử lý và chưa xử lý
+
+| Vấn đề | Tình trạng | Ở đâu |
 |---|---|---|
-| Hộ chiếu, bằng lái, giấy tờ hạn nhiều năm | **Vẫn nhắc** | **Vẫn nhắc** |
-| Gói hàng năm | **Vẫn nhắc** | **Vẫn nhắc** nếu ngày nhắc cố định |
-| Gói hàng tháng, ngày nhắc cố định | **Vẫn nhắc** | **Vẫn nhắc** |
-| Gói hàng tháng, ngày nhắc trôi | **Tịt** | Tịt |
-| Gói hàng quý, nửa năm | Vẫn nhắc kỳ gần nhất | **Tịt** |
-| SIM trả trước, nhắc lại hàng ngày sau hạn | Nhắc trước hạn vẫn tới; nhắc lại sau hạn chỉ có 14 lần | Như bên trái |
+| Không biết trần thật là bao nhiêu, chỉ chép lại | **Đã đo** trên iPhone và Pixel | Mục 5.1 |
+| iPhone vứt nhầm cái quan trọng nhất khi quá tải | **Đã sửa**, đưa vào theo thứ tự ngược | Mục 5.1 |
+| Vượt trần trên Android làm mất sạch nhắc hạn | **Đã chặn** bằng ngân sách 50 chung cho hai nền tảng | Mục 2.3 |
+| Chưa cấp quyền mà app vẫn tưởng đã đặt lịch | **Đã sửa**, kiểm quyền trước khi đặt | Mục 5.1 |
+| Một mục quá hạn ăn sạch suất của cả danh sách | **Đã sửa**, chia theo vòng và trần 14 lần | Mục 2.2, 2.3 |
+| Mục hạn xa không có nhắc hạn nào, màn hình lại nói thang đã chạy hết | **Đã sửa**, bỏ trần 60 ngày cho nấc trước hạn | Mục 2.2 |
+| Không mở app một chu kỳ là mất hết nhắc hạn | **Đã sửa một phần**, khoảng 81% ở thang mặc định | Mục 4, 5.2, 5.3 |
+| Gói hàng quý, nửa năm, chu kỳ tự gõ vẫn tịt | **Chưa**, cần lịch hệ thống | Mục 5.3 |
+| Nhắc thừa sau khi đổi ngày mà chưa mở lại app | **Chưa**, là đánh đổi đã chấp nhận | Mục 6.1 |
+| Không có chỗ nào nói cả danh sách đang có mấy mục im | **Chưa làm**, việc tiếp theo | Mục 6.2 |
+| Ghi sang lịch của bạn | **Chưa làm**, đã có bản mô tả giao diện | `docs/design-brief-calendar.md` |
+| App bị ép dừng, bị dọn, bị tắt quyền | **Không sửa được từ trong app** | Mục 6.3 |
 
-Mục hạn dài lại là mục an toàn nhất, và đó là điều ngược với trực giác. Lý do: hộ chiếu còn
-500 ngày có một cái hẹn đặt sẵn cho ngày thứ 497, nằm im trong hàng chờ suốt thời gian đó,
-không cần app mở lần nào. Còn Netflix hàng tháng thì phụ thuộc vào việc nó có lặp được
-không.
+Hai việc chưa làm, theo thứ tự ưu tiên:
 
-## 9. Còn phải làm gì
-
-Hai việc, theo thứ tự.
-
-**Một, một chỗ nói ra tình trạng.** Hiện app chỉ nói "mục này không được đặt lịch" ở trong
-màn chi tiết của đúng mục đó. Người có sáu mươi mục không có cách nào biết mười mục đang
-im. Cần một chỗ ở cấp toàn app nói ra, và nói cả việc mục nào đang lặp mục nào không.
+**Một, một chỗ nói ra tình trạng ở cấp toàn app.** Nói cả việc mục nào đang lặp mục nào
+không. Đây là việc gấp hơn sau khi có hẹn lặp, đúng vì lý do ở mục 6.2.
 
 **Hai, ghi sang lịch của bạn.** Đây là thứ duy nhất bịt được hết những lỗ còn lại. Lịch
 không có trần số lượng, nhận mọi ngày cụ thể mà app tính ra, đồng bộ theo tài khoản nên
 sang máy mới vẫn còn, và quan trọng nhất: **sự kiện trong lịch không thuộc về Subdock**,
-nên app bị gỡ, bị dọn, hay bị ép dừng thì chúng vẫn còn. Bản mô tả giao diện nằm ở
-`docs/design-brief-calendar.md`.
+nên app bị gỡ, bị dọn, hay bị ép dừng thì chúng vẫn còn.
 
-Máy chủ đẩy thông báo và gửi email vẫn để ngỏ, không loại bỏ. Lý do và cái giá của nó ghi ở
-`docs/product-spec.md` mục 7.6.
-
-## 10. Cách tự kiểm
+## 8. Cách tự kiểm
 
 **Nút Gửi thử một nhắc hạn**, ở màn Nhắc hạn. Nó đi qua đúng đường mà một nhắc hạn thật đi,
-chứ không phải hiện một thông báo ngay lập tức. Nó chứng minh được cả bốn bước ở mục 2 đều
+chứ không phải hiện một thông báo ngay lập tức. Nó chứng minh được cả bốn bước ở mục 3 đều
 thông, và nó báo lại kèm tên múi giờ, vì múi giờ sai từng làm nhắc 08:30 tới lúc 15:30.
 
-**Bài đo trần**, nếu bạn muốn kiểm lại các con số ở mục 3 trên một máy khác:
+**Bài đo trần**, nếu bạn muốn kiểm lại các con số ở mục 5.1 trên một máy khác:
 
 ```bash
 flutter test integration_test/notification_ceiling_test.dart -d <android-device-id>
