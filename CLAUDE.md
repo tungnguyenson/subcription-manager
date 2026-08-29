@@ -1639,6 +1639,7 @@ thẳng thứ đang nói tới, ví dụ "hai cách phân loại khác nhau".
 | Loại tiền và tỉ giá | Bẫy 41 và 46. `lib/domain/fx.dart`, `lib/domain/currency_catalog.dart`, `lib/domain/currency_picks.dart`, `lib/data/currency_store.dart`, `lib/ui/widgets/currency_picker.dart` |
 | Hai màn onboarding | Bẫy 42 và 46. `lib/ui/screens/onboarding/` |
 | Icon | `docs/icon-credits.md` |
+| Nhắc hạn có chắc tới tay không, viết cho người đọc không sửa code | `docs/reminder-reliability.md`. Giải thích cơ chế, các con số đã đo, cái gì còn tịt và vì sao |
 | Nhắc hạn có tới tay không, và bốn cách nó chết | `docs/product-spec.md` mục 7.6. Ghi lại nhắc hạn lặp, lịch hệ thống, và vì sao máy chủ đẩy thông báo được để ngỏ chứ không loại. Bẫy 60 cho phần chia ngân sách |
 | Cái gì sắp xảy ra với một mục | `lib/ui/reminder_timeline.dart` cho phép dựng, `lib/ui/widgets/reminder_timeline_card.dart` cho khối trên màn Detail |
 | Bộ lọc màn Upcoming | `lib/domain/upcoming_filter.dart` cho luật khớp, `lib/ui/filter_presenter.dart` cho danh sách chip và dòng tóm tắt, `lib/ui/widgets/filter_sheet.dart` cho sheet |
