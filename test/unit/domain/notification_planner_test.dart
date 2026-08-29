@@ -3,6 +3,7 @@ import 'package:subdock/domain/category_book.dart';
 import 'package:subdock/domain/local_date.dart';
 import 'package:subdock/domain/model.dart';
 import 'package:subdock/domain/notification_planner.dart';
+import 'package:subdock/domain/recurrence.dart';
 import 'package:subdock/domain/reminders.dart';
 
 void main() {
@@ -752,6 +753,143 @@ void main() {
       );
 
       expect(plan.alerts, isEmpty);
+    });
+  });
+
+  // Whether a rung can be handed over as a standing rule.
+  //
+  // The whole reason this exists: an alert that only fires once, on an app
+  // that only ever computes the next occurrence, means a user who stops
+  // opening the app goes silent after one cycle -- with three services or with
+  // thirty-three. A repeating request costs the same single slot and fires
+  // for ever.
+  group('which rungs repeat', () {
+    TrackedItem monthlyDue(String due, {int? repeatCount, ItemState? state}) =>
+        TrackedItem(
+          id: 'm',
+          name: 'Netflix',
+          categoryId: 'STREAMING',
+          expiresOn: d(due),
+          anchorDate: d(due),
+          cycle: Cycle.monthly,
+          repeatCount: repeatCount,
+          state: state ?? ItemState.active,
+          leadDays: const [3],
+          nagAfterDue: NagPolicy.none,
+          remindAt: Reminders.defaultRemindAt,
+        );
+
+    // Due on the 20th, three days' notice, so the reminder is the 17th of
+    // every month for ever. Nothing drifts.
+    test('a monthly plan whose notice stays inside the month', () {
+      expect(
+        NotificationPlanner.repeatFor(monthlyDue('2026-09-20'), 3),
+        AlertRepeat.monthly,
+      );
+    });
+
+    // The trap the arithmetic hides. Due on the 5th with a week's notice, the
+    // reminder is 29 Dec, 29 Jan, then 26 Feb, because February is short.
+    // There is no day of the month to repeat on.
+    test('a monthly plan whose notice crosses into the short month', () {
+      expect(
+        NotificationPlanner.repeatFor(monthlyDue('2026-09-05'), 7),
+        AlertRepeat.none,
+      );
+    });
+
+    // Due on the 31st. The deadline itself skips the months that have no 31st,
+    // so a fixed-day repeat would fire in months with no charge behind it.
+    test('a monthly plan due past the 28th', () {
+      expect(
+        NotificationPlanner.repeatFor(monthlyDue('2026-10-31'), 3),
+        AlertRepeat.none,
+      );
+    });
+
+    // A standing rule outlives the thing it is about. Both of these end on a
+    // date that only something running inside the app can notice.
+    test('a counted plan never repeats', () {
+      expect(
+        NotificationPlanner.repeatFor(
+          monthlyDue('2026-09-20', repeatCount: 6),
+          3,
+        ),
+        AlertRepeat.none,
+      );
+    });
+
+    test('a cancelled plan never repeats', () {
+      expect(
+        NotificationPlanner.repeatFor(
+          monthlyDue('2026-09-20', state: ItemState.cancelledStillActive),
+          3,
+        ),
+        AlertRepeat.none,
+      );
+    });
+
+    // No shape the platform can match on, so it stays one-shot and stays
+    // silent after one cycle. Worth a test because it is the part the calendar
+    // mirror still has to cover.
+    test('quarterly and a hand-typed cycle do not repeat', () {
+      for (final cycle in [Cycle.quarterly, Cycle.every(10, CycleField.day)]) {
+        final it = item(
+          'q',
+          CategoryBook.shipped['STREAMING'],
+          expiresOn: '2026-09-20',
+          leadDays: const [3],
+          nag: NagPolicy.none,
+        ).copyWith(cycle: () => cycle);
+        expect(
+          NotificationPlanner.repeatFor(it, 3),
+          AlertRepeat.none,
+          reason: '$cycle',
+        );
+      }
+    });
+
+    test('an item with no cycle does not repeat', () {
+      expect(
+        NotificationPlanner.repeatFor(
+          item(
+            'passport',
+            CategoryBook.shipped['DOCUMENTS'],
+            expiresOn: '2028-02-01',
+          ),
+          30,
+        ),
+        AlertRepeat.none,
+      );
+    });
+
+    // Only the rung. A nag has to be able to say something different each
+    // firing and to stop the moment the thing is handled; a verify prompt runs
+    // on its own interval, which matches no calendar shape.
+    test('only a lead rung is marked repeating', () {
+      final plan = NotificationPlanner.plan(
+        [
+          item(
+            'bill',
+            CategoryBook.shipped['UTILITIES'],
+            expiresOn: '2026-08-14',
+            leadDays: const [],
+            nag: NagPolicy.daily,
+            verifyEveryDays: 30,
+          ).copyWith(cycle: () => Cycle.monthly),
+        ],
+        CategoryBook.shipped,
+        now,
+      );
+
+      expect(plan.alerts, isNotEmpty);
+      expect(
+        plan.alerts.every((a) => a.repeat == AlertRepeat.none),
+        isTrue,
+        reason: plan.alerts
+            .map((a) => '${a.reason.name}:${a.repeat.name}')
+            .join(' '),
+      );
     });
   });
 }

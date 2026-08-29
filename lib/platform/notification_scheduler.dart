@@ -347,6 +347,24 @@ class NotificationScheduler {
   Future<int> pendingCount() async =>
       (await _plugin.pendingNotificationRequests()).length;
 
+  /// The platform's own repeat pattern, or null for a single firing.
+  ///
+  /// The planner has already decided that the date this alert lands on really
+  /// does recur in this shape; see `NotificationPlanner.repeatFor`, which walks
+  /// real occurrences rather than trusting the cycle's name. All this does is
+  /// name it in the plugin's vocabulary.
+  ///
+  /// One repeating request costs the same single slot as a one-shot and then
+  /// fires without the app ever running again, which is the whole point: the
+  /// 64-slot ceiling counts requests, not firings.
+  static DateTimeComponents? _repeat(AlertRepeat repeat) => switch (repeat) {
+    AlertRepeat.none => null,
+    AlertRepeat.daily => DateTimeComponents.time,
+    AlertRepeat.weekly => DateTimeComponents.dayOfWeekAndTime,
+    AlertRepeat.monthly => DateTimeComponents.dayOfMonthAndTime,
+    AlertRepeat.yearly => DateTimeComponents.dateAndTime,
+  };
+
   Future<void> _schedule(PlannedAlert alert, AndroidScheduleMode mode) {
     final when = tz.TZDateTime(
       tz.local,
@@ -363,6 +381,7 @@ class NotificationScheduler {
       body: alert.body,
       scheduledDate: when,
       androidScheduleMode: mode,
+      matchDateTimeComponents: _repeat(alert.repeat),
       notificationDetails: NotificationDetails(
         android: AndroidNotificationDetails(
           alert.timeSensitive
@@ -414,9 +433,12 @@ class NotificationScheduler {
         ),
       ),
       payload: alert.itemId,
-      // No `matchDateTimeComponents`: every occurrence is enumerated by the
-      // planner. A repeating trigger cannot vary its text per firing and
-      // cannot be cancelled for one occurrence only.
+      // The wording survives repeating, which is why a lead rung may. `_title`
+      // reads `leadDays`, not the date, so "Due in 3 days" is true on every
+      // firing of a rung that is always three days out. A nag would not
+      // survive it -- it has to be able to say something different each time
+      // and to stop the moment the thing is handled -- which is why the
+      // planner never marks one as repeating.
     );
   }
 

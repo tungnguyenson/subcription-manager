@@ -107,7 +107,7 @@ for f in integration_test/*_test.dart; do flutter test "$f" -d <device-id>; done
 Mất khoảng bốn phút mỗi file trên máy ảo, nên đừng chạy sau từng lần sửa nhỏ. Nhưng
 phải chạy trước khi tin rằng một thay đổi về điều hướng hay bố cục đã xong.
 
-## Sáu mươi cái bẫy đã vấp, đừng vấp lại
+## Sáu mươi mốt cái bẫy đã vấp, đừng vấp lại
 
 1. **Thêm cột vào `itemRow` phải sửa hai chỗ**: bước migration của chính nó, và danh sách
    `newColumns` ở bước dựng lại bảng v3. Bước đó copy toàn bộ lược đồ hiện tại ra khỏi
@@ -1566,6 +1566,53 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
     còn ở phía trước. Khi nhánh này bắn thì `droppedForItem` đặt về 0, không thì footnote
     nói cùng một chuyện hai lần bằng hai giọng: "không có suất nào" rồi "còn N cái nữa
     không lọt".
+
+61. **Nấc thang lặp được thì đặt một lần bắn mãi mãi, và điều kiện lặp đo bằng
+    `Recurrence` chứ không suy bằng công thức ngày.** Trước đây mọi alert đều một lần, mà
+    `_alertsFor` lại chỉ tính cho **kỳ đến hạn kế tiếp**. Hệ quả: ai không mở app trong
+    một chu kỳ là mất sạch nhắc hạn, **dù có ba mục hay ba mươi ba**. Nó không dính gì tới
+    trần 64; ba mục cũng tịt sau một tháng y hệt.
+
+    Nay `PlannedAlert.repeat` mang một `AlertRepeat`, và `_repeat` trong
+    `notification_scheduler.dart` dịch nó sang `matchDateTimeComponents`. Một request lặp
+    tốn đúng **một** suất rồi bắn mãi mãi không cần app chạy lại. Chính DTS của Apple nói
+    điều đó ở [thread 765490](https://developer.apple.com/forums/thread/765490): trần đếm
+    số request đã đặt, không đếm số lần bắn.
+
+    **Điều kiện lặp hẹp hơn tên chu kỳ rất nhiều, và đây là chỗ dễ sai nhất.** App không
+    đặt lịch vào ngày đến hạn, nó đặt vào **ngày đến hạn trừ số ngày báo trước**, và hai
+    thứ đó không đứng yên như nhau. Netflix đến hạn mùng 5 báo trước 7 ngày cho ra ngày
+    nhắc 29/12, 29/01, rồi **26/02**, vì tháng Hai ngắn. `dayOfMonthAndTime` cần một ngày
+    trong tháng cố định, nên mục đó không lặp được dù nó là gói hàng tháng chính hiệu.
+
+    Vì vậy `repeatFor` **dò 14 kỳ thật qua `Recurrence`** rồi so các thành phần mà nền
+    tảng khớp, thay vì suy ra luật số học. Luật số học đúng là "ngày đến hạn phải lớn hơn
+    số ngày báo trước và không quá 28", và nó đúng, nhưng nó là đúng kiểu dễ sai lặng lẽ ở
+    biên. Dò 14 kỳ thì đi qua một tháng Hai và một năm nhuận, và nếu các ngày không khớp
+    nhau thì không có gì để lặp, bất kể công thức nói gì.
+
+    **Ba loại mục bị từ chối thẳng dù ngày có khớp**, vì một luật lặp sống lâu hơn cái nó
+    nói về: mục trả góp có số kỳ hữu hạn (lặp mãi là đòi tiền sau kỳ cuối), mục không phải
+    `ItemState.active` (kỳ đã trả tiền của gói đã huỷ kết thúc vào một ngày mà chỉ
+    `_sweepLapsed` đóng được, và nó cần app được mở), và mục không có chu kỳ.
+
+    **Chỉ nấc lead được lặp.** Nag phải nói khác nhau mỗi lần và phải dừng ngay khi việc
+    xong; hoãn bản chất là một lần; nhắc đối chiếu chạy theo chu kỳ riêng không khớp mẫu
+    lịch nào. Chữ trên thông báo sống sót được qua phép lặp vì `_title` đọc `leadDays` chứ
+    không đọc ngày, nên "Đến hạn sau 3 ngày" đúng ở mọi lần bắn của một nấc luôn cách hạn
+    ba ngày.
+
+    **Đổi lại có một rủi ro mới, ngược chiều, và phải biết là mình đang đổi.** Trước đây
+    không cái nào bắn hai lần nên app **không bao giờ nhắc thừa**. Nay một mục vừa đổi
+    ngày, hay vừa được ghi nhận đã trả sớm, sẽ vẫn nhắc theo ngày cũ cho tới lần mở app kế
+    tiếp. Đổi im lặng lấy sai lệch, và với app này thì đáng.
+
+    **Che phủ không phải toàn bộ, và người dùng không nhìn ra được phần nào là phần nào.**
+    Với thang mặc định báo trước 3 ngày, khoảng 81% ngày đến hạn hợp lệ; báo trước 7 ngày
+    còn 68%; hàng quý, nửa năm và chu kỳ tự gõ thì không có mẫu nào khớp. Hai mục nằm cạnh
+    nhau trong danh sách, một cái nhắc mãi mãi, một cái tịt sau một tháng, và trên màn hình
+    chúng giống hệt nhau. Đó là lập luận còn lại cho lịch hệ thống, xem `docs/product-spec.md`
+    mục 7.6.
 
 ## Viết tài liệu
 

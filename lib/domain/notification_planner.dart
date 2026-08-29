@@ -1,10 +1,27 @@
 import 'package:meta/meta.dart';
 
 import 'category_book.dart';
+import 'instalments.dart';
 import 'local_date.dart';
 import 'model.dart';
+import 'recurrence.dart';
 
 import 'package:subdock/i18n.dart';
+
+/// Whether one alert is a single firing or a standing rule.
+///
+/// A repeating trigger costs the same one slot as a single firing and then
+/// fires for ever without the app running again -- Apple's own DTS answer on
+/// the pending limit says as much: "scheduling a notification to fire every 5
+/// minutes can be done in a single request". That is the only thing that lifts
+/// the app's worst failure, which is not the 64-slot ceiling but the fact that
+/// every alert was one-shot and only the *next* occurrence was ever computed.
+/// A user who stopped opening the app went silent after one cycle whether they
+/// tracked three services or thirty-three.
+///
+/// The values are the shapes the platforms can actually match on. Anything
+/// that is not one of them stays [none] and stays one-shot.
+enum AlertRepeat { none, daily, weekly, monthly, yearly }
 
 enum AlertReason {
   /// Scheduled ahead of the act-by date.
@@ -31,6 +48,14 @@ class PlannedAlert {
   final AlertReason reason;
   final bool timeSensitive;
 
+  /// Whether the device should keep firing this on its own.
+  ///
+  /// Only ever set on a [AlertReason.lead] rung, and only where the date it
+  /// lands on repeats in a shape the platform can match. See
+  /// [NotificationPlanner.repeatFor] for what disqualifies an item, which is
+  /// more than it looks.
+  final AlertRepeat repeat;
+
   /// A clause appended to the notification body, or null.
   ///
   /// Deliberately a rider on an existing alert rather than an alert of its own.
@@ -48,6 +73,7 @@ class PlannedAlert {
     required this.leadDays,
     required this.reason,
     required this.timeSensitive,
+    this.repeat = AlertRepeat.none,
     this.note,
   });
 
@@ -285,6 +311,93 @@ abstract final class NotificationPlanner {
     return _ranking(a, b);
   }
 
+  /// How many occurrences ahead [repeatFor] checks before trusting a pattern.
+  ///
+  /// Fourteen, so a monthly probe crosses a February and a yearly one crosses
+  /// a leap year. Cheap: it is date arithmetic on a handful of dates, once per
+  /// rung per re-plan.
+  static const int repeatProbe = 14;
+
+  /// Whether this rung can be handed over as a standing rule, and in what
+  /// shape.
+  ///
+  /// Two questions, and the second is the one that is easy to get wrong.
+  ///
+  /// **Is the cycle a shape the platform matches?** Daily, weekly, monthly and
+  /// yearly are; quarterly, half-yearly and a hand-typed "every 10 days" are
+  /// not, and stay one-shot.
+  ///
+  /// **Does the date actually repeat in that shape?** This is the trap. The
+  /// app does not schedule the deadline, it schedules the deadline *minus the
+  /// notice*, and those two do not sit still in the same way. A monthly repeat
+  /// matches on a fixed day of the month, but Netflix due on the 5th with a
+  /// week's notice lands on the 29th, the 29th, then the 26th, because
+  /// February is short. There is no fixed day to repeat on, so it stays
+  /// one-shot.
+  ///
+  /// Rather than deriving the arithmetic -- the deadline day has to be greater
+  /// than the notice and no later than the 28th, which is right but is exactly
+  /// the kind of reasoning that is quietly wrong at a boundary -- this walks
+  /// [repeatProbe] real occurrences through [Recurrence] and checks the parts
+  /// the platform matches on are identical every time. If the dates disagree,
+  /// there is nothing to repeat, whatever the arithmetic says.
+  ///
+  /// Three kinds of item are refused outright even where the dates line up,
+  /// because a standing rule outlives the thing it is about:
+  ///
+  ///   * a counted plan, which would keep asking for money after the last
+  ///     instalment;
+  ///   * anything not [ItemState.active], since a cancelled subscription's
+  ///     paid-up window ends on a date that only `_sweepLapsed` closes, and it
+  ///     needs the app to be opened;
+  ///   * an item with no cycle, which has nothing to repeat.
+  @visibleForTesting
+  static AlertRepeat repeatFor(TrackedItem item, int lead) {
+    final cycle = item.cycle;
+    if (cycle == null) return AlertRepeat.none;
+    if (item.state != ItemState.active) return AlertRepeat.none;
+    if (Instalments.of(item) != null) return AlertRepeat.none;
+
+    final shape = switch ((cycle.unit, cycle.step)) {
+      (CycleUnit.day, 1) => AlertRepeat.daily,
+      (CycleUnit.day, 7) => AlertRepeat.weekly,
+      (CycleUnit.month, 1) => AlertRepeat.monthly,
+      (CycleUnit.month, 12) => AlertRepeat.yearly,
+      _ => AlertRepeat.none,
+    };
+    if (shape == AlertRepeat.none) return shape;
+
+    final from = Recurrence.cyclesElapsed(
+      item.anchorDate,
+      cycle,
+      item.expiresOn,
+    );
+    final dates = [
+      for (var n = 0; n < repeatProbe; n++)
+        Recurrence.actBy(
+          Recurrence.occurrenceAfter(item.anchorDate, cycle, from + n),
+          item.actByOffsetDays,
+        ).minusDays(lead),
+    ];
+
+    // What each shape has the device match on. Daily matches the time alone
+    // and weekly the weekday, both of which a fixed-length cycle keeps by
+    // construction; the two calendar shapes are the ones that can drift.
+    final holds = switch (shape) {
+      AlertRepeat.daily => true,
+      AlertRepeat.weekly => dates.every(
+        (d) => d.weekday == dates.first.weekday,
+      ),
+      AlertRepeat.monthly => dates.every((d) => d.day == dates.first.day),
+      AlertRepeat.yearly => dates.every(
+        (d) => d.day == dates.first.day && d.month == dates.first.month,
+      ),
+      AlertRepeat.none => false,
+    };
+
+    return holds ? shape : AlertRepeat.none;
+  }
+
   static List<PlannedAlert> _alertsFor(
     TrackedItem item,
     Category category,
@@ -324,7 +437,19 @@ abstract final class NotificationPlanner {
       // it has not asked the system for. See [horizonDays].
       if (fireOn >= earliest) {
         out.add(
-          _alert(item, category, fireOn, lead, AlertReason.lead, note: note),
+          _alert(
+            item,
+            category,
+            fireOn,
+            lead,
+            AlertReason.lead,
+            note: note,
+            // Only a lead rung repeats. A nag has to be able to say something
+            // different each time and to stop the moment the thing is handled;
+            // a snooze is a one-off by definition; a verify prompt is on its
+            // own interval that matches no calendar shape.
+            repeat: repeatFor(item, lead),
+          ),
         );
       }
     }
@@ -403,6 +528,7 @@ abstract final class NotificationPlanner {
     int lead,
     AlertReason reason, {
     String? note,
+    AlertRepeat repeat = AlertRepeat.none,
   }) => PlannedAlert(
     itemId: item.id,
     itemName: item.name,
@@ -411,6 +537,7 @@ abstract final class NotificationPlanner {
     leadDays: lead,
     reason: reason,
     timeSensitive: category.isTimeSensitive,
+    repeat: repeat,
     note: note,
   );
 }
