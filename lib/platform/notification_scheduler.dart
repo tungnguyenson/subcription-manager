@@ -249,7 +249,26 @@ class NotificationScheduler {
     // trip and the answer cannot change midway through the loop.
     final mode = await _scheduleMode();
 
-    for (final alert in plan.alerts) {
+    // Least important first, so the most important is the last thing handed
+    // over. That is backwards from how it reads, and it is deliberate.
+    //
+    // Measured on an iPhone running iOS 26.5, by
+    // `integration_test/notification_ceiling_test.dart`: hand iOS one hundred
+    // requests numbered nought to ninety-nine in date order, and the sixty-four
+    // it keeps are numbers thirty-six to ninety-nine. It keeps the ones added
+    // **last**, not the ones that fire soonest. The rule stated all over this
+    // repo, that the furthest-out are dropped, is the pre-iOS-10 behaviour and
+    // has not been true for years.
+    //
+    // `plan.alerts` arrives most important first, because `_ordered` puts
+    // round zero -- every item's nearest alert -- at the head. Added in that
+    // order, an overflow would throw away exactly those and keep a year's
+    // worth of distant ones. Reversed, an overflow costs the tail, which is
+    // what the planner already decided it could most afford to lose.
+    //
+    // The budget is 50 against a ceiling of 64, so nothing overflows today.
+    // This is the guard rail for the day someone raises it.
+    for (final alert in plan.alerts.reversed) {
       await _schedule(alert, mode);
     }
   }

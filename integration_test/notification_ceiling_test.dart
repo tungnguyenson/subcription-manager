@@ -76,22 +76,49 @@ void main() {
     ),
   );
 
+  // Checks permission; never asks for it. A measurement harness that waits on
+  // a human is a measurement that does not finish.
+  //
+  // `NotificationScheduler.requestPermission` is the wrong call here for two
+  // reasons. It pops a system dialog, and on Android it then calls
+  // `requestExactAlarmsPermission`, which asks nothing: it *opens the system
+  // settings screen* and leaves the run sitting at `setUpAll` until somebody
+  // walks back out of it. That is right for the app, where a person is holding
+  // the phone and has just been told why. It is wrong for this, which may well
+  // be running with the phone face down on a desk.
+  //
+  // So a missing permission fails at once, with the way to fix it.
   setUpAll(() async {
     await scheduler.initialise();
-    final granted = await scheduler.requestPermission();
+    final granted = await scheduler.hasPermission();
     // ignore: avoid_print
     print(
       'SETUP platform=${Platform.operatingSystem} '
       'version=${Platform.operatingSystemVersion} '
       'granted=$granted exact=${await scheduler.hasExactTiming()}',
     );
-    expect(
-      granted,
-      isTrue,
-      reason:
-          'Allow notifications when the prompt appears, then run again. '
-          'Without permission the counts below measure nothing.',
-    );
+    // A warning, not a stop. Whether an unauthorised app can still hold
+    // pending requests is itself one of the things worth knowing here, and
+    // Apple does not say: authorisation plainly gates *delivery*, and nothing
+    // in the current reference says it gates the pending list. Refusing to run
+    // would leave that unanswered, while running answers it either way. A zero
+    // is caught by the first test's floor, with permission named as the cause.
+    if (!granted) {
+      // ignore: avoid_print
+      print(
+        onIos
+            ? 'SETUP warning: not authorised. Counts of zero below mean the '
+                  'pending list needs it; anything else means it does not. '
+                  'Open Subdock on this device and allow notifications to be '
+                  'sure of the ceiling.'
+            : 'SETUP warning: not authorised. This run has installed the app, '
+                  'so it can be granted without a tap, then run again:\n'
+                  '  adb shell pm grant space.subdock.subdock '
+                  'android.permission.POST_NOTIFICATIONS\n'
+                  '  adb shell appops set space.subdock.subdock '
+                  'SCHEDULE_EXACT_ALARM allow',
+      );
+    }
   });
 
   tearDownAll(() async => scheduler.cancelAll());
@@ -123,8 +150,9 @@ void main() {
       highest,
       greaterThanOrEqualTo(40),
       reason:
-          'a device that cannot '
-          'hold 40 breaks the app outright',
+          'kept nothing worth counting. Either notification permission is '
+          'missing -- see the SETUP line above -- or a device that cannot hold '
+          '40 pending is one this app cannot work on',
     );
     expect(
       highest,
