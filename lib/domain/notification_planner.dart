@@ -134,6 +134,25 @@ abstract final class NotificationPlanner {
   /// was never a platform reason to hold one back.
   static const int horizonDays = 60;
 
+  /// How many nags one item may hold at once.
+  ///
+  /// Two weeks of a daily nag, fourteen weeks of a weekly one. The horizon
+  /// above says a nag for a deadline that is still far off is not worth
+  /// scheduling; this says the same thing about the fortieth repeat of one
+  /// that is.
+  ///
+  /// It is a count and not a span because the budget is spent in counts. An
+  /// overdue item on a daily shelf used to enumerate one alert per day to the
+  /// horizon -- sixty-one of them, forty of which fitted -- so a single
+  /// unhandled bill said the same sentence forty times while every other
+  /// item's second rung was dropped for want of room.
+  ///
+  /// Refilled on the way back in: the planner runs again on every resume and
+  /// hands the next fortnight back. Giving up after two weeks only bites a
+  /// user who has not opened the app in two weeks, and for them the sixty-one
+  /// were doing nothing either.
+  static const int maxNagsPerItem = 14;
+
   /// [now] is the clock, not just the calendar day.
   ///
   /// The time of day is an input to the plan and not decoration on it. An
@@ -194,7 +213,7 @@ abstract final class NotificationPlanner {
       final take = [
         for (final alerts in byItem)
           if (round < alerts.length) alerts[round],
-      ]..sort(_ranking);
+      ]..sort(_beforeTheDeadlineFirst);
       out.addAll(take);
     }
     return out;
@@ -216,6 +235,24 @@ abstract final class NotificationPlanner {
     final byLead = a.leadDays.compareTo(b.leadDays);
     if (byLead != 0) return byLead;
     return a.identifier.compareTo(b.identifier);
+  }
+
+  /// Inside one round: everything that arrives before the deadline, then the
+  /// nags, and soonest first within each.
+  ///
+  /// The two are not worth the same slot. A lead rung is the app's whole
+  /// purpose -- it lands while the thing can still be prevented. A nag lands
+  /// after the fact, on a day when the provider is already sending its own
+  /// message and the service is already being cut, so it repeats news the
+  /// user is about to get anyway. Ordering the round by date alone gave the
+  /// slot to whichever alert was nearest, and a nag is always nearest: it
+  /// starts the day after a deadline that has already gone by, while the rung
+  /// it displaces belongs to a deadline still weeks out and still avoidable.
+  static int _beforeTheDeadlineFirst(PlannedAlert a, PlannedAlert b) {
+    final aNag = a.reason == AlertReason.nag ? 1 : 0;
+    final bNag = b.reason == AlertReason.nag ? 1 : 0;
+    if (aNag != bNag) return aNag - bNag;
+    return _ranking(a, b);
   }
 
   static List<PlannedAlert> _alertsFor(
@@ -303,7 +340,7 @@ abstract final class NotificationPlanner {
     // is still not done", which is as true tomorrow as it was at 08:30 today,
     // so the one that passed slides forward instead of being lost.
     var at = LocalDate.max(actBy.plusDays(stepDays), earliest);
-    while (at <= horizon) {
+    while (at <= horizon && out.length < maxNagsPerItem) {
       out.add(_alert(item, category, at, 0, AlertReason.nag));
       at = at.plusDays(stepDays);
     }

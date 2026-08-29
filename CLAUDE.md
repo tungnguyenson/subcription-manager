@@ -1511,6 +1511,27 @@ phải chạy trước khi tin rằng một thay đổi về điều hướng ha
     lần lập lịch. Điều đó cần thiết ở mép ngân sách, đúng lý do mà `_ranking` có mệnh đề
     so `identifier` ở cuối.
 
+    **Nag có hai cái trần, và nó xếp sau mọi thứ bắn trước hạn.** Chân trời nói một nag
+    cho cái hạn còn xa thì chưa đáng đặt; `maxNagsPerItem` (14) nói lần lặp thứ bốn mươi
+    của một cái hạn đã tới thì không đáng một suất. Là **số đếm** chứ không phải số ngày,
+    vì ngân sách tiêu bằng số đếm: 14 nag là hai tuần với nhóm nhắc hằng ngày và mười bốn
+    tuần với nhóm nhắc hằng tuần, và cả hai đều tốn đúng 14 suất.
+
+    Đo thật: một danh sách 11 mục có **một** mục quá hạn nhắc hằng ngày trước đây tiêu
+    hết 50 suất thành 40 nag cộng 10 nấc, rớt 21 alert. Nay là 24 suất, không rớt cái nào.
+
+    Trần đếm không phải là app bỏ cuộc sau hai tuần: planner chạy lại ở mỗi lần mở app và
+    trả về hai tuần tiếp theo. Nó chỉ cắn một người đã không mở app suốt hai tuần, mà với
+    người đó thì sáu mươi mốt cái nag kia cũng chẳng làm được gì.
+
+    **Trong một vòng, mọi thứ bắn trước hạn đứng trước nag**, đó là
+    `_beforeTheDeadlineFirst` chứ không phải `_ranking`. Lý do là lý do app tồn tại: một
+    nấc trước hạn tới lúc còn ngăn được, còn nag tới sau khi việc đã xảy ra, vào đúng ngày
+    nhà cung cấp đang tự gửi thông báo và dịch vụ đang bị cắt. Sắp một vòng thuần theo
+    ngày là trao suất cho alert gần nhất, mà nag **luôn** gần nhất: nó bắt đầu từ ngày hôm
+    sau một cái hạn đã trôi qua, trong khi cái nấc bị nó đẩy ra thuộc về một cái hạn còn
+    vài tuần nữa và còn tránh được.
+
     **`_silence` có nhánh thứ tư, và phải có.** Bị ngân sách cắt khác hẳn với thang đã
     chạy hết: cái thứ nhất tự hết khi các mốc gần trôi qua, cái thứ hai là một chuyến đi
     sang màn Reminders. Gộp lại là nói với người dùng rằng thang đã qua trong khi mọi nấc

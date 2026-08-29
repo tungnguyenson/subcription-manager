@@ -136,7 +136,11 @@ void main() {
   // undone -- so it is the one kind that still needs a ceiling. Countable
   // alerts do not, and mixing the two jobs into one constant is what put the
   // ceiling on the rungs.
-  test('a nag is still bounded by the horizon', () {
+  //
+  // Two ceilings, each with its own job. The horizon says a nag for a deadline
+  // still far off is not worth scheduling; the count says the fortieth repeat
+  // of one that is near is not worth a slot.
+  test('a nag is bounded by a count, not just by the horizon', () {
     final plan = NotificationPlanner.plan(
       [
         item(
@@ -159,18 +163,65 @@ void main() {
             .toList()
           ..sort();
 
-    // Daily from the day after the deadline to the horizon, both ends
-    // included. The budget is raised well above it here so the ceiling under
-    // test is the horizon and not the fifty slots.
+    // Daily from the day after the deadline, and then it stops. The budget is
+    // raised well above it here so the ceiling under test is the count and not
+    // the fifty slots.
     expect(nags.first, d('2026-08-15'));
-    expect(nags.last, today.plusDays(NotificationPlanner.horizonDays));
-    expect(nags.length, NotificationPlanner.horizonDays + 1);
+    expect(nags.length, NotificationPlanner.maxNagsPerItem);
+    expect(
+      nags.last,
+      d('2026-08-15').plusDays(NotificationPlanner.maxNagsPerItem - 1),
+    );
   });
 
-  // One overdue item nagging daily generates sixty near dates. Sorted by date
-  // alone it took every slot and the rest of the list went silent, with
-  // nothing on any screen saying so. Round zero is one alert per item, so a
-  // list of fewer items than the budget can never have an item hear nothing.
+  // What the app is for. A lead rung lands while the thing can still be
+  // prevented; a nag lands after the fact, on a day the provider is already
+  // sending its own message and the service is already being cut. Ordering a
+  // round by date alone handed the slot to whichever alert was nearest, and a
+  // nag is always nearest -- it starts the day after a deadline that has gone
+  // by, while the rung it displaces belongs to one still weeks out.
+  test('a rung still ahead of its deadline outranks a nag behind one', () {
+    final overdue = item(
+      'overdue',
+      CategoryBook.shipped['UTILITIES'],
+      expiresOn: '2026-08-10',
+      leadDays: const [],
+      nag: NagPolicy.daily,
+    );
+    final coming = item(
+      'coming',
+      CategoryBook.shipped['STREAMING'],
+      expiresOn: '2026-09-20',
+      leadDays: [30, 7],
+      nag: NagPolicy.none,
+    );
+
+    // Two slots: one for each item's first alert, and then one contested
+    // between the overdue item's second nag (tomorrow) and the coming item's
+    // second rung (five weeks out).
+    final plan = NotificationPlanner.plan(
+      [overdue, coming],
+      CategoryBook.shipped,
+      now,
+      budget: 3,
+    );
+
+    expect(
+      plan.alerts.map((a) => '${a.itemId}/${a.reason.name}'),
+      containsAll(['overdue/nag', 'coming/lead']),
+      reason: 'round zero still covers both items',
+    );
+    expect(
+      plan.alerts.where((a) => a.reason == AlertReason.lead).length,
+      2,
+      reason: 'the contested third slot goes to the rung, not the second nag',
+    );
+  });
+
+  // One overdue item nagging daily used to generate sixty near dates. Sorted
+  // by date alone it took every slot and the rest of the list went silent,
+  // with nothing on any screen saying so. Round zero is one alert per item, so
+  // a list of fewer items than the budget can never have an item hear nothing.
   test('every item gets a slot before any item gets a second', () {
     final noisy = item(
       'overdue',
